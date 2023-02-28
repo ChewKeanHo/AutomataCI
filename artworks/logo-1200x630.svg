@@ -1,10 +1,4 @@
 <svg version="1.1" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink">
- <defs>
-  <linearGradient id="linearGradient15177" x1="735.54" x2="1150.3" y1="128.46" y2="128.46" gradientTransform="translate(1.9663 132.54)" gradientUnits="userSpaceOnUse">
-   <stop stop-color="#ffd42a" offset="0"/>
-   <stop stop-color="#f60" offset="1"/>
-  </linearGradient>
- </defs>
  <style>.window {
 			position: absolute;
 			width: 100%;
@@ -7491,7 +7485,7 @@
 	.st35{fill:none;}
 	.st36{fill:url(#SVGID_36_);stroke:#745C00;stroke-miterlimit:10;}
 	.st37{fill:url(#SVGID_37_);stroke:#745C00;stroke-miterlimit:10;}</style>
- <text x="1155.5774" y="242.66669" fill="url(#linearGradient15177)" font-family="'Noto Sans'" font-size="73.333px" text-align="end" text-anchor="end" style="font-variant-ligatures:none;line-height:1.25" xml:space="preserve"><tspan x="1155.5774" y="242.66669" text-align="end">Holloway's</tspan><tspan x="1155.5774" y="334.33331" text-align="end">Template</tspan></text>
+ <text x="1155.5774" y="288.23334" fill="#ffffff" font-family="'Noto Sans'" font-size="73.333px" text-align="end" text-anchor="end" style="font-variant-ligatures:none;line-height:1.25" xml:space="preserve"><tspan x="1155.5774" y="288.23334" text-align="end">Holloway's</tspan><tspan x="1155.5774" y="379.89996" text-align="end">Template</tspan></text>
  <g transform="matrix(.060275 0 0 .060292 1049.3 62.503)" stroke-width="2.0735">
   <rect x="-780.25" y="-594.18" width="2488.6" height="2487.9" fill="#000020" opacity=".99"/>
   <g transform="matrix(.81081 0 0 .81081 87.791 125.4)">

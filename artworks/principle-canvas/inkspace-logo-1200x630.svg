@@ -57,7 +57,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
        x2="1150.3112"
        y2="128.46374"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(1.9663337,132.53626)" />
+       gradientTransform="translate(1.9663337,178.10292)" />
   </defs>
   <sodipodi:namedview
      id="namedview6"
@@ -9419,19 +9419,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	.st37{fill:url(#SVGID_37_);stroke:#745C00;stroke-miterlimit:10;}</style>
   <text
      xml:space="preserve"
-     style="font-size:73.3333px;line-height:1.25;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Normal';font-variant-ligatures:none;text-align:end;text-anchor:end;fill:url(#linearGradient15177);fill-opacity:1"
+     style="font-size:73.3333px;line-height:1.25;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Normal';font-variant-ligatures:none;text-align:end;text-anchor:end;fill:#ffffff;fill-opacity:1"
      x="1155.5774"
-     y="242.66669"
+     y="288.23334"
      id="text4960"><tspan
        sodipodi:role="line"
        x="1155.5774"
-       y="242.66669"
+       y="288.23334"
        id="tspan4962"
-       style="font-size:73.3333px;text-align:end;text-anchor:end;fill:url(#linearGradient15177);fill-opacity:1">Holloway's</tspan><tspan
+       style="font-size:73.3333px;text-align:end;text-anchor:end;fill:#ffffff;fill-opacity:1">Holloway's</tspan><tspan
        sodipodi:role="line"
        x="1155.5774"
-       y="334.33331"
-       style="font-size:73.3333px;text-align:end;text-anchor:end;fill:url(#linearGradient15177);fill-opacity:1"
+       y="379.89996"
+       style="font-size:73.3333px;text-align:end;text-anchor:end;fill:#ffffff;fill-opacity:1"
        id="tspan11104">Template</tspan></text>
   <g
      transform="matrix(0.06027485,0,0,0.06029181,1049.307,62.503403)"
