@@ -3,8 +3,16 @@
 
 This repo serves as a template for all (Holloway) Chew, Kean Ho's new project
 repository. It setups and includes all necessary and easy-to-modify artworks,
-README.md, LICENSE, and `.gitignore` files that are crucial for a git
+`README.md`, `LICENSE`, and `.gitignore` files that are crucial for a git
 repository.
+
+> WHAT TO UPDATE AFTER CLONING:
+>
+> 1. Start with `README.md` especially dealing with title + anything below.
+> 2. Update the `artworks/principle-canvas` logo files and re-generate all the
+>    output logos.
+> 3. Update the `LICENSE` file with the appropriate license(s).
+> 4. Delete this blockquote once it is done.
 
 
 
