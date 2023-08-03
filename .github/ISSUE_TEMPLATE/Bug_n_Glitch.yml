@@ -1,0 +1,53 @@
+name: "Bug & Glitch"
+description: "To report a bug or a glitch regarding about the project."
+labels: [ "Bug", "Discussion" ]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: >
+        Please provide a short description of what you had encountered.
+      placeholder: "E.g: I saw a ghost!"
+    validations:
+      required: true
+  - type: textarea
+    id: expectation
+    attributes:
+      label: Expected Behavior
+      description: >
+        Please specify the expected behavior below.
+      placeholder: "E.g: I won't be seeing a ghost."
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Behavior
+      description: >
+        Please specify the current behavior below.
+      placeholder: "E.g: Whenever I go into my room, she's waving her hand at me, smiling."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce [COMPULSORY]
+      description: >
+        Please specify all the steps required to re-produce to the problem. If
+        the team are not able to reproduce the problem even a slighest symptom
+        of it, then this ticket shall be closed as "Will Not Implement".
+      placeholder: "E.g:\n1. Go into the house A.\n2. Go to Room L3A.\n3. Open the door."
+    validations:
+      required: true
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Associated Data Files
+      description: >
+        Please drag and drop all the necessary data files (e.g. screenshot,
+        logs, etc) into the box below. Each successful uploads shall render a
+        link on its own.
+      placeholder: "Please drag and drop it here."
+    validations:
+      required: false
