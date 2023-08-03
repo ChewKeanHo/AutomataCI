@@ -1,6 +1,6 @@
 ---
 name: "Question"
-about: "use for clarifying a researched uncertainty regarding the repository."
+about: "To clarify a query related to the project."
 labels: "Question, Discussion"
 ---
 
@@ -8,7 +8,7 @@ labels: "Question, Discussion"
 ```
 Please state your question in a brief and ended with question mark (?). You
 may include sub-questions with "if cases" to communicate more effectively
-instead of many 'ping-pong' passing.
+instead of 'ping-pong' around.
 ```
 
 

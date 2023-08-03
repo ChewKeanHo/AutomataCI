@@ -1,6 +1,6 @@
 ---
-name: "Documentation Problem"
-about: "use for reporting documentation problem regarding the repository."
+name: "Documentation Related"
+about: "To report something odd about the documentation of the project."
 labels: "Documentation, Discussion"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: "Feature Enhancement Request"
-about: "use for requesting a feature enhancement for the repository"
+about: "To request a feature enhancement for the project."
 labels: "Enhancement, Discussion"
 ---
 

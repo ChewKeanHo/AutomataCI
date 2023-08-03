@@ -1,6 +1,6 @@
 ---
 name: "New Feature Request"
-about: "use for requesting new feature for the repository"
+about: "To request a new feature for the project."
 labels: "New Feature, Discussion"
 ---
 

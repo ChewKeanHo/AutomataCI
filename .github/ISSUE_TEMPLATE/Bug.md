@@ -1,6 +1,6 @@
 ---
 name: "Bug Report"
-about: "use for reporting bug/gitches regarding the repository."
+about: "To report a bug or gitches regarding about the project."
 labels: "Bug, Discussion"
 ---
 
@@ -29,7 +29,9 @@ Please specify the current behavior of software below.
 
 # Steps to Reproduce (COMPULSORY)
 ```
-Please specify all the steps required to re-produce the problem.
+Please specify all the steps required to re-produce the problem. If the
+developers are not able to reproduce a recognizable symptom then this ticket
+shall be closed as will not implement.
 ```
 
 
