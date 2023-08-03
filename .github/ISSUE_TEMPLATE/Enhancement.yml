@@ -1,14 +1,16 @@
-name: "Bug & Glitch"
-description: "To report a bug or a glitch regarding about the project."
-labels: [ "Bug", "Discussion" ]
+name: "Enhance A Feature"
+description: "To request a feature enhancement for the project."
+labels: [ "Enhancement", "Discussion" ]
 body:
   - type: textarea
     id: description
     attributes:
       label: Description
       description: >
-        Please provide a short description of what you had encountered.
-      placeholder: "E.g: I saw a ghost!"
+        Please provide a short description of what you're looking forward to
+        enhance or remove. Please include the story behind the idea to better
+        visualize your case.
+      placeholder: "E.g: 15cm long pencil instead of 5cm - used up too quickly."
     validations:
       required: true
   - type: textarea
@@ -17,7 +19,7 @@ body:
       label: Expected Behavior
       description: >
         Please specify the expected behavior below.
-      placeholder: "E.g: I won't be seeing a ghost."
+      placeholder: "E.g: Pencil is at least 15cm longer."
     validations:
       required: true
   - type: textarea
@@ -26,18 +28,7 @@ body:
       label: Current Behavior
       description: >
         Please specify the current behavior below.
-      placeholder: "E.g: Whenever I go into my room, she's waving her hand at me, smiling."
-    validations:
-      required: true
-  - type: textarea
-    id: reproduction
-    attributes:
-      label: Steps to Reproduce [COMPULSORY]
-      description: >
-        Please specify all the steps required to re-produce to the problem. If
-        the team are not able to reproduce the problem even a slighest symptom
-        of it, then this ticket shall be closed as "Will Not Implement".
-      placeholder: "E.g:\n1. Go into the house A.\n2. Go to Room L3A.\n3. Open the door."
+      placeholder: "E.g: Pencil is 5cm long and used up in 30 seconds."
     validations:
       required: true
   - type: textarea
