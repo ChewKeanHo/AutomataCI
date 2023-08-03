@@ -1,5 +1,5 @@
 # Template Repository
-[![Holloway's Template](artworks/logo-1200x630.svg)](https://github.com/hollowaykeanho/Template)
+[![Holloway's Template](resources/logos/logo-1200x630.svg)](https://github.com/hollowaykeanho/Template)
 
 This repo serves as a template for all (Holloway) Chew, Kean Ho's new project
 repository. It setups and includes all necessary and easy-to-modify artworks,
@@ -9,10 +9,11 @@ repository.
 > WHAT TO UPDATE AFTER CLONING:
 >
 > 1. Start with `README.md` especially dealing with title + anything below.
-> 2. Update the `artworks/principle-canvas` logo files and re-generate all the
->    output logos.
-> 3. Update the `LICENSE` file with the appropriate license(s).
-> 4. Delete this blockquote once it is done.
+> 2. Update the `resources/logos/principle-canvas` logo files and re-generate
+>    all the output logos OR delete them entirely.
+> 3. Add a `LICENSE.md` file with the appropriate license(s).
+> 4. Add a `CODE_OF_CONDUCT.md` file with the appropriate legal clauses(s).
+> 4. Delete this blockquote once completed.
 
 
 
