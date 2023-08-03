@@ -24,6 +24,12 @@ output/
 /.configs/montuer/secrets/
 
 #####################
+# Python
+#####################
+venv/
+__pycache__
+
+#####################
 # Rust
 #####################
 target/
