@@ -9,10 +9,10 @@ repository.
 > [!IMPORTANT]
 > **WHAT TO UPDATE AFTER CLONING**:
 >
-> 1. Start with `README.md` especially dealing with title + anything below for
->    marking and business objectives.
-> 2. Update the `resources/logos/principle-canvas` logo files and re-generate
+> 1. Update the `resources/logos/principle-canvas` logo files and re-generate
 >    all the output logos OR delete them entirely.
+> 2. Update this `README.md` especially dealing with title + anything below for
+>    marking and business objectives (like WHY then HOW).
 > 3. Add a `LICENSE.md` file with the appropriate license(s).
 > 4. Add a `CODE_OF_CONDUCT.md` file with the appropriate legal clauses(s).
 > 5. Update the `automata/*.cmd` CI executions matching the project.
@@ -60,7 +60,7 @@ SECURITY.md			🠚 repository's security instruction file.
 
 
 
-### Native Continuous Integration Infrastructure (Native CI)
+### Native Continuous Integration (Native CI) Infrastructure
 This repository is governed by a native CI scripted using
 [Polygot Script](https://github.com/ChewKeanHo/PolygotScript) called `ci.cmd`.
 If you are new and wanted to contribute, you may start off by following the
