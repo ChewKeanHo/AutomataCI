@@ -1,0 +1,22 @@
+# STRICTLY ONLY THIS PATTERN:
+#             'key' = 'value: string type' # 1 line tailing comment
+# Batch and POSIX does not have sophisicated toml parser. Do go too creative!
+
+
+
+
+# PROJECT METADATA
+PROJECT_SKU = "my-project"
+PROJECT_NAME = "My Project"
+PROJECT_VERSION = "0.0.1"
+
+
+
+
+# PROJECT STRUCTURE
+PROJECT_PATH_TOOLS = "tools" # relative to root
+PROJECT_PATH_BUILD = "build" # relative to root
+PROJECT_PATH_TEMP = "tmp" # relative to root
+PROJECT_PATH_SOURCE = "src" # relative to root
+PROJECT_PATH_CI = "ci" # relative to root
+PROJECT_PATH_PKG = "pkg" # relative to root
