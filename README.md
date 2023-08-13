@@ -6,7 +6,8 @@ repository. It setups and includes all necessary and easy-to-modify artworks,
 `README.md`, `LICENSE`, and `.gitignore` files that are crucial for a git
 repository.
 
-> IMPORTANT NOTE: WHAT TO UPDATE AFTER CLONING:
+> [!IMPORTANT]
+> **WHAT TO UPDATE AFTER CLONING**:
 >
 > 1. Start with `README.md` especially dealing with title + anything below for
 >    marking and business objectives.
