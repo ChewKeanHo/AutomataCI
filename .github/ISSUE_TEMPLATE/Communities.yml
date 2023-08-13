@@ -9,7 +9,7 @@ body:
       description: >
         Please provide a short description of what you are looking forward to
         have.
-      placeholder: "E.g: I want a soup as a side dish!"
+      placeholder: "E.g: I want a rave man!"
     validations:
       required: true
   - type: textarea
@@ -18,7 +18,7 @@ body:
       label: Expected Behavior
       description: >
         Please specify the expected behavior below of your request feature.
-      placeholder: "E.g: the soup must have tonkotsu, shio, shoyu, and miso."
+      placeholder: "E.g: good food, good drink; lacks the party atmosphere."
     validations:
       required: true
   - type: textarea
@@ -27,7 +27,7 @@ body:
       label: Current Behavior
       description: >
         Please specify the any current behavior (e.g. workarounds).
-      placeholder: "E.g: no workaround."
+      placeholder: "E.g: no workaround. Need to spice up a little."
     validations:
       required: true
   - type: textarea

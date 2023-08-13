@@ -9,7 +9,7 @@ body:
       description: >
         Please provide a short description of what you are looking forward to
         have.
-      placeholder: "E.g: I want a soup as a side dish!"
+      placeholder: "E.g: I want to sponsor your brand!"
     validations:
       required: true
   - type: textarea
@@ -18,7 +18,7 @@ body:
       label: Expected Behavior
       description: >
         Please specify the expected behavior below of your request feature.
-      placeholder: "E.g: the soup must have tonkotsu, shio, shoyu, and miso."
+      placeholder: "E.g: Let's talk business, like ads, materials, etc."
     validations:
       required: true
   - type: textarea
@@ -27,7 +27,7 @@ body:
       label: Current Behavior
       description: >
         Please specify the any current behavior (e.g. workarounds).
-      placeholder: "E.g: no workaround."
+      placeholder: "E.g: I see potential future in your business."
     validations:
       required: true
   - type: textarea

@@ -8,7 +8,7 @@ body:
       label: Description
       description: >
         Please provide a short description of your query.
-      placeholder: "E.g: what's that meat in the meal?"
+      placeholder: "E.g: what's that delicious meat in the meal?"
     validations:
       required: true
   - type: textarea

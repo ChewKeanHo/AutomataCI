@@ -9,7 +9,7 @@ body:
       description: >
         Please provide a short description of what you are looking forward to
         have.
-      placeholder: "E.g: I want a soup as a side dish!"
+      placeholder: "E.g: I want a soup to be presented as smiling kitty cat face."
     validations:
       required: true
   - type: textarea
@@ -19,7 +19,7 @@ body:
       description: >
         Please specify the expected behavior below of your request feature. You
         may upload your associated artwork presentations here.
-      placeholder: "E.g: the soup must have tonkotsu, shio, shoyu, and miso."
+      placeholder: "E.g: something like this one (attached sketch file)."
     validations:
       required: true
   - type: textarea
@@ -29,7 +29,7 @@ body:
       description: >
         Please specify the any current behavior. You may upload the current
         artwork presentation here.
-      placeholder: "E.g: no workaround."
+      placeholder: "E.g: no art. A bit boring."
     validations:
       required: true
   - type: textarea
