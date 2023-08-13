@@ -1,0 +1,21 @@
+name: GitHub CI on Push
+run-name: Run the repo development environment across all OSes for main, staging/next branches.
+on:
+  push:
+    branches: [ main, staging, next ]
+jobs:
+  run-on-linux-deb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: . ./ci.cmd setup
+  run-on-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: .\ci.cmd setup
+  run-on-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: . ./ci.cmd setup

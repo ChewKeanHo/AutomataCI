@@ -15,17 +15,18 @@ echo >/dev/null # >nul & GOTO WINDOWS & rem ^
 # Unix Main Codes                                                              #
 ################################################################################
 # (1) make sure is by sourcing initialization
-if [ "$BASH_SOURCE" == "$(command -v $0)" ]; then
+if [ "$BASH_SOURCE" = "$(command -v $0)" ]; then
         printf "[ ERROR ] - Source me instead! -> $ . ./start.cmd\n"
         exit 1
 fi
+code=0
 
 
 
 
 # (2) determine os
 PROJECT_OS="$(uname)"
-export PROJECT_OS="${PROJECT_OS,,}"
+export PROJECT_OS="$(echo "$PROJECT_OS" | tr '[:upper:]' '[:lower:]')"
 case "${PROJECT_OS}" in
 windows*|ms-dos*)
         export EDM_OS='windows'
@@ -51,7 +52,7 @@ esac
 
 # (3) determine arch
 PROJECT_ARCH="$(uname -m)"
-export PROJECT_ARCH="${PROJECT_ARCH,,}"
+export PROJECT_ARCH="$(echo "$PROJECT_ARCH" | tr '[:upper:]' '[:lower:]')"
 case "${PROJECT_ARCH}" in
 i686-64)
         export EDM_ARCH='ia64' # Intel Itanium.
@@ -94,7 +95,7 @@ while [ "$pathing" != "" ]; do
         fi
 
         # stop the scan if the previous pathing is the same as current
-        if [ "$previous" == "$pathing" ]; then
+        if [ "$previous" = "$pathing" ]; then
                 printf "[ ERROR ] unable to detect repo root directory from PWD.\n"
                 return 1
                 break
@@ -116,7 +117,7 @@ fi
 old_IFS="$IFS"
 while IFS= read -r line; do
         line="${line%%#*}"
-        if [ "$line" == "" ]; then
+        if [ "$line" = "" ]; then
                 continue
         fi
 
@@ -176,33 +177,43 @@ done < "${PROJECT_PATH_ROOT}/CONFIG.toml"
 case "$1" in
 setup|Setup|SETUP)
         . "${PROJECT_PATH_ROOT}"/automata/setup_unix-any.sh
+        code=$?
         ;;
 start|Start|START)
         . "${PROJECT_PATH_ROOT}"/automata/start_unix-any.sh
+        code=$?
         ;;
 test|Test|TEST)
         . "${PROJECT_PATH_ROOT}"/automata/test_unix-any.sh
+        code=$?
         ;;
 prepare|Prepare|PREPARE)
         . "${PROJECT_PATH_ROOT}"/automata/prepare_unix-any.sh
+        code=$?
         ;;
 build|Build|BUILD)
         . "${PROJECT_PATH_ROOT}"/automata/build_unix-any.sh
+        code=$?
         ;;
 package|Package|PACKAGE)
         . "${PROJECT_PATH_ROOT}"/automata/package_unix-any.sh
+        code=$?
         ;;
 release|Release|RELEASE)
         . "${PROJECT_PATH_ROOT}"/automata/release_unix-any.sh
+        code=$?
         ;;
 compose|Compose|COMPOSE)
         . "${PROJECT_PATH_ROOT}"/automata/compose_unix-any.sh
+        code=$?
         ;;
 publish|Publish|PUBLISH)
         . "${PROJECT_PATH_ROOT}"/automata/publish_unix-any.sh
+        code=$?
         ;;
 stop|Stop|STOP)
         . "${PROJECT_PATH_ROOT}"/automata/stop_unix-any.sh
+        code=$?
         unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
         ;;
 *)
@@ -217,13 +228,14 @@ stop|Stop|STOP)
         printf "        To compose the documents 🠚      $ . ci.cmd compose\n"
         printf "        To publish the documents 🠚      $ . ci.cmd publish\n"
         printf "        To stop a development 🠚         $ . ci.cmd stop\n"
+        code=1
         unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
         ;;
 esac
 ################################################################################
 # Unix Main Codes                                                              #
 ################################################################################
-return 0
+return $code
 
 
 
@@ -232,7 +244,7 @@ return 0
 ::##############################################################################
 :: Windows Main Codes                                                          #
 ::##############################################################################
-@echo OFF
+@echo off
 setlocal enabledelayedexpansion
 set code=0
 
@@ -243,9 +255,14 @@ for /F "skip=1 delims=" %%A in ('wmic cpu get architecture') do (
 )
 
 :check_architecture
+set "PROJECT_ARCH=!PROJECT_ARCH:~0,-1!"
+set "PROJECT_ARCH=!PROJECT_ARCH: =!"
 IF "!PROJECT_ARCH!"=="x86" (
-        set PROJECT_ARCH=i386
+        set "PROJECT_ARCH=i386"
         goto check_type
+) ELSE IF "!PROJECT_ARCH!"=="9" (
+        echo "NOTE: GitHub Action Windows Server detected. Simulating amd64 CPU."
+        set "PROJECT_ARCH=amd64"
 ) ELSE IF "!PROJECT_ARCH!"=="64" (
         for /F "skip=1 delims=" %%P in ('wmic cpu get name') do (
                 set "PROJECT_ARCH=%%P"
@@ -259,20 +276,23 @@ IF "!PROJECT_ARCH!"=="x86" (
 
 :check_type
 IF "!PROJECT_ARCH:~0,4!"=="ARM " (
-        set PROJECT_ARCH=arm64
+        set "PROJECT_ARCH=arm64"
 ) ELSE (
-        set PROJECT_ARCH=amd64
+        set "PROJECT_ARCH=amd64"
 )
+
+:set_os
+set "PROJECT_OS=windows"
 
 :scan_root_directory
 set "PROJECT_PWD=%CD%"
 for /r "%PROJECT_PWD%" %%d in (.) do (
-        set "PROJECT_ROOT=%%d"
-        if exist "!PROJECT_ROOT!\.git\config" (
-                goto parse_config_file
+        set "PROJECT_PATH_ROOT=%%d"
+        if exist "!PROJECT_PATH_ROOT!\.git\config" (
+                goto clean_up_root_directory_path
         )
 
-        if "!PROJECT_ROOT!"=="%CD%" (
+        if "!PROJECT_PATH_ROOT!"=="%CD%" (
                 echo "[ ERROR ] unable to detect repo root directory from PWD.\n"
                 set code=1
                 set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
@@ -280,131 +300,190 @@ for /r "%PROJECT_PWD%" %%d in (.) do (
         )
 )
 
+:clean_up_root_directory_path
+if "%PROJECT_PATH_ROOT:~-1%"=="." (
+        set "PROJECT_PATH_ROOT=%PROJECT_PATH_ROOT:~0,-1%"
+)
+if "%PROJECT_PATH_ROOT:~-1%"=="\" (
+        set "PROJECT_PATH_ROOT=%PROJECT_PATH_ROOT:~0,-1%"
+)
+
 :parse_config_file
-if not exist "%PROJECT_ROOT%\CONFIG.toml" (
+if not exist "%PROJECT_PATH_ROOT%\CONFIG.toml" (
         echo "[ ERROR ] unable to locate CONFIG.toml file.\n"
         set code=1
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
         goto end
 )
 
-for /F "usebackq delims=" %%A in ("%PROJECT_ROOT%\CONFIG.toml") do (
-        set "line=%%A"
-        setlocal DisableDelayedExpansion
-        set "line=!line:#.*=!"
-        set "line=!line:^]=!"
-        setlocal EnableDelayedExpansion
-
-        setlocal DisableDelayedExpansion
-        for /F "tokens=1,2 delims=:" %%B in ("!line!") do (
-                set "key=%%B"
-                set "value=%%C"
-                setlocal EnableDelayedExpansion
-                for /F "tokens=* delims= " %%D in ("!key!") do set "key=%%D"
-                for /F "tokens=* delims= " %%E in ("!value!") do set "value=%%E"
-                set "!key!=!value!"
-                endlocal
+for /F "usebackq delims=" %%A in ("%PROJECT_PATH_ROOT%\CONFIG.toml") do (
+        set "subject=%%A"
+        set "line="
+        if not "!subject:~0,1!"=="#" (
+                for /F "tokens=1,2 delims=#" %%a in ("!subject!") do (
+                        if NOT "!stop!"=="1" (
+                                set "line=!line!%%a"
+                        )
+                )
         )
-        endlocal
+
+        if not [!line!] == [] (
+                set "key="
+                set "value="
+
+                for /F "tokens=1,2 delims==" %%a in ("!line!") do (
+                        set "key=%%a"
+                        set "value=%%b"
+
+                        set "key=!key: =!"
+                        set "key=!key:	=!"
+                        set "key=!key:"=!"
+                        set "key=!key:'=!"
+
+                        set "value=!value: =!"
+                        set "value=!value:	=!"
+                        set "value=!value:"=!"
+                        set "value=!value:'=!"
+                )
+
+                set "!key!=!value!"
+        )
 )
 
 :start_job
 IF "%1"=="" (
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        set code=1
         goto :print_help
 )
 
 IF "%1"=="setup" (
-        call "${PROJECT_PATH_ROOT}"/automata/setup_windows-any.cmd
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\setup_windows-any.ps1"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="Setup" (
-        call "${PROJECT_PATH_ROOT}"/automata/setup_windows-any.cmd
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\setup_windows-any.ps1"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="SETUP" (
-        call "${PROJECT_PATH_ROOT}"/automata/setup_windows-any.cmd
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\setup_windows-any.ps1"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="start" (
-        call "${PROJECT_PATH_ROOT}"/automata/start_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\start_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="Start" (
-        call "${PROJECT_PATH_ROOT}"/automata/start_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\start_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="START" (
-        call "${PROJECT_PATH_ROOT}"/automata/start_windows-any.cmd
+        call "%PROJECT_PATH_ROOT\automata\start_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="test" (
-        call "${PROJECT_PATH_ROOT}"/automata/test_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\test_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="Test" (
-        call "${PROJECT_PATH_ROOT}"/automata/test_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\test_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="TEST" (
-        call "${PROJECT_PATH_ROOT}"/automata/TEST_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\TEST_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="prepare" (
-        call "${PROJECT_PATH_ROOT}"/automata/prepare_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="Prepare" (
-        call "${PROJECT_PATH_ROOT}"/automata/prepare_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="PREPARE" (
-        call "${PROJECT_PATH_ROOT}"/automata/prepare_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="build" (
-        call "${PROJECT_PATH_ROOT}"/automata/build_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\build_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="Build" (
-        call "${PROJECT_PATH_ROOT}"/automata/build_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\build_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="BUILD" (
-        call "${PROJECT_PATH_ROOT}"/automata/build_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\build_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="package" (
-        call "${PROJECT_PATH_ROOT}"/automata/package_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\package_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="Package" (
-        call "${PROJECT_PATH_ROOT}"/automata/package_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\package_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="PACKAGE" (
-        call "${PROJECT_PATH_ROOT}"/automata/package_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\package_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="release" (
-        call "${PROJECT_PATH_ROOT}"/automata/release_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\release_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="Release" (
-        call "${PROJECT_PATH_ROOT}"/automata/release_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\release_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="RELEASE" (
-        call "${PROJECT_PATH_ROOT}"/automata/release_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\release_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="compose" (
-        call "${PROJECT_PATH_ROOT}"/automata/compose_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\compose_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="Compose" (
-        call "${PROJECT_PATH_ROOT}"/automata/compose_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\compose_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="COMPOSE" (
-        call "${PROJECT_PATH_ROOT}"/automata/compose_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\compose_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="publish" (
-        call "${PROJECT_PATH_ROOT}"/automata/publish_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\publish_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="Publish" (
-        call "${PROJECT_PATH_ROOT}"/automata/publish_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\publish_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="PUBLISH" (
-        call "${PROJECT_PATH_ROOT}"/automata/publish_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\publish_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         goto :end
 ) ELSE IF "%1"=="stop" (
-        call "${PROJECT_PATH_ROOT}"/automata/stop_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\stop_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
         goto :end
 ) ELSE IF "%1"=="Stop" (
-        call "${PROJECT_PATH_ROOT}"/automata/stop_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\stop_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
         goto :end
 ) ELSE IF "%1"=="STOP" (
-        call "${PROJECT_PATH_ROOT}"/automata/stop_windows-any.cmd
+        call "%PROJECT_PATH_ROOT%\automata\stop_windows-any.cmd"
+        set code="%ERRORLEVEL%"
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
         goto :end
 ) ELSE (
