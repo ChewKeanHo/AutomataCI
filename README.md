@@ -13,9 +13,10 @@ repository.
 >    all the output logos OR delete them entirely.
 > 2. Update this `README.md` especially dealing with title + anything below for
 >    marking and business objectives (like WHY then HOW).
-> 3. Add a `LICENSE.md` file with the appropriate license(s).
+> 3. Select A `LICENSE.pdf` file with the appropriate license(s).
 > 4. Add a `CODE_OF_CONDUCT.md` file with the appropriate legal clauses(s).
-> 5. Update the `automata/*.cmd` CI executions matching the project.
+> 5. Update the `CONFIG.toml` matching the project metadata.
+> 5. Update the `automata/*` CI executions instructions matching the project.
 > 6. Delete this blockquote once everything is completed.
 
 
@@ -44,6 +45,7 @@ maintainers.
 ### Directory Structure
 ```
 automata/			🠚 house the projects' CI automation scripts.
+automata/services		🠚 house tested and pre-built CI automation functions.
 bin/				🠚 default build output directory.
 pkg/				🠚 default package output directory.
 resources/			🠚 housing all indirect raw materials and assets.
@@ -57,6 +59,18 @@ LICENSE[_type]{.md,.pdf}	🠚 repository's meta-level license file.
 README.md			🠚 repository's readme file.
 SECURITY.md			🠚 repository's security instruction file.
 ```
+
+
+
+### Branch Management
+The default uses the following branch managements:
+
+```
+main				= for customers who use git (house stable releases)
+next || staging || testing	= [OPTIONAL] for test developers to test the next release
+edge || experimental		= for project maintainer to develop new feature.
+```
+
 
 
 
@@ -183,6 +197,25 @@ $ . ci.cmd publish
 # WINDOWS
 $ ./ci.cmd publish
 ```
+
+
+
+
+### GitHub Actions
+By default, the GitHub action only executes in this sequence:
+
+1. `setup`
+2. `start`
+3. `prepare`
+4. `test`
+5. `build`
+6. `compose`
+
+for `git push` against `main`, `next`, `staging`, or `testing` branches.
+
+For `package`, `release`, and `publish` CI jobs, due to the invovlement of
+private identitiy signing keys, they are best to be implemented at the local
+side (to protect the key from any unnecessary leak due to 3rd-party).
 
 
 
