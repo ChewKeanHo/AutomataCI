@@ -1,0 +1,2 @@
+# [ COPYRIGHT CLASE HERE]
+NAME = 'Jane'

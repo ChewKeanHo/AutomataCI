@@ -1,0 +1,7 @@
+# Please add your dependencies here
+
+
+
+
+# CI required libraries. Please DO NOT remove. TQ!
+pyinstaller
