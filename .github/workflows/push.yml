@@ -2,7 +2,7 @@ name: GitHub CI on Push
 run-name: Run the repo development process across all OSes for main & next/staging/testing branches.
 on:
   push:
-    branches: [ main, staging, next, testing ]
+    branches: [ main, staging, next, testing, experimental ]
 jobs:
   run-on-linux-deb:
     runs-on: ubuntu-latest
