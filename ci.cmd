@@ -141,7 +141,7 @@ while IFS= read -r line; do
         value="${value%\'}"
         value="${value#\'}"
 
-        case "${1,,}" in
+        case "$(echo "$sample" | tr '[:upper:]' '[:lower:]')" in
         stop)
                 unset "$key"
                 ;;
@@ -157,51 +157,51 @@ done < "${PROJECT_PATH_ROOT}/CONFIG.toml"
 
 
 # (5) execute command
-case "${1,,}" in
-setup)
+case "$1" in
+setup|--setup|Setup|--Setup|SETUP|--SETUP)
         . "${PROJECT_PATH_ROOT}"/automata/setup_unix-any.sh
         code=$?
         ;;
-start)
+start|--start|Start|--Start|START|--START)
         . "${PROJECT_PATH_ROOT}"/automata/start_unix-any.sh
         code=$?
         ;;
-test)
+test|--test|Test|--Test|TEST|--TEST)
         . "${PROJECT_PATH_ROOT}"/automata/test_unix-any.sh
         code=$?
         ;;
-prepare)
+prepare|--prepare|Prepare|--Prepare|PREPARE|--PREPARE)
         . "${PROJECT_PATH_ROOT}"/automata/prepare_unix-any.sh
         code=$?
         ;;
-build)
+build|--build|Build|--Build|BUILD|--BUILD)
         . "${PROJECT_PATH_ROOT}"/automata/build_unix-any.sh
         code=$?
         ;;
-package)
+package|--package|Package|--Package|PACKAGE|--PACKAGE)
         . "${PROJECT_PATH_ROOT}"/automata/package_unix-any.sh
         code=$?
         ;;
-release)
+release|--release|Release|--Release|RELEASE|--RELEASE)
         . "${PROJECT_PATH_ROOT}"/automata/release_unix-any.sh
         code=$?
         ;;
-compose)
+compose|--compose|Compose|--Compose|COMPOSE|--COMPOSE)
         . "${PROJECT_PATH_ROOT}"/automata/compose_unix-any.sh
         code=$?
         ;;
-publish)
+publish|--publish|Publish|--Publish|PUBLISH|--PUBLISH)
         . "${PROJECT_PATH_ROOT}"/automata/publish_unix-any.sh
         code=$?
         ;;
-stop)
+stop|--stop|Stop|--Stop|STOP|--STOP)
         . "${PROJECT_PATH_ROOT}"/automata/stop_unix-any.sh
         code=$?
         unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
         ;;
 *)
-        case "${1,,}" in
-        -h|--help|help)
+        case "$1" in
+        -h|--help|help|--Help|Help|--HELP|HELP)
                 code=1
                 ;;
         *)
