@@ -1,5 +1,5 @@
 name: GitHub CI on Push
-run-name: Run the repo development environment across all OSes for main, staging/next branches.
+run-name: Run the repo development process across all OSes for main & staging/next branches.
 on:
   push:
     branches: [ main, staging, next ]
@@ -9,13 +9,37 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: . ./ci.cmd setup
+      - run: . ./ci.cmd start
+      - run: . ./ci.cmd prepare
+      - run: . ./ci.cmd test
+      - run: . ./ci.cmd build
+      - run: . ./ci.cmd package
+      - run: . ./ci.cmd release
+      - run: . ./ci.cmd compose
+      - run: . ./ci.cmd publish
   run-on-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
       - run: .\ci.cmd setup
+      - run: .\ci.cmd start
+      - run: .\ci.cmd prepare
+      - run: .\ci.cmd test
+      - run: .\ci.cmd build
+      - run: .\ci.cmd package
+      - run: .\ci.cmd release
+      - run: .\ci.cmd compose
+      - run: .\ci.cmd publish
   run-on-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - run: . ./ci.cmd setup
+      - run: . ./ci.cmd start
+      - run: . ./ci.cmd prepare
+      - run: . ./ci.cmd test
+      - run: . ./ci.cmd build
+      - run: . ./ci.cmd package
+      - run: . ./ci.cmd release
+      - run: . ./ci.cmd compose
+      - run: . ./ci.cmd publish
