@@ -361,134 +361,248 @@ IF "%1"=="setup" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
                 -File "%PROJECT_PATH_ROOT%\automata\setup_windows-any.ps1"
-        set code="%ERRORLEVEL%"
-        goto :end
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="Setup" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
                 -File "%PROJECT_PATH_ROOT%\automata\setup_windows-any.ps1"
-        set code="%ERRORLEVEL%"
-        goto :end
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="SETUP" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
                 -File "%PROJECT_PATH_ROOT%\automata\setup_windows-any.ps1"
-        set code="%ERRORLEVEL%"
-        goto :end
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="start" (
-        call "%PROJECT_PATH_ROOT%\automata\start_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\start_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="Start" (
-        call "%PROJECT_PATH_ROOT%\automata\start_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\start_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="START" (
-        call "%PROJECT_PATH_ROOT\automata\start_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\start_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="test" (
-        call "%PROJECT_PATH_ROOT%\automata\test_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\test_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="Test" (
-        call "%PROJECT_PATH_ROOT%\automata\test_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\test_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="TEST" (
-        call "%PROJECT_PATH_ROOT%\automata\TEST_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\test_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="prepare" (
-        call "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="Prepare" (
-        call "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="PREPARE" (
-        call "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="build" (
-        call "%PROJECT_PATH_ROOT%\automata\build_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\build_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="Build" (
-        call "%PROJECT_PATH_ROOT%\automata\build_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\build_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="BUILD" (
-        call "%PROJECT_PATH_ROOT%\automata\build_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\build_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="package" (
-        call "%PROJECT_PATH_ROOT%\automata\package_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\package_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="Package" (
-        call "%PROJECT_PATH_ROOT%\automata\package_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\package_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="PACKAGE" (
-        call "%PROJECT_PATH_ROOT%\automata\package_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\package_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="release" (
-        call "%PROJECT_PATH_ROOT%\automata\release_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\release_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="Release" (
-        call "%PROJECT_PATH_ROOT%\automata\release_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\release_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="RELEASE" (
-        call "%PROJECT_PATH_ROOT%\automata\release_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\release_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="compose" (
-        call "%PROJECT_PATH_ROOT%\automata\compose_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\compose_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="Compose" (
-        call "%PROJECT_PATH_ROOT%\automata\compose_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\compose_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="COMPOSE" (
-        call "%PROJECT_PATH_ROOT%\automata\compose_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\compose_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="publish" (
-        call "%PROJECT_PATH_ROOT%\automata\publish_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\publish_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="Publish" (
-        call "%PROJECT_PATH_ROOT%\automata\publish_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\publish_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="PUBLISH" (
-        call "%PROJECT_PATH_ROOT%\automata\publish_windows-any.cmd"
-        set code="%ERRORLEVEL%"
-        goto :end
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\publish_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
 ) ELSE IF "%1"=="stop" (
-        call "%PROJECT_PATH_ROOT%\automata\stop_windows-any.cmd"
-        set code="%ERRORLEVEL%"
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\stop_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
-        goto :end
+        goto end
 ) ELSE IF "%1"=="Stop" (
-        call "%PROJECT_PATH_ROOT%\automata\stop_windows-any.cmd"
-        set code="%ERRORLEVEL%"
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\stop_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
-        goto :end
+        goto end
 ) ELSE IF "%1"=="STOP" (
-        call "%PROJECT_PATH_ROOT%\automata\stop_windows-any.cmd"
-        set code="%ERRORLEVEL%"
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\automata\stop_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
-        goto :end
+        goto end
 ) ELSE (
         set code=1
-        goto :print_help
+        goto print_help
 )
 
 :print_help
