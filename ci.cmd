@@ -21,6 +21,10 @@ if [ "$BASH_SOURCE" = "$(command -v $0)" ]; then
 fi
 code=0
 
+was_set=false
+if [ ! -z "$PROJECT_PATH_ROOT" ]; then
+        was_set=true
+fi
 
 
 
@@ -137,32 +141,11 @@ while IFS= read -r line; do
         value="${value%\'}"
         value="${value#\'}"
 
-        case "$1" in
-        stop|Stop|STOP)
+        case "${1,,}" in
+        stop)
                 unset "$key"
                 ;;
-        start|Start|START)
-                export "$key"="$value"
-                ;;
-        test|Test|TEST)
-                export "$key"="$value"
-                ;;
-        prepare|Prepare|PREPARE)
-                export "$key"="$value"
-                ;;
-        build|Build|BUILD)
-                export "$key"="$value"
-                ;;
-        package|Package|PACKAGE)
-                export "$key"="$value"
-                ;;
-        release|Release|RELEASE)
-                export "$key"="$value"
-                ;;
-        compose|Compose|COMPOSE)
-                export "$key"="$value"
-                ;;
-        publish|Publish|PUBLISH)
+        start)
                 export "$key"="$value"
                 ;;
         *)
@@ -174,50 +157,60 @@ done < "${PROJECT_PATH_ROOT}/CONFIG.toml"
 
 
 # (5) execute command
-case "$1" in
-setup|Setup|SETUP)
+case "${1,,}" in
+setup)
         . "${PROJECT_PATH_ROOT}"/automata/setup_unix-any.sh
         code=$?
         ;;
-start|Start|START)
+start)
         . "${PROJECT_PATH_ROOT}"/automata/start_unix-any.sh
         code=$?
         ;;
-test|Test|TEST)
+test)
         . "${PROJECT_PATH_ROOT}"/automata/test_unix-any.sh
         code=$?
         ;;
-prepare|Prepare|PREPARE)
+prepare)
         . "${PROJECT_PATH_ROOT}"/automata/prepare_unix-any.sh
         code=$?
         ;;
-build|Build|BUILD)
+build)
         . "${PROJECT_PATH_ROOT}"/automata/build_unix-any.sh
         code=$?
         ;;
-package|Package|PACKAGE)
+package)
         . "${PROJECT_PATH_ROOT}"/automata/package_unix-any.sh
         code=$?
         ;;
-release|Release|RELEASE)
+release)
         . "${PROJECT_PATH_ROOT}"/automata/release_unix-any.sh
         code=$?
         ;;
-compose|Compose|COMPOSE)
+compose)
         . "${PROJECT_PATH_ROOT}"/automata/compose_unix-any.sh
         code=$?
         ;;
-publish|Publish|PUBLISH)
+publish)
         . "${PROJECT_PATH_ROOT}"/automata/publish_unix-any.sh
         code=$?
         ;;
-stop|Stop|STOP)
+stop)
         . "${PROJECT_PATH_ROOT}"/automata/stop_unix-any.sh
         code=$?
         unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
         ;;
 *)
-        printf "[ ERROR ] unknown action. Please try any of the following:\n"
+        case "${1,,}" in
+        -h|--help|help)
+                code=1
+                ;;
+        *)
+                printf "[ ERROR ] unknown action.\n"
+                code=1
+                ;;
+        esac
+        echo "Please try any of the following:\n"
+        printf "        To seek commands' help 🠚        $ . ci.cmd help\n"
         printf "        To setup the repo for work 🠚    $ . ci.cmd setup\n"
         printf "        To start a development 🠚        $ . ci.cmd start\n"
         printf "        To test the repo 🠚              $ . ci.cmd test\n"
@@ -228,10 +221,12 @@ stop|Stop|STOP)
         printf "        To compose the documents 🠚      $ . ci.cmd compose\n"
         printf "        To publish the documents 🠚      $ . ci.cmd publish\n"
         printf "        To stop a development 🠚         $ . ci.cmd stop\n"
-        code=1
-        unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
         ;;
 esac
+
+if [ "$was_set" == "false" ]; then
+        unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
+fi
 ################################################################################
 # Unix Main Codes                                                              #
 ################################################################################
@@ -246,7 +241,13 @@ return $code
 ::##############################################################################
 @echo off
 setlocal enabledelayedexpansion
-set code=0
+set "code=0"
+
+:check_existing_stat
+set "was_set="
+if not "%PROJECT_PATH_ROOT" == "" (
+        set "was_set=1"
+)
 
 :query_architecture
 for /F "skip=1 delims=" %%A in ('wmic cpu get architecture') do (
@@ -352,7 +353,10 @@ for /F "usebackq delims=" %%A in ("%PROJECT_PATH_ROOT%\CONFIG.toml") do (
 
 :start_job
 IF "%1"=="" (
-        set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        echo "[ ERROR ] missing action.\n"
+        if not "!was_set!" == "1" (
+                set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        )
         set code=1
         goto :print_help
 )
@@ -600,13 +604,60 @@ IF "%1"=="setup" (
         )
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
         goto end
+) ELSE IF "%1"=="-h" (
+        if not "!was_set!" == "1" (
+                set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        )
+        set code=0
+        goto print_help
+) ELSE IF "%1"=="--help" (
+        if not "!was_set!" == "1" (
+                set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        )
+        set code=0
+        goto print_help
+) ELSE IF "%1"=="--Help" (
+        if not "!was_set!" == "1" (
+                set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        )
+        set code=0
+        goto print_help
+) ELSE IF "%1"=="--HELP" (
+        if not "!was_set!" == "1" (
+                set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        )
+        set code=0
+        goto print_help
+) ELSE IF "%1"=="help" (
+        if not "!was_set!" == "1" (
+                set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        )
+        set code=0
+        goto print_help
+) ELSE IF "%1"=="Help" (
+        if not "!was_set!" == "1" (
+                set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        )
+        set code=0
+        goto print_help
+) ELSE IF "%1"=="HELP" (
+        if not "!was_set!" == "1" (
+                set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        )
+        set code=0
+        goto print_help
 ) ELSE (
+        echo "[ ERROR ] Unknown action '%1'.\n"
+        if not "!was_set!" == "1" (
+                set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        )
         set code=1
         goto print_help
 )
 
 :print_help
-        echo "[ ERROR ] unknown action. Please try any of the following:\n"
+        echo "Please try any of the following:\n"
+        echo "        To seek commands' help 🠚        $ . ci.cmd help\n"
         echo "        To setup the repo for work 🠚    $ . ci.cmd setup\n"
         echo "        To start a development 🠚        $ . ci.cmd start\n"
         echo "        To test the repo 🠚              $ . ci.cmd test\n"
