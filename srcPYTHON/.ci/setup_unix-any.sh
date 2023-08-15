@@ -31,12 +31,4 @@ fi
 #                # handle error here
 #                return 1
 #          fi
-recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/setup_unix-any.sh"
-if [ -f "$recipe" ]; then
-        . "$recipe"
-        return $?
-fi
-
-
-printf "Missing ${recipe}!\n"
-return 1
+printf "Hello from native CI - setup recipe!\n"

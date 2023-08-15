@@ -141,14 +141,12 @@ while IFS= read -r line; do
         value="${value%\'}"
         value="${value#\'}"
 
-        case "$(echo "$sample" | tr '[:upper:]' '[:lower:]')" in
-        stop)
+        case "$1" in
+        stop|--stop|Stop|--Stop|STOP|--STOP)
                 unset "$key"
                 ;;
-        start)
-                export "$key"="$value"
-                ;;
         *)
+                export "$key"="$value"
                 ;;
         esac
 done < "${PROJECT_PATH_ROOT}/CONFIG.toml"

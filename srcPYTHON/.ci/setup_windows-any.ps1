@@ -15,7 +15,7 @@
 
 # (0) initialize
 IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please start from ci.cmd instead!\n"
+        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
         exit 1
 }
 
@@ -25,14 +25,5 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 # (1) your windows commands for the job recipe here. You can call the pre-built
 #     CI templates inside the ./automata/templates directory for jump-starting
 #     a supported project quickly.
-$recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
-$recipe = "$recipe\setup_windows-any.ps1"
-
-$process = Start-Process -Wait `
-			-FilePath "powershell.exe" `
-			-NoNewWindow `
-			-ArgumentList "-File `"$recipe`"" `
-			-PassThru
-$exitCode = $process.ExitCode
-
-exit $exitCode
+Write-Host "Hello from native CI - setup recipe!\n"
+exit 0
