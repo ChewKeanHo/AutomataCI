@@ -10,26 +10,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-
-
-
-
-# (0) initialize
-if [ -z "$PROJECT_PATH_ROOT" ]; then
-        >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
-        return 1
-fi
-
-
-
-
-# (1) run setup service
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/common.sh"
-CheckPythonIsAvailable
-if [ $? -ne 0 ]; then
-        return 1
-fi
-
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/setup.sh"
-SetupPython
-return $?
+CheckPythonIsAvailable() {
+        if [ ! -z "$(type -t python3)" ]; then
+                program="python3"
+        elif [ ! -z "$(type -t python)" ]; then
+                program="python"
+        else
+                >&2 printf "[ ERROR ] - Missing python interpreter. Please install one.\n"
+                return 1
+        fi
+        >&2 printf "[ INFO ] Using: $(python3 --version)\n"
+        return 0
+}

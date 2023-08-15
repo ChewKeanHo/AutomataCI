@@ -1,0 +1,69 @@
+name: on Git Push
+run-name: CI Run upon Git Push.
+on:
+  push:
+    branches:
+      - main
+      - stable
+      - next
+      - testing
+      - staging
+      - edge
+      - experimental
+env:
+  PROJECT_PYTHON: 'srcPYTHON/python_version.txt'
+jobs:
+  in-linux-and-mac:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check it is a Python project or otherwise
+        id: is_project_requires_python
+        run: |
+          if [ -f ${{ env.PROJECT_PYTHON }} ]; then
+            echo "is_python_project=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_python_project=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Setup Python interpreter
+        if: steps.is_project_requires_python.outputs.is_python_project == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: ${{ env.PROJECT_PYTHON }}
+      - name: Execute repo's native CI setup job recipe
+        id: native_ci_setup
+        run: . ./ci.cmd setup
+      - run: . ./ci.cmd start
+      - run: . ./ci.cmd prepare
+      - run: . ./ci.cmd test
+      - run: . ./ci.cmd build
+      - run: . ./ci.cmd compose
+  in-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check it is a Python project or otherwise
+        id: is_project_requires_python
+        run: |
+          $winPath = ".\" + $env:PROJECT_PYTHON.Replace("/", "\")
+          if (Test-Path $winPath) {
+            Write-Output "is_python_project=true" >> $Env:GITHUB_OUTPUT
+          } else {
+            Write-Output "is_python_project=false" >> $Env:GITHUB_OUTPUT
+          }
+      - name: Setup Python interpreter if the project uses Python
+        if: steps.is_project_requires_python.outputs.is_python_project == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: ${{ env.PROJECT_PYTHON }}
+      - name: Execute repo's native CI setup job recipe
+        id: native_ci_setup
+        run: .\ci.cmd setup
+      - run: .\ci.cmd start
+      - run: .\ci.cmd prepare
+      - run: .\ci.cmd test
+      - run: .\ci.cmd build
+      - run: .\ci.cmd compose

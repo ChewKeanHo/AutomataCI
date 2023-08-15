@@ -27,12 +27,9 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 #     a supported project quickly.
 $recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
 $recipe = "$recipe\setup_windows-any.ps1"
-
 $process = Start-Process -Wait `
 			-FilePath "powershell.exe" `
 			-NoNewWindow `
 			-ArgumentList "-File `"$recipe`"" `
 			-PassThru
-$exitCode = $process.ExitCode
-
-exit $exitCode
+exit $process.ExitCode

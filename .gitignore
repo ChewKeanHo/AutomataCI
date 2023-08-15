@@ -5,14 +5,7 @@
 #####################
 # Standard FHS
 #####################
-docs/resources/
-themes/
-*.log
-.bin/
 vendor/
-gh-pages/
-bin/
-tmp/
 output/
 /releases/
 !/*/releases/
@@ -22,6 +15,15 @@ output/
 #####################
 /.monteurFS/
 /.configs/montuer/secrets/
+.bin/
+
+#####################
+# Native CI
+#####################
+bin/
+tmp/
+pkg/
+tools/
 
 #####################
 # LibreOffice
@@ -42,6 +44,7 @@ target/
 #####################
 # Hugo
 #####################
+themes/
 public/
 .hugo_build.lock
 
@@ -83,6 +86,16 @@ certbot.log
 *.sqlite
 *.sqlite-journal
 *.db-journal
+
+#####################
+# GitHub
+#####################
+gh-pages/
+
+#####################
+# Logs
+#####################
+*.log
 
 #####################
 # MacOS specifics

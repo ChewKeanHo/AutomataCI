@@ -260,7 +260,7 @@ IF "!PROJECT_ARCH!"=="x86" (
         set "PROJECT_ARCH=i386"
         goto check_type
 ) ELSE IF "!PROJECT_ARCH!"=="9" (
-        echo "NOTE: GitHub Action Windows Server detected. Simulating amd64 CPU."
+        echo [ NOTE ] GitHub Action Windows Server detected. Simulating amd64 CPU.
         set "PROJECT_ARCH=amd64"
 ) ELSE IF "!PROJECT_ARCH!"=="64" (
         for /F "skip=1 delims=" %%P in ('wmic cpu get name') do (

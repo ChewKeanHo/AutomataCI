@@ -9,31 +9,30 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+function Get-Python-Path {
+	[CmdletBinding()]
 
+	$program = Get-Command python -ErrorAction SilentlyContinue
+	if ($program) {
+		return $program.Source
+	}
 
-
-
-# (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
-        exit 1
+	return $null
 }
 
 
 
 
-# (1) run setup service
-$services = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_AUTOMATA + "\services"
+function Check-Python-Available {
+	[CmdletBinding()]
+	Param (
+	)
 
+	$program = Get-Command python -ErrorAction SilentlyContinue
+	if ($program) {
+		return 0
+	}
 
-# (1.1) check Python availability
-. ("$services" + "\python\common.ps1")
-$process = Check-Python-Available
-if ($process -ne 0) {
-	exit 1
+	Write-Host "[ ERROR ] - Python was not installed. Please install.!\n"
+	return 1
 }
-
-# (1.2) setup Python virtual environment
-. ("$services" + "\python\setup.ps1")
-$process = Setup-Python
-exit $process
