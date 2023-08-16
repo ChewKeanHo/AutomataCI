@@ -9,20 +9,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-function Get-Python-Path {
-	[CmdletBinding()]
-
-	$program = Get-Command python -ErrorAction SilentlyContinue
-	if ($program) {
-		return $program.Source
-	}
-
-	return $null
-}
-
-
-
-
 function Check-Python-Available {
 	[CmdletBinding()]
 	Param (
@@ -33,6 +19,35 @@ function Check-Python-Available {
 		return 0
 	}
 
-	Write-Host "[ ERROR ] - Python was not installed. Please install.!\n"
+	Write-Error "[ ERROR ] - Python was not installed. Please install.!"
+	return 1
+}
+
+
+
+
+function Activate-Virtual-Environment {
+	if ($env:VIRTUAL_ENV) {
+		Write-Host "[ INFO ] python virtual environment already activated."
+		return 0
+	}
+
+	$location = $env:PROJECT_PATH_ROOT + "\" `
+			+ $env:PROJECT_PATH_TOOLS + "\" `
+			+ $env:PROJECT_PATH_PYTHON_ENGINE + "\" `
+			+ "Scripts\Activate.ps1"
+
+	if (-not (Test-Path "$location")) {
+		Write-Error "[ ERROR ] missing '${location}'. Already Setup?"
+		return 1
+	}
+
+	. $location
+	if ($env:VIRTUAL_ENV) {
+		Write-Host "[ INFO ] python virtual environment activated."
+		return 0
+	}
+
+	Write-Error "[ ERROR ] - failed to activate virtual environment. Please re-setup."
 	return 1
 }

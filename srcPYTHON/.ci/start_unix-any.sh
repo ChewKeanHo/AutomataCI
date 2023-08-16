@@ -23,11 +23,16 @@ fi
 
 
 
-# (1) execute tech-specific CI job
-recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/start_unix-any.sh"
-if [ -f "$recipe" ]; then
-        . "$recipe"
-        return $?
+# (1) run start service
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/common.sh"
+CheckPythonIsAvailable
+if [ $? -ne 0 ]; then
+        return 1
 fi
->&2 printf "[ ERROR ] Missing ${recipe}\n"
-return 1
+
+
+ActivateVirtualEnvironment
+if [ $? -ne 0 ]; then
+        return 1
+fi
+return 0

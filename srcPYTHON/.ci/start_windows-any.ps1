@@ -3,7 +3,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
 # of the License at:
-#                 http://www.apache.org/licenses/LICENSE-2.0
+#               http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,19 +15,32 @@
 
 # (0) initialize
 IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please start from ci.cmd instead!\n"
+        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
         exit 1
 }
 
 
 
 
-# (1) execute tech-specific CI job
-$recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
-$recipe = "$recipe\setup_windows-any.ps1"
-$process = Start-Process -Wait `
-			-FilePath "powershell.exe" `
-			-NoNewWindow `
-			-ArgumentList "-File `"$recipe`"" `
-			-PassThru
-exit $process.ExitCode
+# (1) run start service
+$services = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_AUTOMATA + "\services"
+
+
+
+
+# (2) python is setup properly
+. ("$services" + "\python\common.ps1")
+$process = Check-Python-Available
+if ($process -ne 0) {
+	exit 1
+}
+
+
+
+
+# (3) start engine
+$process = Activate-Virtual-Environment
+if ($process -ne 0) {
+	exit 1
+}
+exit 0

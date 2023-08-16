@@ -33,10 +33,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version-file: ${{ env.PROJECT_PYTHON }}
-      - name: Execute repo's native CI setup job recipe
+      - name: Execute repo's native CI job recipe - SETUP
         id: native_ci_setup
         run: . ./ci.cmd setup
-      - run: . ./ci.cmd start
+      - name: Execute repo's native CI job recipe - START
+        id: native_ci_start
+        run: . ./ci.cmd start
       - run: . ./ci.cmd prepare
       - run: . ./ci.cmd test
       - run: . ./ci.cmd build
@@ -59,10 +61,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version-file: ${{ env.PROJECT_PYTHON }}
-      - name: Execute repo's native CI setup job recipe
+      - name: Execute repo's native CI job recipe - SETUP
         id: native_ci_setup
         run: .\ci.cmd setup
-      - run: .\ci.cmd start
+      - name: Execute repo's native CI job recipe - START
+        id: native_ci_start
+        run: .\ci.cmd start
       - run: .\ci.cmd prepare
       - run: .\ci.cmd test
       - run: .\ci.cmd build

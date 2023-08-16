@@ -22,3 +22,29 @@ CheckPythonIsAvailable() {
         >&2 printf "[ INFO ] Using: $(python3 --version)\n"
         return 0
 }
+
+
+
+
+ActivateVirtualEnvironment() {
+        if [ ! -z "$VIRTUAL_ENV" ] ; then
+                >&2 printf "[ INFO ] python virtual environment already activated.\n"
+                return 0
+        fi
+
+        location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
+        location="${location}/bin/activate"
+        if [ ! -f "$location" ]; then
+                >&2 printf "[ INFO ] missing '${location}'. Already Setup?\n"
+                return 1
+        fi
+
+        . "$location"
+        if [ ! -z "$VIRTUAL_ENV" ] ; then
+                >&2 printf "[ INFO ] python virtual environment activated.\n"
+                return 0
+        fi
+
+        >&2 printf "[ ERROR ] failed to activate virtual environment. Please re-setup.\n"
+        return 1
+}

@@ -23,20 +23,11 @@ fi
 
 
 
-# (1) your unix commands for the job recipe here. You can source the pre-built
-#     templates inside the ./scripts/templates directory to jump-start a
-#     supported project. Example, for Go you can add the following:
-#          . ${PROJECT_PATH_SCRIPTS}/templates/go/start_${PROJECT_OS}-${PROJECT_ARCH}.sh
-#          if [ $? -ne 0 ]; then
-#                # handle error here
-#                return 1
-#          fi
+# (1) execute tech-specific CI job
 recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/setup_unix-any.sh"
 if [ -f "$recipe" ]; then
         . "$recipe"
         return $?
 fi
-
-
-printf "Missing ${recipe}!\n"
+>&2 printf "[ ERROR ] Missing ${recipe}\n"
 return 1
