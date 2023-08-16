@@ -26,6 +26,30 @@ CheckPythonIsAvailable() {
 
 
 
+CheckPythonVENVActivation() {
+        if [ ! -z "$VIRTUAL_ENV" ] ; then
+                return 0
+        fi
+
+        >&2 printf "[ ERROR ] python virtual environment not activated.\n"
+        return 1
+}
+
+
+
+
+CheckPythonPIP() {
+        if [ -z "$(type -t pip)" ]; then
+                >&2 printf "[ ERROR ] python pip is not available.\n"
+                return 1
+        fi
+
+        return 0
+}
+
+
+
+
 ActivateVirtualEnvironment() {
         if [ ! -z "$VIRTUAL_ENV" ] ; then
                 >&2 printf "[ INFO ] python virtual environment already activated.\n"
@@ -41,7 +65,7 @@ ActivateVirtualEnvironment() {
 
         . "$location"
         if [ ! -z "$VIRTUAL_ENV" ] ; then
-                >&2 printf "[ INFO ] python virtual environment activated.\n"
+                >&2 printf "[ INFO ] python virtual environment activated (${location}).\n"
                 return 0
         fi
 

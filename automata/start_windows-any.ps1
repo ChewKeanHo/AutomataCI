@@ -25,9 +25,5 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 # (1) execute tech-specific CI job
 $recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
 $recipe = "$recipe\start_windows-any.ps1"
-$process = Start-Process -Wait `
-			-FilePath "powershell.exe" `
-			-NoNewWindow `
-			-ArgumentList "-File `"$recipe`"" `
-			-PassThru
+. $recipe
 exit $process.ExitCode

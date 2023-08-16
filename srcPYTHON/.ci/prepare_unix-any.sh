@@ -23,11 +23,31 @@ fi
 
 
 
-# (1) execute tech-specific CI job
-recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/prepare_unix-any.sh"
-if [ -f "$recipe" ]; then
-        . "$recipe"
-        return $?
+# (1) safety checking control surfaces
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/common.sh"
+CheckPythonIsAvailable
+if [ $? -ne 0 ]; then
+        return 1
 fi
->&2 printf "[ ERROR ] Missing ${recipe}\n"
-return 1
+
+
+ActivateVirtualEnvironment
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+CheckPythonPIP
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+
+
+# (2) run prepare services
+pip install -r "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/requirements.txt"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+return 0

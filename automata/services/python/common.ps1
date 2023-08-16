@@ -26,6 +26,31 @@ function Check-Python-Available {
 
 
 
+function Check-Python-VENV-Activation {
+	if ($env:VIRTUAL_ENV) {
+		return 0
+	}
+
+	Write-Error "[ ERROR ] python virtual environment not activated."
+	return 1
+}
+
+
+
+
+function Check-Python-PIP {
+	try {
+		$null = pip --version
+		return 0
+	} catch {
+		Write-Error "[ ERROR ] python pip is not available."
+		return 1
+	}
+}
+
+
+
+
 function Activate-Virtual-Environment {
 	if ($env:VIRTUAL_ENV) {
 		Write-Host "[ INFO ] python virtual environment already activated."

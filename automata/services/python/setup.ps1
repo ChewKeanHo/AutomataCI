@@ -13,7 +13,6 @@ function Setup-Python {
 	[CmdletBinding()]
 	Param (
 	)
-
 	$location = $env:PROJECT_PATH_ROOT + "\" `
 			+ $env:PROJECT_PATH_TOOLS + "\" `
 			+ $env:PROJECT_PATH_PYTHON_ENGINE

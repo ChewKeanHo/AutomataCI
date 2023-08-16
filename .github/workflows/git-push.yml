@@ -28,21 +28,35 @@ jobs:
           else
             echo "is_python_project=false" >> $GITHUB_OUTPUT
           fi
-      - name: Setup Python interpreter
+      - name: Setup Python interpreter if the project uses Python
         if: steps.is_project_requires_python.outputs.is_python_project == 'true'
         uses: actions/setup-python@v4
         with:
           python-version-file: ${{ env.PROJECT_PYTHON }}
-      - name: Execute repo's native CI job recipe - SETUP
+      - name: Execute repo's native CI - SETUP
         id: native_ci_setup
-        run: . ./ci.cmd setup
-      - name: Execute repo's native CI job recipe - START
+        run: |
+          . ./ci.cmd setup
+      - name: Execute repo's native CI - START
         id: native_ci_start
-        run: . ./ci.cmd start
-      - run: . ./ci.cmd prepare
-      - run: . ./ci.cmd test
-      - run: . ./ci.cmd build
-      - run: . ./ci.cmd compose
+        run: |
+          . ./ci.cmd start
+      - name: Execute repo's native CI - PREPARE
+        id: native_ci_prepare
+        run: |
+          . ./ci.cmd prepare
+      - name: Execute repo's native CI - TEST
+        id: native_ci_test
+        run: |
+          . ./ci.cmd test
+      - name: Execute repo's native CI - BUILD
+        id: native_ci_build
+        run: |
+          . ./ci.cmd build
+      - name: Execute repo's native CI - COMPOSE
+        id: native_ci_compose
+        run: |
+          . ./ci.cmd compose
   in-windows:
     runs-on: windows-latest
     steps:
@@ -61,13 +75,27 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version-file: ${{ env.PROJECT_PYTHON }}
-      - name: Execute repo's native CI job recipe - SETUP
+      - name: Execute repo's native CI - SETUP
         id: native_ci_setup
-        run: .\ci.cmd setup
-      - name: Execute repo's native CI job recipe - START
+        run: |
+          .\ci.cmd setup
+      - name: Execute repo's native CI - START
         id: native_ci_start
-        run: .\ci.cmd start
-      - run: .\ci.cmd prepare
-      - run: .\ci.cmd test
-      - run: .\ci.cmd build
-      - run: .\ci.cmd compose
+        run: |
+          .\ci.cmd start
+      - name: Execute repo's native CI - PREPARE
+        id: native_ci_prepare
+        run: |
+          .\ci.cmd prepare
+      - name: Execute repo's native CI - TEST
+        id: native_ci_test
+        run: |
+          .\ci.cmd test
+      - name: Execute repo's native CI - BUILD
+        id: native_ci_build
+        run: |
+          .\ci.cmd build
+      - name: Execute repo's native CI - COMPOSE
+        id: native_ci_compose
+        run: |
+          .\ci.cmd compose
