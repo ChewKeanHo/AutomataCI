@@ -43,41 +43,24 @@ if ($process -ne 0) {
 
 
 
-# (2) run test service
-$report_location = $env:PROJECT_PATH_ROOT + "\" `
-			+ $env:PROJECT_PATH_LOG + "\" `
-			+ "python-test-report"
-
-
-# (2.1) execute test run
-Write-Host "[  INFO  ] Being test service..."
-$program = Get-Command python -ErrorAction SilentlyContinue
-$argument = "-m coverage run " `
-	+ "--data-file=`"" + $report_location + "\.coverage" + "`" " `
-	+ "-m unittest discover " `
-	+ "-s `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "`" " `
-	+ "-p '*_test.py'"
-
-$process = Start-Process -Wait `
-			-FilePath "$program" `
-			-NoNewWindow `
-			-ArgumentList "$argument" `
-			-PassThru
-if ($process.ExitCode -ne 0) {
-	Write-Error "[  FAILED  ]"
-	exit 1
+# (2) run build service
+$program = Get-Command pyinstaller -ErrorAction SilentlyContinue
+if (-not ($program)) {
+	Write-Error "[  FAILED  ] missing pyinstaller."
+	return 1
 }
 
-Write-Host "[ SUCCESS ]"
 
-
-# (2.2) process test report
-Write-Host "[  INFO  ] Processing test report..."
-
-$program = Get-Command python -ErrorAction SilentlyContinue
-$argument = "-m coverage html " `
-	+ "--data-file=`"" + $report_location + "\.coverage" + "`" " `
-	+ "--directory=`"" + $report_location + "`""
+Write-Host "[  INFO  ] Building output..."
+$argument = "--noconfirm " `
+	+ "--onefile " `
+	+ "--clean " `
+	+ "--distpath `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_BUILD + "`" " `
+	+ "--workpath `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_TEMP + "`" " `
+	+ "--specpath `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "`" " `
+	+ "--name `"" + $env:PROJECT_SKU + "_" + $env:PROJECT_OS + "-" + $env:PROJECT_ARCH + "`" "`
+	+ "--hidden-import=main " `
+	+ "`"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\main.py" + "`""
 
 $process = Start-Process -Wait `
 			-FilePath "$program" `

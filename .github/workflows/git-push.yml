@@ -53,6 +53,18 @@ jobs:
         id: native_ci_build
         run: |
           . ./ci.cmd build
+      - name: Archive Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build_${{ matrix.os }}
+          path: |
+            build
+      - name: Archive Log Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: log_${{ matrix.os }}
+          path: |
+            log
       - name: Execute repo's native CI - COMPOSE
         id: native_ci_compose
         run: |
@@ -95,6 +107,18 @@ jobs:
         id: native_ci_build
         run: |
           .\ci.cmd build
+      - name: Archive Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build_windows-latest
+          path: |
+            build
+      - name: Archive Test Report Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: log_windows-latest
+          path: |
+            log
       - name: Execute repo's native CI - COMPOSE
         id: native_ci_compose
         run: |

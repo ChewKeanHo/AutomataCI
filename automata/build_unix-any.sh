@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
 # the License at:
-#               http://www.apache.org/licenses/LICENSE-2.0
+#                 http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -23,12 +23,11 @@ fi
 
 
 
-# (1) your unix commands for the job recipe here. You can source the pre-built
-#     templates inside the ./scripts/templates directory to jump-start a
-#     supported project. Example, for Go you can add the following:
-#          . ${PROJECT_PATH_SCRIPTS}/templates/go/start_${PROJECT_OS}-${PROJECT_ARCH}.sh
-#          if [ $? -ne 0 ]; then
-#                # handle error here
-#                return 1
-#          fi
-printf "Hello from native CI - build recipe!\n"
+# (1) execute tech-specific CI job
+recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/build_unix-any.sh"
+if [ -f "$recipe" ]; then
+        . "$recipe"
+        return $?
+fi
+>&2 printf "[ ERROR ] Missing ${recipe}\n"
+return 1

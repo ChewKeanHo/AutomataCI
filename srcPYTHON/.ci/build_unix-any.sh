@@ -37,29 +37,24 @@ if [ $? -ne 0 ]; then
 fi
 
 
-
-
-# (2) run test services
-report_location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/python-test-report"
-mkdir -p "$report_location"
-
-
-# (2.1) execute test run
-python -m coverage run \
-        --data-file="${report_location}/.coverage" \
-        -m unittest discover \
-        -s "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
-        -p '*_test.py'
-if [ $? -ne 0 ]; then
+if [ -z "$(type -t pyinstaller)" ]; then
+        >&2 printf "[ ERROR ] - Missing pyinstaller comamnd. Did you run 'Prepare'?\n"
         return 1
 fi
 
 
-# (2.2) process test report
-python -m coverage html \
-        --data-file="${report_location}/.coverage" \
-        --directory="$report_location"
+
+
+# (2) run build services
+pyinstaller --noconfirm \
+        --onefile \
+        --clean \
+        --distpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}" \
+        --workpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}" \
+        --specpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
+        --name "${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}" \
+        --hidden-import=main \
+        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/main.py"
 if [ $? -ne 0 ]; then
         return 1
 fi
-return 0

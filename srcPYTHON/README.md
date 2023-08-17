@@ -31,3 +31,10 @@ $PROJECT_PATH_ROOT\$PROJECT_PATH_TEMP\python-test-report
 
 You can open the `index.html` file to view the actual coverage mapping which
 can help you to perform pinpoint testing with optimal amount of test cases.
+
+
+
+
+## Build Execution
+The native CI employs `pyinstaller` to construct a single binary program based
+on the default `main.py` file.

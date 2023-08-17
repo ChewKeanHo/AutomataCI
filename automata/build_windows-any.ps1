@@ -22,8 +22,12 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# (1) your windows commands for the job recipe here. You can call the pre-built
-#     CI templates inside the ./automata/templates directory for jump-starting
-#     a supported project quickly.
-Write-Host "Hello from native CI - build recipe!\n"
-exit 0
+# (1) execute tech-specific CI job
+$recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
+$recipe = "$recipe\build_windows-any.ps1"
+$process = Start-Process -Wait `
+			-FilePath "powershell.exe" `
+			-NoNewWindow `
+			-ArgumentList "-File `"$recipe`"" `
+			-PassThru
+exit $process.ExitCode
