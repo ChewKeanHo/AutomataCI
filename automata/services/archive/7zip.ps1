@@ -9,7 +9,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-function Formulate-Path-7Zip {
+function 7ZIP-Formulate-Path {
 	return $env:PROJECT_PATH_ROOT + "\" `
 			+ $env:PROJECT_PATH_TOOLS + "\" `
 			+ "7zip-engine\7zip.exe"
@@ -18,18 +18,21 @@ function Formulate-Path-7Zip {
 
 
 
-function Check-7Zip-Is-Available {
-	if (Test-Path -Path Formulate-Path-7Zip -PathType leaf) {
+function 7ZIP-Is-Available {
+	$program = 7ZIP-Formulate-Path
+	if (Test-Path -Path $program -PathType leaf) {
+		Remove-Variable -Name program
 		return 0
 	}
 
+	Remove-Variable -Name program
 	return 1
 }
 
 
 
 
-function SHA256-File {
+function 7ZIP-SHA256 {
 	param (
 		[string] $path
 	)
@@ -46,8 +49,8 @@ function SHA256-File {
 
 
 
-function Setup-7Zip {
-	$program = Formulate-Path-7Zip
+function 7ZIP-Setup {
+	$program = 7ZIP-Formulate-Path
 	New-Item -ItemType Directory `
 		-Path (Split-Path -Path $program -Parent) `
 		-Force `
@@ -65,7 +68,6 @@ function Setup-7Zip {
 		$url = "https://www.7-zip.org/a/7z2301.exe"
 		$sha256 = "9b6682255bed2e415bfa2ef75e7e0888158d1aaf79370defaa2e2a5f2b003a59"
 	} default {
-		Write-Host "[ ERROR ] unsupported architecture for 7-Zip."
 		Remove-Variable -Name program
 		return 1
 	}}
@@ -73,12 +75,25 @@ function Setup-7Zip {
 	# download the file
 	Invoke-WebRequest -Uri $url -OutFile $program
 
+	# wait for download completion
+	$elapsedTime = 0
+	$downloading = $true
+	$timeout = 600
+	while ($downloading -and $elapsedTime -lt $timeout) {
+		$downloading = !(Test-Path $program)
+		Start-Sleep -Seconds 1
+		$elapsedTime++
+	}
+
+	if ($downloading) {
+		return 1
+	}
+
 	# checksum the payload
-	$checksum = Sha256-File -Path $program
+	$checksum = 7ZIP-Sha256 -Path $program
 
 	# check and verdict
 	if ($checksum -eq $sha256) {
-		Write-Host "[ SUCCESS ]"
 		Remove-Variable -Name checksum
 		Remove-Variable -Name program
 		Remove-Variable -Name url
@@ -87,7 +102,6 @@ function Setup-7Zip {
 	}
 
 	# bad payload. Clean up...
-	Write-Host "[ ERROR ] download failed"
 	Remove-Item $program -ErrorAction SilentlyContinue
 	Remove-Variable -Name checksum
 	Remove-Variable -Name program
@@ -99,30 +113,36 @@ function Setup-7Zip {
 
 
 
-function Create-TARXZ {
+function 7ZIP-Create-TARXZ {
 	param (
 		[string]$Source,
 		[string]$Destination
 	)
-
-
-	# clean up destination path
-	Remove-Item (Split-Path -Parent $Destination) `
-		-Recurse `
-		-Force `
-		-ErrorAction SilentlyContinue
-	New-Item -ItemType Directory `
-		-Force `
-		-Path (Split-Path -Parent $Destination) `
-		| Out-Null
+	$program = 7ZIP-Formulate-Path
 
 
 	# create archive
 	Set-Location -Path $Source
-	Formulate-Path-7Zip a -ttar "$Destination.tar" .
-	Formulate-Path-7Zip a -ttar "$Destination.tar.xz" "$Destination.tar"
-	if ($LASTEXITCODE -ne 0) {
+	$process = Start-Process -Wait `
+			-Filepath "$program" `
+			-NoNewWindow `
+			-ArgumentList "a -ttar `"$Destination.tar`" ." `
+			-PassThru
+	if ($process.ExitCode -ne 0) {
+		Remove-Variable -Name program
 		return 1
 	}
+
+	$process = Start-Process -Wait `
+			-Filepath "$program" `
+			-NoNewWindow `
+			-ArgumentList "a -ttar `"$Destination.tar.xz`" `"$Destination.tar`"" `
+			-PassThru
+	if ($process.ExitCode -ne 0) {
+		Remove-Variable -Name program
+		return 1
+	}
+
+	Remove-Variable -Name program
 	return 0
 }

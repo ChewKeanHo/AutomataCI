@@ -9,12 +9,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-function Create-ZIP {
-	[CmdletBinding()]
+function ZIP-Create {
 	param (
 		[string]$Source,
 		[string]$Destination
 	)
 
-	Compress-Archive -Path $Source -DestinationPath $Destination
+	try {
+		Compress-Archive -Path $Source -DestinationPath $Destination
+		if (Test-Path $Destination) {
+			return 0
+		}
+		return 1
+	} catch {
+		return 1
+	}
 }

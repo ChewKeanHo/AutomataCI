@@ -10,28 +10,31 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-CheckZipIsAvailable() {
+ZIP::is_available() {
         if [ ! -z "$(type -t zip)" ]; then
                 return 0
         fi
-        >&2 printf "[ ERROR ] - Missing zip archiver. Please install one.\n"
         return 1
 }
 
 
 
 
-CreateZIP() {
+ZIP::create() {
         src_path="$1"
         dest_path="$2"
         pwd_path="$PWD"
 
 
-        # clean up destination path
-        mkdir -p "${dest_path%/*}"
+        # check commmand availability
+        ZIP::is_available
+        if [ $? -ne 0 ]; then
+                unset dest_path src_path pwd_path
+                return 1
+        fi
 
 
-        # create tar.xz archive
+        # archive now
         cd "$src_path"
         zip -9 -r "$dest_path" .
         if [ $? -ne 0 ]; then
@@ -39,6 +42,7 @@ CreateZIP() {
                 return 1
         fi
         cd "$pwd_path"
+
 
         # successful clean up
         unset dest_path src_path pwd_path

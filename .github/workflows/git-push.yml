@@ -53,6 +53,14 @@ jobs:
         id: native_ci_build
         run: |
           . ./ci.cmd build
+      - name: Execute repo's native CI - PACKAGE
+        id: native_ci_package
+        run: |
+          . ./ci.cmd package
+      - name: Execute repo's native CI - COMPOSE
+        id: native_ci_compose
+        run: |
+          . ./ci.cmd compose
       - name: Archive Build Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -65,15 +73,6 @@ jobs:
           name: log_${{ matrix.os }}
           path: |
             log
-      - name: Execute repo's native CI - PACKAGE
-        id: native_ci_package
-        run: |
-          . ./ci.cmd package
-          ls pkg/
-      - name: Execute repo's native CI - COMPOSE
-        id: native_ci_compose
-        run: |
-          . ./ci.cmd compose
   in-windows:
     runs-on: windows-latest
     steps:
@@ -112,6 +111,14 @@ jobs:
         id: native_ci_build
         run: |
           .\ci.cmd build
+      - name: Execute repo's native CI - PACKAGE
+        id: native_ci_package
+        run: |
+          .\ci.cmd package
+      - name: Execute repo's native CI - COMPOSE
+        id: native_ci_compose
+        run: |
+          .\ci.cmd compose
       - name: Archive Build Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -124,12 +131,3 @@ jobs:
           name: log_windows-latest
           path: |
             log
-      - name: Execute repo's native CI - PACKAGE
-        id: native_ci_package
-        run: |
-          . ./ci.cmd package
-          ls pkg/
-      - name: Execute repo's native CI - COMPOSE
-        id: native_ci_compose
-        run: |
-          .\ci.cmd compose
