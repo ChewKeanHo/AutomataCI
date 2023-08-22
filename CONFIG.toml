@@ -14,7 +14,7 @@ PROJECT_VERSION = "0.0.1"
 
 
 # PROJECT STRUCTURE
-PROJECT_PATH_AUTOMATA = "automata" # relative to repository root
+PROJECT_PATH_AUTOMATA = "automataCI" # relative to repository root
 PROJECT_PATH_TOOLS = "tools" # relative to repository root
 PROJECT_PATH_BUILD = "build" # relative to repository root
 PROJECT_PATH_TEMP = "tmp" # relative to repository root

@@ -16,8 +16,10 @@ repository.
 > 3. Select A `LICENSE.pdf` file with the appropriate license(s).
 > 4. Add a `CODE_OF_CONDUCT.md` file with the appropriate legal clauses(s).
 > 5. Update the `CONFIG.toml` matching the project metadata.
-> 5. Update the `automata/*` CI executions instructions matching the project.
-> 6. Delete this blockquote once everything is completed.
+> 6. Select one of the placeholding technologies (e.g. `srcGO` or `srcPYTHON`)
+>    and rename it to `src` directory.
+> 7. Update your `src/.ci` automation job recipes if needed.
+> 8. Delete this blockquote once everything is completed.
 
 
 
@@ -25,9 +27,9 @@ repository.
 ## Why It Matters
 State the business reasons for this project.
 
-1. **Working things out efficiently with pinpoint accuracy** - template
-   standardizes all marketing and presentable elements so just focus on the
-   project development.
+1. **Working things out extremely efficiently with pinpoint accuracy** - get
+   all the ecosystem deployments up and ready, out of the way and just focus on
+   product development.
 2. **Steadily for continuous improvement** - version controlled and improve
    iteratively.
 3. **Simple and scalable** - just one git and some changes; you get a decent
@@ -44,12 +46,13 @@ maintainers.
 
 ### Directory Structure
 ```
-automata/			🠚 house the projects' CI automation scripts.
-automata/services		🠚 house tested and pre-built CI automation functions.
+automataCI/			🠚 house the projects' CI automation scripts.
+automataCI/services		🠚 house tested and pre-built CI automation functions.
 bin/				🠚 default build output directory.
 pkg/				🠚 default package output directory.
 resources/			🠚 housing all indirect raw materials and assets.
 src/				🠚 house actual source codes (base directory).
+src/.ci/			🠚 house source codes technology-specific CI automation jobs.
 tools/				🠚 default tooling (e.g. prog. language bin/).
 tmp/				🠚 default temporary workspace.
 CONFIG.toml			🠚 configure project's settings data for CI.
@@ -73,19 +76,32 @@ edge || experimental		= for project maintainer to develop new feature.
 
 
 
-
-### Native Continuous Integration (Native CI) Infrastructure
-This repository is governed by a native CI scripted using
+### Native Continuous Integration (AutomataCI) Infrastructure
+This repository is governed by an automation CI scripted using
 [Polygot Script](https://github.com/ChewKeanHo/PolygotScript) called `ci.cmd`.
-If you are new and wanted to contribute, you may start off by following the
-breadcrumbs via commands starting from `automata/` directory where the
-developers housed their automated continuous development commands. As for
-operating the repository, among the commands available are:
+The technology behind is `AutomataCI` built specifically to operate using only
+the native OS functionalities (`POSIX Shell` for UNIX OSes and `PowerShell`
+for Windows OS).
+
+Generally, you **DO NOT** need to mess with the CI's core system housed in
+`automataCI/` directory. Your CI job recipes are housed in `src/.ci/` directory
+and AutomataCI will auto-detect and engage them immediately.
+
+However, if you are new and wanted to contribute, you may start off by following
+the breadcrumbs or tracing via commands starting from your job recipe. The only
+2 knowledge set required are:
+
+1. POSIX complaint shell scripting (not BASH)
+2. Windows' native PowerShell
+
+Otherwise, you should only use the following CI commands and work on your
+business inside `src/` directory
 
 
 #### `SETUP` - Setup the Tooling in Your Local Environment
 This is for setting up the necessary tooling (e.g. programming language's
-engine) and etc in your local environment. The command:
+engine) and etc in your local environment. If you already setup before, you
+may not need this step. The command:
 
 ```
 # UNIX (MacOS, GNU, Linux)
@@ -100,6 +116,12 @@ $ ./ci.cmd setup
 This is to start your current terminal session for the repository development.
 It parses and facilitates all the pathing and setup the necessary files for the
 project development needs (e.g. language binary, etc):
+
+> [!IMPORTANT]
+>
+> For Windows OS, due to Batch & PowerShell technological limitations, you may
+> or may not be able to engage properly. Hence, please read the on-screen
+> instructions just in case.
 
 ```
 # UNIX (MacOS, GNU, Linux)

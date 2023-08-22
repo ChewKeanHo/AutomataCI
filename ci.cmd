@@ -157,43 +157,43 @@ done < "${PROJECT_PATH_ROOT}/CONFIG.toml"
 # (5) execute command
 case "$1" in
 setup|--setup|Setup|--Setup|SETUP|--SETUP)
-        . "${PROJECT_PATH_ROOT}"/automata/setup_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/setup_unix-any.sh"
         code=$?
         ;;
 start|--start|Start|--Start|START|--START)
-        . "${PROJECT_PATH_ROOT}"/automata/start_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/start_unix-any.sh"
         code=$?
         ;;
 test|--test|Test|--Test|TEST|--TEST)
-        . "${PROJECT_PATH_ROOT}"/automata/test_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/test_unix-any.sh"
         code=$?
         ;;
 prepare|--prepare|Prepare|--Prepare|PREPARE|--PREPARE)
-        . "${PROJECT_PATH_ROOT}"/automata/prepare_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/prepare_unix-any.sh"
         code=$?
         ;;
 build|--build|Build|--Build|BUILD|--BUILD)
-        . "${PROJECT_PATH_ROOT}"/automata/build_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/build_unix-any.sh"
         code=$?
         ;;
 package|--package|Package|--Package|PACKAGE|--PACKAGE)
-        . "${PROJECT_PATH_ROOT}"/automata/package_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/package_unix-any.sh"
         code=$?
         ;;
 release|--release|Release|--Release|RELEASE|--RELEASE)
-        . "${PROJECT_PATH_ROOT}"/automata/release_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/release_unix-any.sh"
         code=$?
         ;;
 compose|--compose|Compose|--Compose|COMPOSE|--COMPOSE)
-        . "${PROJECT_PATH_ROOT}"/automata/compose_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/compose_unix-any.sh"
         code=$?
         ;;
 publish|--publish|Publish|--Publish|PUBLISH|--PUBLISH)
-        . "${PROJECT_PATH_ROOT}"/automata/publish_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/publish_unix-any.sh"
         code=$?
         ;;
 stop|--stop|Stop|--Stop|STOP|--STOP)
-        . "${PROJECT_PATH_ROOT}"/automata/stop_unix-any.sh
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/stop_unix-any.sh"
         code=$?
         unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
         ;;
@@ -362,7 +362,7 @@ IF "%1"=="" (
 IF "%1"=="setup" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\setup_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\setup_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -370,7 +370,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Setup" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\setup_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\setup_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -378,7 +378,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="SETUP" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\setup_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\setup_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -386,7 +386,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="start" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\start_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\start_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -394,7 +394,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Start" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\start_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\start_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -402,7 +402,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="START" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\start_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\start_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -410,7 +410,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="test" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\test_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\test_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -418,7 +418,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Test" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\test_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\test_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -426,7 +426,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="TEST" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\test_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\test_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -434,7 +434,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="prepare" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\prepare_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -442,7 +442,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Prepare" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\prepare_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -450,7 +450,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="PREPARE" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\prepare_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\prepare_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -458,7 +458,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="build" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\build_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\build_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -466,7 +466,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Build" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\build_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\build_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -474,7 +474,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="BUILD" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\build_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\build_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -482,7 +482,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="package" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\package_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\package_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -490,7 +490,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Package" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\package_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\package_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -498,7 +498,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="PACKAGE" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\package_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\package_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -506,7 +506,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="release" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\release_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\release_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -514,7 +514,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Release" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\release_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\release_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -522,7 +522,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="RELEASE" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\release_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\release_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -530,7 +530,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="compose" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\compose_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\compose_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -538,7 +538,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Compose" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\compose_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\compose_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -546,7 +546,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="COMPOSE" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\compose_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\compose_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -554,7 +554,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="publish" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\publish_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\publish_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -562,7 +562,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Publish" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\publish_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\publish_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -570,7 +570,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="PUBLISH" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\publish_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\publish_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -578,7 +578,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="stop" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\stop_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\stop_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -587,7 +587,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="Stop" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\stop_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\stop_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
@@ -596,7 +596,7 @@ IF "%1"=="setup" (
 ) ELSE IF "%1"=="STOP" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\automata\stop_windows-any.ps1"
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\stop_windows-any.ps1"
         IF "!ERRORLEVEL!" NEQ "0" (
                 set code=1
         )
