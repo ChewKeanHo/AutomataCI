@@ -81,6 +81,6 @@ if ($process -ne 0) {
 
 
 
-# (3) report successful build status
-OS-Print-Status success "\n"
+# (3) report successful status
+OS-Print-Status success ""
 exit 0

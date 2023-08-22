@@ -20,25 +20,33 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
+
 
 
 
 # (1) safety checking control surfaces
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/common.sh"
-CheckPythonIsAvailable
+OS::print_status info "checking python|python3 availability...\n"
+PYTHON::is_available
 if [ $? -ne 0 ]; then
+        OS::print_status error "missing python|python3 intepreter..\n"
         return 1
 fi
 
 
-ActivateVirtualEnvironment
+OS::print_status info "activating python venv...\n"
+PYTHON::activate_venv
 if [ $? -ne 0 ]; then
+        OS::print_status error "activation failed.\n"
         return 1
 fi
 
 
-CheckPythonPIP
+OS::print_status info "checking pip availability...\n"
+PYTHON::has_pip
 if [ $? -ne 0 ]; then
+        OS::print_status error "missing pip module manager.\n"
         return 1
 fi
 
@@ -46,8 +54,25 @@ fi
 
 
 # (2) run prepare services
-pip install -r "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/requirements.txt"
+OS::print_status info "updating pip to the latest...\n"
+python -m pip install --upgrade pip
 if [ $? -ne 0 ]; then
+        OS::print_status error "pip update failed.\n"
         return 1
 fi
+
+
+file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/requirements.txt"
+OS::print_status info "executing pip install against $file\n"
+pip install -r "$file"
+if [ $? -ne 0 ]; then
+        OS::print_status error "pip install failed.\n"
+        return 1
+fi
+
+
+
+
+# (3) report successful status
+OS::print_status success "\n\n"
 return 0

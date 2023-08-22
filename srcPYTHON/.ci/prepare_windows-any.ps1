@@ -22,28 +22,36 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# (1) run start service
-$services = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_AUTOMATA + "\services"
+# (1) safety checking control surfaces
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\io\os.ps1"
+. $services
+
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\compilers\python.ps1"
+. $services
 
 
-
-
-# (2) python is setup properly
-. ("$services" + "\python\common.ps1")
-$process = Check-Python-Available
+OS-Print-Status info "checking python availability..."
+$process = PYTHON-Is-Available
 if ($process -ne 0) {
+	OS-Print-Status error "missing python intepreter."
 	exit 1
 }
 
-
-$process = Activate-Virtual-Environment
+OS-Print-Status info "activating python venv..."
+$process = PYTHON-Activate-VENV
 if ($process -ne 0) {
+	OS-Print-Status error "activation failed."
 	exit 1
 }
 
-
-$process = Check-Python-PIP
+OS-Print-Status info "checking pip availability..."
+$process = PYTHON-Has-PIP
 if ($process -ne 0) {
+	OS-Print-Status error "missing pip module manager."
 	exit 1
 }
 
@@ -51,35 +59,27 @@ if ($process -ne 0) {
 
 
 # (3) start prepare the service
-Write-Host "[  INFO  ] Upgrading pip to the latest..."
-$program = Get-Command python -ErrorAction SilentlyContinue
-$process = Start-Process -Wait `
-			-FilePath "$program" `
-			-NoNewWindow `
-			-ArgumentList "-m pip install --upgrade pip" `
-			-PassThru
-if ($process.ExitCode -ne 0) {
-	Write-Error "[  FAILED  ]"
+OS-Print-Status info "upgrading pip to the latest..."
+$process = OS-Exec "python" "-m pip install --upgrade pip"
+if ($process -ne 0) {
+	OS-Print-Status error "pip update failed."
 	exit 1
 }
-Write-Host "[ SUCCESS ]"
 
 
-Write-Host "[  INFO  ] pip install all required modules..."
-$program = Get-Command pip -ErrorAction SilentlyContinue
-$location = $env:PROJECT_PATH_ROOT + "\" `
+$file = $env:PROJECT_PATH_ROOT + "\" `
 		+ $env:PROJECT_PATH_SOURCE + "\" `
 		+ "requirements.txt"
-$process = Start-Process -Wait `
-			-FilePath "$program" `
-			-NoNewWindow `
-			-ArgumentList "install -r $location" `
-			-PassThru
-if ($process.ExitCode -ne 0) {
-	Write-Error "[  FAILED  ]"
+OS-Print-Status info "executing pip install against $file"
+$process = OS-Exec "pip" "install -r $file"
+if ($process -ne 0) {
+	OS-Print-Status error "pip install failed."
 	exit 1
 }
-Write-Host "[ SUCCESS ]"
 
 
+
+
+# (3) report successful status
+OS-Print-Status success ""
 exit 0

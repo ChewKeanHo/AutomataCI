@@ -73,6 +73,6 @@ fi
 
 
 
-# (3) report successful build status
+# (3) report successful status
 OS::print_status success "\n\n"
 return 0
