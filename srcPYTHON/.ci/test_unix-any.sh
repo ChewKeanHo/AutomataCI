@@ -20,19 +20,25 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
+
 
 
 
 # (1) safety checking control surfaces
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/common.sh"
-CheckPythonIsAvailable
+OS::print_status info "checking python|python3 availability...\n"
+PYTHON::is_available
 if [ $? -ne 0 ]; then
+        OS::print_status error "missing python|python3 intepreter..\n"
         return 1
 fi
 
 
-ActivateVirtualEnvironment
+OS::print_status info "activating python venv...\n"
+PYTHON::activate_venv
 if [ $? -ne 0 ]; then
+        OS::print_status error "activation failed.\n"
         return 1
 fi
 
@@ -41,25 +47,36 @@ fi
 
 # (2) run test services
 report_location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/python-test-report"
+OS::print_status info "preparing report vault: ${report_location}\n"
 mkdir -p "$report_location"
 
 
 # (2.1) execute test run
+OS::print_status info "executing all tests with coverage...\n"
 python -m coverage run \
         --data-file="${report_location}/.coverage" \
         -m unittest discover \
         -s "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
         -p '*_test.py'
 if [ $? -ne 0 ]; then
+        OS::print_status error "test executions failed.\n"
         return 1
 fi
 
 
 # (2.2) process test report
+OS::print_status info "processing test coverage data to html...\n"
 python -m coverage html \
         --data-file="${report_location}/.coverage" \
         --directory="$report_location"
 if [ $? -ne 0 ]; then
+        OS::print_status error "data processing failed.\n"
         return 1
 fi
+
+
+
+
+# (3) report successful build status
+OS::print_status success "\n\n"
 return 0

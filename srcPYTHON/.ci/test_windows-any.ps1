@@ -25,18 +25,31 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 # (1) safety checking control surfaces
 $services = $env:PROJECT_PATH_ROOT + "\" `
 		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\python\common.ps1"
+		+ "services\io\os.ps1"
+. $services
+
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\io\fs.ps1"
+. $services
+
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\compilers\python.ps1"
 . $services
 
 
-$process = Check-Python-Available
+OS-Print-Status info "checking python availability..."
+$process = PYTHON-Is-Available
 if ($process -ne 0) {
+	OS-Print-Status error "missing python intepreter."
 	exit 1
 }
 
-
-$process = Activate-Virtual-Environment
+OS-Print-Status info "activating python venv..."
+$process = PYTHON-Activate-VENV
 if ($process -ne 0) {
+	OS-Print-Status error "activation failed."
 	exit 1
 }
 
@@ -47,49 +60,42 @@ if ($process -ne 0) {
 $report_location = $env:PROJECT_PATH_ROOT + "\" `
 			+ $env:PROJECT_PATH_LOG + "\" `
 			+ "python-test-report"
+OS-Print-Status info "preparing report value: $report_location"
+$process = FS-Make-Directory $report_location
+if ($process -ne 0) {
+	OS-Print-Status error "preparation failed."
+	exit 1
+}
 
 
 # (2.1) execute test run
-Write-Host "[  INFO  ] Being test service..."
-$program = Get-Command python -ErrorAction SilentlyContinue
+OS-Print-Status info "executing all tests with coverage..."
 $argument = "-m coverage run " `
 	+ "--data-file=`"" + $report_location + "\.coverage" + "`" " `
 	+ "-m unittest discover " `
 	+ "-s `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "`" " `
 	+ "-p '*_test.py'"
-
-$process = Start-Process -Wait `
-			-FilePath "$program" `
-			-NoNewWindow `
-			-ArgumentList "$argument" `
-			-PassThru
-if ($process.ExitCode -ne 0) {
-	Write-Error "[  FAILED  ]"
+$process = OS-Exec python $argument
+if ($process -ne 0) {
+	OS-Print-Status error "test executions failed."
 	exit 1
 }
-
-Write-Host "[ SUCCESS ]"
 
 
 # (2.2) process test report
-Write-Host "[  INFO  ] Processing test report..."
-
-$program = Get-Command python -ErrorAction SilentlyContinue
+OS-Print-Status info "processing test coverage data to html..."
 $argument = "-m coverage html " `
 	+ "--data-file=`"" + $report_location + "\.coverage" + "`" " `
 	+ "--directory=`"" + $report_location + "`""
-
-$process = Start-Process -Wait `
-			-FilePath "$program" `
-			-NoNewWindow `
-			-ArgumentList "$argument" `
-			-PassThru
-if ($process.ExitCode -ne 0) {
-	Write-Error "[  FAILED  ]"
+$process = OS-Exec python $argument
+if ($process -ne 0) {
+	OS-Print-Status error "data processing failed."
 	exit 1
 }
 
-Write-Host "[ SUCCESS ]"
 
 
+
+# (3) report successful build status
+OS::print_status success "\n\n"
 exit 0

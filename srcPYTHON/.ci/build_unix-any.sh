@@ -27,14 +27,18 @@ fi
 
 
 # (1) safety checking control surfaces
+OS::print_status info "checking python|python3 availability...\n"
 PYTHON::is_available
 if [ $? -ne 0 ]; then
+        OS::print_status error "missing python|python3 intepreter..\n"
         return 1
 fi
 
 
+OS::print_status info "activating python venv...\n"
 PYTHON::activate_venv
 if [ $? -ne 0 ]; then
+        OS::print_status error "activation failed.\n"
         return 1
 fi
 
