@@ -30,6 +30,25 @@ $services = $env:PROJECT_PATH_ROOT + "\" `
 		+ "services\io\fs.ps1"
 . $services
 
+
+
+
+# (1) execute tech specific CI jobs if available
+$recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
+$recipe = "$recipe\package_windows-any.ps1"
+$process = FS-IsExists $recipe
+if ($process) {
+	. $recipe
+	if ($?) {
+		exit 0
+	}
+	exit 1
+}
+
+
+
+
+# (2) no custom job recipe. Use default job executions...
 $services = $env:PROJECT_PATH_ROOT + "\" `
 		+ $env:PROJECT_PATH_AUTOMATA + "\" `
 		+ "services\archive\zip.ps1"
@@ -41,7 +60,9 @@ $services = $env:PROJECT_PATH_ROOT + "\" `
 . $services
 
 
-# (1) safety checking control surfaces
+
+
+# (3) safety checking control surfaces
 $process = 7ZIP-Setup
 if ($process -ne 0) {
 	OS-Print-Status error "failed to setup 7Zip dependency."
@@ -60,7 +81,7 @@ OS-Print-Status info "7Zip command is now available at: $process"
 
 
 
-# (2) clean up destination path
+# (4) clean up destination path
 $dest = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_PKG
 OS-Print-Status info "remaking package directory: $dest"
 $process = FS-Remake-Directory $dest
@@ -72,7 +93,7 @@ if ($process -ne 0) {
 
 
 
-# (3) begin packaging
+# (5) begin packaging
 foreach ($i in Get-ChildItem -Path "$env:PROJECT_PATH_ROOT\$env:PROJECT_PATH_BUILD") {
 	if (FS-IsDirectory $i) {
 		continue
@@ -80,7 +101,7 @@ foreach ($i in Get-ChildItem -Path "$env:PROJECT_PATH_ROOT\$env:PROJECT_PATH_BUI
 	OS-Print-Status info "detected $env:PROJECT_PATH_ROOT\$env:PROJECT_PATH_BUILD\$i"
 
 
-	# (3.1) parse build candidate
+	# (5.1) parse build candidate
 	$TARGET_FILENAME = Split-Path -Leaf $i
 	$TARGET_FILENAME = $TARGET_FILENAME -replace `
 				".*${PROJECT_PATH_ROOT}\${PROJECT_PATH_BUILD}\"
@@ -96,13 +117,13 @@ foreach ($i in Get-ChildItem -Path "$env:PROJECT_PATH_ROOT\$env:PROJECT_PATH_BUI
 	}
 
 
-	# (3.2) archive into tar.xz / zip package
+	# (5.2) archive into tar.xz / zip package
 	$src = "archive_$TARGET_FILENAME_$TARGET_OS-$TARGET_ARCH"
 	$src = "$env:PROJECT_PATH_ROOT\$env:PROJECT_PATH_TEMP\$src"
 	OS-Print-Status info "processing $src for $TARGET_OS-$TARGET_ARCH"
 	$dest = "$env:PROJECT_PATH_ROOT\$env:PROJECT_PATH_PKG"
 
-	# (3.2.1) copy necessary complimentary files to the package
+	# (5.2.1) copy necessary complimentary files to the package
 	OS-Print-Status info "remaking workspace directory: $src"
 	$process = FS-Remake-Directory $src
 	if ($process -ne 0) {
@@ -134,7 +155,7 @@ foreach ($i in Get-ChildItem -Path "$env:PROJECT_PATH_ROOT\$env:PROJECT_PATH_BUI
 		exit 1
 	}
 
-	# (3.2.2) begin archiving to .tar.xz/.zip
+	# (5.2.2) begin archiving to .tar.xz/.zip
 	switch ($TARGET_OS) {
 	"windows" {
 		$file="$src\$TARGET_FILENAME"
@@ -169,7 +190,7 @@ foreach ($i in Get-ChildItem -Path "$env:PROJECT_PATH_ROOT\$env:PROJECT_PATH_BUI
 	}}
 
 
-	# (3.3) report task verdict
+	# (5.3) report task verdict
 	OS-Print-Status success ""
 }
 exit 0

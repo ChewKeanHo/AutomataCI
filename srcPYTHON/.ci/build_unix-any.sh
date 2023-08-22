@@ -20,25 +20,21 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
+
 
 
 
 # (1) safety checking control surfaces
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/common.sh"
-CheckPythonIsAvailable
+PYTHON::is_available
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-ActivateVirtualEnvironment
+PYTHON::activate_venv
 if [ $? -ne 0 ]; then
-        return 1
-fi
-
-
-if [ -z "$(type -t pyinstaller)" ]; then
-        >&2 printf "[ ERROR ] - Missing pyinstaller comamnd. Did you run 'Prepare'?\n"
         return 1
 fi
 
@@ -46,15 +42,33 @@ fi
 
 
 # (2) run build services
+compiler="pyinstaller"
+OS::print_status info "checking ${compiler} availability...\n"
+if [ -z "$(type -t "$compiler")" ]; then
+        OS::print_status error "missing ${compiler} command.\n"
+        return 1
+fi
+
+
+file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
+OS::print_status info "building output file: ${file}\n"
 pyinstaller --noconfirm \
         --onefile \
         --clean \
         --distpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}" \
         --workpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}" \
         --specpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
-        --name "${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}" \
+        --name "$file" \
         --hidden-import=main \
         "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/main.py"
 if [ $? -ne 0 ]; then
+        OS::print_status error "build failed.\n"
         return 1
 fi
+
+
+
+
+# (3) report successful build status
+OS::print_status success "\n\n"
+return 0

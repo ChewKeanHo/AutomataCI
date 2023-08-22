@@ -9,6 +9,44 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+function OS-Is-Command-Available {
+	param (
+		[string] $Command
+	)
+
+	$program = Get-Command $Command -ErrorAction SilentlyContinue
+	if ($program) {
+		return 0
+	}
+
+	return 1
+}
+
+function OS-Exec {
+	param (
+		[string]$Command,
+		[string]$Arguments
+	)
+
+	# get program
+	$program = Get-Command $Command -ErrorAction SilentlyContinue
+	if (-not ($program)) {
+		return 1
+	}
+
+	# execute command
+	$process = Start-Process -Wait `
+				-FilePath "$program" `
+				-NoNewWindow `
+				-ArgumentList "$Arguments" `
+				-PassThru
+	if ($process.ExitCode -eq 0) {
+		return 0
+	}
+
+	return 1
+}
+
 function OS-Print-Status {
 	param (
 		[string]$Mode,

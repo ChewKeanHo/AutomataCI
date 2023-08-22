@@ -20,14 +20,23 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+
 
 
 
 # (1) execute tech-specific CI job
-recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/build_unix-any.sh"
+recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
+recipe="${recipe}/build_unix-any.sh"
 if [ -f "$recipe" ]; then
         . "$recipe"
         return $?
 fi
->&2 printf "[ ERROR ] Missing ${recipe}\n"
-return 1
+
+
+
+
+# (2) use default response since there is no localized jobs
+OS::print_status info "Hello from AutomataCI - Build Recipe!"
+return 0

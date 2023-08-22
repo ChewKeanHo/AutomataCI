@@ -25,18 +25,26 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 # (1) safety checking control surfaces
 $services = $env:PROJECT_PATH_ROOT + "\" `
 		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\python\common.ps1"
+		+ "services\io\os.ps1"
+. $services
+
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\compilers\python.ps1"
 . $services
 
 
-$process = Check-Python-Available
+OS-Print-Status info "checking python availability..."
+$process = PYTHON-Is-Available
 if ($process -ne 0) {
+	OS-Print-Status error "missing python intepreter."
 	exit 1
 }
 
-
-$process = Activate-Virtual-Environment
+OS-Print-Status info "activating python venv..."
+$process = PYTHON-Activate-VENV
 if ($process -ne 0) {
+	OS-Print-Status error "activation failed."
 	exit 1
 }
 
@@ -44,35 +52,35 @@ if ($process -ne 0) {
 
 
 # (2) run build service
-$program = Get-Command pyinstaller -ErrorAction SilentlyContinue
-if (-not ($program)) {
-	Write-Error "[  FAILED  ] missing pyinstaller."
-	return 1
+OS-Print-Status info "checking pyinstaller availability..."
+$compiler = "pyinstaller"
+$process = OS-Is-Command-Available $compiler
+if ($process -ne 0) {
+	OS-Print-Status error "missing $compiler command."
+	exit 1
 }
 
 
-Write-Host "[  INFO  ] Building output..."
+$file = $env:PROJECT_SKU + "_" + $env:PROJECT_OS + "-" + $env:PROJECT_ARCH
+OS-Print-Status info "building output file: $file"
 $argument = "--noconfirm " `
 	+ "--onefile " `
 	+ "--clean " `
 	+ "--distpath `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_BUILD + "`" " `
 	+ "--workpath `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_TEMP + "`" " `
 	+ "--specpath `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "`" " `
-	+ "--name `"" + $env:PROJECT_SKU + "_" + $env:PROJECT_OS + "-" + $env:PROJECT_ARCH + "`" "`
+	+ "--name `"" + $file + "`" " `
 	+ "--hidden-import=main " `
 	+ "`"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\main.py" + "`""
-
-$process = Start-Process -Wait `
-			-FilePath "$program" `
-			-NoNewWindow `
-			-ArgumentList "$argument" `
-			-PassThru
-if ($process.ExitCode -ne 0) {
-	Write-Error "[  FAILED  ]"
+$process = OS-Exec $compiler $argument
+if ($process -ne 0) {
+	OS-Print-Status error "build failed."
 	exit 1
 }
 
-Write-Host "[ SUCCESS ]"
 
 
+
+# (3) report successful build status
+OS-Print-Status success "\n"
 exit 0

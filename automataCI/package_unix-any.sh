@@ -17,46 +17,62 @@
 # (0) initialize
 if [ "$PROJECT_PATH_ROOT" = "" ]; then
         >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
-        exit 1
+        return 1
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+
+
+
+
+# (1) execute tech-specific CI job
+recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
+recipe="${recipe}/package_unix-any.sh"
+if [ -f "$recipe" ]; then
+        . "$recipe"
+        return $?
+fi
+
+
+
+
+# (2) no custom job recipe. Use default job executions...
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/zip.sh"
 
 
 
 
-# (1) safety checking control surfaces
+# (3) safety checking control surfaces
 TARXZ::is_available
 if [ $? -ne 0 ]; then
         OS::print_status error "'tar' command is not available.\n"
-        exit 1
+        return 1
 fi
 
 ZIP::is_available
 if [ $? -ne 0 ]; then
         OS::print_status error "'zip' command is not available.\n"
-        exit 1
+        return 1
 fi
 
 
 
 
-# (2) clean up destination path
+# (4) clean up destination path
 dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
 OS::print_status info "remaking package directory: $dest\n"
 FS::remake_directory "$dest"
 if [ $? -ne 0 ]; then
         OS::print_status error "remake failed.\n"
-        exit 1
+        return 1
 fi
 
 
 
 
-# (3) begin packaging
+# (5) begin packaging
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         if [ -d "$i" ]; then
                 continue
@@ -64,7 +80,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         OS::print_status info "detected ${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${i}\n"
 
 
-        # (3.1) parse build candidate
+        # (5.1) parse build candidate
         TARGET_FILENAME="${i##*${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/}"
         TARGET_FILENAME="${TARGET_FILENAME%.*}"
         TARGET_OS="${TARGET_FILENAME##*_}"
@@ -78,18 +94,18 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         fi
 
 
-        # (3.2) archive into tar.xz / zip package
+        # (5.2) archive into tar.xz / zip package
         src="archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}"
         src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${src}"
         OS::print_status info "processing ${src} for ${TARGET_OS}-${TARGET_ARCH}\n"
         dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
 
-        # (3.2.1) copy necessary complimentary files to the package
+        # (5.2.1) copy necessary complimentary files to the package
         OS::print_status info "remaking workspace directory $src\n"
         FS::remake_directory "$src"
         if [ $? -ne 0 ]; then
                 OS::print_status error "remake failed.\n"
-                exit 1
+                return 1
         fi
 
         file="$i"
@@ -97,7 +113,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         FS::copy_file "$file" "${src}/${TARGET_FILENAME}"
         if [ $? -ne 0 ]; then
                 OS::print_status error "copy failed.\n"
-                exit 1
+                return 1
         fi
 
         file="${PROJECT_PATH_ROOT}/USER-GUIDES-EN.pdf"
@@ -105,7 +121,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         FS::copy_file "$file" "${src}/."
         if [ $? -ne 0 ]; then
                 OS::print_status error "copy failed.\n"
-                exit 1
+                return 1
         fi
 
         file="${PROJECT_PATH_ROOT}/LICENSE-EN.pdf"
@@ -113,11 +129,10 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         FS::copy_file "$file" "${src}/."
         if [ $? -ne 0 ]; then
                 OS::print_status error "copy failed.\n"
-                exit 1
+                return 1
         fi
 
-
-        # (3.2.2) archive accordingly
+        # (5.2.2) archive accordingly
         case "$TARGET_OS" in
         windows)
                 file="${src}/${TARGET_FILENAME}"
@@ -125,7 +140,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 FS::rename "${file}" "${file}.exe"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "packaging failed.\n"
-                        exit 1
+                        return 1
                 fi
 
                 dest="${dest}/${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.zip"
@@ -133,7 +148,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 ZIP::create "$src" "$dest"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "packaging failed.\n"
-                        exit 1
+                        return 1
                 fi
                 ;;
         *)
@@ -142,13 +157,13 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 TARXZ::create "$src" "$dest"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "packaging failed.\n"
-                        exit 1
+                        return 1
                 fi
                 ;;
         esac
 
 
-        # (3.3) report task verdict
+        # (5.3) report task verdict
         OS::print_status success "\n\n"
 done
-exit 0
+return 0

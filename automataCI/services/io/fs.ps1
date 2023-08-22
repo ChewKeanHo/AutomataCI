@@ -30,6 +30,14 @@ function FS-IsDirectory {
 	return Test-Path -Path $Subject -PathType Container
 }
 
+function FS-IsExists {
+	param (
+		[string]$Subject
+	)
+
+	return Test-Path -Path $Subject
+}
+
 function FS-List-All {
 	param (
 		[string]$Target
