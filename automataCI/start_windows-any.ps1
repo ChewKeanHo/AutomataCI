@@ -19,11 +19,34 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         exit 1
 }
 
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\io\os.ps1"
+. $services
+
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\io\fs.ps1"
+. $services
 
 
 
-# (1) execute tech-specific CI job
+
+# (1) execute tech specific CI jobs if available
 $recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
 $recipe = "$recipe\start_windows-any.ps1"
-. $recipe
-exit $process.ExitCode
+$process = FS-IsExists $recipe
+if ($process) {
+	. $recipe
+	if ($?) {
+		exit 0
+	}
+	exit 1
+}
+
+
+
+
+# (2) use default response since no localized CI jobs
+OS-Print-Status info "Hello from AutomataCI - Start Recipe!"
+exit 0

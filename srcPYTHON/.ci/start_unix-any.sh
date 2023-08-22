@@ -20,19 +20,31 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
 
 
 
-# (1) run start service
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/common.sh"
-CheckPythonIsAvailable
+
+# (1) safety checking control surfaces
+OS::print_status info "checking python|python3 availability...\n"
+PYTHON::is_available
 if [ $? -ne 0 ]; then
+        OS::print_status error "missing python|python3 intepreter..\n"
         return 1
 fi
 
 
-ActivateVirtualEnvironment
+OS::print_status info "activating python venv...\n"
+PYTHON::activate_venv
 if [ $? -ne 0 ]; then
+        OS::print_status error "activation failed.\n"
         return 1
 fi
+
+
+
+
+# (2) report successful status
+OS::print_status success "\n\n"
 return 0

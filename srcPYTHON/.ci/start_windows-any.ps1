@@ -22,25 +22,35 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# (1) run start service
-$services = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_AUTOMATA + "\services"
+# (1) safety checking control surfaces
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\io\os.ps1"
+. $services
+
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\compilers\python.ps1"
+. $services
 
 
-
-
-# (2) python is setup properly
-. ("$services" + "\python\common.ps1")
-$process = Check-Python-Available
+OS-Print-Status info "checking python availability..."
+$process = PYTHON-Is-Available
 if ($process -ne 0) {
+	OS-Print-Status error "missing python intepreter."
+	exit 1
+}
+
+OS-Print-Status info "activating python venv..."
+$process = PYTHON-Activate-VENV
+if ($process -ne 0) {
+	OS-Print-Status error "activation failed."
 	exit 1
 }
 
 
 
 
-# (3) start engine
-$process = Activate-Virtual-Environment
-if ($process -ne 0) {
-	exit 1
-}
+# (2) report successful status
+OS-Print-Status success ""
 exit 0
