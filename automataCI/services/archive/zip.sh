@@ -21,30 +21,31 @@ ZIP::is_available() {
 
 
 ZIP::create() {
-        src_path="$1"
-        dest_path="$2"
-        pwd_path="$PWD"
+        __src_path="$1"
+        __dest_path="$2"
+        __pwd_path="$PWD"
 
 
         # check commmand availability
         ZIP::is_available
         if [ $? -ne 0 ]; then
-                unset dest_path src_path pwd_path
+                unset __dest_path __src_path __pwd_path
                 return 1
         fi
 
 
         # archive now
-        cd "$src_path"
-        zip -9 -r "$dest_path" .
+        cd "$__src_path"
+        zip -9 -r "$__dest_path" .
         if [ $? -ne 0 ]; then
-                unset dest_path src_path pwd_path
+                cd "$__pwd_path"
+                unset __dest_path __src_path __pwd_path
                 return 1
         fi
-        cd "$pwd_path"
+        cd "$__pwd_path"
 
 
         # successful clean up
-        unset dest_path src_path pwd_path
+        unset __dest_path __src_path __pwd_path
         return 0
 }

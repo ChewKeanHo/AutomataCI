@@ -38,17 +38,19 @@ PYTHON::activate_venv() {
                 return 0
         fi
 
-        location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
-        location="${location}/bin/activate"
-        if [ ! -f "$location" ]; then
+        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
+        __location="${__location}/bin/activate"
+        if [ ! -f "$__location" ]; then
+                unset __location
                 return 1
         fi
 
-        . "$location"
+        . "$__location"
+        unset __location
+
         if [ ! -z "$VIRTUAL_ENV" ] ; then
                 return 0
         fi
-
         return 1
 }
 

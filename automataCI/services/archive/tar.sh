@@ -25,22 +25,22 @@ TARXZ::is_available() {
 
 
 TARXZ::create() {
-        src_path="$1"
-        dest_path="$2"
-        pwd_path="$PWD"
+        __src_path="$1"
+        __dest_path="$2"
+        __pwd_path="$PWD"
 
 
         # create tar.xz archive
-        cd "$src_path"
-        XZ_OPT='-9' tar -cvJf "$dest_path" .
+        cd "$__src_path"
+        XZ_OPT='-9' tar -cvJf "$__dest_path" .
         if [ $? -ne 0 ]; then
-                unset src_path dest_path pwd_path
+                unset __src_path __dest_path __pwd_path
                 return 1
         fi
-        cd "$pwd_path"
+        cd "$__pwd_path"
 
 
         # successful clean up
-        unset src_path dest_path pwd_path
+        unset __src_path __dest_path __pwd_path
         return 0
 }

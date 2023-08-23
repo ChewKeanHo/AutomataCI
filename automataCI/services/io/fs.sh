@@ -105,7 +105,6 @@ FS::rename() {
 FS::make_directory() {
         __target_path="$1"
 
-
         mkdir -p "$__target_path"
         if [ $? -eq 0 ]; then
                 unset __target_path
