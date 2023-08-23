@@ -22,18 +22,39 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# (1) run setup service
-$services = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_AUTOMATA + "\services"
+# (1) safety checking control surfaces
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\io\os.ps1"
+. $services
+
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\compilers\python.ps1"
+. $services
 
 
-# (1.1) check Python availability
-. ("$services" + "\python\common.ps1")
-$process = Check-Python-Available
+OS-Print-Status info "checking python availability..."
+$process = PYTHON-Is-Available
 if ($process -ne 0) {
+	OS-Print-Status error "missing python intepreter."
 	exit 1
 }
 
-# (1.2) setup Python virtual environment
-. ("$services" + "\python\setup.ps1")
-$process = Setup-Python
-exit $process
+
+
+
+# (2) run services
+OS-Print-Status info "setup python venv..."
+$process = PYTHON-Setup-VENV
+if ($process -ne 0) {
+	OS-Print-Status error "setup failed."
+	exit 1
+}
+
+
+
+
+# (3) report successful status
+OS-Print-Status success ""
+exit 0

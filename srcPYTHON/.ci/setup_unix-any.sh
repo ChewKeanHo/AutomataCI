@@ -15,21 +15,39 @@
 
 
 # (0) initialize
-if [ -z "$PROJECT_PATH_ROOT" ]; then
+if [ "$PROJECT_PATH_ROOT" == "" ]; then
         >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
         return 1
 fi
 
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
 
 
 
-# (1) run setup service
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/common.sh"
-CheckPythonIsAvailable
+
+# (1) safety checking control surfaces
+OS::print_status info "checking python|python3 availability...\n"
+PYTHON::is_available
 if [ $? -ne 0 ]; then
+        OS::print_status error "missing python|python3 intepreter..\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/python/setup.sh"
-SetupPython
-return $?
+
+
+
+# (2) run services
+OS::print_status info "setup python venv...\n"
+PYTHON::setup_venv
+if [ $? -ne 0 ]; then
+        OS::print_status error "setup failed.\n"
+        return 1
+fi
+
+
+
+
+# (3) report successful status
+OS::print_status success "\n\n"
+return 0

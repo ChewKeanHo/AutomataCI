@@ -54,3 +54,52 @@ function PYTHON-Activate-VENV {
 
 	return 1
 }
+
+function PYTHON-Setup-VENV {
+	if (-not $env:PROJECT_PATH_ROOT) {
+		return 1
+	}
+
+	if (-not $env:PROJECT_PATH_TOOLS) {
+		return 1
+	}
+
+	if (-not $env:PROJECT_PATH_PYTHON_ENGINE) {
+		return 1
+	}
+
+	$program = Get-Command python -ErrorAction SilentlyContinue
+	if (-not ($program)) {
+		return 1
+	}
+
+	$location = $env:PROJECT_PATH_ROOT + "\" `
+			+ $env:PROJECT_PATH_TOOLS + "\" `
+			+ $env:PROJECT_PATH_PYTHON_ENGINE
+
+
+	# check if the repo is already established...
+	if (Test-Path "$location\Scripts\Activate.ps1") {
+		return 0
+	}
+
+
+	# it's a clean repo. Start setting up virtual environment...
+	$process = Start-Process -Wait `
+				-FilePath "$program" `
+				-NoNewWindow `
+				-ArgumentList "-m venv `"$location`"" `
+				-PassThru
+	if ($process.ExitCode -ne 0) {
+		return 1
+	}
+
+
+	# last check
+	if (Test-Path "$location\Scripts\Activate.ps1") {
+		return 0
+	}
+
+
+	return 1
+}

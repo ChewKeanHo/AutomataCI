@@ -15,19 +15,38 @@
 
 # (0) initialize
 IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please start from ci.cmd instead!\n"
+        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
         exit 1
+}
+
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\io\os.ps1"
+. $services
+
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\io\fs.ps1"
+. $services
+
+
+
+
+# (1) execute tech specific CI jobs if available
+$recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
+$recipe = "$recipe\setup_windows-any.ps1"
+$process = FS-IsExists $recipe
+if ($process) {
+	. $recipe
+	if ($?) {
+		exit 0
+	}
+	exit 1
 }
 
 
 
 
-# (1) execute tech-specific CI job
-$recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
-$recipe = "$recipe\setup_windows-any.ps1"
-$process = Start-Process -Wait `
-			-FilePath "powershell.exe" `
-			-NoNewWindow `
-			-ArgumentList "-File `"$recipe`"" `
-			-PassThru
-exit $process.ExitCode
+# (2) use default response since no localized CI jobs
+OS-Print-Status info "Hello from AutomataCI - Setup Recipe!"
+exit 0

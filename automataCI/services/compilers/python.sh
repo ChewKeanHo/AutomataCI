@@ -51,3 +51,54 @@ PYTHON::activate_venv() {
 
         return 1
 }
+
+PYTHON::setup_venv() {
+        if [ -z "$PROJECT_PATH_ROOT" ]; then
+                return 1
+        fi
+
+        if [ -z "$PROJECT_PATH_TOOLS" ]; then
+                return 1
+        fi
+
+        if [ -z "$PROJECT_PATH_PYTHON_ENGINE" ]; then
+                return 1
+        fi
+
+        __program=""
+        if [ ! -z "$(type -t python3)" ]; then
+                __program="python3"
+        elif [ ! -z "$(type -t python)" ]; then
+                __program="python"
+        else
+                return 1
+        fi
+
+        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
+        mkdir -p "$__location"
+
+
+        # check if the repo is already established...
+        if [ -f "${__location}/bin/activate" ]; then
+                unset __location __program
+                return 0
+        fi
+
+
+        # it's a clean repo. Start setting up virtual environment...
+        $__program -m venv "$__location"
+        if [ $? -ne 0 ]; then
+                unset __location __program
+                return 1
+        fi
+
+
+        # last check
+        if [ -f "${__location}/bin/activate" ]; then
+                unset __location __program
+                return 0
+        fi
+
+        unset __location __program
+        return 1
+}
