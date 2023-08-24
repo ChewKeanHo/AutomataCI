@@ -1,9 +1,17 @@
 # AutomataCI - Project Configurations Data File
 ################################################################################
-# WARNING: STRICTLY ONLY THIS PATTERN IS ALLOWED:                              #
+# WARNING: STRICTLY ONLY THESE PATTERN ARE ALLOWED:                            #
+#                                                                              #
 #             'key' = 'value: string type' # 1 line tailing comment            #
-#          Both Batch and POSIX Shell do not have sophisicated functions.      #
-#          DO NOT go too creative with TOML!                                   #
+#                                                                              #
+#                                 OR                                           #
+#                                                                              #
+#             # full line comment                                              #
+#                                                                              #
+#          Both Batch and POSIX Shell do not have sophisicated functions       #
+#          (e.g. POSIX Shell does not have array at all!).                     #
+#                                                                              #
+#          DO NOT get too creative with TOML!                                  #
 ################################################################################
 
 
@@ -90,6 +98,12 @@ PROJECT_PATH_CI = ".ci"
 PROJECT_PATH_PKG = "pkg"
 
 
+# PROJECT_PATH_RESOURCES
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's main non-code generative materials directory.
+PROJECT_PATH_RESOURCES = "resources"
+
+
 
 
 ######################
@@ -98,11 +112,78 @@ PROJECT_PATH_PKG = "pkg"
 # PROJECT_PYTHON
 # This is a reserved variable used in GitHub CI workflow where the GitHub CI
 # will automatically determines the requirement for setting up python in the
-# native OSes.
-# PROJECT_PYTHON = '...' # Reserved - used in GitHub CI workflow.
+# native OSes before running any job.
+# PROJECT_PYTHON = '...' # Reserved - set by GitHub CI workflow.
 
 
 # PROJECT_PATH_PYTHON_ENGINE
 # This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
 # setting up venv location.
 PROJECT_PATH_PYTHON_ENGINE = "python-engine"
+
+
+
+
+##########################
+# DISTRIBUTION ECOSYSTEM #
+##########################
+# PROJECT_CONTACT_NAME
+# Entity's full name for inquiries.
+PROJECT_CONTACT_NAME = "Your Legal Full Name Here"
+
+
+# PROJECT_CONTACT_EMAIL
+# Entity's email channel for email communications.
+PROJECT_CONTACT_EMAIL = "contact@youremail.example"
+
+
+# PROJECT_CONTACT_WEBSITE
+# Entity's website channel for sourcing information.
+PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
+
+
+# PROJECT_DEBIAN_IS_NATIVE
+# Flag to determine the project is Debian natively sponsored package. Usually
+# is false.
+# Only accept: "true/false"
+PROJECT_DEBIAN_IS_NATIVE = "false"
+
+
+# PROJECT_DEBIAN_MANUALLY_ASSEMBLED
+# Flag to determine the .deb data package is manually assembled including the
+# compulsory copyright, lintian, man pages, and changelog files.
+# More info: https://www.debian.org/doc/debian-policy/index.html
+#
+# Only accept: "true/false"
+#
+# Default is AutomataCI will automatically create those compulsory files using
+# placeholder presentations.
+PROJECT_DEBIAN_MANUALLY_ASSEMBLED = "false"
+
+
+# PROJECT_DEBIAN_DISTRIBUTION
+# The distribution series for compiling the .deb pakage changelog. See this page
+# for more info:
+# https://www.debian.org/doc/debian-policy/ch-controlfields.html#id25
+# https://www.debian.org/doc/debian-policy/ch-source.html#debian-changelog-debian-changelog
+#
+# Strictly of the following values:
+#   (1) stable = for stable branches (e.g. 'main')
+#   (2) unstable = for next release branches (e.g 'unstable', 'staging', or 'next').
+#   (3) experimental = for latest branches (e.g 'experimental' or 'edge').
+PROJECT_DEBIAN_DISTRIBUTION = "stable"
+
+
+# PROJECT_DEBIAN_URGENCY
+# The urgency value for compiling the .deb pakage changelog. See this page
+# for more info:
+# https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-urgency
+# https://www.debian.org/doc/debian-policy/ch-source.html#debian-changelog-debian-changelog
+#
+# Strictly of the following values:
+#   (1) low
+#   (2) medium
+#   (3) high           = for user diversions
+#   (4) emergency
+#   (5) critical
+PROJECT_DEBIAN_URGENCY = "low"

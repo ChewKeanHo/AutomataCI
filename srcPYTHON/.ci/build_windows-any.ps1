@@ -19,10 +19,6 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         exit 1
 }
 
-
-
-
-# (1) safety checking control surfaces
 $services = $env:PROJECT_PATH_ROOT + "\" `
 		+ $env:PROJECT_PATH_AUTOMATA + "\" `
 		+ "services\io\os.ps1"
@@ -33,6 +29,21 @@ $services = $env:PROJECT_PATH_ROOT + "\" `
 		+ "services\compilers\python.ps1"
 . $services
 
+$services = $env:PROJECT_PATH_ROOT + "\" `
+		+ $env:PROJECT_PATH_AUTOMATA + "\" `
+		+ "services\compilers\changelog.ps1"
+. $services
+
+
+
+
+# (1) safety checking control surfaces
+OS-Print-Status info "checking changelog availability..."
+$process = CHANGELOG-Is-Available
+if ($process -ne 0) {
+	OS-Print-Status error "changelog builder is unavailable."
+	exit 1
+}
 
 OS-Print-Status info "checking python availability..."
 $process = PYTHON-Is-Available
@@ -73,6 +84,34 @@ $argument = "--noconfirm " `
 	+ "--hidden-import=main " `
 	+ "`"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\main.py" + "`""
 $process = OS-Exec $compiler $argument
+if ($process -ne 0) {
+	OS-Print-Status error "build failed."
+	exit 1
+}
+
+
+
+
+# (3) build changelog entries
+$file = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_RESOURCES + "\changelog"
+OS-Print-Status info "building $env:PROJECT_VERSION data changelog entry..."
+$process = CHANGELOG-Build-Data-Entry $file ""
+if ($process -ne 0) {
+	OS-Print-Status error "build failed."
+	exit 1
+}
+
+
+OS-Print-Status info "building $env:PROJECT_VERSION deb changelog entry..."
+$process = CHANGELOG-Build-DEB-Entry `
+	$file `
+	"" `
+	$env:PROJECT_SKU `
+	$env:PROJECT_DEBIAN_DISTRIBUTION `
+	$env:PROJECT_DEBIAN_URGENCY `
+	$env:PROJECT_CONTACT_NAME `
+	$env:PROJECT_CONTACT_EMAIL `
+	(Get-Date -Format 'R')
 if ($process -ne 0) {
 	OS-Print-Status error "build failed."
 	exit 1

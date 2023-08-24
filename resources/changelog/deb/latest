@@ -1,0 +1,24 @@
+my-project (latest) stable; urgency=low
+
+  * resources: added developer engineering spec template
+  * root: removed unused srcDEFAULT
+  * CONFIG.toml: clean up and finalize CONFIG.toml design
+  * automataCI: cleaned up and finalized services APIs
+  * automataCI: refactored setup job recipe
+  * automataCI: refactored start job recipe
+  * automataCI: refactored prepare job recipe
+  * automataCI: refactored test job recipe
+  * automataCI: refactored build job recipe
+  * root: rebrand automata into automataCI
+  * root: refactored nativeCI for a standardized library
+  * root: added tar.xz/zip packaging CI job recipe
+  * root: added python build CI job recipe
+  * root: added python test CI job recipe
+  * root: added python prepare CI job recipe
+  * root: added Python start CI job recipe
+  * root: added python CI setup job
+  * root: enhanced CI to be src-specific executable
+  * root: ported python starter artifacts
+  * .github: added experimental branch into CI
+
+-- Your Legal Full Name Here <contact@youremail.example>  Thu, 24 Aug 2023 12:42:23 +0800

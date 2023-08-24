@@ -25,6 +25,7 @@ bin/
 tmp/
 pkg/
 tools/
+resources/changelog/*/.*
 
 #####################
 # LibreOffice
