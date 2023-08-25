@@ -83,7 +83,7 @@ fi
 # (3) build changelog entries
 file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog"
 OS::print_status info "building ${PROJECT_VERSION} data changelog entry...\n"
-CHANGELOG::build_data_entry "${file}" ""
+CHANGELOG::build_data_entry "$file"
 if [ $? -ne 0 ]; then
         OS::print_status error "build failed.\n"
         return 1
@@ -93,7 +93,7 @@ fi
 OS::print_status info "building ${PROJECT_VERSION} deb changelog entry...\n"
 CHANGELOG::build_deb_entry \
         "$file" \
-        "" \
+        "$PROJECT_VERSION" \
         "$PROJECT_SKU" \
         "$PROJECT_DEBIAN_DISTRIBUTION" \
         "$PROJECT_DEBIAN_URGENCY" \

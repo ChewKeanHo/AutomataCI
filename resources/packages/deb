@@ -1,0 +1,13 @@
+Package: {{ AUTO }}
+Version: {{ AUTO }}
+Architecture: {{ AUTO }}
+Maintainer: {{ AUTO }}
+Installed-Size: {{ AUTO }}
+Section: devel
+Priority: optional
+Homepage: {{ AUTO }}
+Description: {{ AUTO }}
+ Your longer description here. New empty line is separated by period shown
+ below.
+ .
+ This is a new line.

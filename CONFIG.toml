@@ -13,10 +13,6 @@
 #                                                                              #
 #          DO NOT get too creative with TOML!                                  #
 ################################################################################
-
-
-
-
 ####################
 # PROJECT METADATA #
 ####################
@@ -30,6 +26,11 @@ PROJECT_SKU = "my-project"
 # This is the name of the product used in documentation, marketing addresses
 # etc only. For programming purposes, PROJECT_SKU is used instead.
 PROJECT_NAME = "My Project"
+
+# PROJECT_PITCH
+# A short elevator pitch about the project used as a short description. Max
+# Max: 60 characters.
+PROJECT_PITCH = "To Do Things Seamlessly Easy."
 
 # PROJECT_VERSION
 # This is to declare the current project's version. It can be used for
@@ -47,7 +48,7 @@ PROJECT_VERSION = "0.0.1"
 # PROJECT_PATH_ROOT
 # This is an absolute pathing to locate the root directory of the project
 # repository.
-# PROJECT_PATH_ROOT = '...' # determined by ci.cmd automatically.
+# PROJECT_PATH_ROOT = '...' # Reserved - determined by ci.cmd automatically.
 
 
 # PROJECT_PATH_AUTOMATA
@@ -149,18 +150,6 @@ PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
 PROJECT_DEBIAN_IS_NATIVE = "false"
 
 
-# PROJECT_DEBIAN_MANUALLY_ASSEMBLED
-# Flag to determine the .deb data package is manually assembled including the
-# compulsory copyright, lintian, man pages, and changelog files.
-# More info: https://www.debian.org/doc/debian-policy/index.html
-#
-# Only accept: "true/false"
-#
-# Default is AutomataCI will automatically create those compulsory files using
-# placeholder presentations.
-PROJECT_DEBIAN_MANUALLY_ASSEMBLED = "false"
-
-
 # PROJECT_DEBIAN_DISTRIBUTION
 # The distribution series for compiling the .deb pakage changelog. See this page
 # for more info:
@@ -169,7 +158,7 @@ PROJECT_DEBIAN_MANUALLY_ASSEMBLED = "false"
 #
 # Strictly of the following values:
 #   (1) stable = for stable branches (e.g. 'main')
-#   (2) unstable = for next release branches (e.g 'unstable', 'staging', or 'next').
+#   (2) unstable OR testing = for next release branches (e.g 'staging', or 'next').
 #   (3) experimental = for latest branches (e.g 'experimental' or 'edge').
 PROJECT_DEBIAN_DISTRIBUTION = "stable"
 

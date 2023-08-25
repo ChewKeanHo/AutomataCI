@@ -1,3 +1,4 @@
+root: added changelog entry generator function
 resources: added developer engineering spec template
 root: removed unused srcDEFAULT
 CONFIG.toml: clean up and finalize CONFIG.toml design

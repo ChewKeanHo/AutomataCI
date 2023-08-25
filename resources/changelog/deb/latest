@@ -1,5 +1,6 @@
-my-project (latest) stable; urgency=low
+my-project (0.0.1) stable; urgency=low
 
+  * root: added changelog entry generator function
   * resources: added developer engineering spec template
   * root: removed unused srcDEFAULT
   * CONFIG.toml: clean up and finalize CONFIG.toml design
@@ -21,4 +22,4 @@ my-project (latest) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Thu, 24 Aug 2023 12:42:23 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Fri, 25 Aug 2023 12:02:45 +0800
