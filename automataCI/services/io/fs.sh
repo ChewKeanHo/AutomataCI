@@ -11,15 +11,24 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 FS::copy_file() {
-        __src_path="$1"
-        __dest_path="$2"
+        __source="$1"
+        __destination="$2"
 
-        cp "$__src_path" "$__dest_path"
+        # validate input
+        if [ -z "$__source" ] || [ -z "$__destination" ]; then
+                unset __source __destination
+                return 1
+        fi
+
+        # perform copying
+        cp "$__source" "$__destination"
         if [ $? -eq 0 ]; then
-                unset __src_path __dest_path
+                unset __source __destination
                 return 0
         fi
-        unset __src_path __dest_path
+
+        # report status
+        unset __source __destination
         return 1
 }
 
@@ -27,14 +36,19 @@ FS::copy_file() {
 
 
 FS::is_directory() {
-        if [ -z "$1" ]; then
+        __subject="$1"
+
+        if [ -z "$__subject" ]; then
+                unset __subject
                 return 1
         fi
 
 
-        if [ -d "$1" ]; then
+        if [ -d "$__subject" ]; then
+                unset __subject
                 return 0
         fi
+
         return 1
 }
 
@@ -42,16 +56,23 @@ FS::is_directory() {
 
 
 FS::list_all() {
-        __target_path="$1"
+        __target="$1"
 
-        FS::is_directory "$__target_path"
-        if [ $? -ne 0 ]; then
-                unset __target_path
+        # validate target
+        if [ -z "$__target" ]; then
+                unset __target
                 return 1
         fi
 
-        ls -la "$__target_path"
-        unset __target_path
+        # perform listing
+        FS::is_directory "$__target"
+        if [ $? -ne 0 ]; then
+                unset __target
+                return 1
+        fi
+
+        ls -la "$__target"
+        unset __target
         return 0
 }
 
@@ -59,26 +80,37 @@ FS::list_all() {
 
 
 FS::remove() {
-        __target_path="$1"
+        __target="$1"
 
-        rm -rf "$__target_path"
-        if [ $? -ne 0 ]; then
-                unset __target_path
-                return 1
+        # validate target
+        if [ -z "$__target" ]; then
+                unset __target
         fi
 
-        unset __target_path
-        return 0
+        # perform remove
+        rm -rf "$__target"
+        __exit=$?
+        unset __target
+        if [ $__exit -ne 0 ]; then
+                __exit=1
+        fi
+        return $__exit
 }
 
 
 
 
 FS::remove_sliently() {
-        __target_path="$1"
+        __target="$1"
 
-        rm -rf "$__target_path" &> /dev/null
-        unset __target_path
+        # validate target
+        if [ -z "$__target" ]; then
+                unset __target
+        fi
+
+        # perform remove
+        rm -rf "$__target" &> /dev/null
+        unset __target
         return 0
 }
 
@@ -86,32 +118,55 @@ FS::remove_sliently() {
 
 
 FS::rename() {
-        __source_path="$1"
-        __target_path="$2"
+        __source="$1"
+        __target="$2"
 
-        mv "$__source_path" "$__target_path"
-        if [ $? -ne 0 ]; then
-                unset __source_path __target_path
+        # validate input
+        if [ -z "$__source" ] ||
+                [ -z "$__target" ] ||
+                [ ! -d "$__source" ] ||
+                [ ! -f "$__source" ] ||
+                [ -d "$__target" ] ||
+                [ -f "$__target" ]; then
+                unset __source __target
                 return 1
         fi
 
-        unset __source_path __target_path
-        return 0
+        # perform rename
+        mv "$__source" "$__target"
+        __exit=$?
+        if [ $__exit -eq 0 ]; then
+                __exit=0
+        else
+                __exit=1
+        fi
+
+        # report status
+        unset __source __target
+        return $__exit
 }
 
 
 
 
 FS::make_directory() {
-        __target_path="$1"
+        __target="$1"
 
-        mkdir -p "$__target_path"
-        if [ $? -eq 0 ]; then
-                unset __target_path
-                return 0
+        # validate target
+        if [ -z "$__target" ] || [ -d "$__target" ] || [ -f "$__target" ]; then
+                unset __target
+                return 1
         fi
 
-        unset __target_path
+        # perform create
+        mkdir -p "$__target"
+        __exit=$?
+        unset __target
+
+        # report status
+        if [ $__exit -eq 0 ]; then
+                return 0
+        fi
         return 1
 }
 

@@ -19,24 +19,17 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         exit 1
 }
 
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\io\os.ps1"
-. $services
-
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\io\fs.ps1"
-. $services
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 
 
 
 
 # (1) execute tech specific CI jobs if available
-$recipe = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\" + $env:PROJECT_PATH_CI
-$recipe = "$recipe\test_windows-any.ps1"
+$recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
+$recipe = "${recipe}\test_windows-any.ps1"
 $process = FS-IsExists $recipe
-if ($process) {
+if ($process -eq 0) {
 	. $recipe
 	if ($?) {
 		exit 0

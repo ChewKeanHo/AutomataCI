@@ -57,7 +57,7 @@ function OS-Exec {
 				-ArgumentList "$__arguments" `
 				-PassThru
 	$__exit = 0
-	if ($__process.ExitCode -eq 0) {
+	if ($__process.ExitCode -ne 0) {
 		$__exit = 1
 	}
 

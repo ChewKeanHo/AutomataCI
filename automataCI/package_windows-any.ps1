@@ -48,7 +48,7 @@ OS-Print-Status info "sourcing content assembling functions from the project..."
 $recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
 $recipe = "${recipe}\package_windows-any.ps1"
 $process = FS-IsExists $recipe
-if (-not ($process)) {
+if ($process -ne 0) {
 	OS-Print-Status error "sourcing failed - Missing file: ${recipe}"
 	exit 1
 }

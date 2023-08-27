@@ -37,7 +37,7 @@ PACKAGE::assemble_archive_content() {
         # copy main program
         OS::print_status info "copying $__target to $__directory\n"
         case "$__target_os" in
-        "windows")
+        windows)
                 FS::copy_file "$__target" "${__directory}/${PROJECT_SKU}.exe"
                 ;;
         *)
@@ -102,6 +102,8 @@ PACKAGE::assemble_deb_content() {
         __target_arch="$5"
 
 
+
+
         # copy main program
         # TIP: (1) usually is: usr/local/bin or usr/local/sbin
         #      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
@@ -118,6 +120,7 @@ PACKAGE::assemble_deb_content() {
                 return 1
         fi
 
+        __target="$1"
         FS::copy_file "$__target" "$__filepath"
         if [ $? -ne 0 ]; then
                 unset __filepath \

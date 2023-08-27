@@ -38,47 +38,93 @@ function FS-Copy-File {
 
 function FS-IsDirectory {
 	param (
-		[string]$Subject
+		[string]$__subject
 	)
 
-	return Test-Path -Path $Subject -PathType Container
+	# validate input
+	if ([string]::IsNullOrEmpty($__subject)) {
+		Remove-Variable -Name __subject
+		return 1
+	}
+
+	# perform checking
+	$__process = Test-Path -Path $__subject -PathType Container
+
+	# report status
+	Remove-Variable -Name __subject
+	if ($__process) {
+		return 0
+	}
+	return 1
 }
 
 function FS-IsExists {
 	param (
-		[string]$Subject
+		[string]$__subject
 	)
 
-	return Test-Path -Path $Subject
+	# validate input
+	if ([string]::IsNullOrEmpty($__subject)) {
+		Remove-Variable -Name __subject
+		return 1
+	}
+
+	# perform checking
+	$__process = Test-Path -Path $__subject
+
+
+	# report status
+	Remove-Variable -Name __subject
+	if ($__process) {
+		return 0
+	}
+	return 1
 }
 
 function FS-List-All {
 	param (
-		[string]$Target
+		[string]$__target
 	)
 
-	if (-not (FS-IsDirectory $Target)) {
+	# validate target
+	if ([string]::IsNullOrEmpty($__target)) {
+		Remove-Variable -Name __target
+		return 1
+	}
+
+	# perform listing
+	if (-not (FS-IsDirectory $__target)) {
+		Remove-Variable -Name __target
 		return 1
 	}
 
 	try {
-		$items = Get-ChildItem -Path $Target -Recurse
-		foreach ($item in $items) {
-			Write-Host $item.FullName
+		foreach ($__item in (Get-ChildItem -Path $__target -Recurse)) {
+			Write-Host $__item.FullName
 		}
+		Remove-Variable -Name __target
 		return 0
 	} catch {
+		Remove-Variable -Name __target
 		return 1
 	}
 }
 
 function FS-Remove {
 	param (
-		[string]$Target
+		[string]$__target
 	)
 
-	$process = Remove-Item $Target -Force -Recurse
-	if ($process -eq $null) {
+	# validate target
+	if ([string]::IsNullOrEmpty($__target)) {
+		Remove-Variable -Name __target
+		return 1
+	}
+
+	# perform remove
+	$__process = Remove-Item $__target -Force -Recurse
+	Remove-Variable -Name __target
+	if ($__process -eq $null) {
 		return 0
 	}
 	return 1
@@ -86,33 +132,72 @@ function FS-Remove {
 
 function FS-Remove-Silently {
 	param (
-		[string]$Target
+		[string]$__target
 	)
 
-	Remove-Item $Target -Force -Recurse -ErrorAction SilentlyContinue
+	# validate target
+	if ([string]::IsNullOrEmpty($__target)) {
+		Remove-Variable -Name __target
+		return 1
+	}
+
+	# perform remove
+	Remove-Item $__target -Force -Recurse -ErrorAction SilentlyContinue
 	return 0
 }
 
 function FS-Rename {
 	param (
-		[string]$Source,
-		[string]$Target
+		[string]$__source,
+		[string]$__target
 	)
 
-	$process = Move-Item -Path $Source -Destination $Target
-	if ($?) {
-		return 0
+	# validate input
+	if ([string]::IsNullOrEmpty($__source) -or
+		[string]::IsNullOrEmpty($__target) -or
+		(-not (Test-Path -Path $__source -PathType Container)) -or
+		(-not (Test-Path -Path $__source)) -or
+		(Test-Path -Path $__target -PathType Container) -or
+		(Test-Path -Path $__target)) {
+		Remove-Variable -Name __source
+		Remove-Variable -Name __target
+		return 1
 	}
-	return 1
+
+	# perform rename
+	$__process = Move-Item -Path $__source -Destination $__target
+	if ($?) {
+		$__exit = 0
+	} else {
+		$__exit = 1
+	}
+
+	# report status
+	Remove-Variable -Name __process
+	Remove-Variable -Name __source
+	Remove-Variable -Name __target
+	return $__exit
 }
 
 function FS-Make-Directory {
 	param (
-		[string]$Target
+		[string]$__target
 	)
 
-	$process = New-Item -ItemType Directory -Force -Path $Target
-	if ($process) {
+	# validate target
+	if ([string]::IsNullOrEmpty($__target) -or
+		(Test-Path -Path $__target -PathType Container) -or
+		(Test-Path -Path $__target)) {
+		Remove-Variable -Name __target
+		return 1
+	}
+
+	# perform create
+	$__process = New-Item -ItemType Directory -Force -Path $__target
+	Remove-Variable -Name __target
+
+	# report status
+	if ($__process) {
 		return 0
 	}
 	return 1
@@ -120,12 +205,12 @@ function FS-Make-Directory {
 
 function FS-Remake-Directory {
 	param (
-		[string]$Target
+		[string]$__target
 	)
 
-	$process = FS-Remove-Silently $Target
-	$process = FS-Make-Directory $Target
-	if ($process -eq 0) {
+	$__process = FS-Remove-Silently $__target
+	$__process = FS-Make-Directory $__target
+	if ($__process -eq 0) {
 		return 0
 	}
 	return 1

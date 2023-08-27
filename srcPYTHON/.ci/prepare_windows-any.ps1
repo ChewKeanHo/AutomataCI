@@ -19,21 +19,13 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         exit 1
 }
 
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
+
 
 
 
 # (1) safety checking control surfaces
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\io\os.ps1"
-. $services
-
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\compilers\python.ps1"
-. $services
-
-
 OS-Print-Status info "checking python availability..."
 $process = PYTHON-Is-Available
 if ($process -ne 0) {
@@ -67,10 +59,8 @@ if ($process -ne 0) {
 }
 
 
-$file = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_SOURCE + "\" `
-		+ "requirements.txt"
-OS-Print-Status info "executing pip install against $file"
+$file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\requirements.txt"
+OS-Print-Status info "executing pip install against ${file}"
 $process = OS-Exec "pip" "install -r $file"
 if ($process -ne 0) {
 	OS-Print-Status error "pip install failed."
