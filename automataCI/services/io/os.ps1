@@ -11,80 +11,105 @@
 # under the License.
 function OS-Is-Command-Available {
 	param (
-		[string] $Command
+		[string] $__command
 	)
 
-	$program = Get-Command $Command -ErrorAction SilentlyContinue
-	if ($program) {
-		return 0
+	if ([string]::IsNullOrEmpty($__command)) {
+		return 1
 	}
 
+	$__program = Get-Command $__command -ErrorAction SilentlyContinue
+	if ($__program) {
+		return 0
+	}
 	return 1
 }
 
+
+
+
 function OS-Exec {
 	param (
-		[string]$Command,
-		[string]$Arguments
+		[string]$__command,
+		[string]$__arguments
 	)
 
+	# validate input
+	if ([string]::IsNullOrEmpty($__command) -or [string]::IsNullOrEmpty($__arguments)) {
+		Remove-Variable -Name __command
+		Remove-Variable -Name __arguments
+		return 1
+	}
+
 	# get program
-	$program = Get-Command $Command -ErrorAction SilentlyContinue
-	if (-not ($program)) {
+	$__program = Get-Command $__command -ErrorAction SilentlyContinue
+	if (-not ($__program)) {
+		Remove-Variable -Name __program
+		Remove-Variable -Name __command
+		Remove-Variable -Name __arguments
 		return 1
 	}
 
 	# execute command
-	$process = Start-Process -Wait `
-				-FilePath "$program" `
+	$__process = Start-Process -Wait `
+				-FilePath "$__program" `
 				-NoNewWindow `
-				-ArgumentList "$Arguments" `
+				-ArgumentList "$__arguments" `
 				-PassThru
-	if ($process.ExitCode -eq 0) {
-		return 0
+	$__exit = 0
+	if ($__process.ExitCode -eq 0) {
+		$__exit = 1
 	}
 
-	return 1
+	Remove-Variable -Name __program
+	Remove-Variable -Name __command
+	Remove-Variable -Name __arguments
+	return $__exit
 }
+
+
+
 
 function OS-Print-Status {
 	param (
-		[string]$Mode,
-		[string]$Message
+		[string]$__mode,
+		[string]$__message
 	)
 
-	$msg = ""
-	$start_color = ""
-	$stop_color = "`e[0m"
+	$__msg = ""
+	$__start_color = ""
+	$__stop_color = "`e[0m"
 
-	switch ($Mode)
-	{ "error" {
-		$msg = "[ ERROR   ] $Message"
-		$start_color = "`e[91m"
+	switch ($__mode) {
+	"error" {
+		$__msg = "[ ERROR   ] $__message"
+		$__start_color = "`e[91m"
 	} "warning" {
-		$msg = "[ WARNING ] $Message"
-		$start_color = "`e[93m"
+		$__msg = "[ WARNING ] $__message"
+		$__start_color = "`e[93m"
 	} "info" {
-		$msg = "[ INFO    ] $Message"
-		$start_color = "`e[96m"
+		$__msg = "[ INFO    ] $__message"
+		$__start_color = "`e[96m"
 	} "success" {
-		$msg = "[ SUCCESS ] $Message"
-		$start_color = "`e[92m"
+		$__msg = "[ SUCCESS ] $__message"
+		$__start_color = "`e[92m"
 	} "ok" {
-		$msg = "[ INFO    ] == OK =="
-		$start_color = "`e[96m"
+		$__msg = "[ INFO    ] == OK =="
+		$__start_color = "`e[96m"
 	} "plain" {
-		$msg = $Message -join " "
+		$__msg = $__message
 	} default {
 		return
 	}}
 
 	if ($Host.UI.RawUI.ForegroundColor -ge "DarkGray") {
-		$msg = "$start_color$msg$stop_color"
+		$__msg = "${__start_color}${__msg}${__stop_color}"
 	}
 
-	Write-Host $msg -Foregroundcolor $Host.UI.RawUI.ForegroundColor
-	Remove-Variable -Name msg -ErrorAction SilentlyContinue
-	Remove-Variable -Name start_color -ErrorAction SilentlyContinue
-	Remove-Variable -Name stop_color -ErrorAction SilentlyContinue
+	Write-Host $__msg -Foregroundcolor $Host.UI.RawUI.ForegroundColor
+	Remove-Variable -Name __mode -ErrorAction SilentlyContinue
+	Remove-Variable -Name __msg -ErrorAction SilentlyContinue
+	Remove-Variable -Name __message -ErrorAction SilentlyContinue
+	Remove-Variable -Name __start_color -ErrorAction SilentlyContinue
+	Remove-Variable -Name __stop_color -ErrorAction SilentlyContinue
 }
