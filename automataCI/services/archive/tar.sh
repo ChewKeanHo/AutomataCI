@@ -10,37 +10,70 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-TARXZ::is_available() {
+TAR::is_available() {
         if [ -z "$(type -t tar)" ]; then
                 return 1
         fi
-
-        if [ -z "$(type -t xz)" ]; then
-                return 1
-        fi
-
         return 0
 }
 
 
 
+
 TARXZ::create() {
-        __src_path="$1"
-        __dest_path="$2"
-        __pwd_path="$PWD"
+        __source="$1"
+        __destination="$2"
 
-
-        # create tar.xz archive
-        cd "$__src_path"
-        XZ_OPT='-9' tar -cvJf "$__dest_path" .
-        if [ $? -ne 0 ]; then
-                unset __src_path __dest_path __pwd_path
+        # validate input
+        if [ -z "$__source" ] ||
+                [ -z "$__destination" ] ||
+                [ ! -d "$__source" ] ||
+                [ -f "$__destination" ] ||
+                [ -d "$__destination" ]; then
+                unset __source __destination
                 return 1
         fi
-        cd "$__pwd_path"
+
+        # create tar.xz archive
+        __current="$PWD"
+        cd "$__source"
+        XZ_OPT='-9' tar -cvJf "$__destination" .
+        __exit=$?
+        if [ $__exit -ne 0 ]; then
+                $__exit = 1
+        fi
+        cd "$__current"
+
+        # report status
+        unset __source __destination __current
+        return $__exit
+}
 
 
-        # successful clean up
-        unset __src_path __dest_path __pwd_path
-        return 0
+
+
+GZ::create() {
+        __source="$1"
+        __destination="$2"
+
+        # validate input
+        if [ -z "$__source" ] ||
+                [ -z "$__destination" ] ||
+                [ -d "$__source" ] ||
+                [ -f "$__destination" ] ||
+                [ -d "$__destination" ]; then
+                unset __source __destination
+                return 1
+        fi
+
+        # create .gz compressed target
+        tar -czvf "$__destination" "$__source"
+        __exit=$?
+        if [ $__exit -ne 0 ]; then
+                __exit=1
+        fi
+
+        # report status
+        unset __source __destination
+        return $__exit
 }

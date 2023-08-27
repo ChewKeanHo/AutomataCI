@@ -19,20 +19,9 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         exit 1
 }
 
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\io\os.ps1"
-. $services
-
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\compilers\python.ps1"
-. $services
-
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\compilers\changelog.ps1"
-. $services
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
 
 
 
@@ -77,12 +66,12 @@ OS-Print-Status info "building output file: $file"
 $argument = "--noconfirm " `
 	+ "--onefile " `
 	+ "--clean " `
-	+ "--distpath `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_BUILD + "`" " `
-	+ "--workpath `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_TEMP + "`" " `
-	+ "--specpath `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "`" " `
-	+ "--name `"" + $file + "`" " `
+	+ "--distpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}`" " `
+	+ "--workpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}`" " `
+	+ "--specpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}`" " `
+	+ "--name `"${file}`" " `
 	+ "--hidden-import=main " `
-	+ "`"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "\main.py" + "`""
+	+ "`"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\main.py`""
 $process = OS-Exec $compiler $argument
 if ($process -ne 0) {
 	OS-Print-Status error "build failed."
@@ -93,19 +82,19 @@ if ($process -ne 0) {
 
 
 # (3) build changelog entries
-$file = $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_RESOURCES + "\changelog"
-OS-Print-Status info "building $env:PROJECT_VERSION data changelog entry..."
-$process = CHANGELOG-Build-Data-Entry $file ""
+$file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog"
+OS-Print-Status info "building ${env:PROJECT_VERSION} data changelog entry..."
+$process = CHANGELOG-Build-Data-Entry $file
 if ($process -ne 0) {
 	OS-Print-Status error "build failed."
 	exit 1
 }
 
 
-OS-Print-Status info "building $env:PROJECT_VERSION deb changelog entry..."
+OS-Print-Status info "building ${env:PROJECT_VERSION} deb changelog entry..."
 $process = CHANGELOG-Build-DEB-Entry `
 	$file `
-	"" `
+	$env:PROJECT_VERSION `
 	$env:PROJECT_SKU `
 	$env:PROJECT_DEBIAN_DISTRIBUTION `
 	$env:PROJECT_DEBIAN_URGENCY `

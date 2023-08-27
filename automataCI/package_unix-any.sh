@@ -31,17 +31,17 @@ fi
 
 
 # (1) safety checking control surfaces
-OS::print_status info "checking tarxz functions availability...\n"
-TARXZ::is_available
+OS::print_status info "checking tar functions availability...\n"
+TAR::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "checking failed.\n"
+        OS::print_status error "check failed.\n"
         return 1
 fi
 
 OS::print_status info "checking zip functions availability...\n"
 ZIP::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "checking failed.\n"
+        OS::print_status error "check failed.\n"
         return 1
 fi
 
@@ -211,7 +211,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
 
 
         # (5.3) archive debian .deb
-        DEB::is_available "$TARGET_OS" "$TARGET_ARCH" && __ret=$? || __ret=1
+        DEB::is_available "$TARGET_OS" "$TARGET_ARCH" && __ret=0 || __ret=1
         if [ $__ret -eq 0 ]; then
                 src="deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}"
                 src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${src}"

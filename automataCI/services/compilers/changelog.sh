@@ -28,17 +28,17 @@ CHANGELOG::build_data_entry() {
         fi
 
         # get last tag from git log
-        __last_tag="$(git rev-list --tags --max-count=1)"
-        if [ -z "$__last_tag" ]; then
-                __last_tag="$(git rev-list --max-parents=0 --abbrev-commit HEAD)"
+        __tag="$(git rev-list --tags --max-count=1)"
+        if [ -z "$__tag" ]; then
+                __tag="$(git rev-list --max-parents=0 --abbrev-commit HEAD)"
         fi
 
         # generate log file from the latest to the last tag
         __directory="${__directory}/data"
         mkdir -p "$__directory"
-        git log --pretty=format:"%s" HEAD..."$__last_tag" > "${__directory}/.latest"
+        git log --pretty=format:"%s" HEAD..."$__tag" > "${__directory}/.latest"
         if [ ! -f "${__directory}/.latest" ]; then
-                unset __directory __last_tag
+                unset __directory __tag
                 return 1
         fi
 
@@ -47,7 +47,7 @@ CHANGELOG::build_data_entry() {
         __exit=$?
 
         # report verdict
-        unset __directory __last_tag
+        unset __directory __tag
         return $__exit
 }
 
@@ -64,7 +64,7 @@ CHANGELOG::build_deb_entry() {
         # validate input
         if [ -z "$__directory" ] ||
                 [ -z "$__version" ] ||
-                [ -f "${__directory}/data/${__version}" ] ||
+                [ ! -f "${__directory}/data/latest" ] ||
                 [ -z "$__sku" ] ||
                 [ -z "$__dist" ] ||
                 [ -z "$__urgency" ] ||
@@ -187,6 +187,8 @@ CHANGELOG::assemble_deb() {
 
         # assemble file
         rm -rf "$__target" "${__target}.gz" &> /dev/null
+        mkdir -p "${__target%/*}"
+
         old_IFS="$IFS"
         while IFS="" read -r __line || [ -n "$__line" ]; do
                 printf -- "$__line\n" >> "$__target"
@@ -226,5 +228,10 @@ CHANGELOG::assemble_md() {
         __directory="$1"
         __target="$2"
         __version="$3"
+
         >&2 printf "assemble_md\n"
+
+        # report status
+        unset __directory __target __version
+        return 0
 }

@@ -40,7 +40,7 @@ DEB::is_available() {
         esac
         unset __os __arch
 
-        # validate input
+        # validate dependencies
         if [ -z "$(type -t 'gunzip')" -a -z "$(type -t 'gzip')" ] ||
                 [ -z "$(type -t 'tar')" ] ||
                 [ -z "$(type -t 'find')" ] ||

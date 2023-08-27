@@ -27,7 +27,7 @@ fi
 
 
 PACKAGE::assemble_archive_content() {
-        __file="$1"
+        __target="$1"
         __directory="$2"
         __target_name="$3"
         __target_os="$4"
@@ -35,17 +35,17 @@ PACKAGE::assemble_archive_content() {
 
 
         # copy main program
-        OS::print_status info "copying $__file to $__directory\n"
+        OS::print_status info "copying $__target to $__directory\n"
         case "$__target_os" in
         "windows")
-                FS::copy_file "$__file" "${__directory}/${PROJECT_SKU}.exe"
+                FS::copy_file "$__target" "${__directory}/${PROJECT_SKU}.exe"
                 ;;
         *)
-                FS::copy_file "$__file" "${__directory}/${PROJECT_SKU}"
+                FS::copy_file "$__target" "${__directory}/${PROJECT_SKU}"
                 ;;
         esac
         if [ $? -ne 0 ]; then
-                unset __file \
+                unset __target \
                         __directory \
                         __target_name \
                         __target_os \
@@ -55,11 +55,11 @@ PACKAGE::assemble_archive_content() {
 
 
         # copy user guide
-        __file="${PROJECT_PATH_ROOT}/USER-GUIDES-EN.pdf"
-        OS::print_status info "copying $__file to $__directory\n"
-        FS::copy_file "$__file" "${__directory}/."
+        __target="${PROJECT_PATH_ROOT}/USER-GUIDES-EN.pdf"
+        OS::print_status info "copying $__target to $__directory\n"
+        FS::copy_file "$__target" "${__directory}/."
         if [ $? -ne 0 ]; then
-                unset __file \
+                unset __target \
                         __directory \
                         __target_name \
                         __target_os \
@@ -69,11 +69,11 @@ PACKAGE::assemble_archive_content() {
 
 
         # copy license file
-        __file="${PROJECT_PATH_ROOT}/LICENSE-EN.pdf"
-        OS::print_status info "copying $__file to $__directory\n"
-        FS::copy_file "$__file" "${__directory}/."
+        __target="${PROJECT_PATH_ROOT}/LICENSE-EN.pdf"
+        OS::print_status info "copying $__target to $__directory\n"
+        FS::copy_file "$__target" "${__directory}/."
         if [ $? -ne 0 ]; then
-                unset __file \
+                unset __target \
                         __directory \
                         __target_name \
                         __target_os \
@@ -83,7 +83,7 @@ PACKAGE::assemble_archive_content() {
 
 
         # report status
-        unset __file \
+        unset __target \
                 __directory \
                 __target_name \
                 __target_os \

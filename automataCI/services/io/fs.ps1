@@ -11,15 +11,29 @@
 # under the License.
 function FS-Copy-File {
 	param (
-		[string]$Source,
-		[string]$Destination
+		[string]$__source,
+		[string]$__destination
 	)
 
-	Copy-Item -Path $Source -Destination $Destination
-	if ($?) {
-		return 0
+	# validate input
+	if ([string]::IsNullOrEmpty($__source) -or
+		[string]::IsNullOrEmpty($__destination)) {
+		Remove-Variable -Name __source
+		Remove-Variable -Name __destination
+		return 1
 	}
-	return 1
+
+	# perform copying
+	$null = Copy-Item -Path $__source -Destination $__destination
+	$__exit = $?
+	if ($__exit -ne 0) {
+		$__exit = 1
+	}
+
+	# report status
+	Remove-Variable -Name __source
+	Remove-Variable -Name __destination
+	return $__exit
 }
 
 function FS-IsDirectory {
