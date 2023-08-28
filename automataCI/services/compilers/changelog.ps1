@@ -9,14 +9,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\tar.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\gz.ps1"
 
 
 
 
 function CHANGELOG-Is-Available {
-	$_program = Get-Command git -ErrorAction SilentlyContinue
-	if (-not ($_program)) {
+	$__program = Get-Command git -ErrorAction SilentlyContinue
+	if (-not ($__program)) {
+		return 1
+	}
+
+	$__process = GZ-Is-Available
+	if ($__process -ne 0) {
 		return 1
 	}
 
@@ -252,7 +257,7 @@ function CHANGELOG-Assemble-DEB {
 	$null = Remove-Variable -Name "__line"
 
 	# gunzip
-	$process = GZ-Create "${__target}" "${__target}.gz"
+	$process = GZ-Create "${__target}"
 
 	# report status
 	$null = Remove-Variable -Name "__directory"

@@ -10,41 +10,49 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-TAR::is_available() {
-        if [ -z "$(type -t tar)" ]; then
+GZ::is_available() {
+        if [ ! -z "$(type -t gzip)" ]; then
+                return 0
+        elif [ ! -z "$(type -t gunzip)" ]; then
+                return 0
+        else
                 return 1
         fi
-        return 0
 }
 
 
 
 
-TARXZ::create() {
+GZ::create() {
         __source="$1"
-        __destination="$2"
 
         # validate input
-        if [ -z "$__source" ] ||
-                [ -z "$__destination" ] ||
-                [ ! -d "$__source" ] ||
-                [ -f "$__destination" ] ||
-                [ -d "$__destination" ]; then
-                unset __source __destination
+        GZ::is_available
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        # create tar.xz archive
-        __current="$PWD"
-        cd "$__source"
-        XZ_OPT='-9' tar -cvJf "$__destination" .
-        __exit=$?
-        if [ $__exit -ne 0 ]; then
-                $__exit = 1
+        if [ -z "$__source" ] || [ -d "$__source" ]; then
+                unset __source
+                return 1
         fi
-        cd "$__current"
+        __source="${__source%.gz}"
+
+        # create .gz compressed target
+        if [ ! -z "$(type -t gzip)" ]; then
+                gzip -9 $__source
+                __exit=$?
+        elif [ ! -z "$(type -t gunzip)" ]; then
+                gunzip -9 $__source
+                __exit=$?
+        else
+                __exit=1
+        fi
+        if [ $__exit -ne 0 ]; then
+                __exit=1
+        fi
 
         # report status
-        unset __source __destination __current
+        unset __source
         return $__exit
 }

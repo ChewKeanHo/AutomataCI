@@ -10,13 +10,26 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compress/gz.sh"
+
+
+
+
 CHANGELOG::is_available() {
         if [ -z "$(type -t git)" ]; then
                 return 1
         fi
 
+        GZ::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
         return 0
 }
+
+
+
 
 CHANGELOG::build_data_entry() {
         __directory="$1"
@@ -50,6 +63,9 @@ CHANGELOG::build_data_entry() {
         unset __directory __tag
         return $__exit
 }
+
+
+
 
 CHANGELOG::build_deb_entry() {
         __directory="$1"
@@ -137,6 +153,9 @@ ${__sku} (${__version}) ${__dist}; urgency=${__urgency}
         return $__exit
 }
 
+
+
+
 CHANGELOG::compatible_data_version() {
         __directory="$1"
         __version="$2"
@@ -154,6 +173,9 @@ CHANGELOG::compatible_data_version() {
         return 1
 }
 
+
+
+
 CHANGELOG::compatible_deb_version() {
         __directory="$1"
         __version="$2"
@@ -170,6 +192,9 @@ CHANGELOG::compatible_deb_version() {
 
         return 1
 }
+
+
+
 
 CHANGELOG::assemble_deb() {
         __directory="$1"
@@ -208,13 +233,9 @@ CHANGELOG::assemble_deb() {
 
 
         # gunzip
-        if [ "$(type -t gzip)" ]; then
-                gzip -9 "$__target"
-                __exit=$?
-        elif [ "$(type -t gunzip)" ]; then
-                gunzip -9 "$__target"
-                __exit=$?
-        else
+        GZ::create "$__target"
+        __exit=$?
+        if [ $__exit -ne 0 ]; then
                 __exit=1
         fi
 
@@ -223,6 +244,9 @@ CHANGELOG::assemble_deb() {
         unset __directory __target __version
         return $__exit
 }
+
+
+
 
 CHANGELOG::assemble_md() {
         __directory="$1"
