@@ -9,13 +9,21 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+
+
+
+
 function PYTHON-Is-Available {
-	$program = Get-Command python -ErrorAction SilentlyContinue
-	if ($program) {
+	$__program = Get-Command python -ErrorAction SilentlyContinue
+	if ($__program) {
 		return 0
 	}
 	return 1
 }
+
+
+
 
 function PYTHON-Is-VENV-Activated {
 	if ($env:VIRTUAL_ENV) {
@@ -24,36 +32,39 @@ function PYTHON-Is-VENV-Activated {
 	return 1
 }
 
+
+
+
 function PYTHON-Has-PIP {
-	try {
-		$null = pip --version
-		return 0
-	} catch {
-		return 1
-	}
+	return OS-Exec "pip" "--version"
 }
+
+
+
 
 function PYTHON-Activate-VENV {
 	if ($env:VIRTUAL_ENV) {
 		return 0
 	}
 
-	$location = $env:PROJECT_PATH_ROOT + "\" `
-			+ $env:PROJECT_PATH_TOOLS + "\" `
-			+ $env:PROJECT_PATH_PYTHON_ENGINE + "\" `
-			+ "Scripts\Activate.ps1"
+	$__location = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}" `
+			+ "\${env:PROJECT_PATH_PYTHON_ENGINE}\Scripts" `
+			+ "\Activate.ps1"
 
-	if (-not (Test-Path "$location")) {
+	if (-not (Test-Path "${__location}")) {
 		return 1
 	}
 
-	. $location
+	. $__location
 	if ($env:VIRTUAL_ENV) {
 		return 0
 	}
 
 	return 1
 }
+
+
+
 
 function PYTHON-Setup-VENV {
 	if (-not $env:PROJECT_PATH_ROOT) {
@@ -68,38 +79,37 @@ function PYTHON-Setup-VENV {
 		return 1
 	}
 
-	$program = Get-Command python -ErrorAction SilentlyContinue
-	if (-not ($program)) {
+	$__process = PYTHON-Is-Available
+	if ($__process -ne 0) {
 		return 1
 	}
 
-	$location = $env:PROJECT_PATH_ROOT + "\" `
-			+ $env:PROJECT_PATH_TOOLS + "\" `
-			+ $env:PROJECT_PATH_PYTHON_ENGINE
-
-
 	# check if the repo is already established...
-	if (Test-Path "$location\Scripts\Activate.ps1") {
+	$__location = "${env:PROJECT_PATH_ROOT}" `
+			+ "\${env:PROJECT_PATH_TOOLS}" `
+			+ "\${env:PROJECT_PATH_PYTHON_ENGINE}"
+	if (Test-Path "${__location}\Scripts\Activate.ps1") {
+		Remove-Variable -Name __location
 		return 0
 	}
 
 
 	# it's a clean repo. Start setting up virtual environment...
-	$process = Start-Process -Wait `
-				-FilePath "$program" `
-				-NoNewWindow `
-				-ArgumentList "-m venv `"$location`"" `
-				-PassThru
-	if ($process.ExitCode -ne 0) {
+	$__process = OS-Exec "python" "-m venv `"${__location}`""
+	if ($__process -ne 0) {
+		Remove-Variable -Name __location
 		return 1
 	}
 
 
 	# last check
-	if (Test-Path "$location\Scripts\Activate.ps1") {
+	if (Test-Path "${__location}\Scripts\Activate.ps1") {
+		Remove-Variable -Name __process
+		Remove-Variable -Name __location
 		return 0
 	}
 
-
+	Remove-Variable -Name __process
+	Remove-Variable -Name __location
 	return 1
 }
