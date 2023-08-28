@@ -9,12 +9,24 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\gz.ps1"
+
+
+
+
 function TAR-Is-Available {
-	$__program = Get-Command "tar" -ErrorAction SilentlyContinue
-	if ($__program) {
-		return 0
+	$__process = Get-Command "tar" -ErrorAction SilentlyContinue
+	if (-not ($__process)) {
+		return 1
 	}
-	return 1
+
+	$__process = GZ-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	return 0
 }
 
 
@@ -37,27 +49,20 @@ function TARXZ-Create {
 		return 1
 	}
 
-	$__program = Get-Command "tar" -ErrorAction SilentlyContinue
-	if (-not ($__program)) {
+	$__process = TAR-Is-Available
+	if ($__process -ne 0) {
 		Remove-Variable -Name __source
 		Remove-Variable -Name __destination
 		return 1
 	}
 
 	# create tar.xz archive
-	$process = Start-Process -Wait `
-		-Filepath "$__program" `
-		-NoNewWindow `
-		-ArgumentList "-cvJf `"${__destination}`" `"${__source}`"" `
-		-PAssThru
-	$__exit = 0
-	if ($process.ExitCode -ne 0) {
-		$__exit = 1
-	}
+	$__process = OS-Exec "tar -cvJf `"${__destination}`" `"${__source}`""
 
 	# report status
 	Remove-Variable -Name __program
 	Remove-Variable -Name __source
 	Remove-Variable -Name __destination
-	return $__exit
+
+	return $__process
 }
