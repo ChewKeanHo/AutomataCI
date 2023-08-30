@@ -124,12 +124,12 @@ Source: ${__website}
 " > "${__location}"
 
         # append copyright contents into file
-        old_IFS="$IFS"
-        while IFS="" read -r line || [ -n "$p" ]; do
-                printf "$line\n" >> "$__location"
+        __old_IFS="$IFS"
+        while IFS="" read -r __line || [ -n "$__line" ]; do
+                printf "$__line\n" >> "$__location"
         done < "$__copyright"
-        IFS="$old_IFS"
-        unset old_IFS line
+        IFS="$__old_IFS"
+        unset __old_IFS __line
 
         # report status
         unset __location \

@@ -1,0 +1,3 @@
+--share=network
+--socket=pulseaudio
+--filesystem=home

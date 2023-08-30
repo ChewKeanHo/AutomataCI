@@ -149,3 +149,92 @@ PACKAGE::assemble_deb_content() {
                 __target_arch
         return 0
 }
+
+
+
+
+PACKAGE::assemble_flatpak_content() {
+        __target="$1"
+        __directory="$2"
+        __target_name="$3"
+        __target_os="$4"
+        __target_arch="$5"
+
+
+        # copy main program
+        __target="$1"
+        __filepath="${__directory}/${PROJECT_SKU}"
+        OS::print_status info "copying $__target to ${__filepath}\n"
+        FS::copy_file "$__target" "$__filepath"
+        if [ $? -ne 0 ]; then
+                unset __filepath \
+                        __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 1
+        fi
+
+
+        # copy icon.svg
+        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/logos/icon.svg"
+        __filepath="${__directory}/icon.svg"
+        OS::print_status info "copying $__target to ${__filepath}\n"
+        FS::copy_file "$__target" "$__filepath"
+        if [ $? -ne 0 ]; then
+                unset __filepath \
+                        __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 1
+        fi
+
+
+        # copy icon-48x48.png
+        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/logos/icon-48x48.png"
+        __filepath="${__directory}/icon-48x48.png"
+        OS::print_status info "copying $__target to ${__filepath}\n"
+        FS::copy_file "$__target" "$__filepath"
+        if [ $? -ne 0 ]; then
+                unset __filepath \
+                        __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 1
+        fi
+
+
+        # copy icon-128x128.png
+        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/logos/icon-128x128.png"
+        __filepath="${__directory}/icon-128x128.png"
+        OS::print_status info "copying $__target to ${__filepath}\n"
+        FS::copy_file "$__target" "$__filepath"
+        if [ $? -ne 0 ]; then
+                unset __filepath \
+                        __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 1
+        fi
+
+
+        # OPTIONAL (overrides): copy manifest.yml or manifest.json
+        # OPTIONAL (overrides): copy appdata.xml
+
+
+        # report status
+        unset __filepath \
+                __target \
+                __directory \
+                __target_name \
+                __target_os \
+                __target_arch
+        return 0
+}

@@ -1,5 +1,13 @@
-my-project (0.0.1) stable; urgency=low
+myProject (0.0.1) stable; urgency=low
 
+  * automataCI: cleaned up compilers/python.* service
+  * automataCI: clean up archive/tar.* service
+  * automataCI: shifted deb from archive/ to compilers/
+  * automataCI: split gunzip into its own library
+  * automataCI: refactored services/io/fs libraries
+  * automataCI: refactored services/io/os.ps1 to a common format
+  * root: added Windows' version of deb packaging function
+  * root: added .deb generative packaging function
   * root: added changelog entry generator function
   * resources: added developer engineering spec template
   * root: removed unused srcDEFAULT
@@ -22,4 +30,4 @@ my-project (0.0.1) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Fri, 25 Aug 2023 12:02:45 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Tue, 29 Aug 2023 07:52:27 +0800

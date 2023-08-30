@@ -1,3 +1,11 @@
+automataCI: cleaned up compilers/python.* service
+automataCI: clean up archive/tar.* service
+automataCI: shifted deb from archive/ to compilers/
+automataCI: split gunzip into its own library
+automataCI: refactored services/io/fs libraries
+automataCI: refactored services/io/os.ps1 to a common format
+root: added Windows' version of deb packaging function
+root: added .deb generative packaging function
 root: added changelog entry generator function
 resources: added developer engineering spec template
 root: removed unused srcDEFAULT

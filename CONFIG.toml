@@ -20,7 +20,15 @@
 # This is the known product ID used as a command, marketing brand, etc.
 # It should be used with dash ('-'), no space and no underscore for maximum
 # compatibility.
-PROJECT_SKU = "my-project"
+PROJECT_SKU = "myProject"
+
+# PROJECT_APP_ID
+# This is the known application complying to the unique 3-parts identifier
+# (e.g. com.example.www) used in Flatpak, Google Play Store, etc. The triples
+# must be a reversed domain with no dash ('-') and underscore ('_'). For GitHub
+# projects, it's advisable to use 'io.github.[owner].[project]' format instead
+# to avoid naming conflict.
+PROJECT_APP_ID = "com.company.myproject"
 
 # PROJECT_NAME
 # This is the name of the product used in documentation, marketing addresses
@@ -143,6 +151,12 @@ PROJECT_CONTACT_EMAIL = "contact@youremail.example"
 PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
 
 
+# PROJECT_GPG_ID
+# Your GPG ID for signing here. Note that this requires GPG to be installed in
+# the system and the secret key is available for performing such transaction.
+PROJECT_GPG_ID = "49B7878749107ED9C456267ACFD3316C29873FB5"
+
+
 # PROJECT_DEBIAN_IS_NATIVE
 # Flag to determine the project is Debian natively sponsored package. Usually
 # is false.
@@ -176,3 +190,18 @@ PROJECT_DEBIAN_DISTRIBUTION = "stable"
 #   (4) emergency
 #   (5) critical
 PROJECT_DEBIAN_URGENCY = "low"
+
+
+# PROJECT_FLATPAK_RUNTIME
+# The runtime module where the Flatpak is operating on.
+PROJECT_FLATPAK_RUNTIME="org.freedesktop.Platform"
+
+
+# PROJECT_FLATPAK_RUNTIME_VERSION
+# The runtime module where the Flatpak is operating on.
+PROJECT_FLATPAK_RUNTIME_VERSION="22.08"
+
+
+# PROJECT_FLATPAK_SDK
+# The runtime module where the Flatpak is operating on.
+PROJECT_FLATPAK_SDK="org.freedesktop.Sdk"

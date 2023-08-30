@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- refer: https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html -->
+<component>
+	<id>com.company.myproject</id>
+	<name>My Project</name>
+	<summary>Short Discription Here</summary>
+	<icon type="stock">web-browser</icon>
+	<metadata_license>CC0-1.0</metadata_license>
+	<project_license>YOUR-LICENSE-SPDX-ID-HERE</project_license>
+	<categories>
+	<!-- refer: https://specifications.freedesktop.org/menu-spec/latest/apa.html -->
+		<category>Network</category>
+		<category>Web</category>
+	</categories>
+	<keywords>
+		<keyword>internet</keyword>
+		<keyword>web</keyword>
+		<keyword>browser</keyword>
+	</keywords>
+	<url type="homepage">https://your-product.website.here</url>
+	<url type="contact">https://your-product.website.here</url>
+	<screenshots>
+		<screenshot type="default">
+			<caption>Example Use</caption>
+			<image type="source" width="800" height="600">
+				https://your-product.website.here/screenshot-800x600.png
+			</image>
+		</screenshot>
+	</screenshots>
+	<provides>
+		<binary>myProject</binary>
+	</provides>
+</component>
