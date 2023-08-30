@@ -1,5 +1,5 @@
 # AutomataCI
-[![AutomataCI](resources/icons/icon-1200x400.svg)](#)
+[![AutomataCI](resources/icons/icon-1200x400.svg)](#automataci)
 
 This repo is a project template repository equipped with the AutomataCI serving
 as a development foundation for software production of the supported kinds. The
@@ -28,13 +28,13 @@ Some good reasons to use AutomataCI:
 
 > ## How to Use
 >
-> [!IMPORTANT]
-> **REMEMBER TO REMOVE THIS SECTION AFTER COMPLETION.**
+> **IMPORTANT: REMEMBER TO REMOVE THIS SECTION AFTER COMPLETION.**
 >
-> 1. Fork this repo or create a repository using the "GitHub Template".
+> 1. Git clone and re-init or click the "Use This Template" button on GitHub.
 > 2. Update all the files in `resources` directories and regenerate the
->    `resources/logos/logo.svg`, `resources/logos/logo-48x48.png`, and
->    `resources/logos/logo-128x128.png`.
+>    `resources/logos/logo.svg`, `resources/logos/logo-48x48.png`,
+>    `resources/logos/logo-128x128.png`, `DEVELOPER_GUIDES_[LANG].pdf`, and
+>    `USER_GUIDES_[LANG].pdf`.
 > 3. Generate and update the LICENSE file(s).
 > 4. `[OPTIONAL]` - Add a `CODE_OF_CONDUCT.md` file with the appropriate legal
 >    clauses(s).
