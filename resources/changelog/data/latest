@@ -1,3 +1,5 @@
+root: tidied up letter heads and documentations
+root: added flatpak packaging CI job recipe
 automataCI: cleaned up compilers/python.* service
 automataCI: clean up archive/tar.* service
 automataCI: shifted deb from archive/ to compilers/

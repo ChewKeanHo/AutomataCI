@@ -68,7 +68,7 @@ $argument = "--noconfirm " `
 	+ "--clean " `
 	+ "--distpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}`" " `
 	+ "--workpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}`" " `
-	+ "--specpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}`" " `
+	+ "--specpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}`" " `
 	+ "--name `"${file}`" " `
 	+ "--hidden-import=main " `
 	+ "`"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\main.py`""

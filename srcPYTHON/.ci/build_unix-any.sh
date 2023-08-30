@@ -68,7 +68,7 @@ pyinstaller --noconfirm \
         --clean \
         --distpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}" \
         --workpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}" \
-        --specpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
+        --specpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}" \
         --name "$file" \
         --hidden-import=main \
         "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/main.py"

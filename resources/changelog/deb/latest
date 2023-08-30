@@ -1,5 +1,7 @@
 myProject (0.0.1) stable; urgency=low
 
+  * root: tidied up letter heads and documentations
+  * root: added flatpak packaging CI job recipe
   * automataCI: cleaned up compilers/python.* service
   * automataCI: clean up archive/tar.* service
   * automataCI: shifted deb from archive/ to compilers/
@@ -30,4 +32,4 @@ myProject (0.0.1) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Tue, 29 Aug 2023 07:52:27 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Thu, 31 Aug 2023 07:31:09 +0800
