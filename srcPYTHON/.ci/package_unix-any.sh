@@ -178,7 +178,7 @@ PACKAGE::assemble_flatpak_content() {
 
 
         # copy icon.svg
-        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/logos/icon.svg"
+        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon.svg"
         __filepath="${__directory}/icon.svg"
         OS::print_status info "copying $__target to ${__filepath}\n"
         FS::copy_file "$__target" "$__filepath"
@@ -194,7 +194,7 @@ PACKAGE::assemble_flatpak_content() {
 
 
         # copy icon-48x48.png
-        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/logos/icon-48x48.png"
+        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon-48x48.png"
         __filepath="${__directory}/icon-48x48.png"
         OS::print_status info "copying $__target to ${__filepath}\n"
         FS::copy_file "$__target" "$__filepath"
@@ -210,7 +210,7 @@ PACKAGE::assemble_flatpak_content() {
 
 
         # copy icon-128x128.png
-        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/logos/icon-128x128.png"
+        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon-128x128.png"
         __filepath="${__directory}/icon-128x128.png"
         OS::print_status info "copying $__target to ${__filepath}\n"
         FS::copy_file "$__target" "$__filepath"
