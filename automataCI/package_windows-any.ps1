@@ -24,6 +24,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\tar.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\zip.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\deb.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\flatpak.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
 
 
@@ -211,7 +212,15 @@ foreach ($i in Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_
 		OS-Print-Status warning "DEB is incompatible or not available. Skipping."
 	}
 
-	# (5.4) report task verdict
+	# (5.4) archive flatpak
+	$process = FLATPAK-Is-Available $TARGET_OS $TARGET_ARCH
+	if ($process -eq 0) {
+		Write-Host "placeholder flatpak build."
+	} else {
+		OS-Print-Status warning "FLATPAK is incompatible or not available. Skipping."
+	}
+
+	# (5.5) report task verdict
 	OS-Print-Status success ""
 }
 exit 0

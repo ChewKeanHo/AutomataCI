@@ -9,15 +9,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-
-
-
-
 function FLATPAK-Is-Available {
-	$__program = Get-Command "flatpak-builder" -ErrorAction SilentlyContinue
-	if ($__program) {
-		return 0
-	}
+	# report status
 	return 1
 }
