@@ -1,3 +1,7 @@
+automataCI: exported archive package execution into independent sub-lib
+automataCI: exported flatpak package execution into independent sub-lib
+automataCI: exported rpm package execution into independent sub-lib
+automataCI: exported deb package execution into independent sub-lib
 root: added rpm packaging function
 srcPYTHON: fixed outdated icon paths for copy works
 .github: updated workflow to have sensible labelling

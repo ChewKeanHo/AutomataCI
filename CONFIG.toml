@@ -132,10 +132,11 @@ PROJECT_PATH_RESOURCES = "resources"
 # PYTHON TECHNOLOGY  #
 ######################
 # PROJECT_PYTHON
-# This is a reserved variable used in GitHub CI workflow where the GitHub CI
-# will automatically determines the requirement for setting up python in the
-# native OSes before running any job.
-# PROJECT_PYTHON = '...' # Reserved - set by GitHub CI workflow.
+# This is a reserved variable used for other CI workflow integration with
+# AutomataCI. Depending on the offered service (e.g. GitHub CI), setting this
+# variable with value shall notify the CI provider to setup Python development
+# environment automatically.
+PROJECT_PYTHON = 'true'
 
 
 # PROJECT_PATH_PYTHON_ENGINE

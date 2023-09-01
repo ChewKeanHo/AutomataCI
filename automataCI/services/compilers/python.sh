@@ -34,7 +34,8 @@ PYTHON::has_pip() {
 }
 
 PYTHON::activate_venv() {
-        if [ ! -z "$VIRTUAL_ENV" ] ; then
+        PYTHON::is_venv_activated
+        if [ $? -eq 0 ] ; then
                 return 0
         fi
 
@@ -48,7 +49,8 @@ PYTHON::activate_venv() {
         . "$__location"
         unset __location
 
-        if [ ! -z "$VIRTUAL_ENV" ] ; then
+        PYTHON::is_venv_activated
+        if [ $? -eq 0 ] ; then
                 return 0
         fi
         return 1

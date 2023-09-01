@@ -1,5 +1,9 @@
 myProject (0.0.1) stable; urgency=low
 
+  * automataCI: exported archive package execution into independent sub-lib
+  * automataCI: exported flatpak package execution into independent sub-lib
+  * automataCI: exported rpm package execution into independent sub-lib
+  * automataCI: exported deb package execution into independent sub-lib
   * root: added rpm packaging function
   * srcPYTHON: fixed outdated icon paths for copy works
   * .github: updated workflow to have sensible labelling
@@ -37,4 +41,4 @@ myProject (0.0.1) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Fri, 01 Sep 2023 16:12:48 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Fri, 01 Sep 2023 18:51:50 +0800

@@ -13,54 +13,51 @@ on:
 env:
   PROJECT_PYTHON: 'srcPYTHON/python_version.txt'
 jobs:
-  in-unix:
+  develop_on:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
-      - name: Check it is a Python project or otherwise
-        id: is_project_requires_python
+      - name: Get environment configurations
+        id: get_environment_configurations
         run: |
-          if [ -f ${{ env.PROJECT_PYTHON }} ]; then
-            echo "is_python_project=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_python_project=false" >> $GITHUB_OUTPUT
-          fi
+          ./ci.cmd env
       - name: Setup Python interpreter if the project uses Python
-        if: steps.is_project_requires_python.outputs.is_python_project == 'true'
+        if: contains(steps.get_environment_configurations.outputs.value, 'python')
         uses: actions/setup-python@v4
         with:
           python-version-file: ${{ env.PROJECT_PYTHON }}
       - name: Execute repo's native CI - SETUP
         id: native_ci_setup
         run: |
-          . ./ci.cmd setup
+          ./ci.cmd setup
       - name: Execute repo's native CI - START
         id: native_ci_start
         run: |
-          . ./ci.cmd start
+          ./ci.cmd start
       - name: Execute repo's native CI - PREPARE
         id: native_ci_prepare
         run: |
-          . ./ci.cmd prepare
+          ./ci.cmd prepare
       - name: Execute repo's native CI - TEST
         id: native_ci_test
         run: |
-          . ./ci.cmd test
+          ./ci.cmd test
       - name: Execute repo's native CI - BUILD
         id: native_ci_build
         run: |
-          . ./ci.cmd build
-      - name: Execute repo's native CI - PACKAGE
-        id: native_ci_package
-        run: |
-          . ./ci.cmd package
+          ./ci.cmd build
       - name: Execute repo's native CI - COMPOSE
         id: native_ci_compose
         run: |
-          . ./ci.cmd compose
+          ./ci.cmd compose
+      - name: Execute repo's native CI - PACKAGE
+        id: native_ci_package
+        run: |
+          ./ci.cmd package
       - name: Archive Build Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -71,63 +68,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: log_${{ matrix.os }}
-          path: |
-            log
-  in-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Check it is a Python project or otherwise
-        id: is_project_requires_python
-        run: |
-          $winPath = ".\" + $env:PROJECT_PYTHON.Replace("/", "\")
-          if (Test-Path $winPath) {
-            Write-Output "is_python_project=true" >> $Env:GITHUB_OUTPUT
-          } else {
-            Write-Output "is_python_project=false" >> $Env:GITHUB_OUTPUT
-          }
-      - name: Setup Python interpreter if the project uses Python
-        if: steps.is_project_requires_python.outputs.is_python_project == 'true'
-        uses: actions/setup-python@v4
-        with:
-          python-version-file: ${{ env.PROJECT_PYTHON }}
-      - name: Execute repo's native CI - SETUP
-        id: native_ci_setup
-        run: |
-          .\ci.cmd setup
-      - name: Execute repo's native CI - START
-        id: native_ci_start
-        run: |
-          .\ci.cmd start
-      - name: Execute repo's native CI - PREPARE
-        id: native_ci_prepare
-        run: |
-          .\ci.cmd prepare
-      - name: Execute repo's native CI - TEST
-        id: native_ci_test
-        run: |
-          .\ci.cmd test
-      - name: Execute repo's native CI - BUILD
-        id: native_ci_build
-        run: |
-          .\ci.cmd build
-      - name: Execute repo's native CI - PACKAGE
-        id: native_ci_package
-        run: |
-          .\ci.cmd package
-      - name: Execute repo's native CI - COMPOSE
-        id: native_ci_compose
-        run: |
-          .\ci.cmd compose
-      - name: Archive Build Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build_windows-latest
-          path: |
-            build
-      - name: Archive Test Report Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: log_windows-latest
           path: |
             log

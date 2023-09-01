@@ -15,16 +15,12 @@ echo >/dev/null # >nul & GOTO WINDOWS & rem ^
 # Unix Main Codes                                                              #
 ################################################################################
 # (1) make sure is by sourcing initialization
-if [ "$BASH_SOURCE" = "$(command -v $0)" ]; then
-        printf "[ ERROR ] - Source me instead! -> $ . ./start.cmd\n"
-        exit 1
+if [ ! "$BASH_SOURCE" = "$(command -v $0)" ]; then
+        printf "[ ERROR ] - Run me instead! -> $ ./ci.cmd [JOB]\n"
+        return 1
 fi
 code=0
 
-was_set=false
-if [ ! -z "$PROJECT_PATH_ROOT" ]; then
-        was_set=true
-fi
 
 
 
@@ -33,16 +29,16 @@ PROJECT_OS="$(uname)"
 export PROJECT_OS="$(echo "$PROJECT_OS" | tr '[:upper:]' '[:lower:]')"
 case "${PROJECT_OS}" in
 windows*|ms-dos*)
-        export EDM_OS='windows'
+        export PROJECT_OS='windows'
         ;;
 cygwin*|mingw*|mingw32*|msys*)
-        export EDM_OS='windows' # edge cases. Set it to widnows for now
+        export PROJECT_OS='windows' # edge cases. Set it to widnows for now
         ;;
 *freebsd)
-        export EDM_OS='freebsd'
+        export PROJECT_OS='freebsd'
         ;;
 dragonfly*)
-        export EDM_OS='dragonfly'
+        export PROJECT_OS='dragonfly'
         ;;
 x86_64)
         export PROJECT_OS="amd64"
@@ -59,22 +55,22 @@ PROJECT_ARCH="$(uname -m)"
 export PROJECT_ARCH="$(echo "$PROJECT_ARCH" | tr '[:upper:]' '[:lower:]')"
 case "${PROJECT_ARCH}" in
 i686-64)
-        export EDM_ARCH='ia64' # Intel Itanium.
+        export PROJECT_ARCH='ia64' # Intel Itanium.
         ;;
 i386|i486|i586|i686)
-        export EDM_ARCH='i386'
+        export PROJECT_ARCH='i386'
         ;;
 x86_64)
         export PROJECT_ARCH="amd64"
         ;;
 sun4u)
-        export EDM_ARCH='sparc'
+        export PROJECT_ARCH='sparc'
         ;;
 "power macintosh")
-        export EDM_ARCH='powerpc'
+        export PROJECT_ARCH='powerpc'
         ;;
 ip*)
-        export EDM_ARCH='mips'
+        export PROJECT_ARCH='mips'
         ;;
 *)
         ;;
@@ -94,14 +90,14 @@ previous=""
 while [ "$pathing" != "" ]; do
         PROJECT_PATH_ROOT="${PROJECT_PATH_ROOT}${pathing%%/*}/"
         pathing="${pathing#*/}"
-        if [ -f "${PROJECT_PATH_ROOT}/.git/config" ]; then
+        if [ -f "${PROJECT_PATH_ROOT}.git/config" ]; then
                 break
         fi
 
         # stop the scan if the previous pathing is the same as current
         if [ "$previous" = "$pathing" ]; then
                 printf "[ ERROR ] unable to detect repo root directory from PWD.\n"
-                return 1
+                exit 1
                 break
         fi
         previous="$pathing"
@@ -116,7 +112,7 @@ export PROJECT_PATH_ROOT
 # (3) parse repo CI configurations
 if [ ! -f "${PROJECT_PATH_ROOT}/CONFIG.toml" ]; then
         printf "[ ERROR ] - missing '${PROJECT_PATH_ROOT}/CONFIG.toml' repo config file.\n"
-        return 1
+        exit 1
 fi
 old_IFS="$IFS"
 while IFS= read -r line; do
@@ -143,6 +139,10 @@ while IFS= read -r line; do
 
         case "$1" in
         stop|--stop|Stop|--Stop|STOP|--STOP)
+                if [ "$key" = "PROJECT_PATH_AUTOMATA" ]; then
+                        export "$key"="$value"
+                        continue
+                fi
                 unset "$key"
                 ;;
         *)
@@ -156,6 +156,10 @@ done < "${PROJECT_PATH_ROOT}/CONFIG.toml"
 
 # (5) execute command
 case "$1" in
+env|--env|Env|--Env|ENV|--ENV)
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/env_unix-any.sh"
+        code=$?
+        ;;
 setup|--setup|Setup|--Setup|SETUP|--SETUP)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/setup_unix-any.sh"
         code=$?
@@ -208,27 +212,24 @@ stop|--stop|Stop|--Stop|STOP|--STOP)
                 ;;
         esac
         echo "Please try any of the following:\n"
-        printf "        To seek commands' help 🠚        $ . ci.cmd help\n"
-        printf "        To setup the repo for work 🠚    $ . ci.cmd setup\n"
-        printf "        To start a development 🠚        $ . ci.cmd start\n"
-        printf "        To test the repo 🠚              $ . ci.cmd test\n"
-        printf "        To prepare the repo 🠚           $ . ci.cmd prepare\n"
-        printf "        To build the repo 🠚             $ . ci.cmd build\n"
-        printf "        To package the repo product 🠚   $ . ci.cmd package\n"
-        printf "        To release the repo product 🠚   $ . ci.cmd release\n"
-        printf "        To compose the documents 🠚      $ . ci.cmd compose\n"
-        printf "        To publish the documents 🠚      $ . ci.cmd publish\n"
-        printf "        To stop a development 🠚         $ . ci.cmd stop\n"
+        printf "        To seek commands' help 🠚        $ ./ci.cmd help\n"
+        printf "        To initialize environment 🠚     $ ./ci.cmd env\n"
+        printf "        To setup the repo for work 🠚    $ ./ci.cmd setup\n"
+        printf "        To start a development 🠚        $ ./ci.cmd start\n"
+        printf "        To test the repo 🠚              $ ./ci.cmd test\n"
+        printf "        To prepare the repo 🠚           $ ./ci.cmd prepare\n"
+        printf "        To build the repo 🠚             $ ./ci.cmd build\n"
+        printf "        To package the repo product 🠚   $ ./ci.cmd package\n"
+        printf "        To release the repo product 🠚   $ ./ci.cmd release\n"
+        printf "        To compose the documents 🠚      $ ./ci.cmd compose\n"
+        printf "        To publish the documents 🠚      $ ./ci.cmd publish\n"
+        printf "        To stop a development 🠚         $ ./ci.cmd stop\n"
         ;;
 esac
-
-if [ "$was_set" == "false" ]; then
-        unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
-fi
 ################################################################################
 # Unix Main Codes                                                              #
 ################################################################################
-return $code
+exit $code
 
 
 
@@ -240,12 +241,6 @@ return $code
 @echo off
 setlocal enabledelayedexpansion
 set "code=0"
-
-:check_existing_stat
-set "was_set="
-if not "%PROJECT_PATH_ROOT" == "" (
-        set "was_set=1"
-)
 
 :query_architecture
 for /F "skip=1 delims=" %%A in ('wmic cpu get architecture') do (
@@ -359,7 +354,31 @@ IF "%1"=="" (
         goto :print_help
 )
 
-IF "%1"=="setup" (
+IF "%1"=="env" (
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\env_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
+) ELSE IF "%1"=="Env" (
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\env_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
+) ELSE IF "%1"=="ENV" (
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\env_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        goto end
+) ELSE IF "%1"=="setup" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
                 -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\setup_windows-any.ps1"
@@ -655,17 +674,18 @@ IF "%1"=="setup" (
 
 :print_help
         echo "Please try any of the following:\n"
-        echo "        To seek commands' help 🠚        $ . ci.cmd help\n"
-        echo "        To setup the repo for work 🠚    $ . ci.cmd setup\n"
-        echo "        To start a development 🠚        $ . ci.cmd start\n"
-        echo "        To test the repo 🠚              $ . ci.cmd test\n"
-        echo "        To prepare the repo 🠚           $ . ci.cmd prepare\n"
-        echo "        To build the repo 🠚             $ . ci.cmd build\n"
-        echo "        To package the repo product 🠚   $ . ci.cmd package\n"
-        echo "        To release the repo product 🠚   $ . ci.cmd release\n"
-        echo "        To compose the documents 🠚      $ . ci.cmd compose\n"
-        echo "        To publish the documents 🠚      $ . ci.cmd publish\n"
-        echo "        To stop a development 🠚         $ . ci.cmd stop\n"
+        echo "        To seek commands' help 🠚        $ .\ci.cmd help\n"
+        echo "        To initialize environment 🠚     $ .\ci.cmd env\n"
+        echo "        To setup the repo for work 🠚    $ .\ci.cmd setup\n"
+        echo "        To start a development 🠚        $ .\ci.cmd start\n"
+        echo "        To test the repo 🠚              $ .\ci.cmd test\n"
+        echo "        To prepare the repo 🠚           $ .\ci.cmd prepare\n"
+        echo "        To build the repo 🠚             $ .\ci.cmd build\n"
+        echo "        To package the repo product 🠚   $ .\ci.cmd package\n"
+        echo "        To release the repo product 🠚   $ .\ci.cmd release\n"
+        echo "        To compose the documents 🠚      $ .\ci.cmd compose\n"
+        echo "        To publish the documents 🠚      $ .\ci.cmd publish\n"
+        echo "        To stop a development 🠚         $ .\ci.cmd stop\n"
 
 :end
 ::##############################################################################
