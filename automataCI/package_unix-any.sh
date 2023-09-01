@@ -32,6 +32,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rpm.sh"
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/__package-deb_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/__package-rpm_unix-any.sh"
 
 
 
@@ -226,104 +227,9 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 return 1
         fi
 
-        # (5.4) archive red hat .rpm
-        RPM::is_available "$TARGET_OS" "$TARGET_ARCH" && __ret=0 || __ret=1
-        if [ $__ret -eq 0 ]; then
-                src="rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}"
-                src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${src}"
-                dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
-                OS::print_status info "Creating RPM package...\n"
-                OS::print_status info "remaking workspace directory $src\n"
-                FS::remake_directory "$src"
-                mkdir -p "${src}/BUILD" "${src}/SPECS"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "remake failed.\n"
-                        return 1
-                fi
-
-                # (5.4.1) copy necessary complimentary files to the package
-                OS::print_status info "assembling package files...\n"
-                if [ -z "$(type -t PACKAGE::assemble_rpm_content)" ]; then
-                        OS::print_status error \
-                                "missing PACKAGE::assemble_rpm_content function.\n"
-                        return 1
-                fi
-                PACKAGE::assemble_rpm_content \
-                        "$i" \
-                        "$src" \
-                        "$TARGET_NAME" \
-                        "$TARGET_OS" \
-                        "$TARGET_ARCH"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "assembly failed.\n"
-                        return 1
-                fi
-
-                # (5.4.2) check and generate required files
-                OS::print_status info "creating copyright.gz file...\n"
-                COPYRIGHT::create_rpm \
-                        "$src" \
-                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
-                        "$TARGET_SKU" \
-                        "$PROJECT_CONTACT_NAME" \
-                        "$PROJECT_CONTACT_EMAIL" \
-                        "$PROJECT_CONTACT_WEBSITE"
-                __ret=$?
-                if [ $__ret -eq 2 ]; then
-                        OS::print_status info "manual injection detected.\n"
-                elif [ $__ret -eq 1 ]; then
-                        OS::print_status error "create failed.\n"
-                        return 1
-                fi
-
-                OS::print_status info "creating man pages file...\n"
-                MANUAL::create_rpm_manpage \
-                        "$src" \
-                        "$TARGET_SKU" \
-                        "$PROJECT_CONTACT_NAME" \
-                        "$PROJECT_CONTACT_EMAIL" \
-                        "$PROJECT_CONTACT_WEBSITE"
-                __ret=$?
-                if [ $__ret -eq 2 ]; then
-                        OS::print_status info "manual injection detected.\n"
-                elif [ $__ret -eq 1 ]; then
-                        OS::print_status error "create failed.\n"
-                        return 1
-                fi
-
-                # (5.4.3) create rpm spec file
-                OS::print_status info "creating spec file...\n"
-                RPM::create_spec \
-                        "$src" \
-                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
-                        "$TARGET_SKU" \
-                        "$PROJECT_VERSION" \
-                        "$PROJECT_CADENCE" \
-                        "$PROJECT_PITCH" \
-                        "$PROJECT_CONTACT_NAME" \
-                        "$PROJECT_CONTACT_EMAIL" \
-                        "$PROJECT_CONTACT_WEBSITE"
-                __ret=$?
-                if [ $__ret -eq 2 ]; then
-                        OS::print_status info "manual injection detected.\n"
-                elif [ $__ret -eq 1 ]; then
-                        OS::print_status error "create failed.\n"
-                        return 1
-                fi
-
-                # (5.4.4) archive the assembled payload
-                OS::print_status info "archiving .rpm package...\n"
-                RPM::create_archive \
-                        "$src" \
-                        "$dest" \
-                        "$PROJECT_SKU" \
-                        "$TARGET_ARCH"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "package failed.\n"
-                        return 1
-                fi
-        else
-                OS::print_status warning "RPM is incompatible or not available. Skipping.\n"
+        PACKAGE::run_rpm
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
         # (5.5) archive flatpak
