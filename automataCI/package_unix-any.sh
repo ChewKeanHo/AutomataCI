@@ -30,6 +30,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rpm.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/flatpak.sh"
 
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/__package-archive_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/__package-deb_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/__package-rpm_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/__package-flatpak_unix-any.sh"
@@ -144,10 +145,9 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         if [ -d "$i" ]; then
                 continue
         fi
+
+        # parse build candidate
         OS::print_status info "detected ${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${i}\n"
-
-
-        # (5.1) parse build candidate
         TARGET_FILENAME="${i##*${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/}"
         TARGET_FILENAME="${TARGET_FILENAME%.*}"
         TARGET_OS="${TARGET_FILENAME##*_}"
@@ -169,58 +169,10 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 fi
         fi
 
-
-        # (5.2) archive into tar.xz / zip package
-        src="archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}"
-        src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${src}"
-        dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
-        OS::print_status info "archiving ${src} for ${TARGET_OS}-${TARGET_ARCH}\n"
-        OS::print_status info "remaking workspace directory $src\n"
-        FS::remake_directory "$src"
+        PACKAGE::run_archive
         if [ $? -ne 0 ]; then
-                OS::print_status error "remake failed.\n"
                 return 1
         fi
-
-        # (5.2.1) copy necessary complimentary files to the package
-        if [ -z "$(type -t PACKAGE::assemble_archive_content)" ]; then
-                OS::print_status error "missing PACKAGE::assemble_archive_content function.\n"
-                return 1
-        fi
-
-        OS::print_status info "assembling package files...\n"
-        PACKAGE::assemble_archive_content \
-                "$i" \
-                "$src" \
-                "$TARGET_NAME" \
-                "$TARGET_OS" \
-                "$TARGET_ARCH"
-        if [ $? -ne 0 ]; then
-                OS::print_status error "assembling failed.\n"
-                return 1
-        fi
-
-        # (5.2.2) archive the assembled payload
-        case "$TARGET_OS" in
-        windows)
-                dest="${dest}/${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.zip"
-                OS::print_status info "packaging $dest\n"
-                ZIP::create "$src" "$dest"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "packaging failed.\n"
-                        return 1
-                fi
-                ;;
-        *)
-                dest="${dest}/${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.tar.xz"
-                OS::print_status info "packaging $dest\n"
-                TARXZ::create "$src" "$dest"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "packaging failed.\n"
-                        return 1
-                fi
-                ;;
-        esac
 
         PACKAGE::run_deb
         if [ $? -ne 0 ]; then
@@ -237,7 +189,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 return 1
         fi
 
-        # (5.6) report task verdict
+        # report job verdict
         OS::print_status success "\n\n"
 done
 return 0
