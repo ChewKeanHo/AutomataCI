@@ -24,9 +24,12 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/zip.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/deb.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/flatpak.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/changelog.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/copyright.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/manual.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/deb.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rpm.sh"
 
 
 
@@ -48,6 +51,13 @@ fi
 
 OS::print_status info "checking changelog functions availability...\n"
 CHANGELOG::is_available
+if [ $? -ne 0 ]; then
+        OS::print_status error "checking failed.\n"
+        return 1
+fi
+
+OS::print_status info "checking manual docs functions availability...\n"
+MANUAL::is_available
 if [ $? -ne 0 ]; then
         OS::print_status error "checking failed.\n"
         return 1
@@ -253,7 +263,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
 
                 # (5.3.2) check and generate required files
                 OS::print_status info "creating copyright.gz file...\n"
-                DEB::create_copyright \
+                COPYRIGHT::create_deb \
                         "$src" \
                         "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
                         "$PROJECT_DEBIAN_IS_NATIVE" \
@@ -284,7 +294,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 fi
 
                 OS::print_status info "creating man pages file...\n"
-                DEB::create_man_page \
+                MANUAL::create_deb_manpage \
                         "$src" \
                         "$PROJECT_DEBIAN_IS_NATIVE" \
                         "$TARGET_SKU" \
@@ -312,14 +322,16 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 OS::print_status info "creating control/control file...\n"
                 DEB::create_control \
                         "$src" \
-                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/packages/deb" \
+                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
                         "$TARGET_SKU" \
                         "$PROJECT_VERSION" \
                         "$PROJECT_ARCH" \
                         "$PROJECT_CONTACT_NAME" \
                         "$PROJECT_CONTACT_EMAIL" \
                         "$PROJECT_CONTACT_WEBSITE" \
-                        "$PROJECT_PITCH"
+                        "$PROJECT_PITCH" \
+                        "$PROJECT_DEBIAN_PRIORITY" \
+                        "$PROJECT_DEBIAN_SECTION"
                 __ret=$?
                 if [ $__ret -eq 2 ]; then
                         OS::print_status info "manual injection detected.\n"
@@ -341,7 +353,108 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 OS::print_status warning "DEB is incompatible or not available. Skipping.\n"
         fi
 
-        # (5.4) archive flatpak
+
+        # (5.4) archive red hat .rpm
+        RPM::is_available "$TARGET_OS" "$TARGET_ARCH" && __ret=0 || __ret=1
+        if [ $__ret -eq 0 ]; then
+                src="rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}"
+                src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${src}"
+                dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+                OS::print_status info "Creating RPM package...\n"
+                OS::print_status info "remaking workspace directory $src\n"
+                FS::remake_directory "$src"
+                mkdir -p "${src}/BUILD" "${src}/SPECS"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "remake failed.\n"
+                        return 1
+                fi
+
+                # (5.4.1) copy necessary complimentary files to the package
+                OS::print_status info "assembling package files...\n"
+                if [ -z "$(type -t PACKAGE::assemble_rpm_content)" ]; then
+                        OS::print_status error \
+                                "missing PACKAGE::assemble_rpm_content function.\n"
+                        return 1
+                fi
+                PACKAGE::assemble_rpm_content \
+                        "$i" \
+                        "$src" \
+                        "$TARGET_NAME" \
+                        "$TARGET_OS" \
+                        "$TARGET_ARCH"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "assembly failed.\n"
+                        return 1
+                fi
+
+                # (5.4.2) check and generate required files
+                OS::print_status info "creating copyright.gz file...\n"
+                COPYRIGHT::create_rpm \
+                        "$src" \
+                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
+                        "$TARGET_SKU" \
+                        "$PROJECT_CONTACT_NAME" \
+                        "$PROJECT_CONTACT_EMAIL" \
+                        "$PROJECT_CONTACT_WEBSITE"
+                __ret=$?
+                if [ $__ret -eq 2 ]; then
+                        OS::print_status info "manual injection detected.\n"
+                elif [ $__ret -eq 1 ]; then
+                        OS::print_status error "create failed.\n"
+                        return 1
+                fi
+
+                OS::print_status info "creating man pages file...\n"
+                MANUAL::create_rpm_manpage \
+                        "$src" \
+                        "$TARGET_SKU" \
+                        "$PROJECT_CONTACT_NAME" \
+                        "$PROJECT_CONTACT_EMAIL" \
+                        "$PROJECT_CONTACT_WEBSITE"
+                __ret=$?
+                if [ $__ret -eq 2 ]; then
+                        OS::print_status info "manual injection detected.\n"
+                elif [ $__ret -eq 1 ]; then
+                        OS::print_status error "create failed.\n"
+                        return 1
+                fi
+
+                # (5.4.3) create rpm spec file
+                OS::print_status info "creating spec file...\n"
+                RPM::create_spec \
+                        "$src" \
+                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
+                        "$TARGET_SKU" \
+                        "$PROJECT_VERSION" \
+                        "$PROJECT_CADENCE" \
+                        "$PROJECT_PITCH" \
+                        "$PROJECT_CONTACT_NAME" \
+                        "$PROJECT_CONTACT_EMAIL" \
+                        "$PROJECT_CONTACT_WEBSITE"
+                __ret=$?
+                if [ $__ret -eq 2 ]; then
+                        OS::print_status info "manual injection detected.\n"
+                elif [ $__ret -eq 1 ]; then
+                        OS::print_status error "create failed.\n"
+                        return 1
+                fi
+
+                # (5.4.4) archive the assembled payload
+                OS::print_status info "archiving .rpm package...\n"
+                RPM::create_archive \
+                        "$src" \
+                        "$dest" \
+                        "$PROJECT_SKU" \
+                        "$TARGET_ARCH"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "package failed.\n"
+                        return 1
+                fi
+        else
+                OS::print_status warning "RPM is incompatible or not available. Skipping.\n"
+        fi
+
+        # (5.5) archive flatpak
         FLATPAK::is_available "$TARGET_OS" "$TARGET_ARCH" && __ret=0 || __ret=1
         if [ $__ret -eq 0 ]; then
                 src="flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}"
@@ -363,7 +476,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                         return 1
                 fi
 
-                # (5.4.1) copy necessary complimentary files to the package
+                # (5.5.1) copy necessary complimentary files to the package
                 OS::print_status info "assembling package files...\n"
                 if [ -z "$(type -t PACKAGE::assemble_flatpak_content)" ]; then
                         OS::print_status error \
@@ -381,7 +494,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                         return 1
                 fi
 
-                # (5.4.2) check and generate required files
+                # (5.5.2) check and generate required files
                 OS::print_status info "creating manifest file...\n"
                 FLATPAK::create_manifest \
                         "$src" \
@@ -400,7 +513,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                         return 1
                 fi
 
-                # (5.4.3) create appinfo.xml
+                # (5.5.3) create appinfo.xml
                 OS::print_status info "creating app info XML file...\n"
                 FLATPAK::create_appinfo \
                         "$src" \
@@ -413,7 +526,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                         return 1
                 fi
 
-                # (5.4.4) archive the assembled payload
+                # (5.5.4) archive the assembled payload
                 OS::print_status info "archiving .flatpak package...\n"
                 FLATPAK::create_archive \
                         "$src" \
@@ -429,7 +542,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         fi
 
 
-        # (5.4) report task verdict
+        # (5.6) report task verdict
         OS::print_status success "\n\n"
 done
 return 0

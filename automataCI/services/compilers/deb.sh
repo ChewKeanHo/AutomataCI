@@ -55,94 +55,6 @@ DEB::is_available() {
 }
 
 
-DEB::create_copyright() {
-        __directory="$1"
-        __copyright="$2"
-        __is_native="$3"
-        __sku="$4"
-        __name="$5"
-        __email="$6"
-        __website="$7"
-
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ ! -f "$__copyright" ] ||
-                [ -z "$__sku" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__website" ]; then
-                unset __directory \
-                        __copyright \
-                        __is_native \
-                        __sku \
-                        __name \
-                        __email \
-                        __website
-                return 1
-        fi
-
-        # checck if is the document already injected
-        __location="${__directory}/data/usr/local/share/doc/${__sku}/copyright"
-        if [ -f "$__location" ]; then
-                unset __location \
-                        __directory \
-                        __copyright \
-                        __is_native \
-                        __sku \
-                        __name \
-                        __email \
-                        __website
-                return 2
-        fi
-
-        if [ "$__is_native" = "true" ]; then
-                __location="${__directory}/data/usr/share/doc/${__sku}/copyright"
-                if [ -f "$__location" ]; then
-                        unset __location \
-                                __directory \
-                                __copyright \
-                                __is_native \
-                                __sku \
-                                __name \
-                                __email \
-                                __website
-                        return 2
-                fi
-        fi
-
-        # create housing directory path
-        mkdir -p "${__location%/*}"
-
-        # create copyright stanza header
-        printf "\
-Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: ${__sku}
-Upstream-Contact: ${__name} <${__email}>
-Source: ${__website}
-
-" > "${__location}"
-
-        # append copyright contents into file
-        __old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                printf "$__line\n" >> "$__location"
-        done < "$__copyright"
-        IFS="$__old_IFS"
-        unset __old_IFS __line
-
-        # report status
-        unset __location \
-                __directory \
-                __copyright \
-                __is_native \
-                __sku \
-                __name \
-                __email \
-                __website
-        return 0
-}
-
 DEB::create_changelog() {
         __directory="$1"
         __filepath="$2"
@@ -187,107 +99,6 @@ DEB::create_changelog() {
         return 0
 }
 
-DEB::create_man_page() {
-        __directory="$1"
-        __is_native="$2"
-        __sku="$3"
-        __name="$4"
-        __email="$5"
-        __website="$6"
-
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ -z "$__is_native" ] ||
-                [ -z "$__sku" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__website" ]; then
-                unset __directory \
-                        __is_native \
-                        __sku \
-                        __name \
-                        __email \
-                        __website
-                return 1
-        fi
-
-        # check if is the document already injected
-        __location="${__directory}/data/usr/local/share/man/man1/${__sku}.1"
-        if [ -f "$__location" ] || [ -f "${__location}.gz" ]; then
-                unset __location \
-                        __directory \
-                        __is_native \
-                        __sku \
-                        __name \
-                        __email \
-                        __website
-                return 2
-        fi
-
-        if [ "$__is_native" = "true" ]; then
-                __location="${__directory}/data/usr/share/man/man1/${__sku}.1"
-                if [ -f "$__location" ] || [ -f "${__location}.gz" ]; then
-                        unset __location \
-                                __directory \
-                                __is_native \
-                                __sku \
-                                __name \
-                                __email \
-                                __website
-                        return 2
-                fi
-        fi
-
-        # create housing directory path
-        mkdir -p "${__location%/*}"
-
-        # create basic level 1 man page that instruct users to seek --help
-        rm -rf "$__location" &> /dev/null
-        printf "\
-.\" ${__sku} - Lv1 Manpage
-.TH man 1 \"${__sku} man page\"
-
-.SH NAME
-${__sku} - Getting help
-
-.SH SYNOPSIS
-command: $ ./${__sku} help
-
-.SH DESCRIPTION
-This is a backward-compatible auto-generated system-level manual page. To make
-sure you get the required and proper assistances from the software, please make
-sure you call the command above.
-
-.SH SEE ALSO
-Please visit ${__website} for more info.
-
-.SH AUTHORS
-Contact: ${__name} <${__email}>
-" > "$__location"
-
-        # gunzip the manual
-        if [ "$(type -t gzip)" ]; then
-                gzip -9 "$__location"
-                __exit=$?
-        elif [ "$(type -t gunzip)" ]; then
-                gunzip -9 "$__location"
-                __exit=$?
-        else
-                __exit=1
-        fi
-
-        # report status
-        unset __location \
-                __directory \
-                __is_native \
-                __sku \
-                __name \
-                __email \
-                __website
-        return $__exit
-}
-
 DEB::create_checksum() {
         __directory="$1"
 
@@ -321,7 +132,7 @@ DEB::create_checksum() {
 
 DEB::create_control() {
         __directory="$1"
-        __filepath="$2"
+        __resources="$2"
         __sku="$3"
         __version="$4"
         __arch="$5"
@@ -329,44 +140,71 @@ DEB::create_control() {
         __email="$7"
         __website="$8"
         __pitch="$9"
+        __priority="${10}"
+        __section="${11}"
 
         # validate input
         if [ -z "$__directory" ] ||
                 [ ! -d "$__directory" ] ||
-                [ -z "$__filepath" ] ||
-                [ ! -f "$__filepath" ] ||
+                [ -z "$__resources" ] ||
+                [ ! -d "$__resources" ] ||
                 [ -z "$__sku" ] ||
                 [ -z "$__version" ] ||
                 [ -z "$__arch" ] ||
                 [ -z "$__name" ] ||
                 [ -z "$__email" ] ||
                 [ -z "$__website" ] ||
-                [ -z "$__pitch" ]; then
+                [ -z "$__pitch" ] ||
+                [ -z "$__priority" ] ||
+                [ -z "$__section" ]; then
                 unset __directory \
-                        __filepath \
+                        __resources \
                         __sku \
                         __version \
                         __arch \
                         __name \
                         __email \
                         __website \
-                        __pitch
+                        __pitch \
+                        __priority \
+                        __section
                 return 1
         fi
+
+        case "$__priority" in
+        required|important|standard|optional|extra)
+                ;;
+        *)
+                unset __directory \
+                        __resources \
+                        __sku \
+                        __version \
+                        __arch \
+                        __name \
+                        __email \
+                        __website \
+                        __pitch \
+                        __priority \
+                        __section
+                return 1
+                ;;
+        esac
 
         # check if is the document already injected
         __location="${__directory}/control/control"
         if [ -f "$__location" ]; then
                 unset __location \
                         __directory \
-                        __filepath \
+                        __resources \
                         __sku \
                         __version \
                         __arch \
                         __name \
                         __email \
                         __website \
-                        __pitch
+                        __pitch \
+                        __priority \
+                        __section
                 return 2
         fi
 
@@ -374,75 +212,52 @@ DEB::create_control() {
         mkdir -p "${__location%/*}"
 
         # generate control file
+        __size="$(du -ks "${__directory}/data")"
+        __size="${__size%%/*}"
+        __size="${__size%"${__size##*[![:space:]]}"}"
+        printf -- "\
+Package: $__sku
+Version: $__version
+Architecture: $__arch
+Maintainer: $__name <$__email>
+Installed-Size: $__size
+Section: $__section
+Priority: $__priority
+Homepage: $__website
+Description: $__pitch
+" >> "$__location"
+
+        # append description data file
         old_IFS="$IFS"
         while IFS="" read -r __line || [ -n "$__line" ]; do
-                __key="${__line%%: *}"
-                __key="${__key#"${__key%%[![:space:]]*}"}"
-                __key="${__key%"${__key##*[![:space:]]}"}"
-                __value="${__line##*: }"
-                __value="${__value#"${__value%%[![:space:]]*}"}"
-                __value="${__value%"${__value##*[![:space:]]}"}"
-
-                case "$__key" in
-                Package)
-                        if [ "$__value" = "{{ AUTO }}" ]; then
-                                __value="$__sku"
-                        fi
-                        ;;
-                Version)
-                        if [ "$__value" = "{{ AUTO }}" ]; then
-                                __value="$__version"
-                        fi
-                        ;;
-                Architecture)
-                        if [ "$__value" = "{{ AUTO }}" ]; then
-                                __value="$__arch"
-                        fi
-                        ;;
-                Maintainer)
-                        if [ "$__value" = "{{ AUTO }}" ]; then
-                                __value="$__name <$__email>"
-                        fi
-                        ;;
-                Installed-Size)
-                        if [ "$__value" = "{{ AUTO }}" ]; then
-                                __value="$(du -ks "${__directory}/data")"
-                                __value="${__value%%/*}"
-                                __value="${__value%"${__value##*[![:space:]]}"}"
-                        fi
-                        ;;
-                Homepage)
-                        if [ "$__value" = "{{ AUTO }}" ]; then
-                                __value="$__website"
-                        fi
-                        ;;
-                Description)
-                        if [ "$__value" = "{{ AUTO }}" ]; then
-                                __value="$__pitch"
-                        fi
-                        ;;
-                *)
-                        printf "$__line\n" >> "$__location"
+                if [ ! -z "$__line" -a -z "${__line%%#*}" ]; then
                         continue
-                        ;;
-                esac
+                fi
 
-                printf "$__key: $__value\n" >> "$__location"
-        done < "$__filepath"
-        IFS="$old_IFS"
-        unset old_IFS __line __key __value
+                if [ -z "$__line" ]; then
+                        __line=" ."
+                else
+                        __line=" ${__line}"
+                fi
+
+                printf -- "%s\n" "$__line" >> "$__location"
+        done < "${__resources}/packages/DESCRIPTION.txt"
+        IFS="$old_IFS" && unset old_IFS __line
 
         # report status
         unset __location \
+                __size \
                 __directory \
-                __filepath \
+                __resources \
                 __sku \
                 __version \
                 __arch \
                 __name \
                 __email \
                 __website \
-                __pitch
+                __pitch \
+                __priority \
+                __section
         return 0
 }
 

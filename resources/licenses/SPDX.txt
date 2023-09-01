@@ -1,0 +1,6 @@
+################################################################################
+# Refer: https://spdx.org/licenses/                                            #
+# for finding or constructing your license identifier.                         #
+# Once done, leave the value as it is.                                         #
+################################################################################
+Proprietary

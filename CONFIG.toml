@@ -45,7 +45,20 @@ PROJECT_PITCH = "To Do Things Seamlessly Easy."
 # generating version declaration files (e.g. VERSION, version.go, etc). You
 # should only update this field and leave the AutomataCI to generate those
 # output files.
+#
+# In case of a release with purpose like release candidates, tlide (~) is used
+# like '0.0.1~rc1' instead of dashes (-). Some distribution ecosystem have
+# strict and reserved rules for version sorting using dashes so tlide will be
+# the best choice.
 PROJECT_VERSION = "0.0.1"
+
+# PROJECT_CADENCE
+# The build cadence number usually to indicate the multiple builds of the same
+# version like '12312' where some packager will generate the final version
+# number as: '0.0.1-rc1-12312' or '0.0.1-12312'.
+#
+# When it doubt or unused, set to 1 and use numerical increment only.
+PROJECT_CADENCE = "1"
 
 
 
@@ -164,6 +177,19 @@ PROJECT_GPG_ID = "49B7878749107ED9C456267ACFD3316C29873FB5"
 PROJECT_DEBIAN_IS_NATIVE = "false"
 
 
+# PROJECT_DEBIAN_PRIORITY
+# Indicate the current package's distribution priority. Strictly the following
+# values
+#  (1) required
+#  (2) important
+#  (3) standard
+#  (4) optional
+#  (5) extra
+# see https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities for
+# more info.
+PROJECT_DEBIAN_PRIORITY = "optional"
+
+
 # PROJECT_DEBIAN_DISTRIBUTION
 # The distribution series for compiling the .deb pakage changelog. See this page
 # for more info:
@@ -190,6 +216,14 @@ PROJECT_DEBIAN_DISTRIBUTION = "stable"
 #   (4) emergency
 #   (5) critical
 PROJECT_DEBIAN_URGENCY = "low"
+
+
+# PROJECT_DEBIAN_SECTION
+# The categories the project belongs to in the Debian .deb package ecosystem.
+# Contains restricted values. Refer:
+#      https://www.debian.org/doc/debian-policy/ch-archive.html#sections
+# For maximum compliances
+PROJECT_DEBIAN_SECTION="devel"
 
 
 # PROJECT_FLATPAK_RUNTIME

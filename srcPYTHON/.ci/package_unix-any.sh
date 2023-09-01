@@ -153,6 +153,70 @@ PACKAGE::assemble_deb_content() {
 
 
 
+PACKAGE::assemble_rpm_content() {
+        __target="$1"
+        __directory="$2"
+        __target_name="$3"
+        __target_os="$4"
+        __target_arch="$5"
+
+
+        # copy main program
+        # TIP: (1) copy all files into "${__directory}/BUILD" directory.
+        __filepath="${__directory}/BUILD/${PROJECT_SKU}"
+        OS::print_status info "copying $__target to ${__filepath}\n"
+        FS::make_directory "${__filepath%/*}"
+        __target="$1"
+        FS::copy_file "$__target" "$__filepath"
+        if [ $? -ne 0 ]; then
+                unset __filepath \
+                        __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 1
+        fi
+
+
+        # generate AutomataCI's required RPM spec instructions (INSTALL)
+        printf -- "\
+install --directory %%{buildroot}/usr/local/bin
+install -m 0755 ${PROJECT_SKU} %%{buildroot}/usr/local/bin
+
+install --directory %%{buildroot}/usr/local/share/doc/${PROJECT_SKU}/
+install -m 644 copyright %%{buildroot}/usr/local/share/doc/${PROJECT_SKU}/
+
+install --directory %%{buildroot}/usr/local/share/man/man1/
+install -m 644 ${PROJECT_SKU}.1.gz %%{buildroot}/usr/local/share/man/man1/
+" >> "${__directory}/SPEC_INSTALL"
+
+        # generate AutomataCI's required RPM spec instructions (FILES)
+        printf "\
+/usr/local/bin/${PROJECT_SKU}
+/usr/local/share/doc/${PROJECT_SKU}/copyright
+/usr/local/share/man/man1/${PROJECT_SKU}.1.gz
+" >> "${__directory}/SPEC_FILES"
+
+
+        # OPTIONAL (overrides): ${__directory}/BUILD/copyright.gz
+        # OPTIONAL (overrides): ${__directory}/BUILD/man.1.gz
+        # OPTIONAL (overrides): ${__directory}/SPECS/${PROJECT_SKU}.spec
+
+
+        # report status
+        unset __filepath \
+                __target \
+                __directory \
+                __target_name \
+                __target_os \
+                __target_arch
+        return 0
+}
+
+
+
+
 PACKAGE::assemble_flatpak_content() {
         __target="$1"
         __directory="$2"

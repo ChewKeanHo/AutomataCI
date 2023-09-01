@@ -179,6 +179,35 @@ function FS-Rename {
 	return $__exit
 }
 
+function FS-Make-Housing-Directory {
+	param (
+		[string]$__target
+	)
+
+	# validate target
+	if ([string]::IsNullOrEmpty($__target) -or
+		(Test-Path -Path $__target -PathType Container) -or
+		(Test-Path -Path $__target)) {
+		Remove-Variable -Name __target
+		return 1
+	}
+
+	# perform create
+	if (Test-Path -Path $__target -PathType Container) {
+		$__process = New-Item -ItemType Directory -Force -Path $__target
+	} else {
+		$__target = Split-Path -Path $__target
+		$__process = New-Item -ItemType Directory -Force -Path $__target
+	}
+	Remove-Variable -Name __target
+
+	# report status
+	if ($__process) {
+		return 0
+	}
+	return 1
+}
+
 function FS-Make-Directory {
 	param (
 		[string]$__target
@@ -211,6 +240,70 @@ function FS-Remake-Directory {
 	$__process = FS-Remove-Silently $__target
 	$__process = FS-Make-Directory $__target
 	if ($__process -eq 0) {
+		return 0
+	}
+	return 1
+}
+
+function FS-Write-File {
+	param (
+		[string]$__target,
+		[string]$__content
+	)
+
+	# validate target
+	if ([string]::IsNullOrEmpty($__target) -or
+		(Test-Path -Path $__target -PathType Container)) {
+		Remove-Variable -Name __target
+		Remove-Variable -Name __content
+		return 1
+	}
+
+	# remove existing file
+	if (Test-Path -Path $__target) {
+		$__process = FS-Remove-Silently $__target
+		if ($__process -eq 0) {
+			Remove-Variable -Name __target
+			Remove-Variable -Name __content
+			return 1
+		}
+	}
+
+	# perform file write
+	$__content | Out-File -FilePath $__target -Encoding utf8
+	$__process= $?
+	Remove-Variable -Name __target
+	Remove-Variable -Name __content
+
+	# report status
+	if ($__process) {
+		return 0
+	}
+	return 1
+}
+
+function FS-Append-File {
+	param (
+		[string]$__target,
+		[string]$__content
+	)
+
+	# validate target
+	if ([string]::IsNullOrEmpty($__target) -or
+		(Test-Path -Path $__target -PathType Container)) {
+		Remove-Variable -Name __target
+		Remove-Variable -Name __content
+		return 1
+	}
+
+	# perform file write
+	$__content | Out-File -FilePath $__target -Encoding utf8 -Append
+	$__process= $?
+	Remove-Variable -Name __target
+	Remove-Variable -Name __content
+
+	# report status
+	if ($__process) {
 		return 0
 	}
 	return 1

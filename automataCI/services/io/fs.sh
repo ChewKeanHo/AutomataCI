@@ -153,9 +153,14 @@ FS::make_directory() {
         __target="$1"
 
         # validate target
-        if [ -z "$__target" ] || [ -d "$__target" ] || [ -f "$__target" ]; then
+        if [ -z "$__target" ] || [ -f "$__target" ]; then
                 unset __target
                 return 1
+        fi
+
+        if [ -d "$__target" ]; then
+                unset __target
+                return 0
         fi
 
         # perform create

@@ -248,6 +248,74 @@ CHANGELOG::assemble_deb() {
 
 
 
+CHANGELOG::assemble_rpm() {
+        __target="$1"
+        __resources="$2"
+        __date="$3"
+        __name="$4"
+        __email="$5"
+        __version="$6"
+        __cadence="$7"
+
+        # validate input
+        if [ -z "$__target" ] ||
+                [ -z "$__resources" ] ||
+                [ -z "$__date" ] ||
+                [ -z "$__name" ] ||
+                [ -z "$__email" ] ||
+                [ -z "$__version" ] ||
+                [ -z "$__cadence" ] ||
+                [ ! -f "$__target" ] ||
+                [ ! -d "$__resources" ]; then
+                unset  __target \
+                        __resources \
+                        __date \
+                        __name \
+                        __email \
+                        __version \
+                        __cadence
+                return 1
+        fi
+
+        # emit stanza
+        printf -- "%%changelog\n" >> "$__target"
+
+        # emit latest changelog
+        if [ -f "${__resources}/changelog/data/latest" ]; then
+                printf -- "* ${__date} ${__name} <${__email}> - ${__version}-${__cadence}\n" \
+                        >> "$__target"
+
+                __old_IFS="$IFS"
+                while IFS="" read -r __line || [ -n "$__line" ]; do
+                        __line="${__line%%#*}"
+                        if [ -z "$__line" ]; then
+                                continue
+                        fi
+
+                        printf -- "- %s\n" "$__line" >> "$__location"
+                done < "${__resources}/changelog/data/latest"
+                IFS="$__old_IFS" && unset __old_IFS __line
+        else
+                printf -- "# unavailable\n" >> "$__target"
+        fi
+
+        # emit tailing newline
+        printf -- "\n" >> "$__target"
+
+        # report status
+        unset  __target \
+                __resources \
+                __date \
+                __name \
+                __email \
+                __version \
+                __cadence
+        return 0
+}
+
+
+
+
 CHANGELOG::assemble_md() {
         __directory="$1"
         __target="$2"

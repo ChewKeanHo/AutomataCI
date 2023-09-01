@@ -1,5 +1,10 @@
 myProject (0.0.1) stable; urgency=low
 
+  * root: added rpm packaging function
+  * srcPYTHON: fixed outdated icon paths for copy works
+  * .github: updated workflow to have sensible labelling
+  * automataCI: backfilled windows' package recipe for flatpak
+  * srcPYTHON: updated build CI recipe to produce spec into log directory
   * root: tidied up letter heads and documentations
   * root: added flatpak packaging CI job recipe
   * automataCI: cleaned up compilers/python.* service
@@ -32,4 +37,4 @@ myProject (0.0.1) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Thu, 31 Aug 2023 07:31:09 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Fri, 01 Sep 2023 16:12:48 +0800
