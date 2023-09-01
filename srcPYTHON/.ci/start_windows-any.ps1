@@ -19,21 +19,12 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         exit 1
 }
 
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
 
 
 
 # (1) safety checking control surfaces
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\io\os.ps1"
-. $services
-
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\compilers\python.ps1"
-. $services
-
-
 OS-Print-Status info "checking python availability..."
 $process = PYTHON-Is-Available
 if ($process -ne 0) {
@@ -51,6 +42,16 @@ if ($process -ne 0) {
 
 
 
-# (2) report successful status
+# (2) report what to do since AutomataCI is executable, not sourcable
+OS-Print-Status info ""
+OS-Print-Status info "IMPORTANT NOTE"
+OS-Print-Status info "please perform the following command at your terminal manually:"
+OS-Print-Status info "    $ ${env:VIRTUAL_ENV}\bin\activate"
+OS-Print-Status info ""
+
+
+
+
+# (3) report successful status
 OS-Print-Status success ""
 exit 0
