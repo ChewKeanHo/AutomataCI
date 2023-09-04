@@ -19,15 +19,8 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         exit 1
 }
 
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\io\os.ps1"
-. $services
-
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\io\fs.ps1"
-. $services
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 
 
 
@@ -143,5 +136,64 @@ function PACKAGE-Assemble-DEB-Content {
 	$null = Remove-Variable -name TargetName
 	$null = Remove-Variable -name TargetOS
 	$null = Remove-Variable -name TargetArch
+	return 0
+}
+
+function PACKAGE-Assemble-PyPi-Content {
+	param (
+		[string]$__target,
+		[string]$__directory,
+		[string]$__target_name,
+		[string]$__target_os,
+		[string]$__target_arch
+	)
+
+	# validate project
+	$__process = FS-Is-Target-A-Source "$__target"
+	if ($__process -ne 0) {
+		$null = Remove-Variable -Name __target
+		$null = Remove-Variable -Name __directory
+		$null = Remove-Variable -Name __target_name
+		$null = Remove-Variable -Name __target_os
+		$null = Remove-Variable -Name __target_arch
+		return 10
+	}
+
+	if ([string]::IsNullOrEmpty($env:PROJECT_PYTHON)) {
+		$null = Remove-Variable -Name __target
+		$null = Remove-Variable -Name __directory
+		$null = Remove-Variable -Name __target_name
+		$null = Remove-Variable -Name __target_os
+		$null = Remove-Variable -Name __target_arch
+		return 10
+	}
+
+	# assemble the python package
+	PYTHON-Clean-Artifact "${env:PROJECT_PATH_ROOT}\srcPYTHON"
+	$null = FS-Copy-File "${env:PROJECT_PATH_ROOT}\srcPYTHON/Lib\*" "${__directory}"
+
+	# generate the setup.py
+	$null = FS-Write-File "${__directory}/setup.py" @"
+from setuptools import setup, find_packages
+
+setup(
+    name='${env:PROJECT_NAME}',
+    version='${env:PROJECT_VERSION}',
+    author='${env:PROJECT_CONTACT_NAME}',
+    author_email='${env:PROJECT_CONTACT_EMAIL}',
+    url='${env:PROJECT_CONTACT_WEBSITE}',
+    description='${env:PROJECT_PITCH}',
+    packages=find_packages(),
+    long_description=open('${env:PROJECT_PATH_ROOT}\README.md').read(),
+    long_description_content_type='text/markdown',
+)
+"@
+
+	# report status
+	$null = Remove-Variable -Name __target
+	$null = Remove-Variable -Name __directory
+	$null = Remove-Variable -Name __target_name
+	$null = Remove-Variable -Name __target_os
+	$null = Remove-Variable -Name __target_arch
 	return 0
 }

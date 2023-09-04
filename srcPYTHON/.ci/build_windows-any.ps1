@@ -20,6 +20,7 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
 
@@ -78,6 +79,14 @@ if ($process -ne 0) {
 	exit 1
 }
 
+
+$file = "${env:PROJECT_SKU}-src_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
+OS-Print-Status info "building output file: $file"
+$process = FS-Touch "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${file}"
+if ($process -ne 0) {
+	OS-Print-Status error "build failed."
+	exit 1
+}
 
 
 

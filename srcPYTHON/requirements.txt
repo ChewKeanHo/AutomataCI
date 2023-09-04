@@ -6,3 +6,5 @@
 # CI required libraries. Please DO NOT remove. TQ!
 coverage
 pyinstaller
+wheel
+twine

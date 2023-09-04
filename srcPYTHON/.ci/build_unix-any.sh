@@ -21,6 +21,7 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/changelog.sh"
 
@@ -72,6 +73,15 @@ pyinstaller --noconfirm \
         --name "$file" \
         --hidden-import=main \
         "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/main.py"
+if [ $? -ne 0 ]; then
+        OS::print_status error "build failed.\n"
+        return 1
+fi
+
+
+file="${PROJECT_SKU}-src_${PROJECT_OS}-${PROJECT_ARCH}"
+OS::print_status info "building output file: ${file}\n"
+touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${file}"
 if [ $? -ne 0 ]; then
         OS::print_status error "build failed.\n"
         return 1

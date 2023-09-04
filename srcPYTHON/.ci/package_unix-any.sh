@@ -34,23 +34,40 @@ PACKAGE::assemble_archive_content() {
         __target_arch="$5"
 
 
-        # copy main program
-        OS::print_status info "copying $__target to $__directory\n"
-        case "$__target_os" in
-        windows)
-                FS::copy_file "$__target" "${__directory}/${PROJECT_SKU}.exe"
-                ;;
-        *)
-                FS::copy_file "$__target" "${__directory}/${PROJECT_SKU}"
-                ;;
-        esac
-        if [ $? -ne 0 ]; then
-                unset __target \
-                        __directory \
-                        __target_name \
-                        __target_os \
-                        __target_arch
-                return 1
+        # package based on target's nature
+        FS::is_target_a_source "$__target"
+        if [ $? -eq 0 ]; then
+                # it's a source code target
+                PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/srcPYTHON/"
+                cp -r "${PROJECT_PATH_ROOT}/srcPYTHON/Libs/"* "${__directory}"
+                if [ $? -ne 0 ]; then
+                        unset __target \
+                                __directory \
+                                __target_name \
+                                __target_os \
+                                __target_arch
+                        return 1
+                fi
+                return 0
+        else
+                # it's a binary target
+                OS::print_status info "copying $__target to $__directory\n"
+                case "$__target_os" in
+                windows)
+                        FS::copy_file "$__target" "${__directory}/${PROJECT_SKU}.exe"
+                        ;;
+                *)
+                        FS::copy_file "$__target" "${__directory}/${PROJECT_SKU}"
+                        ;;
+                esac
+                if [ $? -ne 0 ]; then
+                        unset __target \
+                                __directory \
+                                __target_name \
+                                __target_os \
+                                __target_arch
+                        return 1
+                fi
         fi
 
 
@@ -102,6 +119,16 @@ PACKAGE::assemble_deb_content() {
         __target_arch="$5"
 
 
+        # validate target before job
+        FS::is_target_a_source "$__target"
+        if [ $? -eq 0 ]; then
+                unset __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 10
+        fi
 
 
         # copy main program
@@ -159,6 +186,18 @@ PACKAGE::assemble_rpm_content() {
         __target_name="$3"
         __target_os="$4"
         __target_arch="$5"
+
+
+        # validate target before job
+        FS::is_target_a_source "$__target"
+        if [ $? -eq 0 ]; then
+                unset __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 10
+        fi
 
 
         # copy main program
@@ -223,6 +262,18 @@ PACKAGE::assemble_flatpak_content() {
         __target_name="$3"
         __target_os="$4"
         __target_arch="$5"
+
+
+        # validate target before job
+        FS::is_target_a_source "$__target"
+        if [ $? -eq 0 ]; then
+                unset __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 10
+        fi
 
 
         # copy main program
@@ -296,6 +347,67 @@ PACKAGE::assemble_flatpak_content() {
         # report status
         unset __filepath \
                 __target \
+                __directory \
+                __target_name \
+                __target_os \
+                __target_arch
+        return 0
+}
+
+
+
+
+PACKAGE::assemble_pypi_content() {
+        __target="$1"
+        __directory="$2"
+        __target_name="$3"
+        __target_os="$4"
+        __target_arch="$5"
+
+
+        # validate project
+        FS::is_target_a_source "$__target"
+        if [ $? -ne 0 ]; then
+                unset __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 10
+        fi
+
+        if [ -z "$PROJECT_PYTHON" ]; then
+                unset __target \
+                        __directory \
+                        __target_name \
+                        __target_os \
+                        __target_arch
+                return 10
+        fi
+
+        # assemble the python package
+        PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/srcPYTHON/"
+        cp -r "${PROJECT_PATH_ROOT}/srcPYTHON/Libs/"* "${__directory}"
+
+        # generate the setup.py
+        printf "\
+from setuptools import setup, find_packages
+
+setup(
+    name='${PROJECT_NAME}',
+    version='${PROJECT_VERSION}',
+    author='${PROJECT_CONTACT_NAME}',
+    author_email='${PROJECT_CONTACT_EMAIL}',
+    url='${PROJECT_CONTACT_WEBSITE}',
+    description='${PROJECT_PITCH}',
+    packages=find_packages(),
+    long_description=open('${PROJECT_PATH_ROOT}/README.md').read(),
+    long_description_content_type='text/markdown',
+)
+" > "${__directory}/setup.py"
+
+        # report status
+        unset __target \
                 __directory \
                 __target_name \
                 __target_os \

@@ -16,8 +16,7 @@ function FS-Copy-File {
 	)
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__source) -or
-		[string]::IsNullOrEmpty($__destination)) {
+	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
 		Remove-Variable -Name __source
 		Remove-Variable -Name __destination
 		return 1
@@ -301,6 +300,62 @@ function FS-Append-File {
 	$__process= $?
 	Remove-Variable -Name __target
 	Remove-Variable -Name __content
+
+	# report status
+	if ($__process) {
+		return 0
+	}
+	return 1
+}
+
+function FS-Is-Target-A-Source {
+	param (
+		[string]$__target
+	)
+
+	if ($($__target -replace '^.*-src') -ne $__target) {
+		return 0
+	}
+
+	return 1
+}
+
+function FS-Move {
+	param (
+		[string]$__source,
+		[string]$__destination
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__source) -or
+		[string]::IsNullOrEmpty($__destination) -or
+		(-not (Test-Path -Path $__source)) -or
+		(-not (Test-Path -Path $__destination))) {
+		Remove-Variable -Name __source
+		Remove-Variable -Name __destination
+		return 1
+	}
+
+	# execute
+	Move-Item -Path $__source -Destination $__destination
+	$__exit = $?
+
+	# report status
+	Remove-Variable -Name __source
+	Remove-Variable -Name __destination
+	if ($__exit) {
+		return 0
+	}
+	return 1
+}
+
+function FS-Touch {
+	param(
+		[string]$__destination
+	)
+
+	# execute
+	$__process = New-Item -Path "${__destination}"
 
 	# report status
 	if ($__process) {

@@ -27,6 +27,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\flatpak.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
 
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-pypi_windows-any.ps1"
 
 
 
@@ -220,7 +221,18 @@ foreach ($i in Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_
 		OS-Print-Status warning "FLATPAK is incompatible or not available. Skipping."
 	}
 
-	# (5.5) report task verdict
+	# (5.5) archive pypi
+	$process = PACKAGE-Run-PyPi `
+		"${i}" `
+		"${TARGET_FILENAME}" `
+		"${TARGET_SKU}" `
+		"${TARGET_OS}" `
+		"${TARGET_ARCH}"
+	if ($process -ne 0) {
+		return 1
+	}
+
+	# (5.6) report task verdict
 	OS-Print-Status success ""
 }
 exit 0

@@ -1,3 +1,7 @@
+automataCI: fixed missing deb library bug
+srcPYTHON: updated Start CI job recipe to issue manual instruction
+automataCI: promote package sub-lib to single underscore
+root: update AutomataCI to use execution instead of sourcing
 automataCI: exported archive package execution into independent sub-lib
 automataCI: exported flatpak package execution into independent sub-lib
 automataCI: exported rpm package execution into independent sub-lib

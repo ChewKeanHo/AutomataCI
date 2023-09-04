@@ -1,5 +1,9 @@
 myProject (0.0.1) stable; urgency=low
 
+  * automataCI: fixed missing deb library bug
+  * srcPYTHON: updated Start CI job recipe to issue manual instruction
+  * automataCI: promote package sub-lib to single underscore
+  * root: update AutomataCI to use execution instead of sourcing
   * automataCI: exported archive package execution into independent sub-lib
   * automataCI: exported flatpak package execution into independent sub-lib
   * automataCI: exported rpm package execution into independent sub-lib
@@ -41,4 +45,4 @@ myProject (0.0.1) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Fri, 01 Sep 2023 18:51:50 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Sun, 03 Sep 2023 11:03:50 +0800

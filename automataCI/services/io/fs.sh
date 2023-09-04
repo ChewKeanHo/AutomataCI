@@ -100,7 +100,7 @@ FS::remove() {
 
 
 
-FS::remove_sliently() {
+FS::remove_silently() {
         __target="$1"
 
         # validate target
@@ -181,10 +181,23 @@ FS::make_directory() {
 FS::remake_directory() {
         # $1 = target_path
 
-        FS::remove_sliently "$1"
+        FS::remove_silently "$1"
         FS::make_directory "$1"
         if [ $? -eq 0 ]; then
                 return 0
         fi
+        return 1
+}
+
+
+
+
+FS::is_target_a_source() {
+        # $1 = __target
+
+        if [ "${1#*-src}" != "$1" ]; then
+                return 0
+        fi
+
         return 1
 }
