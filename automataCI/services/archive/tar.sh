@@ -10,41 +10,47 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compress/xz.sh"
+
+
+
+
 TAR::is_available() {
         if [ -z "$(type -t tar)" ]; then
                 return 1
         fi
+
         return 0
 }
 
 
 
 
-TARXZ::create() {
-        __source="$1"
-        __destination="$2"
+TAR::create_xz() {
+        # __destination="$1"
+        # __source="$2"
 
         # validate input
-        if [ -z "$__source" ] ||
-                [ -z "$__destination" ] ||
-                [ ! -d "$__source" ] ||
-                [ -f "$__destination" ] ||
-                [ -d "$__destination" ]; then
-                unset __source __destination
+        if [ -z "$2" ] || [ -z "$1" ] || [ -f "$1" ] || [ -d "$1" ]; then
+                return 1
+        fi
+
+        TAR::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        XZ::is_available
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
         # create tar.xz archive
-        __current="$PWD"
-        cd "$__source"
-        XZ_OPT='-9' tar -cvJf "$__destination" .
-        __exit=$?
-        if [ $__exit -ne 0 ]; then
-                $__exit = 1
-        fi
-        cd "$__current"
+        XZ_OPT='-9' tar -cvJf "$1" $2
 
         # report status
-        unset __source __destination __current
-        return $__exit
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+        return 1
 }

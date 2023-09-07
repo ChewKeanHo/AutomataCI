@@ -10,8 +10,31 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-ZIP::is_available() {
-        if [ ! -z "$(type -t zip)" ]; then
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+
+
+
+
+XZ::create() {
+        __source="$1"
+
+        # validate input
+        XZ::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        if [ -z "$__source" ] || [ -d "$__source" ]; then
+                unset __source
+                return 1
+        fi
+        __source="${__source%.xz}"
+
+        # create .gz compressed target
+        xz -9 --compress "$__source"
+
+        # report status
+        if [ $? -eq 0 ]; then
                 return 0
         fi
 
@@ -21,20 +44,8 @@ ZIP::is_available() {
 
 
 
-ZIP::create() {
-        # __destination="$1"
-        # __source="$2"
-
-        # validate input
-        ZIP::is_available
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        # execute
-        zip -9 -r "$1" $2
-
-        # report status
+XZ::is_available() {
+        OS::is_command_available "xz"
         if [ $? -eq 0 ]; then
                 return 0
         fi

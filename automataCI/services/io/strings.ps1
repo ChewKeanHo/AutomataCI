@@ -17,6 +17,9 @@ function STRINGS-Trim-Whitespace-Left {
 	return $__content.TrimStart()
 }
 
+
+
+
 function STRINGS-Trim-Whitespace-Right {
 	param(
 		[string]$__content
@@ -24,6 +27,9 @@ function STRINGS-Trim-Whitespace-Right {
 
 	return $__content.TrimEnd()
 }
+
+
+
 
 function STRINGS-Trim-Whitespace {
 	param(
@@ -34,4 +40,27 @@ function STRINGS-Trim-Whitespace {
 	$__content = STRINGS-Trim-Whitespace-Right $__content
 
 	return $__content
+}
+
+
+
+
+function STRINGS-Has-Prefix {
+	param(
+		[string]$__prefix,
+		[string]$__content
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__prefix)) {
+		return 1
+	}
+
+	# execute
+	if ($__content.StartsWith($__prefix)) {
+		return 0
+	}
+
+	# report status
+	return 1
 }

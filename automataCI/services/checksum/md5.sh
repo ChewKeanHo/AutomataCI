@@ -10,32 +10,33 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-ZIP::is_available() {
-        if [ ! -z "$(type -t zip)" ]; then
-                return 0
+MD5::checksum_file() {
+        # __target="$1"
+
+        # validate input
+        if [ -z "$1" ] || [ ! -f "$1" ]; then
+                return 1
         fi
 
+        # execute
+        if [ ! -z "$(type -t md5sum)" ]; then
+                md5sum "$1"
+        elif [ ! -z "$(type -t md5)" ]; then
+                md5 "$1"
+        fi
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
         return 1
 }
 
 
 
 
-ZIP::create() {
-        # __destination="$1"
-        # __source="$2"
-
-        # validate input
-        ZIP::is_available
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        # execute
-        zip -9 -r "$1" $2
-
-        # report status
-        if [ $? -eq 0 ]; then
+MD5::is_available() {
+        if [ ! -z "$(type -t md5sum)" ] || [ ! -z "$(type -t md5)" ]; then
                 return 0
         fi
 

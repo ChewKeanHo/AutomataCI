@@ -15,224 +15,143 @@
 
 # (0) initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
+        Write-Error "[ ERROR ] - Please run me from ci.cmd instead!\n"
         exit 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\tar.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\zip.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\deb.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\flatpak.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
 
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-changelog_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-archive_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-deb_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-rpm_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-flatpak_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-pypi_windows-any.ps1"
 
 
 
-# (1) safety checking control surfaces
-OS-Print-Status info "checking tar functions availability..."
-$process = TAR-Is-Available
-if ($process -ne 0) {
-	OS-Print-Status error "check failed."
+
+# (1) source locally provided functions
+$DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
+$DEST = "${DEST}\package_windows-any.ps1"
+OS-Print-Status info "sourcing content assembling functions from: ${DEST}"
+$__process = FS-Is-Target-Exist "${DEST}"
+if ($__process -ne 0) {
+	OS-Print-Status error "Source failed."
 	exit 1
 }
-
-OS-Print-Status info "checking changelog functions availability..."
-$process = CHANGELOG-Is-Available
-if ($process -ne 0) {
-	OS-Print-Status error "check failed."
-	exit 1
-}
-
-OS-Print-Status info "sourcing content assembling functions from the project..."
-$recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
-$recipe = "${recipe}\package_windows-any.ps1"
-$process = FS-IsExists $recipe
-if ($process -ne 0) {
-	OS-Print-Status error "sourcing failed - Missing file: ${recipe}"
-	exit 1
-}
-. $recipe
+. "${DEST}"
 
 
 
 
-# (2) clean up destination path
-$dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
-OS-Print-Status info "remaking package directory: $dest"
-$process = FS-Remake-Directory $dest
-if ($process -ne 0) {
+# (2) 1-time setup job required materials
+$DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
+OS-Print-Status info "remaking package directory: $DEST"
+$__process = FS-Remake-Directory $DEST
+if ($__process -ne 0) {
 	OS-Print-Status error "remake failed."
 	exit 1
 }
 
 
-
-
-# (3) validate changelog
-OS-Print-Status info "validating ${env:PROJECT_VERSION} data changelog entry..."
-$process = CHANGELOG-Compatible-Data-Version `
-	"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog" `
-	"${env:PROJECT_VERSION}"
-if ($process -ne 0) {
-	OS-Print-Status error "validation failed - there is an existing entry."
-	exit 1
-}
-
-
-OS-Print-Status info "validating ${env:PROJECT_VERSION} deb changelog entry..."
-$process = CHANGELOG-Compatible-Deb-Version `
-	"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog" `
-	"${env:PROJECT_VERSION}"
-if ($process -ne 0) {
-	OS-Print-Status error "validation failed - there is an existing entry."
+$FILE_CHANGELOG_MD = "${env:PROJECT_PATH_ROOT}\MARKDOWN.md"
+$FILE_CHANGELOG_DEB = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb\changelog.gz"
+$__process = Package-Run-Changelog "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
+if ($__process -ne 0) {
 	exit 1
 }
 
 
 
 
-# (4) assemble changelog
-OS-Print-Status info "assembling markdown changelog..."
-$FILE_CHANGELOG_MD="${env:PROJECT_PATH_ROOT}\MARKDOWN.md"
-$process = CHANGELOG-Assemble-MD `
-	"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog" `
-	"$FILE_CHANGELOG_MD" `
-	"$env:PROJECT_VERSION"
-if ($process -ne 0) {
-	OS-Print-Status error "assembly failed."
-	exit 1
-}
-
-
-OS-Print-Status info "assembling deb changelog..."
-$FILE_CHANGELOG_DEB="${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb\changelog"
-$process = CHANGELOG-Assemble-DEB `
-	"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog" `
-	"$FILE_CHANGELOG_DEB" `
-	"$env:PROJECT_VERSION"
-if ($process -ne 0) {
-	OS-Print-Status error "assembly failed."
-	exit 1
-}
-$FILE_CHANGELOG_DEB="${FILE_CHANGELOG_DEB}.gz"
-
-
-
-
-# (5) begin packaging
-foreach ($i in Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}") {
-	if (FS-IsDirectory $i) {
+# (3) begin packaging
+foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}")) {
+	$i = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${i}"
+	$__process = FS-Is-Directory "$i"
+	if ($__process -eq 0) {
 		continue
 	}
-	OS-Print-Status info "detected ${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${i}"
 
-
-	# (5.1) parse build candidate
+	# parse build candidate
+	OS-Print-Status info "detected $i"
 	$TARGET_FILENAME = Split-Path -Leaf $i
 	$TARGET_FILENAME = $TARGET_FILENAME -replace `
-				".*${PROJECT_PATH_ROOT}\${PROJECT_PATH_BUILD}\"
+		(Join-Path $env:PROJECT_PATH_ROOT $env:PROJECT_PATH_BUILD), ""
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "\..*$"
 	$TARGET_OS = $TARGET_FILENAME -replace ".*_"
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "_.*"
 	$TARGET_ARCH = $TARGET_OS -replace ".*-"
 	$TARGET_OS = $TARGET_OS -replace "-.*"
 
-	if (-not $TARGET_OS -or -not $TARGET_ARCH -or -not $TARGET_FILENAME) {
-		OS-Print-Status warning "detected $i but failed to parse. Skipping."
+	if ([string]::IsNullOrEmpty($TARGET_OS) -or
+		[string]::IsNullOrEmpty($TARGET_ARCH) -or
+		[string]::IsNullOrEmpty($TARGET_FILENAME)) {
+		OS-Print-Status warning "failed to parse file. Skipping."
 		continue
 	}
 
-	$TARGET_SKU = "$env:PROJECT_SKU"
-	if ($TARGET_FILENAME -ne $TARGET_SKU) {
-		$TARGET_SKU = "${env:PROJECT_SKU}-src"
+	$__process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "$TARGET_FILENAME"
+	if ($__process -ne 0) {
 		OS-Print-Status warning "incompatible file. Skipping."
 		continue
 	}
 
-
-	# (5.2) archive into tar.xz / zip package
-	$src = "archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}"
-	$src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${src}"
-	$dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
-	OS-Print-Status info "archiving ${src} for ${TARGET_OS}-${TARGET_ARCH}"
-	OS-Print-Status info "remaking workspace directory ${src}"
-	$process = FS-Remake-Directory $src
-	if ($process -ne 0) {
-		OS-Print-Status error "remake failed."
+	$__process = PACKAGE-Run-Archive `
+		"$DEST" `
+		"$i" `
+		"$TARGET_FILENAME" `
+		"$TARGET_OS" `
+		"$TARGET_ARCH"
+	if ($__process -ne 0) {
 		exit 1
 	}
 
-	# (5.2.1) copy necessary complimentary files to the package
-	$process = Get-Command -Name "PACKAGE-Assemble-Archive-Content" `
-				-ErrorAction SilentlyContinue
-	if (-not ($process)) {
-		OS-Print-Status error "missing PACKAGE-Assemble-Archive-Content function."
+	$__process = PACKAGE-Run-DEB `
+		"$DEST" `
+		"$i" `
+		"$TARGET_FILENAME" `
+		"$TARGET_OS" `
+		"$TARGET_ARCH" `
+		"$FILE_CHANGELOG_DEB"
+	if ($__process -ne 0) {
 		exit 1
 	}
 
-	OS-Print-Status info "assembling package files..."
-	$process = PACKAGE-Assemble-Archive-Content `
-			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${i}" `
-			"$src" `
-			"$TARGET_NAME" `
-			"$TARGET_OS" `
-			"$TARGET_ARCH"
-	if (-not ($process)) {
-		OS-Print-Status error "assembling failed."
+	$__process = PACKAGE-Run-RPM `
+		"$DEST" `
+		"$i" `
+		"$TARGET_FILENAME" `
+		"$TARGET_OS" `
+		"$TARGET_ARCH"
+	if ($__process -ne 0) {
 		exit 1
 	}
 
-	# (5.2.2) archive the assembly payload
-	switch ($TARGET_OS) {
-	"windows" {
-		$dest = "${dest}\${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.zip"
-		OS-Print-Status info "packaging ${dest}.zip"
-		$process = ZIP-Create -Source $src -Destination $dest
-		if ($process -ne 0) {
-			OS-Print-Status error "packaging failed."
-			exit 1
-		}
-	} default {
-		$dest = "${dest}\${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}"
-		OS-Print-Status info "packaging $dest.tar.xz"
-		7ZIP-Create-TARXZ -Source $src -Destination $dest
-		if ($process -ne 0) {
-			OS-Print-Status error "packaging failed."
-			exit 1
-		}
-	}}
-
-	# (5.3) archive debian .deb
-	$process = DEB-Is-Available $TARGET_OS $TARGET_ARCH
-	if ($process -eq 0) {
-		Write-Host "placeholder deb build."
-	} else {
-		OS-Print-Status warning "DEB is incompatible or not available. Skipping."
+	$__process = PACKAGE-Run-FLATPAK `
+		"$DEST" `
+		"$i" `
+		"$TARGET_FILENAME" `
+		"$TARGET_OS" `
+		"$TARGET_ARCH"
+	if ($__process -ne 0) {
+		exit 1
 	}
 
-	# (5.4) archive flatpak
-	$process = FLATPAK-Is-Available $TARGET_OS $TARGET_ARCH
-	if ($process -eq 0) {
-		Write-Host "placeholder flatpak build."
-	} else {
-		OS-Print-Status warning "FLATPAK is incompatible or not available. Skipping."
+	$__process = PACKAGE-Run-PYPI `
+		"$DEST" `
+		"$i" `
+		"$TARGET_FILENAME" `
+		"$TARGET_OS" `
+		"$TARGET_ARCH"
+	if ($__process -ne 0) {
+		exit 1
 	}
 
-	# (5.5) archive pypi
-	$process = PACKAGE-Run-PyPi `
-		"${i}" `
-		"${TARGET_FILENAME}" `
-		"${TARGET_SKU}" `
-		"${TARGET_OS}" `
-		"${TARGET_ARCH}"
-	if ($process -ne 0) {
-		return 1
-	}
-
-	# (5.6) report task verdict
+	# report task verdict
 	OS-Print-Status success ""
 }
+
 exit 0

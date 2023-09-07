@@ -9,6 +9,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\gz.ps1"
 
 
@@ -38,7 +39,6 @@ function CHANGELOG-Build-Data-Entry {
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory)) {
-		Remove-Variable -Name "__directory"
 		return 1
 	}
 
@@ -50,34 +50,23 @@ function CHANGELOG-Build-Data-Entry {
 
 	# generate log file from the latest to the last tag
 	$__directory = "${__directory}\data"
-	$null = New-Item -ItemType Directory -Path "$__directory" -Force
-	Invoke-Expression "git log --pretty=oneline HEAD...${__tag}" `
+	$null = FS-Make-Directory "${__directory}"
+	Invoke-Expression "git log --pretty=`"%s`" HEAD...${__tag}" `
 		| Out-File -FilePath "${__directory}\.latest" -Encoding utf8
-	get-content "${__directory}\.latest"
 	if (-not (Test-Path "${__directory}\.latest")) {
-		Remove-Variable -Name "__directory"
-		Remove-Variable -Name "__tag"
 		return 1
 	}
 
 	# good file, update the previous
-	$null = Remove-Item "${__directory}\latest" `
-		-Recurse `
-		-Force `
-		-ErrorAction SilentlyContinue
-	$null = Move-Item -Path "${__directory}\.latest" `
-			-Destination "${__directory}\latest" `
-			-Force
-	$__exit = $?
+	$null = FS-Remove-Silently "${__directory}\latest"
+	$__process = FS-Move "${__directory}\.latest" "${__directory}\latest"
 
-	# report verdict
-	$null = Remove-Variable -Name "__directory"
-	$null = Remove-Variable -Name "__tag"
-	if ($__exit) {
-		return 0
-	}
-	return 1
+	# report status
+	return $__process
 }
+
+
+
 
 function CHANGELOG-Build-DEB-Entry {
 	param (
@@ -101,14 +90,6 @@ function CHANGELOG-Build-DEB-Entry {
 		[string]::IsNullOrEmpty($__name) -or
 		[string]::IsNullOrEmpty($__email) -or
 		[string]::IsNullOrEmpty($__date)) {
-		$null = Remove-Variable -Name "__directory"
-		$null = Remove-Variable -Name "__version"
-		$null = Remove-Variable -Name "__sku"
-		$null = Remove-Variable -Name "__dist"
-		$null = Remove-Variable -Name "__urgency"
-		$null = Remove-Variable -Name "__name"
-		$null = Remove-Variable -Name "__email"
-		$null = Remove-Variable -Name "__date"
 		return 1
 	}
 
@@ -123,57 +104,38 @@ function CHANGELOG-Build-DEB-Entry {
 	} experimental {
 		break
 	} default {
-		$null = Remove-Variable -Name "__directory"
-		$null = Remove-Variable -Name "__version"
-		$null = Remove-Variable -Name "__sku"
-		$null = Remove-Variable -Name "__dist"
-		$null = Remove-Variable -Name "__urgency"
-		$null = Remove-Variable -Name "__name"
-		$null = Remove-Variable -Name "__email"
-		$null = Remove-Variable -Name "__date"
 		return 1
 	}}
 
 	# all good. Generate the log fragment
-	$null = New-Item -ItemType Directory -Path "${__directory}\deb" -Force
+	$null = FS-Make-Directory "${__directory}\deb"
 
 	# create the entry header
-	"${__sku} (${__version}) ${__dist}; urgency=${__urgency}" `
-		| Out-File -FilePath "${__directory}\deb\.latest" -Encoding utf8
+	$null = FS-Write-File "${__directory}\deb\.latest" @"
+${__sku} (${__version}) ${__dist}; urgency=${__urgency}
+
+"@
 
 	# generate body line-by-line
-	"" | Out-File -FilePath "${__directory}\deb\.latest" -Encoding utf8 -Append
 	Get-Content -Path "${__directory}\data\latest" | ForEach-Object {
 		$__line = $_.Substring(0, [Math]::Min($_.Length, 80))
-		"  * ${__line}" `
-			| Out-File -FilePath "${__directory}\deb\.latest" -Encoding utf8 -Append
+		$null = FS-Append-File "${__directory}\deb\.latest" "  * ${__line}"
 	}
-	"" | Out-File -FilePath "${__directory}\deb\.latest" -Encoding utf8 -Append
+	$null = FS-Append-File "${__directory}\deb\.latest" ""
 
 	# create the entry sign-off
-	"-- ${__name} <${__email}>  ${__date}" `
-		| Out-File -FilePath "${__directory}\deb\.latest" -Encoding utf8 -Append
+	$null = FS-Append-File "${__directory}\deb\.latest" `
+		"-- ${__name} <${__email}>  ${__date}"
 
 	# good file, update the previous
-	$null = Move-Item -Path "${__directory}\deb\.latest" `
-		-Destination "${__directory}\deb\latest" `
-		-Force
-	$__exit = $?
+	$__process = FS-Move "${__directory}\deb\.latest" "${__directory}\deb\latest"
 
 	# report status
-	$null = Remove-Variable -Name "__directory"
-	$null = Remove-Variable -Name "__version"
-	$null = Remove-Variable -Name "__sku"
-	$null = Remove-Variable -Name "__dist"
-	$null = Remove-Variable -Name "__urgency"
-	$null = Remove-Variable -Name "__name"
-	$null = Remove-Variable -Name "__email"
-	$null = Remove-Variable -Name "__date"
-	if (!$__exit) {
-		return 1
-	}
-	return 0
+	return $__process
 }
+
+
+
 
 function CHANGELOG-Compatible-Data-Version {
 	param(
@@ -181,21 +143,20 @@ function CHANGELOG-Compatible-Data-Version {
 		[string]$__version
 	)
 
-	if ([string]::IsNullOrEmpty($__directory) -or
-		[string]::IsNullOrEmpty($__version)) {
-		$null = Remove-Variable -Name "__directory"
-		$null = Remove-Variable -Name "__version"
+	if ([string]::IsNullOrEmpty($__directory) -or [string]::IsNullOrEmpty($__version)) {
 		return 1
 	}
 
-	if (-not (Test-Path -Path "${__directory}\data\${__version}")) {
-		$null = Remove-Variable -Name "__directory"
-		$null = Remove-Variable -Name "__version"
+	$__process = FS-Is-File "${__directory}\data\${__version}"
+	if ($__process -ne 0) {
 		return 0
 	}
 
 	return 1
 }
+
+
+
 
 function CHANGELOG-Compatible-DEB-Version {
 	param(
@@ -203,21 +164,20 @@ function CHANGELOG-Compatible-DEB-Version {
 		[string]$__version
 	)
 
-	if ([string]::IsNullOrEmpty($__directory) -or
-		[string]::IsNullOrEmpty($__version)) {
-		$null = Remove-Variable -Name "__directory"
-		$null = Remove-Variable -Name "__version"
+	if ([string]::IsNullOrEmpty($__directory) -or [string]::IsNullOrEmpty($__version)) {
 		return 1
 	}
 
-	if (-not (Test-Path -Path "${__directory}\deb\${__version}")) {
-		$null = Remove-Variable -Name "__directory"
-		$null = Remove-Variable -Name "__version"
+	$__process = FS-Is-File "${__directory}\deb\${__version}"
+	if ($__process -ne 0) {
 		return 0
 	}
 
 	return 1
 }
+
+
+
 
 function CHANGELOG-Assemble-DEB {
 	param (
@@ -229,41 +189,108 @@ function CHANGELOG-Assemble-DEB {
 	if ([string]::IsNullOrEmpty($__directory) -or
 		[string]::IsNullOrEmpty($__target) -or
 		[string]::IsNullOrEmpty($__version)) {
-		$null = Remove-Variable -Name "__directory"
-		$null = Remove-Variable -Name "__target"
-		$null = Remove-Variable -Name "__version"
 		return 1
 	}
+
 	$__directory = "${__directory}\deb"
+	$__target = $__target -replace '\.gz.*$'
 
 	# assemble file
-	$null = Remove-Item -Path $__target, "${__target}.gz" -ErrorAction SilentlyContinue
-	$null = New-Item -ItemType Directory -Path (Split-Path ${__target}) -Force
+	$null = FS-Remove-Silently "${__target}"
+	$null = FS-Remove-Silently "${__target}.gz"
+	$null = FS-Make-Housing-Directory "${__target}"
 
-	foreach ($__line in (Get-Content -Path "${__directory}\latest")) {
-		"${__line}" | Out-File -FilePath $__target -Encoding utf8 -Append
+	foreach ($__line in (Get-Content "${__directory}\latest")) {
+		$__process = FS-Append-File "${__target}" "${__line}"
+		if ($__process -ne 0) {
+			return 1
+		}
 	}
 
-	git tag --sort version:refname | ForEach-Object {
-		$__line = $_
-		if (-not (Test-Path "${__directory}\${__line}")) {
+	foreach ($__tag in (git tag --sort version:refname)) {
+		if (-not (Test-Path "${__directory}\${__tag}")) {
 			continue
 		}
 
-		Get-Content "${__directory}\${__line}" | ForEach-Object {
-			"$`n$_" | Out-File -FilePath $__target -Encoding utf8 -Append
+		foreach ($__line in (Get-Content "${__directory}\${__tag}")) {
+			$__process = FS-Append-File "${__target}" "$`n${__line}"
+			if ($__process -ne 0) {
+				return 1
+			}
 		}
 	}
-	$null = Remove-Variable -Name "__line"
 
 	# gunzip
-	$process = GZ-Create "${__target}"
+	$__process = GZ-Create "${__target}"
 
 	# report status
-	$null = Remove-Variable -Name "__directory"
-	$null = Remove-Variable -Name "__target"
-	$null = Remove-Variable -Name "__version"
-	return $process
+	return $__process
+}
+
+
+
+
+function CHANGELOG-Assemble-RPM {
+	param (
+		[string]$__target,
+		[string]$__resources,
+		[string]$__date,
+		[string]$__name,
+		[string]$__email,
+		[string]$__version,
+		[string]$__cadence
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		[string]::IsNullOrEmpty($__resources) -or
+		[string]::IsNullOrEmpty($__date) -or
+		[string]::IsNullOrEmpty($__name) -or
+		[string]::IsNullOrEmpty($__email) -or
+		[string]::IsNullOrEmpty($__version) -or
+		[string]::IsNullOrEmpty($__cadence) -or
+		(-not (Test-Path -Path "${__target}")) -or
+		(-not (Test-Path -Path "${__resources}" -PathType Container))) {
+		return 1
+	}
+
+	# emit stanza
+	$__process = FS-Write-File "${__target}" "%%changelog`n"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# emit latest changelog
+	if (Test-Path -Path "${__resources}\changelog\data\latest") {
+		$__process = FS-Append-File "${__target}" `
+			"* ${__date} ${__name} <${__email}> - ${__version}-${__cadence}`n"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		Get-Content -Path "${__directory}\changelog\data\latest" | ForEach-Object {
+			$__line = $_ -replace '#.*'
+			if ([string]::IsNullOrEmpty($__line)) {
+				continue
+			}
+
+			$__process = FS-Append-File "${__target}" "  * ${__line}"
+			if ($__process -ne 0) {
+				return 1
+			}
+		}
+	} else {
+		$__process = FS-Append-File "${__target}" "# unavailable`n"
+		if ($__process -ne 0) {
+			return 1
+		}
+	}
+
+	# emit tailing newline
+	$__process = FS-Append-File "${__target}" "`n"
+
+	# report status
+	return $__process
 }
 
 
@@ -277,8 +304,5 @@ function CHANGELOG-Assemble-MD {
 	)
 
 	# report status
-	$null = Remove-Variable -Name "__directory"
-	$null = Remove-Variable -Name "__target"
-	$null = Remove-Variable -Name "__version"
 	return 0
 }

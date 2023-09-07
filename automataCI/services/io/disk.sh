@@ -10,32 +10,36 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-ZIP::is_available() {
-        if [ ! -z "$(type -t zip)" ]; then
-                return 0
-        fi
-
-        return 1
-}
-
-
-
-
-ZIP::create() {
-        # __destination="$1"
-        # __source="$2"
+DISK::calculate_size() {
+        # __location="$1"
 
         # validate input
-        ZIP::is_available
+        if [ -z "$1" ] || [ ! -d "$1" ]; then
+                return 1
+        fi
+
+        DISK::is_available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
         # execute
-        zip -9 -r "$1" $2
+        __size="$(du -ks "$1")"
 
         # report status
-        if [ $? -eq 0 ]; then
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        printf "${__size%%[!0-9]*}"
+        return 0
+}
+
+
+
+
+DISK::is_available() {
+        if [ ! -z "$(type -t du)" ]; then
                 return 0
         fi
 

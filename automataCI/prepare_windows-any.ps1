@@ -28,7 +28,7 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 # (1) execute tech specific CI jobs if available
 $recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
 $recipe = "$recipe\prepare_windows-any.ps1"
-$process = FS-IsExists $recipe
+$process = FS-Is-File $recipe
 if ($process -eq 0) {
 	. $recipe
 	if ($?) {

@@ -20,6 +20,7 @@ function PYTHON-Is-Available {
 	if ($__program) {
 		return 0
 	}
+
 	return 1
 }
 
@@ -30,6 +31,7 @@ function PYTHON-Is-VENV-Activated {
 	if ($env:VIRTUAL_ENV) {
 		return 0
 	}
+
 	return 1
 }
 
@@ -37,30 +39,32 @@ function PYTHON-Is-VENV-Activated {
 
 
 function PYTHON-Has-PIP {
-	return OS-Exec "pip" "--version"
+	return OS-Is-Command-Available "pip"
 }
 
 
 
 
 function PYTHON-Activate-VENV {
+	# validate input
 	if ($env:VIRTUAL_ENV) {
 		return 0
 	}
 
+	# execute
 	$__location = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}" `
 			+ "\${env:PROJECT_PATH_PYTHON_ENGINE}\Scripts" `
 			+ "\Activate.ps1"
-
 	if (-not (Test-Path "${__location}")) {
 		return 1
 	}
 
 	. $__location
+
+	# report status
 	if ($env:VIRTUAL_ENV) {
 		return 0
 	}
-
 	return 1
 }
 
@@ -68,6 +72,7 @@ function PYTHON-Activate-VENV {
 
 
 function PYTHON-Setup-VENV {
+	# validate input
 	if (-not $env:PROJECT_PATH_ROOT) {
 		return 1
 	}
@@ -80,6 +85,7 @@ function PYTHON-Setup-VENV {
 		return 1
 	}
 
+	# execute
 	$__process = PYTHON-Is-Available
 	if ($__process -ne 0) {
 		return 1
@@ -90,28 +96,19 @@ function PYTHON-Setup-VENV {
 			+ "\${env:PROJECT_PATH_TOOLS}" `
 			+ "\${env:PROJECT_PATH_PYTHON_ENGINE}"
 	if (Test-Path "${__location}\Scripts\Activate.ps1") {
-		Remove-Variable -Name __location
 		return 0
 	}
-
 
 	# it's a clean repo. Start setting up virtual environment...
 	$__process = OS-Exec "python" "-m venv `"${__location}`""
 	if ($__process -ne 0) {
-		Remove-Variable -Name __location
 		return 1
 	}
 
-
-	# last check
+	# report status
 	if (Test-Path "${__location}\Scripts\Activate.ps1") {
-		Remove-Variable -Name __process
-		Remove-Variable -Name __location
 		return 0
 	}
-
-	Remove-Variable -Name __process
-	Remove-Variable -Name __location
 	return 1
 }
 
@@ -119,9 +116,22 @@ function PYTHON-Setup-VENV {
 
 
 function PYTHON-Clean-Artifact {
-	$null = Get-ChildItem -Recurse `
+	param (
+		[string]$__target
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		(-not (Test-Path -Path "${__target}" -PathType Container))) {
+		return 1
+	}
+
+	# execute
+	$null = Get-ChildItem -Path "${__target}" -Recurse `
 		| Where-Object {$_.Name -match "__pycache__|\.pyc$" } `
 		| Remove-Item -Force -Recurse
+
+	# report status
 	return 0
 }
 
@@ -129,20 +139,23 @@ function PYTHON-Clean-Artifact {
 
 
 function PYPI-Is-Available {
+	# validate input
 	if ([string]::IsNullOrEmpty($env:PROJECT_PYTHON)) {
 		return 1
 	}
 
+	# execute
 	$__process = PYTHON-Is-VENV-Activated
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = Get-Command twine -ErrorAction SilentlyContinue
+	$__process = OS-Is-Command-Available "twine"
 	if (-not ($__process)) {
 		return 1
 	}
 
+	# report status
 	return 0
 }
 
@@ -173,15 +186,6 @@ function PYPI-Create-Setup-PY {
 		[string]::IsNullOrEmpty($__readme_path) -or
 		[string]::IsNullOrEmpty($__readtme_type) -or
 		(-not (Test-Path -PathType Container -Path $__directory))) {
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __project_name
-		Remove-Variable -Name __version
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
-		Remove-Variable -Name __pitch
-		Remove-Variable -Name __readme_path
-		Remove-Variable -Name __readme_type
 		return 1
 	}
 
@@ -208,16 +212,7 @@ setup(
 "@
 
 	# report status
-	Remove-Variable -Name __directory
-	Remove-Variable -Name __project_name
-	Remove-Variable -Name __version
-	Remove-Variable -Name __name
-	Remove-Variable -Name __email
-	Remove-Variable -Name __website
-	Remove-Variable -Name __pitch
-	Remove-Variable -Name __readme_path
-	Remove-Variable -Name __readme_type
-	return 0
+	return $__process
 }
 
 
@@ -232,18 +227,14 @@ function PYPI-Create-Archive {
 	# valdiate input
 	if ([string]::IsNullOrEmpty($__directory) -or
 		[string]::IsNullOrEmpty($__destination) -or
-		(-not (Test-Path -PathType Container -Path $__directory))
+		(-not (Test-Path -PathType Container -Path $__directory)) -or
 		(-not (Test-Path -Path "${__directory}\setup.py")) -or
 		(-not (Test-Path -PathType Container -Path $__destination))) {
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __destination
 		return 1
 	}
 
 	$__process = PYPI-Is-Available
 	if ($__process -ne 0) {
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __destination
 		return 1
 	}
 
@@ -254,8 +245,6 @@ function PYPI-Create-Archive {
 	if ($__process -ne 0) {
 		Set-Location -Path $__current_path
 		Remove-Variable -Name __current_path
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __destination
 		return 1
 	}
 
@@ -263,18 +252,19 @@ function PYPI-Create-Archive {
 	if ($__process -ne 0) {
 		Set-Location -Path $__current_path
 		Remove-Variable -Name __current_path
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __destination
 		return 1
 	}
 	Set-Location -Path $__current_path
 	Remove-Variable -Name __current_path
 
 	# export to destination
-	$__process = FS-Move "${__directory}\dist\*" "${__destination}\."
+	$null = Get-ChildItem -Path "${__directory}\dist" -Recurse | Where-Object {
+		$__process = FS-Move "${_}.FullName" "${__destination}\."
+		if ($__process -ne 0) {
+			return 1
+		}
+	}
 
 	# report status
-	Remove-Variable -Name __directory
-	Remove-Variable -Name __destination
-	return $__process
+	return 0
 }

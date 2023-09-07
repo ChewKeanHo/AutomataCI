@@ -14,13 +14,13 @@
 
 
 
-function GZ-Create {
+function XZ-Create {
 	param (
 		[string]$__source
 	)
 
 	# validate input
-	$__process = GZ-Is-Available
+	$__process = XZ-Is-Available
 	if ($__process -ne 0) {
 		return 1
 	}
@@ -28,16 +28,10 @@ function GZ-Create {
 	if ([string]::IsNullOrEmpty($__source) -or (Test-Path $__source -PathType Container)) {
 		return 1
 	}
-	$__source = $__source -replace "\.gz$"
+	$__source = $__source -replace "\.xz$"
 
 	# create .gz compressed target
-	if ((OS-Is-Command-Available "gzip") -eq 0) {
-		$__process = OS-Exec "gzip" "-9 `"${__source}`""
-	} elseif ((OS-Is-Command-Available "gunzip") -eq 0) {
-		$__process = OS-Exec "gunzip" "-9 `"${__source}`""
-	} else {
-		$__process = 1
-	}
+	$__process = OS-Exec "xz" "-9 --compress `"${__source}`""
 
 	# report status
 	return $__process
@@ -46,13 +40,8 @@ function GZ-Create {
 
 
 
-function GZ-Is-Available {
-	$__process = OS-Is-Command-Available "gzip"
-	if ($__process -eq 0) {
-		return 0
-	}
-
-	$__process = OS-Is-Command-Available "gunzip"
+function XZ-Is-Available {
+	$__process = OS-Is-Command-Available "xz"
 	if ($__process -eq 0) {
 		return 0
 	}

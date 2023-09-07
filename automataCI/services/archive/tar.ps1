@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\gz.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\xz.ps1"
 
 
 
@@ -21,21 +21,16 @@ function TAR-Is-Available {
 		return 1
 	}
 
-	$__process = GZ-Is-Available
-	if ($__process -ne 0) {
-		return 1
-	}
-
 	return 0
 }
 
 
 
 
-function TARXZ-Create {
+function TAR-Create-XZ {
 	param (
-		[string]$__source,
-		[string]$__destination
+		[string]$__destination,
+		[string]$__source
 	)
 
 	# validate input
@@ -44,25 +39,22 @@ function TARXZ-Create {
 		(-not (Test-Path $__source -PathType Container)) -or
 		(Test-Path -PathType Leaf -Path $__destination) -or
 		(Test-Path $__destination -PathType Container)) {
-		Remove-Variable -Name __source
-		Remove-Variable -Name __destination
 		return 1
 	}
 
 	$__process = TAR-Is-Available
 	if ($__process -ne 0) {
-		Remove-Variable -Name __source
-		Remove-Variable -Name __destination
+		return 1
+	}
+
+	$__process = XZ-Is-Available
+	if ($__process -ne 0) {
 		return 1
 	}
 
 	# create tar.xz archive
-	$__process = OS-Exec "tar -cvJf `"${__destination}`" `"${__source}`""
+	$__process = OS-Exec "tar -cvJf `"${__destination}`" ${__source}"
 
 	# report status
-	Remove-Variable -Name __program
-	Remove-Variable -Name __source
-	Remove-Variable -Name __destination
-
 	return $__process
 }

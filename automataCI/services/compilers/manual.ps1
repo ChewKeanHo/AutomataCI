@@ -15,18 +15,6 @@
 
 
 
-function MANUAL-Is-Available {
-	$__process = GZ-Is-Available
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	return 0
-}
-
-
-
-
 function MANUAL-Create-DEB-Manpage {
 	param(
 		[string]$__directory,
@@ -45,60 +33,41 @@ function MANUAL-Create-DEB-Manpage {
 		[string]::IsNullOrEmpty($__name) -or
 		[string]::IsNullOrEmpty($__email) -or
 		[string]::IsNullOrEmpty($__website)) {
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __is_native
-		Remove-Variable -Name __sku
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
 		return 1
 	}
 
 	# check if is the document already injected
 	$__location = "${__directory}\data\usr\local\share\man\man1\${__sku}.1"
-	if (Test-Path "${__location}.gz") {
-		Remove-Variable -Name __location
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __is_native
-		Remove-Variable -Name __sku
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
-		return 0
+	$__process = FS-Is-File "${__location}"
+	if ($__process -eq 0) {
+		return 2
+	}
+
+	$__process = FS-Is-File "${__location}.gz"
+	if ($__process -eq 0) {
+		return 2
 	}
 
 	if ($__is_native == "true") {
 		$__location = "${__directory}\data\usr\share\man\man1\${__sku}.1"
-		if (Test-Path "${__location}.gz") {
-			Remove-Variable -Name __location
-			Remove-Variable -Name __directory
-			Remove-Variable -Name __is_native
-			Remove-Variable -Name __sku
-			Remove-Variable -Name __name
-			Remove-Variable -Name __email
-			Remove-Variable -Name __website
-			return 0
+		$__process = FS-Is-File "${__location}"
+		if ($__process -eq 0) {
+			return 2
+		}
+
+		$__process = FS-Is-File "${__location}.gz"
+		if ($__process -eq 0) {
+			return 2
 		}
 	}
 
 	# create manpage
-	$__process = MANUAL-Create-Baseline-Manpage `
+	return MANUAL-Create-Baseline-Manpage `
 		$__location `
 		$__sku `
 		$__name `
 		$__email `
 		$__website
-
-
-	# report status
-	Remove-Variable -Name __location
-	Remove-Variable -Name __directory
-	Remove-Variable -Name __is_native
-	Remove-Variable -Name __sku
-	Remove-Variable -Name __name
-	Remove-Variable -Name __email
-	Remove-Variable -Name __website
-	return $__process
 }
 
 
@@ -120,43 +89,29 @@ function MANUAL-Create-RPM-Manpage {
 		[string]::IsNullOrEmpty($__name) -or
 		[string]::IsNullOrEmpty($__email) -or
 		[string]::IsNullOrEmpty($__website)) {
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __sku
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
 		return 1
 	}
 
 	# check if is the document already injected
 	$__location = "${__directory}\BUILD\${__sku}.1"
-	if (Test-Path "${__location}.gz") {
-		Remove-Variable -Name __location
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __is_native
-		Remove-Variable -Name __sku
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
-		return 0
+
+	$__process = FS-Is-File "${__location}"
+	if ($__process -eq 0) {
+		return 2
+	}
+
+	$__process = FS-Is-File "${__location}.gz"
+	if ($__process -eq 0) {
+		return 2
 	}
 
 	# create manpage
-	$__process = MANUAL-Create-Baseline-Manpage `
+	return MANUAL-Create-Baseline-Manpage `
 		$__location `
 		$__sku `
 		$__name `
 		$__email `
 		$__website
-
-	# report status
-	Remove-Variable -Name __location
-	Remove-Variable -Name __directory
-	Remove-Variable -Name __sku
-	Remove-Variable -Name __name
-	Remove-Variable -Name __email
-	Remove-Variable -Name __website
-	return $__process
 }
 
 
@@ -177,20 +132,16 @@ function MANUAL-Create-Baseline-Manpage {
 		[string]::IsNullOrEmpty($__name) -or
 		[string]::IsNullOrEmpty($__email) -or
 		[string]::IsNullOrEmpty($__website)) {
-		Remove-Variable -Name __location
-		Remove-Variable -Name __sku
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
 		return 1
 	}
 
 	# create housing directory path
-	$null = FS-Make-Directory (Split-Path -Parent -Path $__location)
+	$null = FS-Make-Housing-Directory "${__location}"
 
 	# create basic level 1 man page that instruct users to seek --help
-	$null = FS-Remove-Silently $__location
-	$__content = @".`" ${__sku} - Lv1 Manpage
+	$null = FS-Remove-Silently "${__location}"
+	$__process = FS-Write-File "${__location}" @"
+.`" ${__sku} - Lv1 Manpage
 .TH man 1 `"${__sku} man page`"
 
 .SH NAME
@@ -210,16 +161,22 @@ Please visit ${__website} for more info.
 .SH AUTHORS
 Contact: ${__name} <${__email}>
 "@
-	$null = FS-Write-File $__location $__content
+	if ($__process -ne 0) {
+		return 0
+	}
 
 	# gunzip the manual
-	$__process = GZ-Create $__location
+	return GZ-Create "${__location}"
+}
 
-	# report status
-	Remove-Variable -Name __location
-	Remove-Variable -Name __sku
-	Remove-Variable -Name __name
-	Remove-Variable -Name __email
-	Remove-Variable -Name __website
-	return $__process
+
+
+
+function MANUAL-Is-Available {
+	$__process = GZ-Is-Available
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	return 1
 }

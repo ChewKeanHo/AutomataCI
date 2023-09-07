@@ -27,115 +27,132 @@ function COPYRIGHT-Create-DEB {
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
-		[string]::IsNullOrEmpty($__manual_file) -or
 		(-not (Test-Path $__directory -PathType Container)) -or
+		[string]::IsNullOrEmpty($__manual_file) -or
 		(-not (Test-Path $__manual_file)) -or
 		[string]::IsNullOrEmpty($__sku) -or
 		[string]::IsNullOrEmpty($__name) -or
 		[string]::IsNullOrEmpty($__email) -or
 		[string]::IsNullOrEmpty($__website)) {
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __manual_file
-		Remove-Variable -Name __is_native
-		Remove-Variable -Name __sku
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
 		return 1
 	}
 
 	# checck if is the document already injected
 	$__location = "${__directory}\data\usr\local\share\doc\${__sku}\copyright"
-	if (Test-Path $__location) {
-		Remove-Variable -Name __location
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __manual_file
-		Remove-Variable -Name __is_native
-		Remove-Variable -Name __sku
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
+	if (Test-Path "${__location}") {
 		return 0
 	}
 
 	if ($__is_native == "true") {
 		$__location = "${__directory}\data\usr\share\doc\${__sku}\copyright"
-		if (Test-Path $__location) {
-			Remove-Variable -Name __location
-			Remove-Variable -Name __directory
-			Remove-Variable -Name __manual_file
-			Remove-Variable -Name __is_native
-			Remove-Variable -Name __sku
-			Remove-Variable -Name __name
-			Remove-Variable -Name __email
-			Remove-Variable -Name __website
+		if (Test-Path "${__location}") {
 			return 0
 		}
 	}
 
-	# create housing directory path
-	$__process = FS-Make-Housing-Directory $__location
-	if ($__process -ne 0) {
-		Remove-Variable -Name __location
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __manual_file
-		Remove-Variable -Name __is_native
-		Remove-Variable -Name __sku
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
+	# create baseline
+	$__process = COPYRIGHT-Create-Baseline-DEB `
+		"${__location}" `
+		"${__manual_file}" `
+		"${__sku}" `
+		"${__name}" `
+		"${__email}" `
+		"${__website}"
+
+	# report status
+	return $__process
+}
+
+
+
+
+function COPYRIGHT-Create-RPM {
+	param (
+		[string]$__directory,
+		[string]$__manual_file,
+		[string]$__is_native,
+		[string]$__sku,
+		[string]$__name,
+		[string]$__email,
+		[string]$__website
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__directory) -or
+		(-not (Test-Path $__directory -PathType Container)) -or
+		[string]::IsNullOrEmpty($__manual_file) -or
+		(-not (Test-Path $__manual_file)) -or
+		[string]::IsNullOrEmpty($__sku) -or
+		[string]::IsNullOrEmpty($__name) -or
+		[string]::IsNullOrEmpty($__email) -or
+		[string]::IsNullOrEmpty($__website)) {
 		return 1
 	}
 
+	# checck if is the document already injected
+	$__location = "${__directory}\BUILD\copyright"
+	if (Test-Path "${__location}") {
+		return 0
+	}
+
+	# create baseline
+	$__process = COPYRIGHT-Create-Baseline-DEB `
+		"${__location}" `
+		"${__manual_file}" `
+		"${__sku}" `
+		"${__name}" `
+		"${__email}" `
+		"${__website}"
+
+	# report status
+	return $__process
+}
+
+
+
+
+function COPYRIGHT-Create-Baseline-DEB {
+	param (
+		[string]$__location,
+		[string]$__manual_file,
+		[string]$__sku,
+		[string]$__name,
+		[string]$__email,
+		[string]$__website
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__location) -or
+		(Test-Path $__location -PathType Container) -or
+		[string]::IsNullOrEmpty($__manual_file) -or
+		(-not (Test-Path $__manual_file)) -or
+		[string]::IsNullOrEmpty($__sku) -or
+		[string]::IsNullOrEmpty($__name) -or
+		[string]::IsNullOrEmpty($__email) -or
+		[string]::IsNullOrEmpty($__website)) {
+		return 1
+	}
+
+	# create housing directory path
+	$null = FS-Make-Housing-Directory "${__location}"
+
 	# create copyright stanza header
-	$__content = @"
+	$__process = FS-Write-File "${__location}" @"
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: ${__sku}
 Upstream-Contact: ${__name} <${__email}>
 Source: ${__website}
 
 "@
-	$__process = FS-Write-File "$__location" "$__content"
 	if ($__process -ne 0) {
-		Remove-Variable -Name __location
-		Remove-Variable -Name __content
-		Remove-Variable -Name __directory
-		Remove-Variable -Name __manual_file
-		Remove-Variable -Name __is_native
-		Remove-Variable -Name __sku
-		Remove-Variable -Name __name
-		Remove-Variable -Name __email
-		Remove-Variable -Name __website
 		return 1
 	}
 
 	# append manually facilitated copyright contents
 	Get-Content -Path $__manual_file | ForEach-Object {
-		$__content = $_.Substring(0, [Math]::Min($_.Length, 80))
-		$__process = FS-Append-File $__location $__content
-		if ($__process -ne 0) {
-			Remove-Variable -Name __location
-			Remove-Variable -Name __content
-			Remove-Variable -Name __directory
-			Remove-Variable -Name __manual_file
-			Remove-Variable -Name __is_native
-			Remove-Variable -Name __sku
-			Remove-Variable -Name __name
-			Remove-Variable -Name __email
-			Remove-Variable -Name __website
-			return 1
-		}
+		$null = FS-Append-File "${__location}" "${_}"
 	}
 
 	# report status
-	Remove-Variable -Name __location
-	Remove-Variable -Name __content
-	Remove-Variable -Name __directory
-	Remove-Variable -Name __manual_file
-	Remove-Variable -Name __is_native
-	Remove-Variable -Name __sku
-	Remove-Variable -Name __name
-	Remove-Variable -Name __email
-	Remove-Variable -Name __website
 	return 0
 }

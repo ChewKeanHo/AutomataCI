@@ -16,21 +16,15 @@
 
 # (0) initialize
 if [ "$PROJECT_PATH_ROOT" = "" ]; then
-        >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run me from ci.cmd instead!\n"
         return 1
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/zip.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/changelog.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/copyright.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/manual.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/deb.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rpm.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/flatpak.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
 
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-changelog_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-archive_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-deb_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-rpm_unix-any.sh"
@@ -39,110 +33,42 @@ fi
 
 
 
-# (1) safety checking control surfaces
-OS::print_status info "checking tar functions availability...\n"
-TAR::is_available
+
+# (1) source locally provided functions
+DEST="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
+DEST="${DEST}/package_unix-any.sh"
+OS::print_status info "sourcing content assembling functions from: ${DEST}\n"
+FS::is_target_exist "$DEST"
 if [ $? -ne 0 ]; then
-        OS::print_status error "check failed.\n"
+        OS::print_status error "Sourcing failed\n"
         return 1
 fi
-
-OS::print_status info "checking zip functions availability...\n"
-ZIP::is_available
-if [ $? -ne 0 ]; then
-        OS::print_status error "check failed.\n"
-        return 1
-fi
-
-OS::print_status info "checking changelog functions availability...\n"
-CHANGELOG::is_available
-if [ $? -ne 0 ]; then
-        OS::print_status error "checking failed.\n"
-        return 1
-fi
-
-OS::print_status info "checking manual docs functions availability...\n"
-MANUAL::is_available
-if [ $? -ne 0 ]; then
-        OS::print_status error "checking failed.\n"
-        return 1
-fi
-
-OS::print_status info "sourcing content assembling functions from the project...\n"
-recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
-recipe="${recipe}/package_unix-any.sh"
-if [ ! -f "$recipe" ]; then
-        OS::print_status error "sourcing failed - Missing file: ${recipe}\n"
-        return 1
-fi
-. "$recipe"
+. "$DEST"
 
 
 
 
-# (2) clean up destination path
-dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
-OS::print_status info "remaking package directory: $dest\n"
-FS::remake_directory "$dest"
+# (2) 1-time setup job required materials
+DEST="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+OS::print_status info "remaking package directory: $DEST\n"
+FS::remake_directory "$DEST"
 if [ $? -ne 0 ]; then
         OS::print_status error "remake failed.\n"
         return 1
 fi
 
 
-
-
-# (3) validate changelog
-OS::print_status info "validating ${PROJECT_VERSION} data changelog entry...\n"
-CHANGELOG::compatible_data_version \
-        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
-        "$PROJECT_VERSION"
-if [ $? -ne 0 ]; then
-        OS::print_status error "validation failed - there is an existing entry.\n"
-        return 1
-fi
-
-OS::print_status info "validating ${PROJECT_VERSION} deb changelog entry...\n"
-CHANGELOG::compatible_deb_version \
-        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
-        "$PROJECT_VERSION"
-if [ $? -ne 0 ]; then
-        OS::print_status error "validation failed - there is an existing entry.\n"
-        return 1
-fi
-
-
-
-
-# (4) assemble changelog
-OS::print_status info "assembling markdown changelog...\n"
 FILE_CHANGELOG_MD="${PROJECT_PATH_ROOT}/MARKDOWN.md"
-CHANGELOG::assemble_md \
-        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
-        "$FILE_CHANGELOG_MD" \
-        "$PROJECT_VERSION"
+FILE_CHANGELOG_DEB="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb/changelog.gz"
+PACKAGE::run_changelog "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
 if [ $? -ne 0 ]; then
-        OS::print_status error "assembly failed.\n"
         return 1
 fi
 
-OS::print_status info "assembling deb changelog...\n"
-FILE_CHANGELOG_DEB="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb/changelog"
-mkdir -p "${FILE_CHANGELOG_DEB%/*}"
-CHANGELOG::assemble_deb \
-        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
-        "$FILE_CHANGELOG_DEB" \
-        "$PROJECT_VERSION"
-if [ $? -ne 0 ]; then
-        OS::print_status error "assembly failed.\n"
-        return 1
-fi
-FILE_CHANGELOG_DEB="${FILE_CHANGELOG_DEB}.gz"
 
 
 
-
-# (5) begin packaging
+# (3) begin packaging
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         if [ -d "$i" ]; then
                 continue
@@ -162,36 +88,59 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 continue
         fi
 
-        TARGET_SKU="$PROJECT_SKU"
-        if [ ! "$TARGET_FILENAME" = "$TARGET_SKU" ]; then
-                TARGET_SKU="${PROJECT_SKU}-src"
-                if [ ! "$TARGET_FILENAME" = "$TARGET_SKU" ]; then
-                        OS::print_status warning "incompatible file. Skipping.\n"
-                        continue
-                fi
+        STRINGS::has_prefix "$PROJECT_SKU" "$TARGET_FILENAME"
+        if [ $? -ne 0 ]; then
+                OS::print_status warning "incompatible file. Skipping.\n"
+                continue
         fi
 
-        PACKAGE::run_archive
+        PACKAGE::run_archive \
+                "$DEST" \
+                "$i" \
+                "$TARGET_FILENAME" \
+                "$TARGET_OS" \
+                "$TARGET_ARCH"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        PACKAGE::run_deb
+        PACKAGE::run_deb \
+                "$DEST" \
+                "$i" \
+                "$TARGET_FILENAME" \
+                "$TARGET_OS" \
+                "$TARGET_ARCH" \
+                "$FILE_CHANGELOG_DEB"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        PACKAGE::run_rpm
+        PACKAGE::run_rpm \
+                "$DEST" \
+                "$i" \
+                "$TARGET_FILENAME" \
+                "$TARGET_OS" \
+                "$TARGET_ARCH"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        PACKAGE::run_flatpak
+        PACKAGE::run_flatpak \
+                "$DEST" \
+                "$i" \
+                "$TARGET_FILENAME" \
+                "$TARGET_OS" \
+                "$TARGET_ARCH"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        PACKAGE::run_pypi "$i" "$TARGET_FILENAME" "$TARGET_SKU" "$TARGET_OS" "$TARGET_ARCH"
+        PACKAGE::run_pypi \
+                "$DEST" \
+                "$i" \
+                "$TARGET_FILENAME" \
+                "$TARGET_OS" \
+                "$TARGET_ARCH"
         if [ $? -ne 0 ]; then
                 return 1
         fi

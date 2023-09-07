@@ -10,25 +10,68 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-FS::copy_file() {
-        __source="$1"
-        __destination="$2"
+FS::append_file() {
+        # __target="$1"
+        # __content="$2"
 
-        # validate input
-        if [ -z "$__source" ] || [ -z "$__destination" ]; then
-                unset __source __destination
+        # validate target
+        if [ ! -z "$1" -a -z "$2" ] || [ -z "$1" ]; then
                 return 1
         fi
 
-        # perform copying
-        cp "$__source" "$__destination"
+        # perform file write
+        printf -- "%b" "$2" >> "$1"
+
+        # report status
         if [ $? -eq 0 ]; then
-                unset __source __destination
                 return 0
         fi
 
+        return 1
+}
+
+
+
+
+FS::copy_all() {
+        # __source="$1"
+        # __destination="$2"
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ]; then
+                return 1
+        fi
+
+        # execute
+        cp -r "${1}"* "${2}/."
+
         # report status
-        unset __source __destination
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+FS::copy_file() {
+        # __source="$1"
+        # __destination="$2"
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ]; then
+                return 1
+        fi
+
+        # execute
+        cp "$1" "$2"
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
         return 1
 }
 
@@ -36,19 +79,76 @@ FS::copy_file() {
 
 
 FS::is_directory() {
-        __subject="$1"
+        # __target="$1"
 
-        if [ -z "$__subject" ]; then
-                unset __subject
+        # execute
+        if [ -z "$1" ]; then
                 return 1
         fi
 
 
-        if [ -d "$__subject" ]; then
-                unset __subject
+        if [ -d "$1" ]; then
                 return 0
         fi
 
+        return 1
+}
+
+
+
+
+FS::is_file() {
+        # __target="$1"
+
+        # execute
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        if [ -f "$1" ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+FS::is_target_a_source() {
+        # __target="$1"
+
+        # execute
+        if [ "${1#*-src}" != "$1" ]; then
+                return 0
+        fi
+
+        # report status
+        return 1
+}
+
+
+
+
+FS::is_target_exist() {
+        # __target="$1"
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+        # perform checking
+        if [ -f "$1" ]; then
+                return 0
+        fi
+
+        # report status
         return 1
 }
 
@@ -56,122 +156,102 @@ FS::is_directory() {
 
 
 FS::list_all() {
-        __target="$1"
-
-        # validate target
-        if [ -z "$__target" ]; then
-                unset __target
-                return 1
-        fi
-
-        # perform listing
-        FS::is_directory "$__target"
-        if [ $? -ne 0 ]; then
-                unset __target
-                return 1
-        fi
-
-        ls -la "$__target"
-        unset __target
-        return 0
-}
-
-
-
-
-FS::remove() {
-        __target="$1"
-
-        # validate target
-        if [ -z "$__target" ]; then
-                unset __target
-        fi
-
-        # perform remove
-        rm -rf "$__target"
-        __exit=$?
-        unset __target
-        if [ $__exit -ne 0 ]; then
-                __exit=1
-        fi
-        return $__exit
-}
-
-
-
-
-FS::remove_silently() {
-        __target="$1"
-
-        # validate target
-        if [ -z "$__target" ]; then
-                unset __target
-        fi
-
-        # perform remove
-        rm -rf "$__target" &> /dev/null
-        unset __target
-        return 0
-}
-
-
-
-
-FS::rename() {
-        __source="$1"
-        __target="$2"
+        # __target="$1"
 
         # validate input
-        if [ -z "$__source" ] ||
-                [ -z "$__target" ] ||
-                [ ! -d "$__source" ] ||
-                [ ! -f "$__source" ] ||
-                [ -d "$__target" ] ||
-                [ -f "$__target" ]; then
-                unset __source __target
+        if [ -z "$1" ]; then
                 return 1
         fi
 
-        # perform rename
-        mv "$__source" "$__target"
-        __exit=$?
-        if [ $__exit -eq 0 ]; then
-                __exit=0
-        else
-                __exit=1
+        FS::is_directory "$1"
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
-        # report status
-        unset __source __target
-        return $__exit
+        # execute
+        ls -la "$1"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
 }
 
 
 
 
 FS::make_directory() {
-        __target="$1"
+        # __target="$1"
 
-        # validate target
-        if [ -z "$__target" ] || [ -f "$__target" ]; then
-                unset __target
+        # validate input
+        if [ -z "$1" ]; then
                 return 1
         fi
 
-        if [ -d "$__target" ]; then
-                unset __target
+        FS::is_directory "$1"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        FS::is_target_exist "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        # execute
+        mkdir -p "$1"
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+FS::make_housing_directory() {
+        # __target="$1"
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -eq 0 ]; then
                 return 0
         fi
 
         # perform create
-        mkdir -p "$__target"
-        __exit=$?
-        unset __target
+        FS::make_directory "${1%/*}"
 
         # report status
-        if [ $__exit -eq 0 ]; then
+        return $?
+}
+
+
+
+
+FS::move() {
+        # __source="$1"
+        # __destination="$2"
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ]; then
+                return 1
+        fi
+
+        # execute
+        mv "$1" "$2"
+
+        # report status
+        if [ $? -eq 0 ]; then
                 return 0
         fi
+
         return 1
 }
 
@@ -179,10 +259,13 @@ FS::make_directory() {
 
 
 FS::remake_directory() {
-        # $1 = target_path
+        # __target="$1"
 
+        # execute
         FS::remove_silently "$1"
         FS::make_directory "$1"
+
+        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -192,10 +275,104 @@ FS::remake_directory() {
 
 
 
-FS::is_target_a_source() {
-        # $1 = __target
+FS::remove() {
+        # __target="$1"
 
-        if [ "${1#*-src}" != "$1" ]; then
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+        # execute
+        rm -rf "$1"
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+FS::remove_silently() {
+        # __target="$1"
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 0
+        fi
+
+        # execute
+        rm -rf "$1" &> /dev/null
+
+        # report status
+        return 0
+}
+
+
+
+
+FS::rename() {
+        #__source="$1"
+        #__target="$2"
+
+        # execute
+        FS::move "$1" "$2"
+        return $?
+}
+
+
+
+
+FS::touch_file() {
+        # __target="$1"
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+        FS::is_file "$1"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        # execute
+        touch "$1"
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+FS::write_file() {
+        # __target="$1"
+        # __content="$2"
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+        FS::is_file "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        # perform file write
+        printf -- "%b" "$2" >> "$1"
+
+        # report status
+        if [ $? -eq 0 ]; then
                 return 0
         fi
 

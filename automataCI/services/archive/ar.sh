@@ -10,34 +10,32 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-ZIP::is_available() {
-        if [ ! -z "$(type -t zip)" ]; then
-                return 0
+AR::is_available() {
+        if [ -z "$(type -t ar)" ]; then
+                return 1
         fi
 
-        return 1
+        return 0
 }
 
 
 
 
-ZIP::create() {
-        # __destination="$1"
-        # __source="$2"
+AR::create() {
+        # __name="$1"
+        # __list="$2"
 
         # validate input
-        ZIP::is_available
-        if [ $? -ne 0 ]; then
+        if [ -z "$1" ] || [ -z "$2" ]; then
                 return 1
         fi
 
         # execute
-        zip -9 -r "$1" $2
+        ar r "$1" $2
 
         # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
-
         return 1
 }

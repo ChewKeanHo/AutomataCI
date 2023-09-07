@@ -10,19 +10,24 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
+
+
+
+
 FLATPAK::is_available() {
         __os="$1"
         __arch="$2"
 
         if [ -z "$__os" ] && [ -z "$__arch" ]; then
-                unset __os __arch
                 return 1
         fi
 
         # check compatible target os
         case "$__os" in
         windows|darwin)
-                unset __os __arch
                 return 2
                 ;;
         *)
@@ -32,16 +37,15 @@ FLATPAK::is_available() {
         # check compatible target cpu architecture
         case "$__arch" in
         any)
-                unset __os __arch
                 return 3
                 ;;
         *)
                 ;;
         esac
-        unset __os __arch
 
         # validate dependencies
-        if [ -z "$(type -t flatpak-builder)" ]; then
+        OS::is_command_available "flatpak-builder"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
@@ -57,32 +61,25 @@ FLATPAK::create_appinfo() {
         __resources="$2"
 
         # validate input
-        if [ -z "$__directory" ] ||
-                [ -z "$__resources" ]; then
-                unset __directory __resources
+        if [ -z "$__directory" ] || [ -z "$__resources" ]; then
                 return 1
         fi
 
         # check for overriding manifest file
         if [ -f "${__directory}/appdata.xml" ]; then
-                unset __directory __resources
                 return 2
         fi
 
         # check appinfo is available
         if [ ! -f "${__resources}/packages/flatpak.xml" ]; then
-                unset __directory __resources
                 return 1
         fi
 
         # copy flatpak.xml to workspace
-        cp "${__resources}/packages/flatpak.xml" "${__directory}/appdata.xml"
+        FS::copy_file "${__resources}/packages/flatpak.xml" "${__directory}/appdata.xml"
         if [ $? -ne 0 ]; then
-                unset __directory __resources
                 return 1
         fi
-
-        unset __directory __resources
         return 0
 }
 
@@ -110,34 +107,17 @@ FLATPAK::create_manifest() {
                 [ -z "$__sdk" ] ||
                 [ ! -d "$__resources" ] ||
                 [ ! -d "$__location" ]; then
-                unset __location \
-                        __resources \
-                        __app_id \
-                        __sku \
-                        __arch \
-                        __runtime \
-                        __runtime_version \
-                        __sdk
                 return 1
         fi
 
         # check for overriding manifest file
         if [ -f "${__location}/manifest.yml" ] || [ -f "${__location}/manifest.json" ]; then
-                unset __location \
-                        __resources \
-                        __manifest \
-                        __app_id \
-                        __sku \
-                        __arch \
-                        __runtime \
-                        __runtime_version \
-                        __sdk
                 return 2
         fi
 
         # generate manifest app metadata fields
-        __location="${__location}/manifest.yml"
-        printf "\
+        __target="${__location}/manifest.yml"
+        FS::write_file "$__target" "\
 app-id: ${__app_id}
 branch: ${__arch}
 default-branch: any
@@ -160,24 +140,24 @@ modules:
     sources:
       - type: file
         path: appdata.xml
-" >> "$__location"
+"
 
         # process icon.svg
-        if [ -f "${1}/icon.svg" ]; then
-                printf "\
-  - name: ${__sku}-logo-svg
+        if [ -f "${__location}/icon.svg" ]; then
+                FS::write_file "$__target" "\
+  - name: ${__sku}-icon-svg
     buildsystem: simple
     build-commands:
       - install -D icon.svg /app/share/icons/hicolor/scalable/apps/${__sku}.svg
     sources:
       - type: file
         path: icon.svg
-" >> "$__location"
+"
         fi
 
         # process icon-48x48.png
-        if [ -f "${1}/icon-48x48.png" ]; then
-                printf "\
+        if [ -f "${__location}/icon-48x48.png" ]; then
+                FS::write_file "$__target" "\
   - name: ${__sku}-logo-48x48-png
     buildsystem: simple
     build-commands:
@@ -185,12 +165,12 @@ modules:
     sources:
       - type: file
         path: icon-48x48.png
-" >> "$__location"
+"
         fi
 
         # process icon-128x128.png
-        if [ -f "${1}/icon-128x128.png" ]; then
-                printf "\
+        if [ -f "${__location}/icon-128x128.png" ]; then
+                FS::write_file "$__target" "\
   - name: ${__sku}-icon-128x128-png
     buildsystem: simple
     build-commands:
@@ -198,7 +178,7 @@ modules:
     sources:
       - type: file
         path: icon-128x128.png
-" >> "$__location"
+"
         fi
 
         # append more setup if available
@@ -207,27 +187,18 @@ modules:
                 while IFS="" read -r __line || [ -n "$__line" ]; do
                         __line="${__line%%#*}"
                         __key="${__line%%:*}"
-                        __key="${__key#"${__key%%[![:space:]]*}"}"
-                        __key="${__key%"${__key##*[![:space:]]}"}"
+                        __key="$(STRINGS::trim_whitespace "${__key}")"
 
                         if [ -z "$__line" ] || [ "$__key" = "modules" ]; then
                                 continue
                         fi
 
-                        printf "${__line}\n" >> "$__location"
+                        FS::write_file "$__target" "${__line}\n"
                 done < "${__resources}/packages/flatpak.yml"
                 IFS="$old_IFS" && unset old_IFS
         fi
 
         # report status
-        unset __location \
-                __resources \
-                __app_id \
-                __sku \
-                __arch \
-                __runtime \
-                __runtime_version \
-                __sdk
         return 0
 }
 
@@ -246,31 +217,21 @@ FLATPAK::create_archive() {
                 [ -z "$__app_id" ] ||
                 [ -z "$__gpg_id" ] ||
                 [ ! -d "$__directory" ]; then
-                unset __directory \
-                        __destination \
-                        __app_id \
-                        __gpg_id
                 return 1
         fi
+
+        __path_build="./build"
+        __path_manifest="./manifest.yml"
 
         # change location into the workspace
         __current_path="$PWD"
         cd "$__directory"
 
-        __path_build="./build"
-        __path_manifest="./manifest.yml"
-
+        # build archive
         if [ ! -f "$__path_manifest" ]; then
-                unset __directory \
-                        __destination \
-                        __app_id \
-                        __gpg_id \
-                        __path_build \
-                        __path_manifest
                 return 1
         fi
 
-        # build archive
         flatpak-builder \
                 --force-clean \
                 --gpg-sign="${__gpg_id}" \
@@ -278,31 +239,19 @@ FLATPAK::create_archive() {
                 "${__path_manifest}"
         if [ $? -ne 0 ]; then
                 cd "${__current_path}" && unset __current_path
-                unset __directory \
-                        __destination \
-                        __app_id \
-                        __gpg_id \
-                        __path_build \
-                        __path_manifest
                 return 1
         fi
 
         # export output
-        mv "$__path_build" "$__destination"
-        if [ $? -ne 0 ]; then
-                cd "${__current_path}" && unset __current_path
-                unset __directory \
-                        __destination \
-                        __app_id \
-                        __gpg_id \
-                        __path_build \
-                        __path_manifest
-                return 1
-        fi
+        FS::move "$__path_build" "$__destination"
+        __exit=$?
 
         # head back to current directory
         cd "${__current_path}" && unset __current_path
 
         # report status
+        if [ $__exit -ne 0 ]; then
+                return 1
+        fi
         return 0
 }

@@ -14,10 +14,12 @@ function OS-Is-Command-Available {
 		[string] $__command
 	)
 
+	# validate input
 	if ([string]::IsNullOrEmpty($__command)) {
 		return 1
 	}
 
+	# execute
 	$__program = Get-Command $__command -ErrorAction SilentlyContinue
 	if ($__program) {
 		return 0
@@ -36,17 +38,12 @@ function OS-Exec {
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__command) -or [string]::IsNullOrEmpty($__arguments)) {
-		Remove-Variable -Name __command
-		Remove-Variable -Name __arguments
 		return 1
 	}
 
 	# get program
 	$__program = Get-Command $__command -ErrorAction SilentlyContinue
 	if (-not ($__program)) {
-		Remove-Variable -Name __program
-		Remove-Variable -Name __command
-		Remove-Variable -Name __arguments
 		return 1
 	}
 
@@ -56,15 +53,10 @@ function OS-Exec {
 				-NoNewWindow `
 				-ArgumentList "$__arguments" `
 				-PassThru
-	$__exit = 0
 	if ($__process.ExitCode -ne 0) {
-		$__exit = 1
+		return 1
 	}
-
-	Remove-Variable -Name __program
-	Remove-Variable -Name __command
-	Remove-Variable -Name __arguments
-	return $__exit
+	return 0
 }
 
 

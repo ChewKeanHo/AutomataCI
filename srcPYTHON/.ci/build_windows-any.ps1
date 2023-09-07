@@ -82,7 +82,7 @@ if ($process -ne 0) {
 
 $file = "${env:PROJECT_SKU}-src_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 OS-Print-Status info "building output file: $file"
-$process = FS-Touch "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${file}"
+$process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${file}"
 if ($process -ne 0) {
 	OS-Print-Status error "build failed."
 	exit 1

@@ -10,15 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-GZ::is_available() {
-        if [ ! -z "$(type -t gzip)" ]; then
-                return 0
-        elif [ ! -z "$(type -t gunzip)" ]; then
-                return 0
-        else
-                return 1
-        fi
-}
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 
 
 
@@ -33,7 +25,6 @@ GZ::create() {
         fi
 
         if [ -z "$__source" ] || [ -d "$__source" ]; then
-                unset __source
                 return 1
         fi
         __source="${__source%.gz}"
@@ -48,11 +39,27 @@ GZ::create() {
         else
                 __exit=1
         fi
-        if [ $__exit -ne 0 ]; then
-                __exit=1
-        fi
 
         # report status
-        unset __source
-        return $__exit
+        if [ $__exit -ne 0 ]; then
+                return 1
+        fi
+        return 0
+}
+
+
+
+
+GZ::is_available() {
+        OS::is_command_available "gzip"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        OS::is_command_available "gunzip"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
 }

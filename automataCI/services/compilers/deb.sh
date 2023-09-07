@@ -10,19 +10,27 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/disk.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/ar.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/checksum/md5.sh"
+
+
+
+
 DEB::is_available() {
         __os="$1"
         __arch="$2"
 
         if [ -z "$__os" ] || [ -z "$__arch" ]; then
-                unset __os __arch
                 return 1
         fi
 
         # check compatible target os
         case "$__os" in
         windows|darwin)
-                unset __os __arch
                 return 2
                 ;;
         *)
@@ -32,27 +40,74 @@ DEB::is_available() {
         # check compatible target cpu architecture
         case "$__arch" in
         any)
-                unset __os __arch
                 return 3
                 ;;
         *)
                 ;;
         esac
-        unset __os __arch
 
         # validate dependencies
-        if [ -z "$(type -t 'gunzip')" -a -z "$(type -t 'gzip')" ] ||
-                [ -z "$(type -t 'tar')" ] ||
-                [ -z "$(type -t 'find')" ] ||
-                [ -z "$(type -t 'md5sum')" -a -z "$(type -t 'md5')" ] ||
-                [ -z "$(type -t 'ar')" ] ||
-                [ -z "$(type -t 'du')" ]; then
+        MD5::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        TAR::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        AR::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        DISK::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "find"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
         # report status
         return 0
 }
+
+
+
+
+DEB::create_checksum() {
+        __directory="$1"
+
+        # validate input
+        if [ -z "$__directory" ] || [ ! -d "$__directory" ]; then
+                return 1
+        fi
+
+        # check if the document has already injected
+        __location="${__directory}/control/md5sums"
+        if [ -f "$__location" ]; then
+                return 2
+        fi
+
+        # create housing directory path
+        FS::make_housing_directory "$__location"
+
+        # checksum
+        for __line in $(find "${__directory}/data" -type f); do
+                __checksum="$(MD5::checksum_file "$__line")"
+                FS::append_file "$__location" \
+                        "${__checksum%% *} ${__line##*${__directory}/data/}\n"
+        done
+
+        # report status
+        return 0
+}
+
+
 
 
 DEB::create_changelog() {
@@ -66,69 +121,39 @@ DEB::create_changelog() {
                 [ ! -d "$__directory" ] ||
                 [ -z "$__filepath" ] ||
                 [ ! -f "$__filepath" ] ||
-                [ -z "$__filepath" ] ||
                 [ -z "$__is_native" ] ||
                 [ -z "$__sku" ]; then
-                unset __directory __filepath __is_native __sku
                 return 1
         fi
 
-        # check if is the document already injected
+        # check if the document has already injected
         __location="${__directory}/data/usr/local/share/doc/${__sku}/changelog.gz"
         if [ -f "$__location" ]; then
-                unset __location __directory __filepath __is_native __sku
                 return 2
         fi
 
         if [ "$__is_native" = "true" ]; then
                 __location="${__directory}/data/usr/share/doc/${__sku}/changelog.gz"
                 if [ -f "$__location" ]; then
-                        unset __location __directory __filepath __is_native __sku
                         return 2
                 fi
         fi
 
         # create housing directory path
-        mkdir -p "${__location%/*}"
+        FS::make_housing_directory "$__location"
 
         # copy processed file to target location
-        cp "$__filepath" "$__location"
+        FS::copy_file "$__filepath" "$__location"
 
         # report status
-        unset __location __directory __filepath __is_native __sku
-        return 0
-}
-
-DEB::create_checksum() {
-        __directory="$1"
-
-        # validate input
-        if [ -z "$__directory" ] || [ ! -d "$__directory" ]; then
-                unset __directory
+        if [ $? -ne 0 ]; then
                 return 1
         fi
-
-        # check if is the document already injected
-        __location="${__directory}/control/md5sums"
-        if [ -f "$__location" ]; then
-                unset __location __directory
-                return 2
-        fi
-
-        # create housing directory path
-        mkdir -p "${__location%/*}"
-
-        # checksum
-        for __line in $(find "${__directory}/data" -type f); do
-                __checksum="$(md5sum "$__line")"
-                printf "${__checksum%% *} ${__line##*$__directory/data/}\n" \
-                        >> "$__location"
-        done
-
-        # report status
-        unset __location __checksum __line __directory
         return 0
 }
+
+
+
 
 DEB::create_control() {
         __directory="$1"
@@ -157,17 +182,6 @@ DEB::create_control() {
                 [ -z "$__pitch" ] ||
                 [ -z "$__priority" ] ||
                 [ -z "$__section" ]; then
-                unset __directory \
-                        __resources \
-                        __sku \
-                        __version \
-                        __arch \
-                        __name \
-                        __email \
-                        __website \
-                        __pitch \
-                        __priority \
-                        __section
                 return 1
         fi
 
@@ -175,47 +189,26 @@ DEB::create_control() {
         required|important|standard|optional|extra)
                 ;;
         *)
-                unset __directory \
-                        __resources \
-                        __sku \
-                        __version \
-                        __arch \
-                        __name \
-                        __email \
-                        __website \
-                        __pitch \
-                        __priority \
-                        __section
                 return 1
                 ;;
         esac
 
-        # check if is the document already injected
+        # check if the document has already injected
         __location="${__directory}/control/control"
         if [ -f "$__location" ]; then
-                unset __location \
-                        __directory \
-                        __resources \
-                        __sku \
-                        __version \
-                        __arch \
-                        __name \
-                        __email \
-                        __website \
-                        __pitch \
-                        __priority \
-                        __section
                 return 2
         fi
 
         # create housing directory path
-        mkdir -p "${__location%/*}"
+        FS::make_housing_directory "${__location}"
 
         # generate control file
-        __size="$(du -ks "${__directory}/data")"
-        __size="${__size%%/*}"
-        __size="${__size%"${__size##*[![:space:]]}"}"
-        printf -- "\
+        __size="$(DISK::calculate_size "${__directory}/data")"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::write_file "$__location" "\
 Package: $__sku
 Version: $__version
 Architecture: $__arch
@@ -225,7 +218,7 @@ Section: $__section
 Priority: $__priority
 Homepage: $__website
 Description: $__pitch
-" >> "$__location"
+"
 
         # append description data file
         old_IFS="$IFS"
@@ -240,26 +233,16 @@ Description: $__pitch
                         __line=" ${__line}"
                 fi
 
-                printf -- "%s\n" "$__line" >> "$__location"
+                FS::append_file "$__location" "${__line}\n"
         done < "${__resources}/packages/DESCRIPTION.txt"
         IFS="$old_IFS" && unset old_IFS __line
 
         # report status
-        unset __location \
-                __size \
-                __directory \
-                __resources \
-                __sku \
-                __version \
-                __arch \
-                __name \
-                __email \
-                __website \
-                __pitch \
-                __priority \
-                __section
         return 0
 }
+
+
+
 
 DEB::create_archive() {
         __directory="$1"
@@ -271,56 +254,52 @@ DEB::create_archive() {
                 [ ! -d "${__directory}/control" ] ||
                 [ ! -d "${__directory}/data" ] ||
                 [ ! -f "${__directory}/control/control" ]; then
-                unset __directory \
-                        __destination
                 return 1
         fi
 
+        # capture current directory
         __current_path="$PWD"
 
         # package control
         cd "${__directory}/control"
-        XZ_OPT='-9' tar -cvJf ../control.tar.xz *
+        TAR::create_xz "../control.tar.xz" *
         if [ $? -ne 0 ]; then
-                cd "$__current_path"
-                unset __current_path __directory __destination
+                cd "$__current_path" && unset __current_path
                 return 1
         fi
 
         # package data
         cd "${__directory}/data"
-        XZ_OPT='-9' tar -cvJf ../data.tar.xz ./[a-z]*
+        TAR::create_xz "../data.tar.xz" "./[a-z]*"
         if [ $? -ne 0 ]; then
-                cd "$__current_path"
-                unset __current_path __directory __destination
+                cd "$__current_path" && unset __current_path
                 return 1
         fi
 
         # generate debian-binary
         cd "${__directory}"
-        printf "2.0\n" > "${__directory}/debian-binary"
+        FS::write_file "${__directory}/debian-binary" "2.0\n"
         if [ $? -ne 0 ]; then
-                cd "$__current_path"
-                unset __current_path __directory __destination
+                cd "$__current_path" && unset __current_path
                 return 1
         fi
 
         # archive into deb
-        cd "${__directory}"
-        ar r package.deb debian-binary control.tar.xz data.tar.xz
+        __file="package.deb"
+        AR::create "$__file" "debian-binary control.tar.xz data.tar.xz"
         if [ $? -ne 0 ]; then
-                cd "$__current_path"
-                unset __current_path __directory __destination
+                cd "$__current_path" && unset __current_path
                 return 1
         fi
 
         # move to destination
-        rm -f "$__destination" &> /dev/null
-        mv package.deb "$__destination"
+        FS::remove_silently "$__destination"
+        FS::move "$__file" "$__destination"
         __exit=$?
 
+        # return to current directory
+        cd "$__current_path" && unset __current_path
+
         # report status
-        cd "$__current_path"
-        unset __current_path __directory __destination
         return $__exit
 }

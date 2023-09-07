@@ -9,6 +9,55 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+function FS-Append-File {
+	param (
+		[string]$__target,
+		[string]$__content
+	)
+
+	# validate target
+	if ([string]::IsNullOrEmpty($__target)) {
+		return 1
+	}
+
+	# perform file write
+	$__content | Out-File -FilePath $__target -Encoding utf8 -Append
+
+	# report status
+	if ($?) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
+function FS-Copy-All {
+	param (
+		[string]$__source,
+		[string]$__destination
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
+		return 1
+	}
+
+	# execute
+	$null = Copy-Item -Path "${__source}\*" -Destination "${__destination}" -Recurse
+
+	# report status
+	if ($?) {
+		return 0
+	}
+	return 1
+}
+
+
+
+
 function FS-Copy-File {
 	param (
 		[string]$__source,
@@ -17,262 +66,159 @@ function FS-Copy-File {
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
-		Remove-Variable -Name __source
-		Remove-Variable -Name __destination
 		return 1
 	}
 
-	# perform copying
-	$null = Copy-Item -Path $__source -Destination $__destination
-	$__exit = $?
-	if ($__exit -ne 0) {
-		$__exit = 1
-	}
+	# execute
+	$null = Copy-Item -Path "${__source}" -Destination "${__destination}"
 
 	# report status
-	Remove-Variable -Name __source
-	Remove-Variable -Name __destination
-	return $__exit
+	if ($?) {
+		return 0
+	}
+
+	return 1
 }
 
-function FS-IsDirectory {
+
+
+
+function FS-Is-Directory {
+	param (
+		[string]$__target
+	)
+
+	# execute
+	if ([string]::IsNullOrEmpty($__target)) {
+		return 1
+	}
+
+	if (Test-Path -Path "${__target}" -PathType Container -ErrorAction SilentlyContinue) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
+function FS-Is-File {
+	param (
+		[string]$__target
+	)
+
+	# execute
+	if ([string]::IsNullOrEmpty($__target)) {
+		return 1
+	}
+
+	$__process = FS-Is-Directory "${__target}"
+	if ($__process -eq 0) {
+		return 1
+	}
+
+	if (Test-Path -Path "${__target}" -ErrorAction SilentlyContinue) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
+function FS-Is-Target-A-Source {
 	param (
 		[string]$__subject
 	)
 
+	# execute
+	if ($("${__subject}" -replace '^.*-src') -ne "${__subject}") {
+		return 0
+	}
+
+	# report status
+	return 1
+}
+
+
+
+
+function FS-Is-Target-Exist {
+	param (
+		[string]$__target
+	)
+
 	# validate input
-	if ([string]::IsNullOrEmpty($__subject)) {
-		Remove-Variable -Name __subject
+	if ([string]::IsNullOrEmpty("${__target}")) {
 		return 1
 	}
 
 	# perform checking
-	$__process = Test-Path -Path $__subject -PathType Container
+	$__process = Test-Path -Path "${__target}" -ErrorAction SilentlyContinue
 
 	# report status
-	Remove-Variable -Name __subject
 	if ($__process) {
 		return 0
 	}
 	return 1
 }
 
-function FS-IsExists {
-	param (
-		[string]$__subject
-	)
-
-	# validate input
-	if ([string]::IsNullOrEmpty($__subject)) {
-		Remove-Variable -Name __subject
-		return 1
-	}
-
-	# perform checking
-	$__process = Test-Path -Path $__subject
 
 
-	# report status
-	Remove-Variable -Name __subject
-	if ($__process) {
-		return 0
-	}
-	return 1
-}
 
 function FS-List-All {
 	param (
 		[string]$__target
 	)
 
-	# validate target
-	if ([string]::IsNullOrEmpty($__target)) {
-		Remove-Variable -Name __target
+	# validate input
+	if ([string]::IsNullOrEmpty("${__target}")) {
 		return 1
 	}
 
-	# perform listing
-	if (-not (FS-IsDirectory $__target)) {
-		Remove-Variable -Name __target
+	# execute
+	if ((FS-Is-Directory "${__target}") -ne 0) {
 		return 1
 	}
 
 	try {
-		foreach ($__item in (Get-ChildItem -Path $__target -Recurse)) {
+		foreach ($__item in (Get-ChildItem -Path "${__target}" -Recurse)) {
 			Write-Host $__item.FullName
 		}
-		Remove-Variable -Name __target
+
 		return 0
 	} catch {
-		Remove-Variable -Name __target
 		return 1
 	}
 }
 
-function FS-Remove {
-	param (
-		[string]$__target
-	)
 
-	# validate target
-	if ([string]::IsNullOrEmpty($__target)) {
-		Remove-Variable -Name __target
-		return 1
-	}
 
-	# perform remove
-	$__process = Remove-Item $__target -Force -Recurse
-	Remove-Variable -Name __target
-	if ($__process -eq $null) {
-		return 0
-	}
-	return 1
-}
-
-function FS-Remove-Silently {
-	param (
-		[string]$__target
-	)
-
-	# validate target
-	if ([string]::IsNullOrEmpty($__target)) {
-		Remove-Variable -Name __target
-		return 1
-	}
-
-	# perform remove
-	Remove-Item $__target -Force -Recurse -ErrorAction SilentlyContinue
-	return 0
-}
-
-function FS-Rename {
-	param (
-		[string]$__source,
-		[string]$__target
-	)
-
-	# validate input
-	if ([string]::IsNullOrEmpty($__source) -or
-		[string]::IsNullOrEmpty($__target) -or
-		(-not (Test-Path -Path $__source -PathType Container)) -or
-		(-not (Test-Path -Path $__source)) -or
-		(Test-Path -Path $__target -PathType Container) -or
-		(Test-Path -Path $__target)) {
-		Remove-Variable -Name __source
-		Remove-Variable -Name __target
-		return 1
-	}
-
-	# perform rename
-	$__process = Move-Item -Path $__source -Destination $__target
-	if ($?) {
-		$__exit = 0
-	} else {
-		$__exit = 1
-	}
-
-	# report status
-	Remove-Variable -Name __process
-	Remove-Variable -Name __source
-	Remove-Variable -Name __target
-	return $__exit
-}
-
-function FS-Make-Housing-Directory {
-	param (
-		[string]$__target
-	)
-
-	# validate target
-	if ([string]::IsNullOrEmpty($__target) -or
-		(Test-Path -Path $__target -PathType Container) -or
-		(Test-Path -Path $__target)) {
-		Remove-Variable -Name __target
-		return 1
-	}
-
-	# perform create
-	if (Test-Path -Path $__target -PathType Container) {
-		$__process = New-Item -ItemType Directory -Force -Path $__target
-	} else {
-		$__target = Split-Path -Path $__target
-		$__process = New-Item -ItemType Directory -Force -Path $__target
-	}
-	Remove-Variable -Name __target
-
-	# report status
-	if ($__process) {
-		return 0
-	}
-	return 1
-}
 
 function FS-Make-Directory {
 	param (
 		[string]$__target
 	)
 
-	# validate target
-	if ([string]::IsNullOrEmpty($__target) -or
-		(Test-Path -Path $__target -PathType Container) -or
-		(Test-Path -Path $__target)) {
-		Remove-Variable -Name __target
+	# validate input
+	if ([string]::IsNullOrEmpty("${__target}")) {
 		return 1
 	}
 
-	# perform create
-	$__process = New-Item -ItemType Directory -Force -Path $__target
-	Remove-Variable -Name __target
-
-	# report status
-	if ($__process) {
-		return 0
-	}
-	return 1
-}
-
-function FS-Remake-Directory {
-	param (
-		[string]$__target
-	)
-
-	$__process = FS-Remove-Silently $__target
-	$__process = FS-Make-Directory $__target
+	$__process = FS-Is-Directory "${__target}"
 	if ($__process -eq 0) {
 		return 0
 	}
-	return 1
-}
 
-function FS-Write-File {
-	param (
-		[string]$__target,
-		[string]$__content
-	)
-
-	# validate target
-	if ([string]::IsNullOrEmpty($__target) -or
-		(Test-Path -Path $__target -PathType Container)) {
-		Remove-Variable -Name __target
-		Remove-Variable -Name __content
+	$__process = FS-Is-Target-Exist "${__target}"
+	if ($__process -eq 0) {
 		return 1
 	}
 
-	# remove existing file
-	if (Test-Path -Path $__target) {
-		$__process = FS-Remove-Silently $__target
-		if ($__process -eq 0) {
-			Remove-Variable -Name __target
-			Remove-Variable -Name __content
-			return 1
-		}
-	}
-
-	# perform file write
-	$__content | Out-File -FilePath $__target -Encoding utf8
-	$__process= $?
-	Remove-Variable -Name __target
-	Remove-Variable -Name __content
+	# execute
+	$__process = New-Item -ItemType Directory -Force -Path "${__target}"
 
 	# report status
 	if ($__process) {
@@ -281,44 +227,33 @@ function FS-Write-File {
 	return 1
 }
 
-function FS-Append-File {
-	param (
-		[string]$__target,
-		[string]$__content
-	)
 
-	# validate target
-	if ([string]::IsNullOrEmpty($__target) -or
-		(Test-Path -Path $__target -PathType Container)) {
-		Remove-Variable -Name __target
-		Remove-Variable -Name __content
-		return 1
-	}
 
-	# perform file write
-	$__content | Out-File -FilePath $__target -Encoding utf8 -Append
-	$__process= $?
-	Remove-Variable -Name __target
-	Remove-Variable -Name __content
 
-	# report status
-	if ($__process) {
-		return 0
-	}
-	return 1
-}
-
-function FS-Is-Target-A-Source {
+function FS-Make-Housing-Directory {
 	param (
 		[string]$__target
 	)
 
-	if ($($__target -replace '^.*-src') -ne $__target) {
+	# validate input
+	if ([string]::IsNullOrEmpty($__target)) {
+		return 1
+	}
+
+	$__process = FS-Is-Directory $__target
+	if ($__process -eq 0) {
 		return 0
 	}
 
-	return 1
+	# perform create
+	$__process = FS-Make-Directory (Split-Path -Path $__target)
+
+	# report status
+	return $__process
 }
+
+
+
 
 function FS-Move {
 	param (
@@ -327,39 +262,152 @@ function FS-Move {
 	)
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__source) -or
-		[string]::IsNullOrEmpty($__destination) -or
-		(-not (Test-Path -Path $__source)) -or
-		(-not (Test-Path -Path $__destination))) {
-		Remove-Variable -Name __source
-		Remove-Variable -Name __destination
+	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
 		return 1
 	}
 
 	# execute
-	Move-Item -Path $__source -Destination $__destination
-	$__exit = $?
+	Move-Item -Path $__source -Destination $__destination -Force
 
 	# report status
-	Remove-Variable -Name __source
-	Remove-Variable -Name __destination
-	if ($__exit) {
+	if ($?) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
+function FS-Remake-Directory {
+	param (
+		[string]$__target
+	)
+
+	# execute
+	$null = FS-Remove-Silently "${__target}"
+	$__process = FS-Make-Directory "${__target}"
+
+	# report status
+	if ($__process -eq 0) {
 		return 0
 	}
 	return 1
 }
 
-function FS-Touch {
-	param(
-		[string]$__destination
+
+
+
+function FS-Remove {
+	param (
+		[string]$__target
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target)) {
+		return 1
+	}
+
+	# execute
+	$__process = Remove-Item $__target -Force -Recurse
+
+	# report status
+	if ($__process -eq $null) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
+function FS-Remove-Silently {
+	param (
+		[string]$__target
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target)) {
+		return 0
+	}
+
+	# execute
+	$null = Remove-Item $__target -Force -Recurse -ErrorAction SilentlyContinue
+
+	# report status
+	return 0
+}
+
+
+
+
+function FS-Rename {
+	param (
+		[string]$__source,
+		[string]$__target
 	)
 
 	# execute
-	$__process = New-Item -Path "${__destination}"
+	return FS-Move "${__source}" "${__target}"
+}
+
+
+
+
+function FS-Touch-File {
+	param(
+		[string]$__target
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target)) {
+		return 1
+	}
+
+	$__process = FS-Is-File "${__target}"
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	# execute
+	$__process = New-Item -Path "${__target}"
 
 	# report status
 	if ($__process) {
 		return 0
 	}
+
+	return 1
+}
+
+
+
+
+function FS-Write-File {
+	param (
+		[string]$__target,
+		[string]$__content
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target)) {
+		return 1
+	}
+
+	$__process = FS-Is-File "${__target}"
+	if ($__process -eq 0) {
+		return 1
+	}
+
+	# perform file write
+	$__content | Out-File -FilePath $__target -Encoding utf8
+
+	# report status
+	if ($?) {
+		return 0
+	}
+
 	return 1
 }

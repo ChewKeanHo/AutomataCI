@@ -10,12 +10,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+
+
+
+
 PYTHON::is_available() {
         if [ ! -z "$(type -t python3)" ]; then
                 return 0
         elif [ ! -z "$(type -t python)" ]; then
                 return 0
         fi
+
         return 1
 }
 
@@ -26,6 +33,7 @@ PYTHON::is_venv_activated() {
         if [ ! -z "$VIRTUAL_ENV" ] ; then
                 return 0
         fi
+
         return 1
 }
 
@@ -33,31 +41,30 @@ PYTHON::is_venv_activated() {
 
 
 PYTHON::has_pip() {
-        if [ -z "$(type -t pip)" ]; then
-                return 1
-        fi
-        return 0
+        OS::is_command_available "pip"
+        return $?
 }
 
 
 
 
 PYTHON::activate_venv() {
+        # validate input
         PYTHON::is_venv_activated
         if [ $? -eq 0 ] ; then
                 return 0
         fi
 
+        # execute
         __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
         __location="${__location}/bin/activate"
         if [ ! -f "$__location" ]; then
-                unset __location
                 return 1
         fi
 
         . "$__location"
-        unset __location
 
+        # report status
         PYTHON::is_venv_activated
         if [ $? -eq 0 ] ; then
                 return 0
@@ -69,6 +76,7 @@ PYTHON::activate_venv() {
 
 
 PYTHON::setup_venv() {
+        # validate input
         if [ -z "$PROJECT_PATH_ROOT" ]; then
                 return 1
         fi
@@ -81,6 +89,7 @@ PYTHON::setup_venv() {
                 return 1
         fi
 
+        # execute
         __program=""
         if [ ! -z "$(type -t python3)" ]; then
                 __program="python3"
@@ -90,32 +99,23 @@ PYTHON::setup_venv() {
                 return 1
         fi
 
-        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
-        mkdir -p "$__location"
-
 
         # check if the repo is already established...
+        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
         if [ -f "${__location}/bin/activate" ]; then
-                unset __location __program
                 return 0
         fi
-
 
         # it's a clean repo. Start setting up virtual environment...
         $__program -m venv "$__location"
         if [ $? -ne 0 ]; then
-                unset __location __program
                 return 1
         fi
 
-
-        # last check
+        # report status
         if [ -f "${__location}/bin/activate" ]; then
-                unset __location __program
                 return 0
         fi
-
-        unset __location __program
         return 1
 }
 
@@ -123,10 +123,22 @@ PYTHON::setup_venv() {
 
 
 PYTHON::clean_artifact() {
-        find "${PROJECT_PATH_ROOT}/srcPYTHON/" \
-                | grep -E "(__pycache__|\.pyc$)" \
-                | xargs rm -rf \
-                &> /dev/null
+        # __target="$1"
+
+        # validate input
+        if [ -z "$1" ] || [ ! -d "$1" ]; then
+                return 1
+        fi
+
+        OS::is_command_available "find"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # execute
+        find "$1" | grep -E "(__pycache__|\.pyc$)" | xargs rm -rf &> /dev/null
+
+        # report status
         return 0
 }
 
@@ -134,19 +146,23 @@ PYTHON::clean_artifact() {
 
 
 PYPI::is_available() {
+        # validate input
         if [ -z "$PROJECT_PYTHON" ]; then
                 return 1
         fi
 
+        # execute
         PYTHON::is_venv_activated
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ -z "$(type -t twine)" ]; then
+        OS::is_command_available "twine"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
+        # report status
         return 0
 }
 
@@ -175,15 +191,6 @@ PYPI::create_setup_py() {
                 [ -z "$__readme_path" ] ||
                 [ -z "$__readme_type" ] ||
                 [ ! -d "$__directory" ]; then
-                unset __directory \
-                        __project_name \
-                        __version \
-                        __name \
-                        __email \
-                        __website \
-                        __pitch \
-                        __readme_path \
-                        __readme_type
                 return 1
         fi
 
@@ -193,7 +200,7 @@ PYPI::create_setup_py() {
         fi
 
         # create default file
-        printf "\
+        FS::write_file "${__directory}/setup.py" "\
 from setuptools import setup, find_packages
 
 
@@ -208,19 +215,10 @@ setup(
     long_description=open('${__readme_path}').read(),
     long_description_content_type='${__readme_type}',
 )
-" > "${__directory}/setup.py"
+"
 
         # report status
-        unset __directory \
-                __project_name \
-                __version \
-                __name \
-                __email \
-                __website \
-                __pitch \
-                __readme_path \
-                __readme_type
-        return 0
+        return $?
 }
 
 
@@ -232,16 +230,15 @@ PYPI::create_archive() {
 
         # validate input
         if [ -z "$__directory" ] ||
+                [ -z "$__destination" ] ||
                 [ ! -d "$__directory" ] ||
                 [ ! -f "${__directory}/setup.py" ] ||
                 [ ! -d "$__destination" ]; then
-                unset __directory __destination
                 return 1
         fi
 
         PYPI::is_available
         if [ $? -ne 0 ]; then
-                unset __directory __destination
                 return 1
         fi
 
@@ -250,23 +247,24 @@ PYPI::create_archive() {
         python "${__directory}/setup.py" sdist bdist_wheel
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                unset __directory __destination
                 return 1
         fi
 
         twine check "${__directory}/dist/"*
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                unset __directory __destination
                 return 1
         fi
         cd "$__current_path" && unset __current_path
 
         # export to destination
-        mv "${__directory}/dist/"* "${__destination}/."
-        __exit=$?
+        for __file in "${__directory}/dist/"*; do
+                FS::move "$__file" "$__destination"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        done
 
         # report status
-        unset __directory __destination
-        return $__exit
+        return 0
 }

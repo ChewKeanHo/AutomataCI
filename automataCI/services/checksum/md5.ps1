@@ -9,27 +9,28 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-function ZIP-Create {
+function MD5-Checksum-File {
 	param (
-		[string]$__destination,
-		[string]$__source
+		[string]$__target
 	)
 
-	try {
-		Compress-Archive -Path $__source -DestinationPath $__destination
-		if (Test-Path $__destination) {
-			return 0
-		}
-
-		return 1
-	} catch {
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or (-not (Test-Path -Path "$__target"))) {
 		return 1
 	}
+
+	# execute
+	return (Get-FileHash -Path $__target.FullName -Algorithm MD5).Hash
 }
 
 
 
 
-function ZIP-Is-Available {
-	return 0
+function MD5-Is-Available {
+	$__md5 = [System.Security.Cryptography.MD5]::Create("MD5")
+	if ($__md5) {
+		return 0
+	}
+
+	return 1
 }

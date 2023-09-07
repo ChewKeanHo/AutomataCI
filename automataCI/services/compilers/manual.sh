@@ -10,19 +10,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compress/gz.sh"
-
-
-
-
-MANUAL::is_available() {
-        GZ::is_available
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        return 0
-}
 
 
 
@@ -42,39 +31,33 @@ MANUAL::create_deb_manpage() {
                 [ -z "$__name" ] ||
                 [ -z "$__email" ] ||
                 [ -z "$__website" ]; then
-                unset __directory \
-                        __is_native \
-                        __sku \
-                        __name \
-                        __email \
-                        __website
                 return 1
         fi
 
         # check if is the document already injected
         __location="${__directory}/data/usr/local/share/man/man1/${__sku}.1"
-        if [ -f "${__location}.gz" ]; then
-                unset __location \
-                        __directory \
-                        __is_native \
-                        __sku \
-                        __name \
-                        __email \
-                        __website
-                return 0
+
+        FS::is_file "${__location}"
+        if [ $? -eq 0 ]; then
+                return 2
+        fi
+
+        FS::is_file "${__location}.gz"
+        if [ $? -eq 0 ]; then
+                return 2
         fi
 
         if [ "$__is_native" = "true" ]; then
                 __location="${__directory}/data/usr/share/man/man1/${__sku}.1"
-                if [ -f "${__location}.gz" ]; then
-                        unset __location \
-                                __directory \
-                                __is_native \
-                                __sku \
-                                __name \
-                                __email \
-                                __website
-                        return 0
+
+                FS::is_file "${__location}"
+                if [ $? -eq 0 ]; then
+                        return 2
+                fi
+
+                FS::is_file "${__location}.gz"
+                if [ $? -eq 0 ]; then
+                        return 2
                 fi
         fi
 
@@ -85,20 +68,7 @@ MANUAL::create_deb_manpage() {
                 "$__name" \
                 "$__email" \
                 "$__website"
-        __exit=$?
-        if [ $__exit -ne 0 ]; then
-                __exit=1
-        fi
-
-        # report status
-        unset __location \
-                __directory \
-                __is_native \
-                __sku \
-                __name \
-                __email \
-                __website
-        return $__exit
+        return $?
 }
 
 
@@ -118,24 +88,20 @@ MANUAL::create_rpm_manpage() {
                 [ -z "$__name" ] ||
                 [ -z "$__email" ] ||
                 [ -z "$__website" ]; then
-                unset __directory \
-                        __sku \
-                        __name \
-                        __email \
-                        __website
                 return 1
         fi
 
         # check if is the document already injected
         __location="${__directory}/BUILD/${__sku}.1"
-        if [ -f "${__location}.gz" ]; then
-                unset __location \
-                        __directory \
-                        __sku \
-                        __name \
-                        __email \
-                        __website
-                return 0
+
+        FS::is_file "${__location}"
+        if [ $? -eq 0 ]; then
+                return 2
+        fi
+
+        FS::is_file "${__location}.gz"
+        if [ $? -eq 0 ]; then
+                return 2
         fi
 
         # create manpage
@@ -145,19 +111,7 @@ MANUAL::create_rpm_manpage() {
                 "$__name" \
                 "$__email" \
                 "$__website"
-        __exit=$?
-        if [ $__exit -ne 0 ]; then
-                __exit=1
-        fi
-
-        # report status
-        unset __location \
-                __directory \
-                __sku \
-                __name \
-                __email \
-                __website
-        return $__exit
+        return $?
 }
 
 
@@ -177,20 +131,15 @@ MANUAL::create_baseline_manpage() {
                 [ -z "$__name" ] ||
                 [ -z "$__email" ] ||
                 [ -z "$__website" ]; then
-                unset __location \
-                        __sku \
-                        __name \
-                        __email \
-                        __website
                 return 1
         fi
 
         # create housing directory path
-        mkdir -p "${__location%/*}"
+        FS::make_housing_directory "$__location"
 
         # create basic level 1 man page that instruct users to seek --help
-        rm -rf "$__location" &> /dev/null
-        printf "\
+        FS::remove_silently "$__location"
+        FS::write_file "${__location}" "\
 .\" ${__sku} - Lv1 Manpage
 .TH man 1 \"${__sku} man page\"
 
@@ -210,20 +159,24 @@ Please visit ${__website} for more info.
 
 .SH AUTHORS
 Contact: ${__name} <${__email}>
-" > "${__location}"
+"
+        if [ $? -ne 0 ]; then
+                return 0
+        fi
 
         # gunzip the manual
         GZ::create "$__location"
-        __exit=$?
-        if [ $__exit -ne 0 ]; then
-                __exit=1
+        return $?
+}
+
+
+
+
+MANUAL::is_available() {
+        GZ::is_available
+        if [ $? -eq 0 ]; then
+                return 0
         fi
 
-        # report status
-        unset __location \
-                __sku \
-                __name \
-                __email \
-                __website
-        return $__exit
+        return 1
 }

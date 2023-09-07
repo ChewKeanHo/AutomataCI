@@ -9,44 +9,42 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-
-
-
-# (0) initialize
-If (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
-        exit 1
-}
-
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
 
 
 
 
-# (1) safety checking control surfaces
-OS-Print-Status info "checking python availability..."
-$process = PYTHON-Is-Available
-if ($process -ne 0) {
-	OS-Print-Status error "missing python intepreter."
-	exit 1
+function AR-Is-Available {
+	$__process = Get-Command "ar" -ErrorAction SilentlyContinue
+	if (-not ($__process)) {
+		return 1
+	}
+
+	return 0
 }
 
 
 
 
-# (2) run services
-OS-Print-Status info "setup python venv..."
-$process = PYTHON-Setup-VENV
-if ($process -ne 0) {
-	OS-Print-Status error "setup failed."
-	exit 1
+function AR-Create {
+	param (
+		[string]$__name,
+		[string]$__list
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__name) -or [string]::IsNullOrEmpty($__list)) {
+		return 1
+	}
+
+	$__process = AR-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# execute
+	$__process = OS-Exec "ar" "r ${__name} ${__list}"
+
+	# report status
+	return $__process
 }
-
-
-
-
-# (3) report successful status
-OS-Print-Status success ""
-exit 0

@@ -10,6 +10,24 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+OS::is_command_available() {
+        # __command="$1"
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+        # execute
+        if [ ! -z "$(type -t "$1")" ]; then
+                return 0
+        fi
+        return 1
+}
+
+
+
+
 OS::print_status() {
         __status_mode="$1" && shift 1
         __msg=""

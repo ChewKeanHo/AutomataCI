@@ -18,11 +18,11 @@
 
 
 PACKAGE::run_pypi() {
-        __target="$1"
-        __target_filename="$2"
-        __target_sku="$3"
-        __target_os="$4"
-        __target_arch="$5"
+        _dest="$1"
+        _target="$2"
+        _target_filename="$3"
+        _target_os="$4"
+        _target_arch="$5"
 
         if [ ! -z "$PROJECT_PYTHON" ]; then
                 PYTHON::activate_venv
@@ -34,26 +34,27 @@ PACKAGE::run_pypi() {
                 return 0
         fi
 
-        FS::is_target_a_source "$__target"
+        # prepare workspace and required values
+        _target_path="${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
+        FS::is_target_a_source "$_target"
         if [ $? -eq 0 ]; then
-                __src="pypi-src_${__target_filename}_${__target_os}-${__target_arch}"
+                _src="pypi-src_${PROJECT_SKU}_${_target_os}-${_target_arch}"
+                _target_path="${_dest}/pypi-src_${_target_path}"
         else
-                __src="pypi_${__target_filename}_${__target_os}-${__target_arch}"
+                _src="pypi_${PROJECT_SKU}_${_target_os}-${_target_arch}"
+                _target_path="${_dest}/pypi_${_target_path}"
         fi
-        __src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${__src}"
-        __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_src}"
         OS::print_status info "Creating PyPi source code package...\n"
-        OS::print_status info "remaking workspace directory $__src\n"
-        FS::remake_directory "$__src"
+        OS::print_status info "remaking workspace directory ${_src}\n"
+        FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
                 OS::print_status error "remake failed.\n"
                 return 1
         fi
-        __target="$1"
 
-        __target_path="${__dest}/pypi_${__target_sku}_${__target_os}-${__target_arch}"
         OS::print_status info "checking output file existence...\n"
-        if [ -d "$__target_path" ]; then
+        if [ -d "$_target_path" ]; then
                 OS::print_status error "check failed - output exists!\n"
                 return 1
         fi
@@ -65,25 +66,29 @@ PACKAGE::run_pypi() {
                 return 1
         fi
         PACKAGE::assemble_pypi_content \
-                "$__target" \
-                "$__src" \
-                "$__target_filename" \
-                "$__target_os" \
-                "$__target_arch"
-        __exit=$?
-        if [ $__exit -eq 10 ]; then
-                FS::remove_silently "$__src"
+                "$_target" \
+                "$_src" \
+                "$_target_filename" \
+                "$_target_os" \
+                "$_target_arch"
+        case $? in
+        10)
+                FS::remove_silently "$_src"
                 OS::print_status warning "packaging is not required. Skipping process.\n"
                 return 0
-        elif [ $__exit -ne 0 ]; then
+                ;;
+        0)
+                ;;
+        *)
                 OS::print_status error "assembly failed.\n"
                 return 1
-        fi
+                ;;
+        esac
 
         # generate required files
         OS::print_status info "creating setup.py file...\n"
         PYPI::create_setup_py \
-                "$__src" \
+                "$_src" \
                 "$PROJECT_NAME" \
                 "$PROJECT_VERSION" \
                 "$PROJECT_CONTACT_NAME" \
@@ -92,18 +97,22 @@ PACKAGE::run_pypi() {
                 "$PROJECT_PITCH" \
                 "${PROJECT_PATH_ROOT}/README.md" \
                 "text/markdown"
-        __exit=$?
-        if [ $__exit -eq 2 ]; then
+        case $? in
+        2)
                 OS::print_status info "manual injection detected.\n"
-        elif [ $__exit -ne 0 ]; then
+                ;;
+        0)
+                ;;
+        *)
                 OS::print_status error "create failed.\n"
                 return 1
-        fi
+                ;;
+        esac
 
         # archive the assembled payload
-        OS::print_status info "archiving .pypi package...\n"
-        mkdir -p "$__target_path"
-        PYPI::create_archive "$__src" "$__target_path"
+        OS::print_status info "archiving PyPi package...\n"
+        FS::make_directory "$_target_path"
+        PYPI::create_archive "$_src" "$_target_path"
         if [ $? -ne 0 ]; then
                 OS::print_status error "package failed.\n"
                 return 1

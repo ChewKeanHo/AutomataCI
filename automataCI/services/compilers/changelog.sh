@@ -10,6 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compress/gz.sh"
 
 
@@ -36,7 +37,6 @@ CHANGELOG::build_data_entry() {
 
         # validate input
         if [ -z "$__directory" ]; then
-                unset __directory
                 return 1
         fi
 
@@ -48,20 +48,21 @@ CHANGELOG::build_data_entry() {
 
         # generate log file from the latest to the last tag
         __directory="${__directory}/data"
-        mkdir -p "$__directory"
+        FS::make_directory "$__directory"
         git log --pretty=format:"%s" HEAD..."$__tag" > "${__directory}/.latest"
         if [ ! -f "${__directory}/.latest" ]; then
-                unset __directory __tag
                 return 1
         fi
 
         # good file, update the previous
-        mv "${__directory}/.latest" "${__directory}/latest"
-        __exit=$?
+        FS::remove_silently "${__directory}/latest" &> /dev/null
+        FS::move "${__directory}/.latest" "${__directory}/latest"
 
         # report verdict
-        unset __directory __tag
-        return $__exit
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+        return 1
 }
 
 
@@ -87,14 +88,6 @@ CHANGELOG::build_deb_entry() {
                 [ -z "$__name" ] ||
                 [ -z "$__email" ] ||
                 [ -z "$__date" ]; then
-                unset __directory \
-                        __version \
-                        __sku \
-                        __dist \
-                        __urgency \
-                        __name \
-                        __email \
-                        __date
                 return 1
         fi
 
@@ -102,55 +95,41 @@ CHANGELOG::build_deb_entry() {
         stable|unstable|testing|experimental)
                 ;;
         *)
-                unset __directory \
-                        __version \
-                        __sku \
-                        __dist \
-                        __urgency \
-                        __name \
-                        __email \
-                        __date
                 return 1
                 ;;
         esac
 
         # all good. Generate the log fragment
-        mkdir -p "${__directory}/deb"
+        FS::make_directory "${__directory}/deb"
 
         # create the entry header
-        printf "\
+        FS::append_file "${__directory}/deb/.latest" "\
 ${__sku} (${__version}) ${__dist}; urgency=${__urgency}
-" > "${__directory}/deb/.latest"
+
+"
 
         # generate body line-by-line
-        printf "\n" >> "${__directory}/deb/.latest"
         old_IFS="$IFS"
         while IFS="" read -r line || [ -n "$line" ]; do
                 line="${line::80}"
-                printf "  * $line\n" >> "${__directory}/deb/.latest"
+                FS::append_file "${__directory}/deb/.latest" "  * ${line}\n"
         done < "${__directory}/data/latest"
         IFS="$old_IFS"
         unset line old_IFS
-        printf "\n" >> "${__directory}/deb/.latest"
+        FS::append_file "${__directory}/deb/.latest" "\n"
 
         # create the entry signed-off
-        printf -- "-- ${__name} <${__email}>  ${__date}\n" \
-                >> "${__directory}/deb/.latest"
+        FS::append_file "${__directory}/deb/.latest" \
+                "-- ${__name} <${__email}>  ${__date}\n"
 
         # good file, update the previous
-        mv "${__directory}/deb/.latest" "${__directory}/deb/latest"
-        __exit=$?
+        FS::move "${__directory}/deb/.latest" "${__directory}/deb/latest"
 
         # report status
-        unset __directory \
-                __version \
-                __sku \
-                __dist \
-                __urgency \
-                __name \
-                __email \
-                __date
-        return $__exit
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+        return 1
 }
 
 
@@ -161,12 +140,10 @@ CHANGELOG::compatible_data_version() {
         __version="$2"
 
         if [ -z "$__directory" ] || [ -z "$__version" ]; then
-                unset __directory __version
                 return 1
         fi
 
         if [ ! -f "${__directory}/data/${__version}" ]; then
-                unset __directory __version
                 return 0
         fi
 
@@ -181,12 +158,10 @@ CHANGELOG::compatible_deb_version() {
         __version="$2"
 
         if [ -z "$__directory" ] || [ -z "$__version" ]; then
-                unset __directory __version
                 return 1
         fi
 
         if [ ! -f "${__directory}/deb/${__version}" ]; then
-                unset __directory __version
                 return 0
         fi
 
@@ -201,22 +176,25 @@ CHANGELOG::assemble_deb() {
         __target="$2"
         __version="$3"
 
-        if [ -z "$__directory" ] ||
-                [ -z "$__target" ] ||
-                [ -z "$__version" ]; then
-                unset __directory __target __version
+        # validate input
+        if [ -z "$__directory" ] || [ -z "$__target" ] || [ -z "$__version" ]; then
                 return 1
         fi
-        __directory="${__directory}/deb"
 
+        __directory="${__directory}/deb"
+        __target="${__target%.gz*}"
 
         # assemble file
-        rm -rf "$__target" "${__target}.gz" &> /dev/null
-        mkdir -p "${__target%/*}"
+        FS::remove_silently "$__target"
+        FS::remove_silently "${__target}.gz"
+        FS::make_housing_directory "$__target"
 
         old_IFS="$IFS"
         while IFS="" read -r __line || [ -n "$__line" ]; do
-                printf -- "$__line\n" >> "$__target"
+                FS::append_file "$__target" "$__line\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         done < "${__directory}/latest"
 
         for __tag in "$(git tag --sort version:refname)"; do
@@ -225,24 +203,24 @@ CHANGELOG::assemble_deb() {
                 fi
 
                 while IFS="" read -r __line || [ -n "$__line" ]; do
-                        printf -- "\n$__line\n" >> "$__target"
+                        FS::append_file "$__target" "\n$__line\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
                 done < "${__directory}/${__tag}"
         done
         IFS="$old_IFS"
         unset old_IFS __line __tag
 
-
         # gunzip
         GZ::create "$__target"
-        __exit=$?
-        if [ $__exit -ne 0 ]; then
-                __exit=1
-        fi
-
 
         # report status
-        unset __directory __target __version
-        return $__exit
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
 }
 
 
@@ -267,23 +245,22 @@ CHANGELOG::assemble_rpm() {
                 [ -z "$__cadence" ] ||
                 [ ! -f "$__target" ] ||
                 [ ! -d "$__resources" ]; then
-                unset  __target \
-                        __resources \
-                        __date \
-                        __name \
-                        __email \
-                        __version \
-                        __cadence
                 return 1
         fi
 
         # emit stanza
-        printf -- "%%changelog\n" >> "$__target"
+        FS::append_file "$__target" "%%changelog\n"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
         # emit latest changelog
         if [ -f "${__resources}/changelog/data/latest" ]; then
-                printf -- "* ${__date} ${__name} <${__email}> - ${__version}-${__cadence}\n" \
-                        >> "$__target"
+                FS::append_file "$__target" \
+                        "* ${__date} ${__name} <${__email}> - ${__version}-${__cadence}\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
 
                 __old_IFS="$IFS"
                 while IFS="" read -r __line || [ -n "$__line" ]; do
@@ -292,24 +269,26 @@ CHANGELOG::assemble_rpm() {
                                 continue
                         fi
 
-                        printf -- "- %s\n" "$__line" >> "$__location"
+                        FS::append_file "$__target" "- ${__line}\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
                 done < "${__resources}/changelog/data/latest"
                 IFS="$__old_IFS" && unset __old_IFS __line
         else
-                printf -- "# unavailable\n" >> "$__target"
+                FS::append_file "$__target" "# unavailable\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
         # emit tailing newline
-        printf -- "\n" >> "$__target"
+        FS::append_file "$__target" "\n"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
         # report status
-        unset  __target \
-                __resources \
-                __date \
-                __name \
-                __email \
-                __version \
-                __cadence
         return 0
 }
 
@@ -321,9 +300,6 @@ CHANGELOG::assemble_md() {
         __target="$2"
         __version="$3"
 
-        >&2 printf "assemble_md\n"
-
         # report status
-        unset __directory __target __version
         return 0
 }

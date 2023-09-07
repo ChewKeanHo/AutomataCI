@@ -11,12 +11,12 @@
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\flatpak.ps1"
 
 
 
 
-function PACKAGE-Run-PYPI {
+function PACKAGE-Run-FLATPAK {
 	param (
 		[string]$_dest,
 		[string]$_target,
@@ -25,28 +25,35 @@ function PACKAGE-Run-PYPI {
 		[string]$_target_arch
 	)
 
-	if ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
-		$null = PYTHON-Activate-VENV
-	}
-
-	$__process = PYPI-Is-Available
-	if ($__process -ne 0) {
-		OS-Print-Status warning "PyPi is incompatible or not available. Skipping."
+	OS-Print-Status info "checking FLATPAK functions availability..."
+	$__process = FLATPAK-Is-Available "${_target_os}" "${_target_arch}"
+	switch ($__process) {
+	2 {
+		OS-Print-Status warning "FLATPAK is incompatible (OS type). Skipping."
 		return 0
-	}
+	} 3 {
+		OS-Print-Status warning "FLATPAK is incompatible (CPU type). Skipping."
+		return 0
+	} 0 {
+		break
+	} Default {
+		OS-Print-Status warning "FLATPAK is unavailable. Skipping."
+		return 0
+	}}
+
 
 	# prepare workspace and required values
 	$_target_path = "${env:PROJECT_SKU}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$__process = FS-Is-Target-A-Source "${_target}"
 	if ($__process -eq 0) {
-		$_src = "pypi-src_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
-		$_target_path = "${_dest}\pypi-src_${_target_path}"
+		$_src = "flatpak-src_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
+		$_target_path = "${_dest}\flatpak-src_${_target_path}"
 	} else {
-		$_src = "pypi_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
-		$_target_path = "${_dest}\pypi_${_target_path}"
+		$_src = "flatpak_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
+		$_target_path = "${_dest}\flatpak_${_target_path}"
 	}
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${_src}"
-	OS-Print-Status info "Creating PyPi source code package..."
+	OS-Print-Status info "Creating FLATPAK package..."
 	OS-Print-Status info "remaking workspace directory ${_src}"
 	$__process = FS-Remake-Directory "${_src}"
 	if ($__process -ne 0) {
@@ -62,12 +69,12 @@ function PACKAGE-Run-PYPI {
 
 	# copy all complimentary files to the workspace
 	OS-Print-Status info "assembling package files..."
-	$__process = OS-Is-Command-Available "PACKAGE-Assemble-PYPI-Content"
+	$__process = OS-Is-Command-Available "PACKAGE-Assemble-FLATPAK-Content"
 	if ($__process -ne 0) {
-		OS-Print-Status error "missing PACKAGE-Assemble-PYPI-Content function."
+		OS-Print-Status error "missing PACKAGE-Assemble-FLATPAK-Content function."
 		return 1
 	}
-	$__process = PACKAGE-Assemble-PYPI-Content `
+	$__process = PACKAGE-Assemble-FLATPAK-Content `
 			${_target} `
 			${_src} `
 			${_target_filename} `
@@ -83,17 +90,27 @@ function PACKAGE-Run-PYPI {
 	}
 
 	# generate required files
-	OS-Print-Status info "creating setup.py file..."
-	$__process = PYPI-Create-Setup-PY `
-		${_src} `
-		${env:PROJECT_NAME} `
-		${env:PROJECT_VERSION} `
-		${env:PROJECT_CONTACT_NAME} `
-		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE} `
-		${env:PROJECT_PITCH} `
-		"${env:PROJECT_PATH_ROOT}\README.md" `
-		"text/markdown"
+	OS-Print-Status info "creating manifest file..."
+	$__process = FLATPAK-Create-Manifest `
+		"${_src}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
+		"${env:PROJECT_APP_ID}" `
+		"${env:PROJECT_SKU}" `
+		"${_target_arch}" `
+		"${env:PROJECT_FLATPAK_RUNTIME}" `
+		"${env:PROJECT_FLATPAK_RUNTIME_VERSION}" `
+		"${env:PROJECT_FLATPAK_SDK}"
+	if ($__process -eq 2) {
+		OS-Print-Status info "manual injection detected."
+	} elseif ($__process -ne 0) {
+		OS-Print-Status error "create failed."
+		return 1
+	}
+
+	OS-Print-Status info "creating AppInfo XML file..."
+	$__process = FLATPAK-Create-AppInfo `
+		"${_src}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
 	if ($__process -eq 2) {
 		OS-Print-Status info "manual injection detected."
 	} elseif ($__process -ne 0) {
@@ -102,9 +119,13 @@ function PACKAGE-Run-PYPI {
 	}
 
 	# archive the assembled payload
-	OS-Print-Status info "archiving .pypi package..."
+	OS-Print-Status info "archiving .flatpak package..."
 	$null = FS-Make-Directory "${_target_path}"
-	$__process = PYPI-Create-Archive "${_src}" "${_target_path}"
+	$__process = FLATPAK-Create-Archive `
+		"${_src}" `
+		"${_target_path}" `
+		"${env:PROJECT_APP_ID}" `
+		"${env:PROJECT_GPG_ID}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "package failed."
 		return 1

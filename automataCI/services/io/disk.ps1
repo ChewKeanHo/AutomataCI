@@ -9,27 +9,30 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-function ZIP-Create {
+function DISK-Calculate-Size {
 	param (
-		[string]$__destination,
-		[string]$__source
+		[string]$__location
 	)
 
-	try {
-		Compress-Archive -Path $__source -DestinationPath $__destination
-		if (Test-Path $__destination) {
-			return 0
-		}
-
-		return 1
-	} catch {
+	# validate input
+	if ([string]::IsNullOrEmpty($__location) -or (-not (Test-Path -Path "$__location"))) {
 		return 1
 	}
+
+	$__process = DISK-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# execute
+	return Get-ChildItem -Recurse ${__location} `
+		| Measure-Object -Sum Length `
+		| select { $_.sum / 1KB }
 }
 
 
 
 
-function ZIP-Is-Available {
+function DISK-Is-Available {
 	return 0
 }

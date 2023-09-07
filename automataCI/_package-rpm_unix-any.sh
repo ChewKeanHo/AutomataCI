@@ -10,25 +10,65 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/copyright.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/manual.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rpm.sh"
+
+
+
+
 PACKAGE::run_rpm() {
-        RPM::is_available "$TARGET_OS" "$TARGET_ARCH" && __ret=0 || __ret=1
-        if [ $__ret -ne 0 ]; then
-                OS::print_status warning "RPM is incompatible or not available. Skipping.\n"
+        _dest="$1"
+        _target="$2"
+        _target_filename="$3"
+        _target_os="$4"
+        _target_arch="$5"
+
+        OS::print_status info "checking rpm functions availability...\n"
+        RPM::is_available "$_target_os" "$_target_arch"
+        case $? in
+        2)
+                OS::print_status warning "RPM is incompatible (OS type). Skipping.\n"
                 return 0
+                ;;
+        3)
+                OS::print_status warning "RPM is incompatible (CPU type). Skipping.\n"
+                return 0
+                ;;
+        0)
+                ;;
+        *)
+                OS::print_status warning "RPM is unavailable. Skipping.\n"
+                return 0
+                ;;
+        esac
+
+        OS::print_status info "checking manual docs functions availability...\n"
+        MANUAL::is_available
+        if [ $? -ne 0 ]; then
+                OS::print_status error "checking failed.\n"
+                return 1
         fi
 
-        src="rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}"
-        src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${src}"
-        dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+        # prepare workspace and required values
+        FS::is_target_a_source "$_target"
+        if [ $? -eq 0 ]; then
+                _src="rpm-src_${PROJECT_SKU}_${_target_os}-${_target_arch}"
+        else
+                _src="rpm_${PROJECT_SKU}_${_target_os}-${_target_arch}"
+        fi
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_src}"
         OS::print_status info "Creating RPM package...\n"
-        OS::print_status info "remaking workspace directory $src\n"
-        FS::remake_directory "$src"
+        OS::print_status info "remaking workspace directory ${_src}\n"
+        FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
                 OS::print_status error "remake failed.\n"
                 return 1
         fi
-        FS::make_directory "${src}/BUILD"
-        FS::make_directory "${src}/SPECS"
+        FS::make_directory "${_src}/BUILD"
+        FS::make_directory "${_src}/SPECS"
 
         # copy all complimentary files to the workspace
         OS::print_status info "assembling package files...\n"
@@ -37,74 +77,91 @@ PACKAGE::run_rpm() {
                 return 1
         fi
         PACKAGE::assemble_rpm_content \
-                "$i" \
-                "$src" \
-                "$TARGET_NAME" \
-                "$TARGET_OS" \
-                "$TARGET_ARCH"
-        if [ $? -ne 0 ]; then
+                "$_target" \
+                "$_src" \
+                "$_target_filename" \
+                "$_target_os" \
+                "$_target_arch"
+        case $? in
+        10)
+                FS::remove_silently "$_src"
+                OS::print_status warning "packaging is not required. Skipping process.\n"
+                return 0
+                ;;
+        0)
+                ;;
+        *)
                 OS::print_status error "assembly failed.\n"
                 return 1
-        fi
+                ;;
+        esac
 
         # generate required files
         OS::print_status info "creating copyright.gz file...\n"
         COPYRIGHT::create_rpm \
-                "$src" \
+                "$_src" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
-                "$TARGET_SKU" \
+                "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE"
-        __ret=$?
-        if [ $__ret -eq 2 ]; then
+        case $? in
+        2)
                 OS::print_status info "manual injection detected.\n"
-        elif [ $__ret -eq 1 ]; then
+                ;;
+        0)
+                ;;
+        *)
                 OS::print_status error "create failed.\n"
                 return 1
-        fi
+                ;;
+        esac
 
         OS::print_status info "creating man pages file...\n"
         MANUAL::create_rpm_manpage \
-                "$src" \
-                "$TARGET_SKU" \
+                "$_src" \
+                "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE"
-        __ret=$?
-        if [ $__ret -eq 2 ]; then
+        case $? in
+        2)
                 OS::print_status info "manual injection detected.\n"
-        elif [ $__ret -eq 1 ]; then
+                ;;
+        0)
+                ;;
+        *)
                 OS::print_status error "create failed.\n"
                 return 1
-        fi
+                ;;
+        esac
 
         OS::print_status info "creating spec file...\n"
         RPM::create_spec \
-                "$src" \
+                "$_src" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
-                "$TARGET_SKU" \
+                "$PROJECT_SKU" \
                 "$PROJECT_VERSION" \
                 "$PROJECT_CADENCE" \
                 "$PROJECT_PITCH" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE"
-        __ret=$?
-        if [ $__ret -eq 2 ]; then
+        case $? in
+        2)
                 OS::print_status info "manual injection detected.\n"
-        elif [ $__ret -eq 1 ]; then
+                ;;
+        0)
+                ;;
+        *)
                 OS::print_status error "create failed.\n"
                 return 1
-        fi
+                ;;
+        esac
 
         # archive the assembled payload
         OS::print_status info "archiving .rpm package...\n"
-        RPM::create_archive \
-                "$src" \
-                "$dest" \
-                "$PROJECT_SKU" \
-                "$TARGET_ARCH"
+        RPM::create_archive "$_src" "$_dest" "$PROJECT_SKU" "$_target_arch"
         if [ $? -ne 0 ]; then
                 OS::print_status error "package failed.\n"
                 return 1
