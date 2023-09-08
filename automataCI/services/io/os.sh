@@ -36,23 +36,23 @@ OS::print_status() {
         case "$__status_mode" in
         error)
                 __msg="[ ERROR   ] "
-                __color="91"
+                __color="31"
                 ;;
         warning)
                 __msg="[ WARNING ] "
-                __color="93"
+                __color="33"
                 ;;
         info)
                 __msg="[ INFO    ] "
-                __color="96"
+                __color="36"
                 ;;
         success)
                 __msg="[ SUCCESS ] "
-                __color="92"
+                __color="32"
                 ;;
         ok)
                 __msg="[ INFO    ] == OK == "
-                __color="96"
+                __color="36"
                 ;;
         plain)
                 __msg=""
