@@ -31,31 +31,31 @@ OS::is_command_available() {
 OS::print_status() {
         __status_mode="$1" && shift 1
         __msg=""
-        __stop_color="\033[0m"
+        __color=""
 
         case "$__status_mode" in
         error)
-                __msg="[ ERROR   ] ${@}"
-                __start_color="\e[91m"
+                __msg="[ ERROR   ] "
+                __color="91"
                 ;;
         warning)
-                __msg="[ WARNING ] ${@}"
-                __start_color="\e[93m"
+                __msg="[ WARNING ] "
+                __color="93"
                 ;;
         info)
-                __msg="[ INFO    ] ${@}"
-                __start_color="\e[96m"
+                __msg="[ INFO    ] "
+                __color="96"
                 ;;
         success)
-                __msg="[ SUCCESS ] ${@}"
-                __start_color="\e[92m"
+                __msg="[ SUCCESS ] "
+                __color="92"
                 ;;
         ok)
-                __msg="[ INFO    ] == OK =="
-                __start_color="\e[96m"
+                __msg="[ INFO    ] == OK == "
+                __color="96"
                 ;;
         plain)
-                __msg="$@"
+                __msg=""
                 ;;
         *)
                 return 0
@@ -63,14 +63,13 @@ OS::print_status() {
         esac
 
 
-        if [ ! -z "$COLORTERM" ]; then
-                if [ "$COLORTERM" = truecolor ] || [ "$COLORTERM" = 24bit ]; then
-                        __msg="${__start_color}${__msg}${__stop_color}"
-                fi
+        if [ ! -z "$COLORTERM" ] || [ "$TERM" = "xterm-256color" ]; then
+                __msg="\033[1;${__color}m${__msg}\033[0;${__color}m${@}\033[0m"
+        else
+                __msg="${__msg} ${@}"
         fi
 
-
-        1>&2 printf "${__msg}"
-        unset __status_mode __msg __start_color __stop_color
+        1>&2 printf -- "${__msg}"
+        unset __status_mode __msg __color
         return 0
 }

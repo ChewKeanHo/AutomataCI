@@ -19,6 +19,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+        TERM: xterm-256color
     steps:
       - uses: actions/checkout@v3
       - name: Get environment configurations
