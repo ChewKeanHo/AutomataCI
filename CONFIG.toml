@@ -78,12 +78,6 @@ PROJECT_CADENCE = "1"
 PROJECT_PATH_AUTOMATA = "automataCI"
 
 
-# PROJECT_PATH_SOURCE
-# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
-# project's source codes working directory.
-PROJECT_PATH_SOURCE = "srcPYTHON"
-
-
 # PROJECT_PATH_TOOLS
 # This is the relative pathing to PROJECT_PATH_ROOT where it locates the
 # project's tooling directory like programming languages' engine or executables.
@@ -129,16 +123,25 @@ PROJECT_PATH_RESOURCES = "resources"
 
 
 ######################
-# PYTHON TECHNOLOGY  #
+# TECHNOLOGIES       #
 ######################
 # PROJECT_PYTHON
-# This is a reserved variable used for other CI workflow integration with
-# AutomataCI. Depending on the offered service (e.g. GitHub CI), setting this
+# This is a reserved variable used for enabling Python technology and also
+# defining its source codes directory relative to PROJECT_PATH_ROOT.
+# Depending on the offered service (e.g. GitHub CI), setting this
 # variable with value shall notify the CI provider to setup Python development
 # environment automatically.
-PROJECT_PYTHON = 'true'
+#
+# To enable it: simply supply the path (e.g. default is 'srcPYTHON').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_PYTHON = 'srcPYTHON'
 
 
+
+
+######################
+# PYTHON TECHNOLOGY  #
+######################
 # PROJECT_PATH_PYTHON_ENGINE
 # This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
 # setting up venv location.

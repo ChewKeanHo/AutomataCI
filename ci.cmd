@@ -137,18 +137,7 @@ while IFS= read -r line; do
         value="${value%\'}"
         value="${value#\'}"
 
-        case "$1" in
-        stop|--stop|Stop|--Stop|STOP|--STOP)
-                if [ "$key" = "PROJECT_PATH_AUTOMATA" ]; then
-                        export "$key"="$value"
-                        continue
-                fi
-                unset "$key"
-                ;;
-        *)
-                export "$key"="$value"
-                ;;
-        esac
+        export "$key"="$value"
 done < "${PROJECT_PATH_ROOT}/CONFIG.toml"
 
 
@@ -156,50 +145,58 @@ done < "${PROJECT_PATH_ROOT}/CONFIG.toml"
 
 # (5) execute command
 case "$1" in
-env|--env|Env|--Env|ENV|--ENV)
+env|Env|ENV)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/env_unix-any.sh"
         code=$?
         ;;
-setup|--setup|Setup|--Setup|SETUP|--SETUP)
+setup|Setup|SETUP)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/setup_unix-any.sh"
         code=$?
         ;;
-start|--start|Start|--Start|START|--START)
+start|Start|START)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/start_unix-any.sh"
         code=$?
         ;;
-test|--test|Test|--Test|TEST|--TEST)
+test|Test|TEST)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/test_unix-any.sh"
         code=$?
         ;;
-prepare|--prepare|Prepare|--Prepare|PREPARE|--PREPARE)
+prepare|Prepare|PREPARE)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/prepare_unix-any.sh"
         code=$?
         ;;
-build|--build|Build|--Build|BUILD|--BUILD)
+build|Build|BUILD)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/build_unix-any.sh"
         code=$?
         ;;
-package|--package|Package|--Package|PACKAGE|--PACKAGE)
+package|Package|PACKAGE)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/package_unix-any.sh"
         code=$?
         ;;
-release|--release|Release|--Release|RELEASE|--RELEASE)
+release|Release|RELEASE)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/release_unix-any.sh"
         code=$?
         ;;
-compose|--compose|Compose|--Compose|COMPOSE|--COMPOSE)
+compose|Compose|COMPOSE)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/compose_unix-any.sh"
         code=$?
         ;;
-publish|--publish|Publish|--Publish|PUBLISH|--PUBLISH)
+publish|Publish|PUBLISH)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/publish_unix-any.sh"
         code=$?
         ;;
-stop|--stop|Stop|--Stop|STOP|--STOP)
+stop|Stop|STOP)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/stop_unix-any.sh"
         code=$?
         unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
+        ;;
+clean|Clean|CLEAN)
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/clean_unix-any.sh"
+        code=$?
+        ;;
+purge|Purge|PURGE)
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/purge_unix-any.sh"
+        code=$?
         ;;
 *)
         case "$1" in
@@ -224,6 +221,8 @@ stop|--stop|Stop|--Stop|STOP|--STOP)
         printf "        To compose the documents 🠚      $ ./ci.cmd compose\n"
         printf "        To publish the documents 🠚      $ ./ci.cmd publish\n"
         printf "        To stop a development 🠚         $ ./ci.cmd stop\n"
+        printf "        To clean the workspace 🠚        $ ./ci.cmd clean\n"
+        printf "        To purge everything 🠚           $ ./ci.cmd purge\n"
         ;;
 esac
 ################################################################################
@@ -315,9 +314,7 @@ for /F "usebackq delims=" %%A in ("%PROJECT_PATH_ROOT%\CONFIG.toml") do (
         set "line="
         if not "!subject:~0,1!"=="#" (
                 for /F "tokens=1,2 delims=#" %%a in ("!subject!") do (
-                        if NOT "!stop!"=="1" (
-                                set "line=!line!%%a"
-                        )
+                        set "line=!line!%%a"
                 )
         )
 
@@ -621,6 +618,60 @@ IF "%1"=="env" (
         )
         set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
         goto end
+) ELSE IF "%1"=="clean" (
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\clean_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        goto end
+) ELSE IF "%1"=="Clean" (
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\clean_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        goto end
+) ELSE IF "%1"=="CLEAN" (
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\clean_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        goto end
+) ELSE IF "%1"=="purge" (
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\purge_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        goto end
+) ELSE IF "%1"=="Purge" (
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\purge_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        goto end
+) ELSE IF "%1"=="PURGE" (
+        Powershell.exe ^
+                -executionpolicy remotesigned ^
+                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\purge_windows-any.ps1"
+        IF "!ERRORLEVEL!" NEQ "0" (
+                set code=1
+        )
+        set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
+        goto end
 ) ELSE IF "%1"=="-h" (
         if not "!was_set!" == "1" (
                 set PROJECT_ARCH= PROJECT_OS= PROJECT_PATH_PWD= PROJECT_PATH_ROOT=
@@ -686,6 +737,8 @@ IF "%1"=="env" (
         echo "        To compose the documents 🠚      $ .\ci.cmd compose\n"
         echo "        To publish the documents 🠚      $ .\ci.cmd publish\n"
         echo "        To stop a development 🠚         $ .\ci.cmd stop\n"
+        echo "        To clean the workspace 🠚        $ .\ci.cmd clean\n"
+        echo "        To purge everything 🠚           $ .\ci.cmd purge\n"
 
 :end
 ::##############################################################################

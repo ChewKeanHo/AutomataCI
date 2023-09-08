@@ -15,7 +15,7 @@
 
 # (0) initialize
 IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
+        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
         exit 1
 }
 
@@ -59,7 +59,7 @@ if ($process -ne 0) {
 }
 
 
-$file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\requirements.txt"
+$file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\requirements.txt"
 OS-Print-Status info "executing pip install against ${file}"
 $process = OS-Exec "pip" "install -r $file"
 if ($process -ne 0) {

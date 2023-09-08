@@ -21,31 +21,9 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 
 
 
 
-# (1) execute tech-specific CI job
-if [ ! -z "$PROJECT_PYTHON" ]; then
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
-        __recipe="${__recipe}/start_unix-any.sh"
-        OS::print_status info "Python technology detected. Parsing job recipe: ${__recipe}\n"
-
-        FS::is_file "$__recipe"
-        if [ $? -ne 0 ]; then
-                OS::print_status error "Parse failed - missing file.\n"
-                return 1
-        fi
-
-        . "$__recipe"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-fi
-
-
-
-
-# (2) use default response since there is no localized jobs
+OS::print_status success "(placeholder)\n"
 return 0

@@ -16,7 +16,7 @@
 
 # (0) initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please start from ci.cmd instead!\n"
         return 1
 fi
 
@@ -27,16 +27,25 @@ fi
 
 
 # (1) execute tech-specific CI job
-recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
-recipe="${recipe}/prepare_unix-any.sh"
-if [ -f "$recipe" ]; then
-        . "$recipe"
-        return $?
+if [ ! -z "$PROJECT_PYTHON" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/prepare_unix-any.sh"
+        OS::print_status info "Python technology detected. Parsing job recipe: ${__recipe}\n"
+
+        FS::is_file "$__recipe"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "Parse failed - missing file.\n"
+                return 1
+        fi
+
+        . "$__recipe"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 fi
 
 
 
 
 # (2) use default response since there is no localized jobs
-OS::print_status info "Hello from AutomataCI - Prepare Recipe!"
 return 0

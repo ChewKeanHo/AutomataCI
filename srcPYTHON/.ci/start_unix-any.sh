@@ -16,7 +16,7 @@
 
 # (0) initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
 

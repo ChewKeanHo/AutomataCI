@@ -1,3 +1,8 @@
+automataCI: increase coloration intensity
+srcPYTHON: split all package CI functions
+.github: set CI to print color
+automataCI: performed major code clean up for stability
+root: added pypi library packager function
 automataCI: fixed missing deb library bug
 srcPYTHON: updated Start CI job recipe to issue manual instruction
 automataCI: promote package sub-lib to single underscore

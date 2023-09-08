@@ -14,39 +14,37 @@
 
 
 # (0) initialize
-If (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
         exit 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 
 
 
 
-# (1) safety checking control surfaces
-OS-Print-Status info "checking python availability..."
-$process = PYTHON-Is-Available
-if ($process -ne 0) {
-	OS-Print-Status error "missing python intepreter."
-	exit 1
+# (1) execute tech specific CI jobs if available
+if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
+	$__recipe = "${__recipe}\clean_windows-any.ps1"
+	OS-Print-Status info "Python technology detected. Parsing job recipe: ${__recipe}"
+
+	$__process = FS-Is-File $__recipe
+	if ($__process -ne 0) {
+		OS-Print-Status error "Parse failed - missing file."
+		exit 1
+	}
+
+	. $__recipe
+	if (-not $?) {
+		exit 1
+	}
 }
 
 
 
 
-# (2) run services
-OS-Print-Status info "setup python venv..."
-$process = PYTHON-Setup-VENV
-if ($process -ne 0) {
-	OS-Print-Status error "setup failed."
-	exit 1
-}
-
-
-
-
-# (3) report successful status
-OS-Print-Status success ""
+# (2) use default response since no localized CI jobs
 exit 0

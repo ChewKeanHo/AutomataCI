@@ -16,7 +16,7 @@
 
 # (0) initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
 
@@ -72,7 +72,7 @@ pyinstaller --noconfirm \
         --specpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}" \
         --name "$file" \
         --hidden-import=main \
-        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/main.py"
+        "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/main.py"
 if [ $? -ne 0 ]; then
         OS::print_status error "build failed.\n"
         return 1

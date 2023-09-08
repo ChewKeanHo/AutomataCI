@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
 # the License at:
-#                 http://www.apache.org/licenses/LICENSE-2.0
+#                http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,19 +16,36 @@
 
 # (0) initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
+fi
+
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+
+
+
+
+# (1) execute tech-specific CI job
+if [ ! -z "$PROJECT_PYTHON" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/publish_unix-any.sh"
+        OS::print_status info "Python technology detected. Parsing job recipe: ${__recipe}\n"
+
+        FS::is_file "$__recipe"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "Parse failed - missing file.\n"
+                return 1
+        fi
+
+        . "$__recipe"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 fi
 
 
 
 
-# (1) your unix commands for the job recipe here. You can source the pre-built
-#     templates inside the ./scripts/templates directory to jump-start a
-#     supported project. Example, for Go you can add the following:
-#          . ${PROJECT_PATH_SCRIPTS}/templates/go/start_${PROJECT_OS}-${PROJECT_ARCH}.sh
-#          if [ $? -ne 0 ]; then
-#                # handle error here
-#                return 1
-#          fi
-printf "Hello from native CI - publish recipe!\n"
+# (2) use default response since there is no localized jobs
+return 0

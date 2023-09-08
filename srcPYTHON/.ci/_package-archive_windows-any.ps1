@@ -38,8 +38,8 @@ function PACKAGE-Assemble-Archive-Content {
 	$__process = FS-Is-Target-A-Source "${__target}"
 	if ($__process -eq 0) {
 		# it's a source code target
-		PYTHON-Clean-Artifact "${env:PROJECT_PATH_ROOT}\srcPYTHON"
-		$__target = "${env:PROJECT_PATH_ROOT}\srcPYTHON\Libs"
+		PYTHON-Clean-Artifact "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
+		$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs"
 		OS-Print-Status info "copying ${__target} to ${__directory}"
 		$__process = FS-Copy-All "${__target}" "${__directory}"
 		if ($__process -ne 0) {

@@ -3,7 +3,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
 # of the License at:
-#               http://www.apache.org/licenses/LICENSE-2.0
+#                 http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,15 +15,36 @@
 
 # (0) initialize
 IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
+        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
         exit 1
+}
+
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+
+
+
+
+# (1) execute tech specific CI jobs if available
+if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
+	$__recipe = "${__recipe}\stop_windows-any.ps1"
+	OS-Print-Status info "Python technology detected. Parsing job recipe: ${__recipe}"
+
+	$__process = FS-Is-File $__recipe
+	if ($__process -ne 0) {
+		OS-Print-Status error "Parse failed - missing file."
+		exit 1
+	}
+
+	. $__recipe
+	if (-not $?) {
+		exit 1
+	}
 }
 
 
 
 
-# (1) your windows commands for the job recipe here. You can call the pre-built
-#     CI templates inside the ./automata/templates directory for jump-starting
-#     a supported project quickly.
-Write-Host "Hello from native CI - stop recipe!\n"
+# (2) use default response since no localized CI jobs
 exit 0

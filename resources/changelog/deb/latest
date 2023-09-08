@@ -1,5 +1,10 @@
 myProject (0.0.1) stable; urgency=low
 
+  * automataCI: increase coloration intensity
+  * srcPYTHON: split all package CI functions
+  * .github: set CI to print color
+  * automataCI: performed major code clean up for stability
+  * root: added pypi library packager function
   * automataCI: fixed missing deb library bug
   * srcPYTHON: updated Start CI job recipe to issue manual instruction
   * automataCI: promote package sub-lib to single underscore
@@ -45,4 +50,4 @@ myProject (0.0.1) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Sun, 03 Sep 2023 11:03:50 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Fri, 08 Sep 2023 17:04:01 +0800

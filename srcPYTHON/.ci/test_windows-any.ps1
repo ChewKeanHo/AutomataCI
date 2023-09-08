@@ -14,37 +14,26 @@
 
 
 # (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
         exit 1
 }
+
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
 
 
 
 
 # (1) safety checking control surfaces
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\io\os.ps1"
-. $services
-
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\io\fs.ps1"
-. $services
-
-$services = $env:PROJECT_PATH_ROOT + "\" `
-		+ $env:PROJECT_PATH_AUTOMATA + "\" `
-		+ "services\compilers\python.ps1"
-. $services
-
-
 OS-Print-Status info "checking python availability..."
 $process = PYTHON-Is-Available
 if ($process -ne 0) {
 	OS-Print-Status error "missing python intepreter."
 	exit 1
 }
+
 
 OS-Print-Status info "activating python venv..."
 $process = PYTHON-Activate-VENV
@@ -57,10 +46,8 @@ if ($process -ne 0) {
 
 
 # (2) run test service
-$report_location = $env:PROJECT_PATH_ROOT + "\" `
-			+ $env:PROJECT_PATH_LOG + "\" `
-			+ "python-test-report"
-OS-Print-Status info "preparing report value: $report_location"
+$report_location = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\python-test-report"
+OS-Print-Status info "preparing report value: ${report_location}"
 $process = FS-Make-Directory $report_location
 if ($process -ne 0) {
 	OS-Print-Status error "preparation failed."
@@ -71,9 +58,9 @@ if ($process -ne 0) {
 # (2.1) execute test run
 OS-Print-Status info "executing all tests with coverage..."
 $argument = "-m coverage run " `
-	+ "--data-file=`"" + $report_location + "\.coverage" + "`" " `
+	+ "--data-file=`"${report_location}\.coverage`" " `
 	+ "-m unittest discover " `
-	+ "-s `"" + $env:PROJECT_PATH_ROOT + "\" + $env:PROJECT_PATH_SOURCE + "`" " `
+	+ "-s `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}`" " `
 	+ "-p '*_test.py'"
 $process = OS-Exec python $argument
 if ($process -ne 0) {
@@ -85,8 +72,8 @@ if ($process -ne 0) {
 # (2.2) process test report
 OS-Print-Status info "processing test coverage data to html..."
 $argument = "-m coverage html " `
-	+ "--data-file=`"" + $report_location + "\.coverage" + "`" " `
-	+ "--directory=`"" + $report_location + "`""
+	+ "--data-file=`"${report_location}\.coverage`" " `
+	+ "--directory=`"${report_location}`""
 $process = OS-Exec python $argument
 if ($process -ne 0) {
 	OS-Print-Status error "data processing failed."

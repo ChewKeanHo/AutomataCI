@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
 # the License at:
-#                 http://www.apache.org/licenses/LICENSE-2.0
+#                http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -29,7 +29,7 @@ fi
 # (1) execute tech-specific CI job
 if [ ! -z "$PROJECT_PYTHON" ]; then
         __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
-        __recipe="${__recipe}/start_unix-any.sh"
+        __recipe="${__recipe}/purge_unix-any.sh"
         OS::print_status info "Python technology detected. Parsing job recipe: ${__recipe}\n"
 
         FS::is_file "$__recipe"

@@ -16,7 +16,7 @@
 
 # (0) initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
 
@@ -56,7 +56,7 @@ OS::print_status info "executing all tests with coverage...\n"
 python -m coverage run \
         --data-file="${report_location}/.coverage" \
         -m unittest discover \
-        -s "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
+        -s "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}" \
         -p '*_test.py'
 if [ $? -ne 0 ]; then
         OS::print_status error "test executions failed.\n"

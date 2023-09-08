@@ -15,7 +15,7 @@
 
 # (0) initialize
 IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
+        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
         exit 1
 }
 
@@ -62,7 +62,7 @@ if ($process -ne 0) {
 }
 
 
-$file = $env:PROJECT_SKU + "_" + $env:PROJECT_OS + "-" + $env:PROJECT_ARCH
+$file = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 OS-Print-Status info "building output file: $file"
 $argument = "--noconfirm " `
 	+ "--onefile " `
@@ -72,7 +72,7 @@ $argument = "--noconfirm " `
 	+ "--specpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}`" " `
 	+ "--name `"${file}`" " `
 	+ "--hidden-import=main " `
-	+ "`"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\main.py`""
+	+ "`"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\main.py`""
 $process = OS-Exec $compiler $argument
 if ($process -ne 0) {
 	OS-Print-Status error "build failed."

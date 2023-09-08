@@ -35,7 +35,7 @@ fi
 
 
 # (1) source locally provided functions
-DEST="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
+DEST="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
 DEST="${DEST}/package_unix-any.sh"
 OS::print_status info "sourcing content assembling functions from: ${DEST}\n"
 FS::is_target_exist "$DEST"

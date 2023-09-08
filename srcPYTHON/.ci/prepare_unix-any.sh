@@ -16,7 +16,7 @@
 
 # (0) initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
 
@@ -62,7 +62,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/requirements.txt"
+file="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/requirements.txt"
 OS::print_status info "executing pip install against $file\n"
 pip install -r "$file"
 if [ $? -ne 0 ]; then

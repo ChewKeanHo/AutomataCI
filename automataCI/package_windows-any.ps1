@@ -34,7 +34,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 # (1) source locally provided functions
-$DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
+$DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
 $DEST = "${DEST}\package_windows-any.ps1"
 OS-Print-Status info "sourcing content assembling functions from: ${DEST}"
 $__process = FS-Is-Target-Exist "${DEST}"

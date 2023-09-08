@@ -45,8 +45,9 @@ function PACKAGE-Assemble-PYPI-Content {
 	}
 
 	# assemble the python package
-	PYTHON-Clean-Artifact "${env:PROJECT_PATH_ROOT}\srcPYTHON"
-	$__process = FS-Copy-All "${env:PROJECT_PATH_ROOT}\srcPYTHON\Libs" "${__directory}"
+	PYTHON-Clean-Artifact "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
+	$__process = FS-Copy-All "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs" `
+				"${__directory}"
 	if ($__process -ne 0) {
 		return 1
 	}

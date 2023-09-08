@@ -44,8 +44,8 @@ PACKAGE::assemble_pypi_content() {
         fi
 
         # assemble the python package
-        PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/srcPYTHON/"
-        FS::copy_all "${PROJECT_PATH_ROOT}/srcPYTHON/Libs/" "${__directory}"
+        PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/"
+        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/" "${__directory}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

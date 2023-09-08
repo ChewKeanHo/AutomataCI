@@ -37,8 +37,8 @@ PACKAGE::assemble_archive_content() {
         FS::is_target_a_source "$__target"
         if [ $? -eq 0 ]; then
                 # it's a source code target
-                PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/srcPYTHON/"
-                FS::copy_all "${PROJECT_PATH_ROOT}/srcPYTHON/Libs/" "${__directory}"
+                PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/"
+                FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/" "${__directory}"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
