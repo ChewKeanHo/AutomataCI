@@ -29,6 +29,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-rpm_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-flatpak_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-pypi_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-docker_windows-any.ps1"
 
 
 
@@ -141,6 +142,16 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 	}
 
 	$__process = PACKAGE-Run-PYPI `
+		"$DEST" `
+		"$i" `
+		"$TARGET_FILENAME" `
+		"$TARGET_OS" `
+		"$TARGET_ARCH"
+	if ($__process -ne 0) {
+		exit 1
+	}
+
+	$__process = PACKAGE-Run-DOCKER `
 		"$DEST" `
 		"$i" `
 		"$TARGET_FILENAME" `

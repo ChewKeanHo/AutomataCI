@@ -9,6 +9,63 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+function STRINGS-Has-Prefix {
+	param(
+		[string]$__prefix,
+		[string]$__content
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__prefix)) {
+		return 1
+	}
+
+	# execute
+	if ($__content.StartsWith($__prefix)) {
+		return 0
+	}
+
+	# report status
+	return 1
+}
+
+
+
+
+function STRINGS-Has-Suffix {
+	param(
+		[string]$__suffix,
+		[string]$__content
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__suffix)) {
+		return 1
+	}
+
+	# execute
+	if ($__content.EndsWith($__suffix)) {
+		return 0
+	}
+
+	# report status
+	return 1
+}
+
+
+
+
+function STRINGS-To-Lowercase {
+	param(
+		[string]$__content
+	)
+
+	return $__content.ToLower()
+}
+
+
+
+
 function STRINGS-Trim-Whitespace-Left {
 	param(
 		[string]$__content
@@ -45,22 +102,10 @@ function STRINGS-Trim-Whitespace {
 
 
 
-function STRINGS-Has-Prefix {
+function STRINGS-To-Uppercase {
 	param(
-		[string]$__prefix,
 		[string]$__content
 	)
 
-	# validate input
-	if ([string]::IsNullOrEmpty($__prefix)) {
-		return 1
-	}
-
-	# execute
-	if ($__content.StartsWith($__prefix)) {
-		return 0
-	}
-
-	# report status
-	return 1
+	return $__content.ToUpper()
 }

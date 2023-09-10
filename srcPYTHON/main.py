@@ -6,9 +6,9 @@ __copyright__ = """
 __license__ = "[ LICENSE_SPDX_ID_HERE ]"
 ################################################################################
 import sys
-from libs.Sample import Entity
-from libs.Sample import Location
-from libs.Sample import Strings
+from Libs.Sample import Entity
+from Libs.Sample import Location
+from Libs.Sample import Strings
 
 def main() -> int:
     print("Hello " + Strings.Process(Entity.NAME, Location.NAME))

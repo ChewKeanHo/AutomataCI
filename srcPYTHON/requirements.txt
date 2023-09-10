@@ -6,5 +6,7 @@
 # CI required libraries. Please DO NOT remove. TQ!
 coverage
 pyinstaller
+patchelf-wrapper; sys_platform == 'linux'
+staticx; sys_platform == 'linux'
 wheel
 twine

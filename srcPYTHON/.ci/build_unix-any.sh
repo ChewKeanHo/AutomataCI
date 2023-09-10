@@ -78,6 +78,23 @@ if [ $? -ne 0 ]; then
         return 1
 fi
 
+if [ "$PROJECT_OS" = "linux" ] && [ "$PROJECT_ARCH" = "amd64" ]; then
+        OS::print_status info "transforming output file to full static binary...\n"
+        staticx "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/$file" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/.$file"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "build failed.\n"
+                return 1
+        fi
+
+        mv "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/.$file" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/$file"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "build failed.\n"
+                return 1
+        fi
+fi
+
 
 file="${PROJECT_SKU}-src_${PROJECT_OS}-${PROJECT_ARCH}"
 OS::print_status info "building output file: ${file}\n"

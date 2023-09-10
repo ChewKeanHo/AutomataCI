@@ -1,3 +1,5 @@
+root: removed unwanted executable permissions
+root: enabled multi-tech implementations
 automataCI: increase coloration intensity
 srcPYTHON: split all package CI functions
 .github: set CI to print color

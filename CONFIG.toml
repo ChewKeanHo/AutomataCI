@@ -123,6 +123,17 @@ PROJECT_PATH_RESOURCES = "resources"
 
 
 ######################
+# PROJECT REPOSITORY #
+######################
+# PROJECT_REPO_ID
+# The repository ID (e.g. GitHub user ID or group ID) used for tagging purposes
+# (e.g. Docker).
+PROJECT_REPO_ID = "local"
+
+
+
+
+######################
 # TECHNOLOGIES       #
 ######################
 # PROJECT_PYTHON

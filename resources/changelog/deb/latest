@@ -1,5 +1,7 @@
 myProject (0.0.1) stable; urgency=low
 
+  * root: removed unwanted executable permissions
+  * root: enabled multi-tech implementations
   * automataCI: increase coloration intensity
   * srcPYTHON: split all package CI functions
   * .github: set CI to print color
@@ -50,4 +52,4 @@ myProject (0.0.1) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Fri, 08 Sep 2023 17:04:01 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Sat, 09 Sep 2023 21:11:09 +0800

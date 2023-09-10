@@ -30,6 +30,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-rpm_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-flatpak_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-pypi_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-docker_unix-any.sh"
 
 
 
@@ -136,6 +137,16 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         fi
 
         PACKAGE::run_pypi \
+                "$DEST" \
+                "$i" \
+                "$TARGET_FILENAME" \
+                "$TARGET_OS" \
+                "$TARGET_ARCH"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        PACKAGE::run_docker \
                 "$DEST" \
                 "$i" \
                 "$TARGET_FILENAME" \

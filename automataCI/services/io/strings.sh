@@ -10,36 +10,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-STRINGS::trim_whitespace_left() {
-        #__content="$1"
-
-        printf "${1#"${1%%[![:space:]]*}"}"
-        return 0
-}
-
-
-
-
-STRINGS::trim_whitespace_right() {
-        #__content="$1"
-
-        printf "${1%"${1##*[![:space:]]}"}"
-        return 0
-}
-
-
-
-
-STRINGS::trim_whitespace() {
-        #__content="$1"
-
-        printf "$(STRINGS::trim_whitespace_right "$(STRINGS::trim_whitespace_left "$1")")"
-        return 0
-}
-
-
-
-
 STRINGS::has_prefix() {
         #__prefix="$1"
         #__content="$2"
@@ -74,4 +44,54 @@ STRINGS::has_suffix() {
                 return 1
                 ;;
         esac
+}
+
+
+
+
+STRINGS::to_lowercase() {
+        #__content="$1"
+
+        printf "$1" | tr '[:upper:]' '[:lower:]'
+        return 0
+}
+
+
+
+
+STRINGS::trim_whitespace_left() {
+        #__content="$1"
+
+        printf "${1#"${1%%[![:space:]]*}"}"
+        return 0
+}
+
+
+
+
+STRINGS::trim_whitespace_right() {
+        #__content="$1"
+
+        printf "${1%"${1##*[![:space:]]}"}"
+        return 0
+}
+
+
+
+
+STRINGS::trim_whitespace() {
+        #__content="$1"
+
+        printf "$(STRINGS::trim_whitespace_right "$(STRINGS::trim_whitespace_left "$1")")"
+        return 0
+}
+
+
+
+
+STRINGS::to_uppercase() {
+        #__content="$1"
+
+        printf "$1" | tr '[:lower:]' '[:upper:]'
+        return 0
 }
