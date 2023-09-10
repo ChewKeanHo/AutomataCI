@@ -13,38 +13,40 @@
 
 
 
-# (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please source from ci.cmd instead!\n"
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
         exit 1
 }
 
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\installer.ps1"
 
 
 
-# (1) construct json array
-$__output = ""
+
+# begin service
+OS-Print-Status info "Installing choco system..."
+$__process = INSTALLER-Setup
+if ($__process -ne 0) {
+	OS-Print-Status error "install failed."
+	return 1
+}
 
 
 
-if (-not ([string]::IsNullOrEmpty($env:PROJECT_PYTHON))) {
-	if (-not ([string]::IsNullOrEmpty($__output))) {
-		$__output = "${__output} "
+
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
+	OS-Print-Status info "Python tech detected. Installing..."
+	$__process = INSTALLER-Setup-Python
+	if ($__process -ne 0) {
+		OS-Print-Status error "install failed."
+		return 1
 	}
-
-	$__output = $__output + "python"
 }
 
 
 
 
-# (2) print output
-$__output = "value='${__output}'"
-
-if (Test-Path "${env:GITHUB_OUTPUT}") {
-	echo $__output >> ${env:GITHUB_OUTPUT}
-}
-
-Write-Host $__output
-
+# report status
 return 0

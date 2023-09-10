@@ -16,38 +16,6 @@
 
 
 
-PYTHON::is_available() {
-        if [ ! -z "$(type -t python3)" ]; then
-                return 0
-        elif [ ! -z "$(type -t python)" ]; then
-                return 0
-        fi
-
-        return 1
-}
-
-
-
-
-PYTHON::is_venv_activated() {
-        if [ ! -z "$VIRTUAL_ENV" ] ; then
-                return 0
-        fi
-
-        return 1
-}
-
-
-
-
-PYTHON::has_pip() {
-        OS::is_command_available "pip"
-        return $?
-}
-
-
-
-
 PYTHON::activate_venv() {
         # validate input
         PYTHON::is_venv_activated
@@ -69,6 +37,61 @@ PYTHON::activate_venv() {
         if [ $? -eq 0 ] ; then
                 return 0
         fi
+        return 1
+}
+
+
+
+
+PYTHON::clean_artifact() {
+        # __target="$1"
+
+        # validate input
+        if [ -z "$1" ] || [ ! -d "$1" ]; then
+                return 1
+        fi
+
+        OS::is_command_available "find"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # execute
+        find "$1" | grep -E "(__pycache__|\.pyc$)" | xargs rm -rf &> /dev/null
+
+        # report status
+        return 0
+}
+
+
+
+
+PYTHON::has_pip() {
+        OS::is_command_available "pip"
+        return $?
+}
+
+
+
+
+PYTHON::is_available() {
+        if [ ! -z "$(type -t python3)" ]; then
+                return 0
+        elif [ ! -z "$(type -t python)" ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+PYTHON::is_venv_activated() {
+        if [ ! -z "$VIRTUAL_ENV" ] ; then
+                return 0
+        fi
+
         return 1
 }
 
@@ -117,29 +140,6 @@ PYTHON::setup_venv() {
                 return 0
         fi
         return 1
-}
-
-
-
-
-PYTHON::clean_artifact() {
-        # __target="$1"
-
-        # validate input
-        if [ -z "$1" ] || [ ! -d "$1" ]; then
-                return 1
-        fi
-
-        OS::is_command_available "find"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        # execute
-        find "$1" | grep -E "(__pycache__|\.pyc$)" | xargs rm -rf &> /dev/null
-
-        # report status
-        return 0
 }
 
 

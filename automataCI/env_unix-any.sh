@@ -10,40 +10,43 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/installer.sh"
 
 
 
 
-# (0) initialize
+# initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please source from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
 
 
 
 
-# (1) construct json array
-__output=""
+# begin service
+OS::print_status info "Installing brew system...\n"
+INSTALLER::setup
+if [ $? -ne 0 ]; then
+        OS::print_status error "install failed.\n"
+        return 1
+fi
+
+
 
 
 if [ ! -z "$PROJECT_PYTHON" ]; then
-        if [ ! -z "$__output" ]; then
-                __output="${__output} "
+        OS::print_status info "Python tech detected. Installing...\n"
+        INSTALLER::setup_python
+        if [ $? -ne 0 ]; then
+                OS::print_status error "install failed.\n"
+                return 1
         fi
-        __output="${__output}python"
 fi
 
 
 
 
-
-# (2) print output
-__output="value='${__output}'"
-
-if [ ! -z "$GITHUB_OUTPUT" ]; then
-        printf -- "${__output}" >> "$GITHUB_OUTPUT"
-fi
-
->&2 printf -- "${__output}\n"
+# report status
 return 0

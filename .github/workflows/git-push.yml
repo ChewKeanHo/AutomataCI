@@ -23,15 +23,10 @@ jobs:
         TERM: xterm-256color
     steps:
       - uses: actions/checkout@v3
-      - name: Get environment configurations
-        id: get_environment_configurations
+      - name: Execute repo's native CI - ENV (TECH)
+        id: native_ci_env
         run: |
           ./ci.cmd env
-      - name: Setup Python interpreter if the project uses Python
-        if: contains(steps.get_environment_configurations.outputs.value, 'python')
-        uses: actions/setup-python@v4
-        with:
-          python-version-file: ${{ env.PROJECT_PYTHON }}
       - name: Execute repo's native CI - SETUP
         id: native_ci_setup
         run: |
