@@ -44,16 +44,9 @@ PACKAGE::run_docker() {
         esac
 
         # prepare workspace and required values
-        _target_path="${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
-        FS::is_target_a_source "$_target"
-        if [ $? -eq 0 ]; then
-                _src="docker-src_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/docker-src-${_target_path}.tar"
-        else
-                _src="docker_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/docker-${_target_path}.tar"
-        fi
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_src}"
+        _src="${__target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
+        _target_path="${_dest}/docker_${_src}.tar"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/docker_${_src}"
         OS::print_status info "dockering ${_src} for ${_target_os}-${_target_arch}\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
         FS::remake_directory "$_src"

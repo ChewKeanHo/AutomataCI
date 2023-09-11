@@ -41,16 +41,9 @@ function PACKAGE-Run-Archive {
 	}
 
 	# prepare workspace and required values
-	$_target_path = "${env:PROJECT_SKU}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
-	$__process = FS-Is-Target-A-Source "${_target}"
-	if ($__process -eq 0) {
-		$_src = "archive-src_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
-		$_target_path = "${_dest}\src-${_target_path}"
-	} else {
-		$_src = "archive_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
-		$_target_path = "${_dest}\${_target_path}"
-	}
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${_src}"
+	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
+	$_target_path = "${_dest}\${_src}"
+	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\archive_${_src}"
 	OS-Print-Status info "archiving ${_src} for ${_target_os}-${_target_arch}"
 	OS-Print-Status info "remaking workspace directory ${_src}"
 	$__process = FS-Remake-Directory "${_src}"

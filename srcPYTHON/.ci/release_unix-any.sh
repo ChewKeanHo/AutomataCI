@@ -14,7 +14,7 @@
 
 
 
-# (0) initialize
+# initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
@@ -25,5 +25,23 @@ fi
 
 
 
-OS::print_status success "(placeholder)\n"
+RELEASE::run_python_post_processor() {
+        #__directory="$1"
+
+        return 0
+}
+
+
+
+
+RELEASE::run_python_pre_processor() {
+        #__directory="$1"
+
+        return 0
+}
+
+
+
+
+# report status
 return 0

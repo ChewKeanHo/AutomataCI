@@ -35,16 +35,9 @@ PACKAGE::run_pypi() {
         fi
 
         # prepare workspace and required values
-        _target_path="${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
-        FS::is_target_a_source "$_target"
-        if [ $? -eq 0 ]; then
-                _src="pypi-src_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/pypi-src_${_target_path}"
-        else
-                _src="pypi_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/pypi_${_target_path}"
-        fi
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_src}"
+        _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
+        _target_path="${_dest}/pypi_${_src}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/pypi_${_src}"
         OS::print_status info "Creating PyPi source code package...\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
         FS::remake_directory "$_src"

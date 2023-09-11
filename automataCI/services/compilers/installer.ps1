@@ -53,6 +53,11 @@ function INSTALLER-Setup-Python {
 		return 1
 	}
 
+	$__process =  OS-Is-Command-Available "python"
+	if ($__process -eq 0) {
+		return 0
+	}
+
 	# execute
 	$__process = OS-Exec "choco" "install python -y"
 	if ($__process -ne 0) {
@@ -66,4 +71,11 @@ function INSTALLER-Setup-Python {
 	}
 
 	return 1
+}
+
+
+
+
+function INSTALLER-Setup-Reprepro {
+	return 0  # Windows do not have Reprepro
 }

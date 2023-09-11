@@ -53,13 +53,8 @@ PACKAGE::run_rpm() {
         fi
 
         # prepare workspace and required values
-        FS::is_target_a_source "$_target"
-        if [ $? -eq 0 ]; then
-                _src="rpm-src_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-        else
-                _src="rpm_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-        fi
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_src}"
+        _src="${_target_filename}_${_target_os}-${_target_arch}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rpm_${_src}"
         OS::print_status info "Creating RPM package...\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
         FS::remake_directory "$_src"

@@ -44,16 +44,9 @@ PACKAGE::run_flatpak() {
         esac
 
         # prepare workspace and required values
-        _target_path="${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
-        FS::is_target_a_source "$_target"
-        if [ $? -eq 0 ]; then
-                _src="flatpak-src_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/flatpak-src_${_target_path}"
-        else
-                _src="flatpak_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/flatpak_${_target_path}"
-        fi
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_src}"
+        _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
+        _target_path="${_dest}/flatpak_${_src}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/flatpak_${_src}"
         OS::print_status info "Creating FLATPAK package...\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
         FS::remake_directory "${_src}"

@@ -1,5 +1,7 @@
-myProject (0.0.1) stable; urgency=low
+myproject (0.0.1) stable; urgency=low
 
+  * automataCI: updated to setup python natively
+  * root: added docker packaging function
   * root: removed unwanted executable permissions
   * root: enabled multi-tech implementations
   * automataCI: increase coloration intensity
@@ -52,4 +54,4 @@ myProject (0.0.1) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Sat, 09 Sep 2023 21:11:09 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Mon, 11 Sep 2023 11:50:38 +0800

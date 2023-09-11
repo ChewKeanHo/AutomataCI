@@ -18,9 +18,9 @@
 ####################
 # PROJECT_SKU
 # This is the known product ID used as a command, marketing brand, etc.
-# It should be used with dash ('-'), no space and no underscore for maximum
-# compatibility.
-PROJECT_SKU = "myProject"
+# It should not be using dash ('-'), underscore ('_'), and space (' ') for
+# maximum compatibility.
+PROJECT_SKU = "myproject"
 
 # PROJECT_APP_ID
 # This is the known application complying to the unique 3-parts identifier
@@ -60,81 +60,16 @@ PROJECT_VERSION = "0.0.1"
 # When it doubt or unused, set to 1 and use numerical increment only.
 PROJECT_CADENCE = "1"
 
-
-
-
-######################
-# PROJECT FILESYSTEM #
-######################
-# PROJECT_PATH_ROOT
-# This is an absolute pathing to locate the root directory of the project
-# repository.
-# PROJECT_PATH_ROOT = '...' # Reserved - determined by ci.cmd automatically.
-
-
-# PROJECT_PATH_AUTOMATA
-# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
-# AutomataCI working directory.
-PROJECT_PATH_AUTOMATA = "automataCI"
-
-
-# PROJECT_PATH_TOOLS
-# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
-# project's tooling directory like programming languages' engine or executables.
-PROJECT_PATH_TOOLS = "tools"
-
-
-# PROJECT_PATH_BUILD
-# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
-# project's build output directory.
-PROJECT_PATH_BUILD = "build"
-
-
-# PROJECT_PATH_TEMP
-# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
-# project's temporary workspace directory.
-PROJECT_PATH_TEMP = "tmp"
-
-
-# PROJECT_PATH_LOG
-# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
-# project's log output directory.
-PROJECT_PATH_LOG = "log"
-
-
-# PROJECT_PATH_CI
-# This is the relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_SOURCE where
-# it locates the project's tech-specific CI job directory.
-PROJECT_PATH_CI = ".ci"
-
-
-# PROJECT_PATH_PKG
-# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
-# project's releasable packages output directory.
-PROJECT_PATH_PKG = "pkg"
-
-
-# PROJECT_PATH_RESOURCES
-# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
-# project's main non-code generative materials directory.
-PROJECT_PATH_RESOURCES = "resources"
-
-
-
-
-######################
-# PROJECT REPOSITORY #
-######################
 # PROJECT_REPO_ID
 # The repository ID (e.g. GitHub user ID or group ID) used for tagging purposes
-# (e.g. Docker).
+# (e.g. Docker and Homebrew).
 PROJECT_REPO_ID = "local"
 
 
 
 
 ######################
-# TECHNOLOGIES       #
+# PYTHON TECHNOLOGY  #
 ######################
 # PROJECT_PYTHON
 # This is a reserved variable used for enabling Python technology and also
@@ -147,12 +82,6 @@ PROJECT_REPO_ID = "local"
 # To disable it: simply supply an empty path (e.g. default is '').
 PROJECT_PYTHON = 'srcPYTHON'
 
-
-
-
-######################
-# PYTHON TECHNOLOGY  #
-######################
 # PROJECT_PATH_PYTHON_ENGINE
 # This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
 # setting up venv location.
@@ -254,3 +183,89 @@ PROJECT_FLATPAK_RUNTIME_VERSION="22.08"
 # PROJECT_FLATPAK_SDK
 # The runtime module where the Flatpak is operating on.
 PROJECT_FLATPAK_SDK="org.freedesktop.Sdk"
+
+
+# PROJECT_REPREPRO_CODENAME
+# The codename used by .deb's Reprepro for publishing any detected .deb package
+# file. In any cases, the value **MUST** match any one of the 'Codename:' field
+# defined in PROJECT_PATH_RESOURCES/publishers/deb/conf/distributions data list.
+PROJECT_REPREPRO_CODENAME="main"
+
+
+# PROJECT_STATIC_REPO
+# The git repository for publishing all the packages using static file sharing
+# (e.g. .deb repo, .rpm repo, flatpak repo, etc). This URL shall be git cloned
+# as the PROJECT_PATH_RELEASE directory.
+PROJECT_STATIC_REPO="git@github.com:ChewKeanHo/AutomataCI.wiki.git"
+
+
+# PROJECT_STATIC_URL
+# The public facing base URL for accessing the published static repo. This URL
+# shall be used to construct the final user instructions across various
+# distribution ecosystems.
+PROJECT_STATIC_URL="https://github.com/ChewKeanHo/AutomataCI/wiki/"
+
+
+
+
+######################
+# PROJECT FILESYSTEM #
+######################
+# PROJECT_PATH_ROOT
+# This is an absolute pathing to locate the root directory of the project
+# repository.
+# PROJECT_PATH_ROOT = '...' # Reserved - determined by ci.cmd automatically.
+
+
+# PROJECT_PATH_AUTOMATA
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# AutomataCI working directory.
+PROJECT_PATH_AUTOMATA = "automataCI"
+
+
+# PROJECT_PATH_TOOLS
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's tooling directory like programming languages' engine or executables.
+PROJECT_PATH_TOOLS = "tools"
+
+
+# PROJECT_PATH_BUILD
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's build output directory.
+PROJECT_PATH_BUILD = "build"
+
+
+# PROJECT_PATH_TEMP
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's temporary workspace directory.
+PROJECT_PATH_TEMP = "tmp"
+
+
+# PROJECT_PATH_LOG
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's log output directory.
+PROJECT_PATH_LOG = "log"
+
+
+# PROJECT_PATH_CI
+# This is the relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_SOURCE where
+# it locates the project's tech-specific CI job directory.
+PROJECT_PATH_CI = ".ci"
+
+
+# PROJECT_PATH_PKG
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's releasable packages output directory.
+PROJECT_PATH_PKG = "pkg"
+
+
+# PROJECT_PATH_RELEASE
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's publication output directory.
+PROJECT_PATH_RELEASE = "releases"
+
+
+# PROJECT_PATH_RESOURCES
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's main non-code generative materials directory.
+PROJECT_PATH_RESOURCES = "resources"

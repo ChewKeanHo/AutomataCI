@@ -13,7 +13,7 @@
 
 
 
-# (0) initialize
+# initialize
 IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
         exit 1
@@ -21,23 +21,45 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
+
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-deb_unix-any.ps1"
 
 
 
 
-# (1) execute tech specific CI jobs if available
+# setup release repo
+OS-Print-Status info "Setup artifact release repo..."
+$__current_path = Get-Location
+$null = Set-Location "${env:PROJECT_PATH_ROOT}"
+$__process = GIT-clone "${env:PROJECT_STATIC_REPO}" "${env:PROJECT_PATH_RELEASE}"
+$__current_path = Get-Location
+$null = Set-Location "${__current_path}"
+$null = Remove-Variable __current_path
+
+if ($__process -eq 2) {
+	OS-Print-Status info "Existing directory detected. Skipping..."
+} elseif ($__process -ne 0) {
+	OS-Print-Status error "Setup failed."
+	exit 1
+}
+
+
+
+
+# source tech-specific functions
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
 	$__recipe = "${__recipe}\release_windows-any.ps1"
 	OS-Print-Status info "Python technology detected. Parsing job recipe: ${__recipe}"
 
-	$__process = FS-Is-File $__recipe
+	$__process = FS-Is-File "${__recipe}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "Parse failed - missing file."
 		exit 1
 	}
 
-	. $__recipe
+	. "${__recipe}"
 	if (-not $?) {
 		exit 1
 	}
@@ -46,5 +68,73 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 
 
 
-# (2) use default response since no localized CI jobs
+# run pre-processors
+if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
+	OS-Print-Status info "running python pre-processing function..."
+	$__process = OS-Is-Command-Available "RELEASE-Run-Python-Pre-Processor"
+	if ($__process -ne 0) {
+		OS-Print-Status error "missing RELEASE-Run-Python-Pre-Processor function."
+		return 1
+	}
+
+	$__process = RELEASE-Run-Python-Pre-Processor `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
+	switch ($__process) {
+	10 {
+		OS-Print-Status warning "release is not required. Skipping process."
+		return 0
+	} 0 {
+		# accepted
+	} Default {
+		OS-Print-Status error "pre-processor failed."
+		return 1
+	}}
+}
+
+
+
+
+# loop through each package and publish accordingly
+foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
+	OS-Print-Status info "processing ${TARGET}"
+
+	$__process = RELEASE-Run-DEB `
+		"$TARGET" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
+	if ($__process -ne 0) {
+		return 1
+	}
+}
+
+
+
+
+# run post-processors
+if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
+	OS-Print-Status info "running python post-processing function..."
+	$__process = OS-Is-Command-Available "RELEASE-Run-Python-Post-Processor"
+	if ($__process -ne 0) {
+		OS-Print-Status error "missing RELEASE-Run-Python-Post-Processor function."
+		return 1
+	}
+
+	$__process = RELEASE-Run-Python-Post-Processor `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
+	switch ($__process) {
+	10 {
+		# accepted
+	} 0 {
+		# accepted
+	} Default {
+		OS-Print-Status error "post-processor failed."
+		return 1
+	}}
+}
+
+
+
+
+# use default response since there is no localized CI jobs
+OS-Print-Status success ""
 exit 0

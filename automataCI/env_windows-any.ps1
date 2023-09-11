@@ -30,10 +30,16 @@ OS-Print-Status info "Installing choco system..."
 $__process = INSTALLER-Setup
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
-	return 1
+	exit 1
 }
 
 
+OS-Print-Status info "Installing reprepro..."
+$__process = INSTALLER-Setup-Reprepro
+if ($__process -ne 0) {
+	OS-Print-Status error "install failed."
+	exit 1
+}
 
 
 if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
@@ -41,7 +47,7 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
 	$__process = INSTALLER-Setup-Python
 	if ($__process -ne 0) {
 		OS-Print-Status error "install failed."
-		return 1
+		exit 1
 	}
 }
 
@@ -49,4 +55,4 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
 
 
 # report status
-return 0
+exit 0

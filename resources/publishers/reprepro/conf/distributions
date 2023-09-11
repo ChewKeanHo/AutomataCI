@@ -1,0 +1,5 @@
+Codename: main
+Suite: stable
+Architectures: amd64 i386 arm64 armhf
+Components: stable
+SignWith: 49B7878749107ED9C456267ACFD3316C29873FB5

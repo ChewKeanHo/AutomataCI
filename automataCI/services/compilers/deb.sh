@@ -79,6 +79,26 @@ DEB::is_available() {
 
 
 
+DEB::is_valid() {
+        #__target="$1"
+
+        # validate input
+        if [ -z "$1" ] || [ -d "$1" ] || [ ! -f "$1" ]; then
+                return 1
+        fi
+
+        # execute
+        if [ "${1##*.}" = "deb" ]; then
+                return 0
+        fi
+
+        # return status
+        return 1
+}
+
+
+
+
 DEB::create_checksum() {
         __directory="$1"
 

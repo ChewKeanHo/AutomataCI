@@ -51,13 +51,8 @@ function PACKAGE-Run-RPM {
 	}
 
 	# prepare workspace and required values
-	$__process = FS-Is-Target-A-Source "${_target}"
-	if ($__process -eq 0) {
-		$_src = "rpm-src_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-	} else {
-		$_src = "rpm_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-	}
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${_src}"
+	$_src = "${_target_filename}_${_target_os}-${_target_arch}"
+	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\rpm_${_src}"
 	OS-Print-Status info "Creating RPM package..."
 	OS-Print-Status info "remaking workspace directory ${_src}"
 	$__process = FS-Remake-Directory "${_src}"

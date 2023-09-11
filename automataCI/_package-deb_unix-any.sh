@@ -54,16 +54,9 @@ PACKAGE::run_deb() {
         fi
 
         # prepare workspace and required values
-        _target_path="${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
-        FS::is_target_a_source "$_target"
-        if [ $? -eq 0 ]; then
-                _src="deb-src_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/src-${_target_path}.deb"
-        else
-                _src="deb_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/${_target_path}.deb"
-        fi
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_src}"
+        _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
+        _target_path="${_dest}/${_src}.deb"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb_${_src}"
         OS::print_status info "Creating DEB package...\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
         FS::remake_directory "${_src}"

@@ -40,16 +40,9 @@ PACKAGE::run_archive() {
         fi
 
         # prepare workspace and required values
-        _target_path="${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
-        FS::is_target_a_source "$_target"
-        if [ $? -eq 0 ]; then
-                _src="archive-src_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/src-${_target_path}"
-        else
-                _src="archive_${PROJECT_SKU}_${_target_os}-${_target_arch}"
-                _target_path="${_dest}/${_target_path}"
-        fi
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_src}"
+        _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
+        _target_path="${_dest}/${_src}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/archive_${_src}"
         OS::print_status info "archiving ${_src} for ${_target_os}-${_target_arch}\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
         FS::remake_directory "$_src"

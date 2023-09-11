@@ -1,3 +1,5 @@
+automataCI: updated to setup python natively
+root: added docker packaging function
 root: removed unwanted executable permissions
 root: enabled multi-tech implementations
 automataCI: increase coloration intensity

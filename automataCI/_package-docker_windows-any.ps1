@@ -42,16 +42,9 @@ function PACKAGE-Run-DOCKER {
 	}}
 
 	# prepare workspace and required values
-	$_target_path = "${env:PROJECT_SKU}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
-	$__process = FS-Is-Target-A-Source "${_target}"
-	if ($__process -eq 0) {
-		$_src = "docker-src_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
-		$_target_path = "${_dest}\docker-src-${_target_path}.tar"
-	} else {
-		$_src = "docker_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
-		$_target_path = "${_dest}\docker-${_target_path}.tar"
-	}
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${_src}"
+	$_src = "${__target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
+	$_target_path = "${_dest}\docker_${_src}.tar"
+	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\docker_${_src}"
 	OS-Print-Status info "dockering ${_src} for ${_target_os}-${_target_arch}"
 	OS-Print-Status info "remaking workspace directory ${_src}"
 	$__process = FS-Remake-Directory "${_src}"

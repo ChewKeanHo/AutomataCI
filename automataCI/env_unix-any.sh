@@ -34,6 +34,12 @@ if [ $? -ne 0 ]; then
 fi
 
 
+OS::print_status info "Installing reprepro...\n"
+INSTALLER::setup_reprepro
+if [ $? -ne 0 ]; then
+        OS::print_status error "install failed.\n"
+        return 1
+fi
 
 
 if [ ! -z "$PROJECT_PYTHON" ]; then

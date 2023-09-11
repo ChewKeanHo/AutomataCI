@@ -74,6 +74,30 @@ function DEB-Is-Available {
 
 
 
+function DEB-Is-Valid {
+	param (
+		[string]__target
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		(Test-Path "${__target}" -PathType Container) -or
+		(-not (Test-Path "${__target}"))) {
+		return 1
+	}
+
+	# execute
+	if ($(${__target} -split '\.')[-1] -eq "deb") {
+		return 0
+	}
+
+	# report status
+	return 1
+}
+
+
+
+
 function DEB-Create-Checksum {
 	param (
 		[string]$__directory

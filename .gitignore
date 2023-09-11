@@ -20,11 +20,13 @@ output/
 #####################
 # Native CI
 #####################
-log/
 bin/
-tmp/
-pkg/
 tools/
+tmp/
+log/
+build/
+pkg/
+releases/
 resources/changelog/*/.*
 
 #####################

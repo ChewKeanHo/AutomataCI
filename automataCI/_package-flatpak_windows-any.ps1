@@ -43,16 +43,9 @@ function PACKAGE-Run-FLATPAK {
 
 
 	# prepare workspace and required values
-	$_target_path = "${env:PROJECT_SKU}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
-	$__process = FS-Is-Target-A-Source "${_target}"
-	if ($__process -eq 0) {
-		$_src = "flatpak-src_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
-		$_target_path = "${_dest}\flatpak-src_${_target_path}"
-	} else {
-		$_src = "flatpak_${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
-		$_target_path = "${_dest}\flatpak_${_target_path}"
-	}
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${_src}"
+	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
+	$_target_path = "${_dest}\flatpak_${_src}"
+	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\flatpak_${_src}"
 	OS-Print-Status info "Creating FLATPAK package..."
 	OS-Print-Status info "remaking workspace directory ${_src}"
 	$__process = FS-Remake-Directory "${_src}"
