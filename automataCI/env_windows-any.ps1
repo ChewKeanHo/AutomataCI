@@ -26,7 +26,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 # begin service
-OS-Print-Status info "Installing choco system..."
+OS-Print-Status info "Installing choco..."
 $__process = INSTALLER-Setup
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
@@ -34,8 +34,8 @@ if ($__process -ne 0) {
 }
 
 
-OS-Print-Status info "Installing reprepro..."
-$__process = INSTALLER-Setup-Reprepro
+OS-Print-Status info "Installing curl..."
+$__process = INSTALLER-Setup-Curl
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
 	exit 1
@@ -44,6 +44,14 @@ if ($__process -ne 0) {
 
 OS-Print-Status info "Installing docker..."
 $__process = INSTALLER-Setup-Docker
+if ($__process -ne 0) {
+	OS-Print-Status error "install failed."
+	exit 1
+}
+
+
+OS-Print-Status info "Installing reprepro..."
+$__process = INSTALLER-Setup-Reprepro
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
 	exit 1

@@ -77,6 +77,58 @@ INSTALLER::setup() {
 
 
 
+INSTALLER::setup_curl() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "curl"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        # execute
+        brew install curl
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+INSTALLER::setup_docker() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "docker"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        # execute
+        brew install docker
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
 INSTALLER::setup_python() {
         # validate input
         OS::is_command_available "brew"
@@ -122,32 +174,6 @@ INSTALLER::setup_reprepro() {
 
         # execute
         brew install reprepro
-
-        # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
-}
-
-
-
-
-INSTALLER::setup_docker() {
-        # validate input
-        OS::is_command_available "brew"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        OS::is_command_available "docker"
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        # execute
-        brew install docker
 
         # report status
         if [ $? -eq 0 ]; then

@@ -26,7 +26,7 @@ fi
 
 
 # begin service
-OS::print_status info "Installing brew system...\n"
+OS::print_status info "Installing brew...\n"
 INSTALLER::setup
 if [ $? -ne 0 ]; then
         OS::print_status error "install failed.\n"
@@ -34,8 +34,8 @@ if [ $? -ne 0 ]; then
 fi
 
 
-OS::print_status info "Installing reprepro...\n"
-INSTALLER::setup_reprepro
+OS::print_status info "Installing curl...\n"
+INSTALLER::setup_curl
 if [ $? -ne 0 ]; then
         OS::print_status error "install failed.\n"
         return 1
@@ -44,6 +44,14 @@ fi
 
 OS::print_status info "Installing docker...\n"
 INSTALLER::setup_docker
+if [ $? -ne 0 ]; then
+        OS::print_status error "install failed.\n"
+        return 1
+fi
+
+
+OS::print_status info "Installing reprepro...\n"
+INSTALLER::setup_reprepro
 if [ $? -ne 0 ]; then
         OS::print_status error "install failed.\n"
         return 1
