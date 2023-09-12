@@ -76,7 +76,7 @@ function DEB-Is-Available {
 
 function DEB-Is-Valid {
 	param (
-		[string]__target
+		[string]$__target
 	)
 
 	# validate input

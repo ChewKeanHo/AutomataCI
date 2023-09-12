@@ -18,23 +18,6 @@
 
 
 
-RELEASE::check_deb() {
-        # __target="$1"
-
-        # validate input
-        DEB::is_valid "$1"
-        if [ $? -ne 0 ]; then
-                return 0
-        fi
-
-
-        # report status
-        return 0
-}
-
-
-
-
 RELEASE::run_deb() {
         __target="$1"
         __directory="$2"

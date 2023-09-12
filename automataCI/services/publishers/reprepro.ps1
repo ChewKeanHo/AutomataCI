@@ -35,6 +35,17 @@ function REPREPRO-Publish {
 		[string]$__codename
 	)
 
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		[string]::IsNullOrEmpty($__directory) -or
+		[string]::IsNullOrEmpty($__datastore) -or
+		[string]::IsNullOrEmpty($__codename) -or
+		(Test-Path "${__target}" -PathType Container) -or
+		(-not (Test-Path "${__directory}" -PathType Container)) -or
+		(-not (Test-Path "${__datastore}" -PathType Container))) {
+		return 1
+	}
+
 	# execute
 	$__arguments = "--basedir `"${__datastore}`" " `
 			+ "--outdir `"${__directory}`" " `

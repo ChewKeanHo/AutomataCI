@@ -53,6 +53,30 @@ function RPM-Is-Available {
 
 
 
+function REB-Is-Valid {
+	param (
+		[string]$__target
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		(Test-Path "${__target}" -PathType Container) -or
+		(-not (Test-Path "${__target}"))) {
+		return 1
+	}
+
+	# execute
+	if ($(${__target} -split '\.')[-1] -eq "rpm") {
+		return 0
+	}
+
+	# report status
+	return 1
+}
+
+
+
+
 function RPM-Create-Spec {
 	param(
 		[string]$__directory,

@@ -25,6 +25,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-deb_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-rpm_unix-any.sh"
 
 
 
@@ -103,6 +104,14 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         OS::print_status info "processing ${TARGET}\n"
 
         RELEASE::run_deb \
+                "$TARGET" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE::run_rpm \
                 "$TARGET" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"

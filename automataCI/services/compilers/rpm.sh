@@ -55,6 +55,26 @@ RPM::is_available() {
 
 
 
+RPM::is_valid() {
+        #__target="$1"
+
+        # validate input
+        if [ -z "$1" ] || [ -d "$1" ] || [ ! -f "$1" ]; then
+                return 1
+        fi
+
+        # execute
+        if [ "${1##*.}" = "rpm" ]; then
+                return 0
+        fi
+
+        # return status
+        return 1
+}
+
+
+
+
 RPM::create_spec() {
         __directory="$1"
         __resources="$2"
@@ -202,7 +222,7 @@ URL: ${__website}
                 done < "${__directory}/SPEC_INSTALL"
                 IFS="$__old_IFS" && unset __old_IFS __line
 
-                #FS::remove_silently "${__directory}/SPEC_INSTALL"
+                FS::remove_silently "${__directory}/SPEC_INSTALL"
         else
                 FS::append_file "$__location" "\n"
         fi

@@ -23,7 +23,8 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-deb_unix-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-deb_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-rpm_windows-any.ps1"
 
 
 
@@ -99,6 +100,14 @@ foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT
 	OS-Print-Status info "processing ${TARGET}"
 
 	$__process = RELEASE-Run-DEB `
+		"$TARGET" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = RELEASE-Run-RPM `
 		"$TARGET" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
