@@ -42,6 +42,14 @@ if ($__process -ne 0) {
 }
 
 
+OS-Print-Status info "Installing docker..."
+$__process = INSTALLER-Setup-Docker
+if ($__process -ne 0) {
+	OS-Print-Status error "install failed."
+	exit 1
+}
+
+
 if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
 	OS-Print-Status info "Python tech detected. Installing..."
 	$__process = INSTALLER-Setup-Python

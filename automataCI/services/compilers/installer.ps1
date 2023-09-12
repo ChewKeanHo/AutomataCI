@@ -79,3 +79,33 @@ function INSTALLER-Setup-Python {
 function INSTALLER-Setup-Reprepro {
 	return 0  # Windows do not have Reprepro
 }
+
+
+
+
+function INSTALLER-Setup-Docker {
+	# validate input
+	$__process =  OS-Is-Command-Available "choco"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process =  OS-Is-Command-Available "docker"
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	# execute
+	$__process = OS-Exec "choco" "install docker-desktop -y"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# report status
+	$__process = OS-Is-Command-Available "docker"
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	return 1
+}

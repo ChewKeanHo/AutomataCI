@@ -42,6 +42,14 @@ if [ $? -ne 0 ]; then
 fi
 
 
+OS::print_status info "Installing docker...\n"
+INSTALLER::setup_docker
+if [ $? -ne 0 ]; then
+        OS::print_status error "install failed.\n"
+        return 1
+fi
+
+
 if [ ! -z "$PROJECT_PYTHON" ]; then
         OS::print_status info "Python tech detected. Installing...\n"
         INSTALLER::setup_python

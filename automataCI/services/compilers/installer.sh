@@ -22,6 +22,11 @@ INSTALLER::setup() {
                 return 1
         fi
 
+        OS::is_command_available "brew"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
         # execute
         /bin/bash -c \
         "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -84,6 +89,11 @@ INSTALLER::setup_python() {
                 return 0
         fi
 
+        OS::is_command_available "python3"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
         # execute
         brew install python
 
@@ -112,6 +122,32 @@ INSTALLER::setup_reprepro() {
 
         # execute
         brew install reprepro
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+INSTALLER::setup_docker() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "docker"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        # execute
+        brew install docker
 
         # report status
         if [ $? -eq 0 ]; then
