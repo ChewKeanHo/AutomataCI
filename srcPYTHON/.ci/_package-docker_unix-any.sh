@@ -54,6 +54,21 @@ PACKAGE::assemble_docker_content() {
                 return 1
         fi
 
+        if [ "$PROJECT_OS" = "linux" ] && [ "$PROJECT_ARCH" = "amd64" ]; then
+                OS::print_status info "transforming output file to full static binary...\n"
+                staticx "${__directory}/${PROJECT_SKU}" "${__directory}/.${PROJECT_SKU}"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "transform failed.\n"
+                        return 1
+                fi
+
+                mv "${__directory}/.${PROJECT_SKU}" "${__directory}/${PROJECT_SKU}"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "transform failed.\n"
+                        return 1
+                fi
+        fi
+
         FS::touch_file "${__directory}/.blank"
         if [ $? -ne 0 ]; then
                 return 1

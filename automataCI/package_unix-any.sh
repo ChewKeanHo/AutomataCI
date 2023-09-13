@@ -131,7 +131,8 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 "$i" \
                 "$TARGET_FILENAME" \
                 "$TARGET_OS" \
-                "$TARGET_ARCH"
+                "$TARGET_ARCH" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/flatpak"
         if [ $? -ne 0 ]; then
                 return 1
         fi

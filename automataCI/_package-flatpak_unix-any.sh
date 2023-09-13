@@ -23,6 +23,7 @@ PACKAGE::run_flatpak() {
         _target_filename="$3"
         _target_os="$4"
         _target_arch="$5"
+        _repo="$6"
 
         OS::print_status info "checking FLATPAK functions availability...\n"
         FLATPAK::is_available "$_target_os" "$_target_arch"
@@ -45,7 +46,7 @@ PACKAGE::run_flatpak() {
 
         # prepare workspace and required values
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
-        _target_path="${_dest}/flatpak_${_src}"
+        _target_path="${_dest}/${_src}.flatpak"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/flatpak_${_src}"
         OS::print_status info "Creating FLATPAK package...\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
@@ -131,6 +132,7 @@ PACKAGE::run_flatpak() {
         FLATPAK::create_archive \
                 "$_src" \
                 "$_target_path" \
+                "$_repo" \
                 "$PROJECT_APP_ID" \
                 "$PROJECT_GPG_ID"
         if [ $? -ne 0 ]; then

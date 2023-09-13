@@ -1,5 +1,11 @@
 myproject (0.0.1) stable; urgency=low
 
+  * automataCI: added .rpm createrepo release job function
+  * srcPYTHON: added stricter requirements for staticx
+  * .github: tidy up github actions script
+  * automataCI: added curl installation
+  * automataCI: added docker installation function
+  * root: added Reprepro release job recipe
   * automataCI: updated to setup python natively
   * root: added docker packaging function
   * root: removed unwanted executable permissions
@@ -54,4 +60,4 @@ myproject (0.0.1) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Mon, 11 Sep 2023 11:50:38 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Tue, 12 Sep 2023 22:02:31 +0800

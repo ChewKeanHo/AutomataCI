@@ -16,47 +16,6 @@
 
 
 
-function FLATPAK-Is-Available {
-	param(
-		[string]$__os,
-		[string]$__arch
-	)
-
-	if ([string]::IsNullOrEmpty($__os) -or [string]::IsNullOrEmpty($__arch)) {
-		return 1
-	}
-
-	# check compatible target os
-	switch ($__os) {
-	windows {
-		return 2
-	} darwin {
-		return 2
-	} Default {
-		Break
-	}}
-
-	# check compatible target cpu architecture
-	switch ($__arch) {
-	any {
-		return 3
-	} Default {
-		Break
-	}}
-
-	# validate dependencies
-	$__process = OS-Is-Command-Available "flatpak-builder"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	# report status
-	return 0
-}
-
-
-
-
 function FLATPAK-Create-AppInfo {
 	param (
 		[string]$__directory,
@@ -80,6 +39,101 @@ function FLATPAK-Create-AppInfo {
 
 	# copy flatpak.xml to workspace
 	return FS-Copy-File "${__resources}\packages\flatpak.xml" "${__directory}\appdata.xml"
+}
+
+
+
+
+function FLATPAK-Create-Archive {
+	param (
+		[string]$__directory,
+		[string]$__destination,
+		[string]$__repo,
+		[string]$__app_id,
+		[string]$__gpg_id
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__directory) -or
+		[string]::IsNullOrEmpty($__destination) -or
+		[string]::IsNullOrEmpty($__repo) -or
+		[string]::IsNullOrEmpty($__app_id) -or
+		[string]::IsNullOrEmpty($__gpg_id) -or
+		(-not (Test-Path $__directory -PathType Container))) {
+		return 1
+	}
+
+	$__path_build = ".\build"
+	$__path_export = ".\export"
+	$__path_package = ".\out.flatpak"
+	$__path_manifest = ".\manifest.yml"
+	$null = FS-Make-Directory "${__repo}"
+
+	# change location into the workspace
+	$__current_path = Get-Location
+	Set-Location -Path $__directory
+
+	# build archive
+	if (-not (Test-Path $__path_manifest)) {
+		return 1
+	}
+
+	$__arguments = "--user " +
+			"--install " +
+			"--force-clean " +
+			"--repo=`"${__repo}`" " +
+			"--gpg-sign=`"${__gpg_id}`" " +
+			"`"${__path_build}`" " +
+			"`"${__path_manifest}`""
+	$__process = OS-Exec "flatpak-builder" $__arguments
+	if ($__process -ne 0) {
+		Set-Location -Path $__current_path
+		Remove-Variable -Name __current_path
+		return 1
+	}
+
+	$__arguments = "build-export " +
+			"`"${__path_export}`" " +
+			"`"${__path_build}`""
+	$__process = OS-Exec "flatpak" $__arguments
+	if ($__process -ne 0) {
+		Set-Location -Path $__current_path
+		Remove-Variable -Name __current_path
+		return 1
+	}
+
+	$__arguments = "build-bundle " +
+			"`"${__path_export}`" " +
+			"`"${__path_package}`" " +
+			"`"${__app_id}`""
+	$__process = OS-Exec "flatpak" $__arguments
+	if ($__process -ne 0) {
+		Set-Location -Path $__current_path
+		Remove-Variable -Name __current_path
+		return 1
+	}
+
+	$__arguments = "--user " +
+			"--assumeyes " +
+			"--noninteractive " +
+			"uninstall " +
+			"`"${__app_id}`""
+	$__process = OS-Exec "flatpak" $__arguments
+	if ($__process -ne 0) {
+		Set-Location -Path $__current_path
+		Remove-Variable -Name __current_path
+		return 1
+	}
+
+	# export output
+	$__process = FS-Move "${__path_build}" "${__destination}"
+
+	# head back to current directory
+	Set-Location -Path ${__current_path}
+	Remove-Variable -Name __current_path
+
+	# report status
+	return $__process
 }
 
 
@@ -205,52 +259,68 @@ modules:
 
 
 
-function FLATPAK-Create-Archive {
+function FLATPAK-Is-Available {
+	param(
+		[string]$__os,
+		[string]$__arch
+	)
+
+	if ([string]::IsNullOrEmpty($__os) -or [string]::IsNullOrEmpty($__arch)) {
+		return 1
+	}
+
+	# check compatible target os
+	switch ($__os) {
+	windows {
+		return 2
+	} darwin {
+		return 2
+	} Default {
+		Break
+	}}
+
+	# check compatible target cpu architecture
+	switch ($__arch) {
+	any {
+		return 3
+	} Default {
+		Break
+	}}
+
+	# validate dependencies
+	$__process = OS-Is-Command-Available "flatpak-builder"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# report status
+	return 0
+}
+
+
+
+
+function FLATPAK-Test-Build {
 	param (
-		[string]$__directory,
-		[string]$__destination,
-		[string]$__app_id,
-		[string]$__gpg_id
+		[string]$__target,
+		[string]$__command
 	)
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		[string]::IsNullOrEmpty($__destination) -or
-		[string]::IsNullOrEmpty($__app_id) -or
-		[string]::IsNullOrEmpty($__gpg_id) -or
-		(-not (Test-Path $__directory -PathType Container))) {
+	if ([string]::IsNullOrEmpty($__target) -or [string]::IsNullOrEmpty($__command)) {
 		return 1
 	}
 
-	$__path_build = ".\build"
-	$__path_manifest = ".\manifest.yml"
-	if (-not (Test-Path $__path_manifest)) {
-		return 1
-	}
-
-	# change location into the workspace
-	$__current_path = Get-Location
-	Set-Location -Path $__directory
-
-	# build archive
-	$__arguments = "--force-clean " +
-			"--gpg-sign=`"${__gpg_id}`" " +
-			"`"${__path_build}`" " +
-			"`"${__path_manifest}`""
+	# execute
+	$__arguments = "--run `"${__target}`" " +
+			"`"${__target}\files\manifest.json`" " +
+			"${__command}"
 	$__process = OS-Exec "flatpak-builder" $__arguments
-	if ($__process -ne 0) {
-		Set-Location -Path $__current_path
-		Remove-Variable -Name __current_path
-		return 1
-	}
-
-	# export output
-	$__process = FS-Move "${__path_build}" "${__destination}"
-
-	# head back to current directory
-	Set-Location -Path ${__current_path}
-	Remove-Variable -Name __current_path
 
 	# report status
-	return $__process
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	return 1
 }

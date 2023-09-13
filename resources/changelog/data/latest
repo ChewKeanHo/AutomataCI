@@ -1,3 +1,9 @@
+automataCI: added .rpm createrepo release job function
+srcPYTHON: added stricter requirements for staticx
+.github: tidy up github actions script
+automataCI: added curl installation
+automataCI: added docker installation function
+root: added Reprepro release job recipe
 automataCI: updated to setup python natively
 root: added docker packaging function
 root: removed unwanted executable permissions

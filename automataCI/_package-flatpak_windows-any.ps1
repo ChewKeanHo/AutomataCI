@@ -22,7 +22,8 @@ function PACKAGE-Run-FLATPAK {
 		[string]$_target,
 		[string]$_target_filename,
 		[string]$_target_os,
-		[string]$_target_arch
+		[string]$_target_arch,
+		[string]$_repo
 	)
 
 	OS-Print-Status info "checking FLATPAK functions availability..."
@@ -44,7 +45,7 @@ function PACKAGE-Run-FLATPAK {
 
 	# prepare workspace and required values
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
-	$_target_path = "${_dest}\flatpak_${_src}"
+	$_target_path = "${_dest}\${_src}.flatpak"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\flatpak_${_src}"
 	OS-Print-Status info "Creating FLATPAK package..."
 	OS-Print-Status info "remaking workspace directory ${_src}"
@@ -68,11 +69,11 @@ function PACKAGE-Run-FLATPAK {
 		return 1
 	}
 	$__process = PACKAGE-Assemble-FLATPAK-Content `
-			${_target} `
-			${_src} `
-			${_target_filename} `
-			${_target_os} `
-			${_target_arch}
+			"${_target}" `
+			"${_src}" `
+			"${_target_filename}" `
+			"${_target_os}" `
+			"${_target_arch}"
 	if ($__process -eq 10) {
 		$null = FS-Remove-Silently ${_src}
 		OS-Print-Status warning "packaging is not required. Skipping process."

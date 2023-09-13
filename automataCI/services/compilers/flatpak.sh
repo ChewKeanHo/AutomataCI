@@ -17,45 +17,6 @@
 
 
 
-FLATPAK::is_available() {
-        __os="$1"
-        __arch="$2"
-
-        if [ -z "$__os" ] && [ -z "$__arch" ]; then
-                return 1
-        fi
-
-        # check compatible target os
-        case "$__os" in
-        windows|darwin)
-                return 2
-                ;;
-        *)
-                ;;
-        esac
-
-        # check compatible target cpu architecture
-        case "$__arch" in
-        any)
-                return 3
-                ;;
-        *)
-                ;;
-        esac
-
-        # validate dependencies
-        OS::is_command_available "flatpak-builder"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        # report status
-        return 0
-}
-
-
-
-
 FLATPAK::create_appinfo() {
         __directory="$1"
         __resources="$2"
@@ -78,6 +39,86 @@ FLATPAK::create_appinfo() {
         # copy flatpak.xml to workspace
         FS::copy_file "${__resources}/packages/flatpak.xml" "${__directory}/appdata.xml"
         if [ $? -ne 0 ]; then
+                return 1
+        fi
+        return 0
+}
+
+
+
+
+FLATPAK::create_archive() {
+        __directory="$1"
+        __destination="$2"
+        __repo="$3"
+        __app_id="$4"
+        __gpg_id="$5"
+
+        # validate input
+        if [ -z "$__directory" ] ||
+                [ -z "$__destination" ] ||
+                [ -z "$__repo" ] ||
+                [ -z "$__app_id" ] ||
+                [ -z "$__gpg_id" ] ||
+                [ ! -d "$__directory" ]; then
+                return 1
+        fi
+
+        __path_build="./build"
+        __path_export="./export"
+        __path_package="./out.flatpak"
+        __path_manifest="./manifest.yml"
+        FS::make_directory "$__repo"
+
+        # change location into the workspace
+        __current_path="$PWD"
+        cd "$__directory"
+
+        # build archive
+        if [ ! -f "$__path_manifest" ]; then
+                return 1
+        fi
+
+        flatpak-builder \
+                --user \
+                --install \
+                --force-clean \
+                --repo="${__repo}" \
+                --gpg-sign="${__gpg_id}" \
+                "$__path_build" \
+                "$__path_manifest"
+        if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
+                return 1
+        fi
+
+        flatpak build-export "$__path_export" "$__path_build"
+        if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
+                return 1
+        fi
+
+        flatpak build-bundle "$__path_export" "$__path_package" "$__app_id"
+        if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
+                return 1
+        fi
+
+        flatpak --user --assumeyes --noninteractive uninstall "$__app_id"
+        if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
+                return 1
+        fi
+
+        # export output
+        FS::move "$__path_package" "$__destination"
+        __exit=$?
+
+        # head back to current directory
+        cd "${__current_path}" && unset __current_path
+
+        # report status
+        if [ $__exit -ne 0 ]; then
                 return 1
         fi
         return 0
@@ -126,14 +167,15 @@ runtime: ${__runtime}
 runtime-version: '${__runtime_version}'
 sdk: ${__sdk}
 modules:
-  - name: ${__sku}-binary
+  - name: ${__sku}-main
     buildsystem: simple
+    no-python-timestamp-fix: true
     build-commands:
       - install -D ${__sku} /app/bin/${__sku}
     sources:
       - type: file
         path: ${__sku}
-  - name: ${__sku}-appinfo
+  - name: ${__sku}-appdata
     buildsystem: simple
     build-commands:
       - install -D appdata.xml /app/share/metainfo/${__app_id}.appdata.xml
@@ -205,53 +247,64 @@ modules:
 
 
 
-FLATPAK::create_archive() {
-        __directory="$1"
-        __destination="$2"
-        __app_id="$3"
-        __gpg_id="$4"
+FLATPAK::is_available() {
+        __os="$1"
+        __arch="$2"
 
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ -z "$__destination" ] ||
-                [ -z "$__app_id" ] ||
-                [ -z "$__gpg_id" ] ||
-                [ ! -d "$__directory" ]; then
+        if [ -z "$__os" ] && [ -z "$__arch" ]; then
                 return 1
         fi
 
-        __path_build="./build"
-        __path_manifest="./manifest.yml"
+        # check compatible target os
+        case "$__os" in
+        windows|darwin)
+                return 2
+                ;;
+        *)
+                ;;
+        esac
 
-        # change location into the workspace
-        __current_path="$PWD"
-        cd "$__directory"
+        # check compatible target cpu architecture
+        case "$__arch" in
+        any)
+                return 3
+                ;;
+        *)
+                ;;
+        esac
 
-        # build archive
-        if [ ! -f "$__path_manifest" ]; then
-                return 1
-        fi
-
-        flatpak-builder \
-                --force-clean \
-                --gpg-sign="${__gpg_id}" \
-                "${__path_build}" \
-                "${__path_manifest}"
+        # validate dependencies
+        OS::is_command_available "flatpak-builder"
         if [ $? -ne 0 ]; then
-                cd "${__current_path}" && unset __current_path
                 return 1
         fi
-
-        # export output
-        FS::move "$__path_build" "$__destination"
-        __exit=$?
-
-        # head back to current directory
-        cd "${__current_path}" && unset __current_path
 
         # report status
-        if [ $__exit -ne 0 ]; then
+        return 0
+}
+
+
+
+
+FLATPAK::test_build() {
+        __target="$1"
+        __command="$2"
+
+        # validate input
+        if [ -z "$__target" ] || [ -z "$__command" ]; then
                 return 1
         fi
-        return 0
+
+        # execute
+        flatpak-builder \
+                --run "$__target" \
+                "${__target}/files/manifest.json" \
+                "$__command"
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
 }

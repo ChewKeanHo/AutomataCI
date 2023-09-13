@@ -116,14 +116,10 @@ INSTALLER::setup_docker() {
         fi
 
         # execute
-        brew install docker
+        # NOTE: do nothing since docker requires host to provide anyway.
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }
 
 

@@ -136,7 +136,8 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		"$i" `
 		"$TARGET_FILENAME" `
 		"$TARGET_OS" `
-		"$TARGET_ARCH"
+		"$TARGET_ARCH" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\flatpak"
 	if ($__process -ne 0) {
 		exit 1
 	}
