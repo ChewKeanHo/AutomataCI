@@ -43,9 +43,16 @@ PACKAGE::run_docker() {
                 ;;
         esac
 
+        OS::print_status info "checking docker registry login credentials...\n"
+        DOCKER::check_login
+        if [ $? -ne 0 ]; then
+                OS::print_status warning "DOCKER is unavailable (login). Skipping.\n"
+                return 0
+        fi
+
         # prepare workspace and required values
-        _src="${__target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
-        _target_path="${_dest}/docker_${_src}.tar"
+        _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
+        _target_path="${_dest}/docker.txt"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/docker_${_src}"
         OS::print_status info "dockering ${_src} for ${_target_os}-${_target_arch}\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
@@ -87,6 +94,15 @@ PACKAGE::run_docker() {
         OS::print_status info "checking required dockerfile...\n"
         FS::is_file "${_src}/Dockerfile"
         if [ $? -ne 0 ]; then
+                OS::print_status error "check failed.\n"
+                return 1
+        fi
+
+        # check login credentials
+        OS::print_status info "checking docker login credentials...\n"
+        DOCKER::check_login
+        if [ $? -ne 0 ]; then
+                OS::print_status error "check failed.\n"
                 return 1
         fi
 
@@ -99,11 +115,19 @@ PACKAGE::run_docker() {
                 "$_target_path" \
                 "$_target_os" \
                 "$_target_arch" \
-                "$PROJECT_REPO_ID" \
+                "$PROJECT_DOCKER_REGISTRY" \
                 "$PROJECT_SKU" \
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then
                 OS::print_status error "package failed.\n"
+                return 1
+        fi
+
+        # logout
+        OS::print_status info "logging out docker account...\n"
+        DOCKER::logout
+        if [ $? -ne 0 ]; then
+                OS::print_status error "logout failed.\n"
                 return 1
         fi
 

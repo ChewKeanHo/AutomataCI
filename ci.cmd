@@ -143,6 +143,38 @@ done < "${PROJECT_PATH_ROOT}/CONFIG.toml"
 
 
 
+# (4) parse repo secrets
+if [ -f "${PROJECT_PATH_ROOT}/SECRETS.toml" ]; then
+        old_IFS="$IFS"
+        while IFS= read -r line; do
+                line="${line%%#*}"
+                if [ "$line" = "" ]; then
+                        continue
+                fi
+
+                key="${line%%=*}"
+                key="${key#"${key%%[![:space:]]*}"}"
+                key="${key%"${key##*[![:space:]]}"}"
+                key="${key%\"}"
+                key="${key#\"}"
+                key="${key%\'}"
+                key="${key#\'}"
+
+                value="${line##*=}"
+                value="${value#"${value%%[![:space:]]*}"}"
+                value="${value%"${value##*[![:space:]]}"}"
+                value="${value%\"}"
+                value="${value#\"}"
+                value="${value%\'}"
+                value="${value#\'}"
+
+                export "$key"="$value"
+        done < "${PROJECT_PATH_ROOT}/SECRETS.toml"
+fi
+
+
+
+
 # (5) execute command
 case "$1" in
 env|Env|ENV)
@@ -338,6 +370,41 @@ for /F "usebackq delims=" %%A in ("%PROJECT_PATH_ROOT%\CONFIG.toml") do (
                 )
 
                 set "!key!=!value!"
+        )
+)
+
+:parse_secret_file
+if exist "%PROJECT_PATH_ROOT%\SECRETS.toml" (
+        for /F "usebackq delims=" %%A in ("%PROJECT_PATH_ROOT%\SECRETS.toml") do (
+                set "subject=%%A"
+                set "line="
+                if not "!subject:~0,1!"=="#" (
+                        for /F "tokens=1,2 delims=#" %%a in ("!subject!") do (
+                                set "line=!line!%%a"
+                        )
+                )
+
+                if not [!line!] == [] (
+                        set "key="
+                        set "value="
+
+                        for /F "tokens=1,2 delims==" %%a in ("!line!") do (
+                                set "key=%%a"
+                                set "value=%%b"
+
+                                set "key=!key: =!"
+                                set "key=!key:	=!"
+                                set "key=!key:"=!"
+                                set "key=!key:'=!"
+
+                                set "value=!value: =!"
+                                set "value=!value:	=!"
+                                set "value=!value:"=!"
+                                set "value=!value:'=!"
+                        )
+
+                        set "!key!=!value!"
+                )
         )
 )
 

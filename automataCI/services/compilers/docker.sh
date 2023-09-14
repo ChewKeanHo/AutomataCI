@@ -17,6 +17,44 @@
 
 
 
+DOCKER::amend_manifest() {
+        #__tag="$1"
+        #__list="$2"
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ]; then
+                return 1
+        fi
+
+        # execute
+        BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker manifest create "$1" $2
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker manifest push "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # report status
+        return 0
+}
+
+
+
+DOCKER::check_login() {
+        # validate input
+        if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PASSWORD" ]; then
+                return 1
+        fi
+
+        # report status
+        return 0
+}
+
+
+
 DOCKER::clean_up() {
         # validate input
         DOCKER::is_available
@@ -62,24 +100,74 @@ DOCKER::create() {
         fi
 
         __dockerfile="./Dockerfile"
-        __id="$(STRINGS::to_lowercase "${__repo}/${__sku}_${__os}-${__arch}:${__version}")"
+        __tag="$(DOCKER::get_id "$__repo" "$__sku" "$__version" "$__os" "$__arch")"
 
-        FS::is_file "${__dockerfile}"
+        FS::is_file "$__dockerfile"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
         # execute
-        docker buildx build \
+        DOCKER::login "$__repo"
+        if [ $? -ne 0 ]; then
+                DOCKER::logout
+                return 1
+        fi
+
+        BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker buildx build \
                 --platform "${__os}/${__arch}" \
-                --file "${__dockerfile}" \
-                --tag "${__id}" \
+                --file "$__dockerfile" \
+                --tag "$__tag" \
+                --provenance=false \
+                --sbom=false \
+                --label "org.opencontainers.image.ref.name=${__tag}" \
+                --push \
                 .
+        if [ $? -ne 0 ]; then
+                DOCKER::logout
+                return 1
+        fi
+
+        DOCKER::logout
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        DOCKER::save_image "$__id" "$__destination"
+        DOCKER::stage "$__destination" "$__os" "$__arch" "$__tag"
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+DOCKER::get_id() {
+        #__repo="$1"
+        #__sku="$2"
+        #__version="$3"
+        #__os="$4"
+        #__arch="$5"
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+                return 1
+        fi
+
+        # execute
+        if [ ! -z "$4" ] && [ ! -z "$5" ]; then
+                printf "$(STRINGS::to_lowercase "${1}/${2}:${4}-${5}_${3}")"
+        elif [ -z "$4" ] && [ ! -z "$5" ]; then
+                printf "$(STRINGS::to_lowercase "${1}/${2}:${5}_${3}")"
+        elif [ ! -z "$4" ] && [ -z "$5" ]; then
+                printf "$(STRINGS::to_lowercase "${1}/${2}:${4}_${3}")"
+        else
+                printf "$(STRINGS::to_lowercase "${1}/${2}:${3}")"
+        fi
 
         # report status
         if [ $? -eq 0 ]; then
@@ -111,22 +199,185 @@ DOCKER::is_available() {
 
 
 
-DOCKER::save_image() {
-        #__id="$1"
-        #__destination="$2"
+DOCKER::is_valid() {
+        #__target="$1"
 
-        # validate input
-        if [ -z "${__id}" ] || [ -z "${__destination}" ]; then
+        # execute
+        if [ ! -f "$1" ]; then
                 return 1
         fi
 
+        if [ "${1##*/}" = "docker.txt" ]; then
+                return 0
+        fi
+
+        # report status
+        return 1
+}
+
+
+
+
+DOCKER::login() {
+        #__repo="$1"
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+        DOCKER::check_login
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # execute
+        printf "$DOCKER_PASSWORD" \
+                | docker login "$1" \
+                        --username "$DOCKER_USERNAME" \
+                        --password-stdin
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+DOCKER::logout() {
+        # execute
+        docker logout && rm -f "${HOME}/.docker/config.json" &> /dev/null
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+DOCKER::release() {
+        __target="$1"
+        __directory="$2"
+        __datastore="$3"
+        __version="$4"
+
+        # validate input
+        if [ -z "$__target" ] ||
+                [ -z "$__directory" ] ||
+                [ -z "$__datastore" ] ||
+                [ -z "$__version" ] ||
+                [ ! -f "$__target" ] ||
+                [ ! -d "$__directory" ] ||
+                [ ! -d "$__datastore" ]; then
+                return 1
+        fi
+
+
+        # execute
+        __list=""
+        __repo=""
+        __sku=""
+        old_IFS="$IFS"
+        while IFS="" read -r __line || [ -n "$__line" ]; do
+                if [ -z "$__line" ] || [ "$__line" == "\n" ]; then
+                        continue
+                fi
+
+                __entry="${__line##* }"
+                __repo="${__entry%%:*}"
+                __sku="${__repo##*/}"
+                __repo="${__repo%/*}"
+
+                if [ ! -z "$__list" ]; then
+                        __list="${__list} "
+                fi
+                __list="${__list}--amend $__entry"
+        done < "$__target"
+        IFS="$old_IFS" && unset old_IFS __line
+
+        if [ -z "$__list" ] || [ -z "$__repo" ] || [ -z "$__sku" ]; then
+                return 1
+        fi
+
+        DOCKER::login "$__repo"
+        if [ $? -ne 0 ]; then
+                DOCKER::logout
+                return 1
+        fi
+
+        DOCKER::amend_manifest "$(DOCKER::get_id "$__repo" "$__sku" "latest")" "$__list"
+        if [ $? -ne 0 ]; then
+                DOCKER::logout
+                return 1
+        fi
+
+        DOCKER::amend_manifest "$(DOCKER::get_id "$__repo" "$__sku" "$__version")" "$__list"
+        if [ $? -ne 0 ]; then
+                DOCKER::logout
+                return 1
+        fi
+
+        DOCKER::logout
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # report status
+        return 0
+}
+
+
+
+
+DOCKER::setup_builder_multiarch() {
+        # validate input
         DOCKER::is_available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
         # execute
-        docker save "$1" > "$__destination"
+        __name="multiarch"
+
+        docker buildx inspect "$__name" &> /dev/null
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        docker buildx create --use --name "$__name"
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+DOCKER::stage() {
+        #__target="$1"
+        #__os="$2"
+        #__arch="$3"
+        #__tag="$4"
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
+                return 1
+        fi
+
+        # execute
+        FS::append_file "$1" "${2} ${3} ${4}\n"
 
         # report status
         if [ $? -eq 0 ]; then

@@ -47,7 +47,7 @@ function PACKAGE-Assemble-DOCKER-Content {
 		return 10
 	}}
 
-	# assemble the python package
+	# assemble the package
 	$__process = FS-Copy-File "${__target}" "${__directory}\${env:PROJECT_SKU}"
 	if ($__process -ne 0) {
 		return 1
@@ -59,11 +59,44 @@ function PACKAGE-Assemble-DOCKER-Content {
 	}
 
 	# generate the Dockerfile
-	$__process = FS-Write-File "${__directory}\Dockerfile" @"
+	if ((${__target_os} == "linux") -and (${__target_arch} == "amd64")) {
+		$__process = FS-Write-File "${__directory}\Dockerfile" @"
 # Defining baseline image
-FROM --platform=${__target_os}/${__target_arch} scratch
-MAINTAINER ${PROJECT_CONTACT_NAME} <${PROJECT_CONTACT_EMAIL}>
+FROM --platform=${__target_os}/${__target_arch} busybox:latest
+"@
+	} elseif (${__target_os} == "windows") {
+		$__process = FS-Write-File "${__directory}\Dockerfile" @"
+# Defining baseline image
+FROM --platform=${__target_os}/${__target_arch} mcr.microsoft.com/windows/nanoserver:ltsc2022
+"@
+	} else {
+		$__process = FS-Write-File "${__directory}\Dockerfile" @"
+# Defining baseline image
+FROM --platform=${__target_os}/${__target_arch} busybox:latest
+"@
+	}
 
+	$__process = FS-Append-File "${__directory}\Dockerfile" @"
+LABEL org.opencontainers.image.title=`"${env:PROJECT_NAME}`"
+LABEL org.opencontainers.image.description=`"${env:PROJECT_PITCH}`"
+LABEL org.opencontainers.image.authors=`"${env:PROJECT_CONTACT_NAME} <${env:PROJECT_CONTACT_EMAIL}>`"
+LABEL org.opencontainers.image.version=`"${env:PROJECT_VERSION}`"
+LABEL org.opencontainers.image.revision=`"${PROJECT_CADENCE}`"
+"@
+
+	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_CONTACT_WEBSITE}))) {
+		$__process = FS-Append-File "${__directory}\Dockerfile" @"
+LABEL org.opencontainers.image.url=`"${env:PROJECT_CONTACT_WEBSITE}`"
+"@
+	}
+
+	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SOURCE_URL}))) {
+		$__process = FS-Append-File "${__directory}\Dockerfile" @"
+LABEL org.opencontainers.image.source=`"${env:PROJECT_SOURCE_URL}`"
+"@
+	}
+
+	$__process = FS-Append-File "${__directory}\Dockerfile" @"
 # Defining environment variables
 ENV ARCH ${__target_arch}
 ENV OS ${__target_os}

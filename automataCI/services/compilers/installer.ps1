@@ -11,6 +11,7 @@
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\docker.ps1"
 
 
 
@@ -83,24 +84,28 @@ function INSTALLER-Setup-Docker {
 		return 1
 	}
 
+	$__process = choco list --local-only --exact 'docker-desktop'
+	if (-not ($LASTEXITCODE -eq 0 -and $packageList -match $dockerDesktopPackage)) {
+		$__process = OS-Exec "choco" "install docker-desktop -y"
+		if ($__process -ne 0) {
+			return 1
+		}
+	}
+
 	$__process =  OS-Is-Command-Available "docker"
-	if ($__process -eq 0) {
+	if ($__process -ne 0) {
+		# NOTE: nothing else can be done since docker is host-specific
 		return 0
 	}
 
 	# execute
-	$__process = OS-Exec "choco" "install docker-desktop -y"
+	$__process = DOCKER-Setup-Builder-Multiarch
 	if ($__process -ne 0) {
 		return 1
 	}
 
 	# report status
-	$__process = OS-Is-Command-Available "docker"
-	if ($__process -eq 0) {
-		return 0
-	}
-
-	return 1
+	return 0
 }
 
 

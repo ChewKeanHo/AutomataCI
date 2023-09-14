@@ -21,6 +21,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     env:
         TERM: xterm-256color
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     steps:
       - uses: actions/checkout@v3
       - name: Execute repo's native CI - ENVIRONMENT

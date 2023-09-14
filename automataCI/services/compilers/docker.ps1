@@ -16,7 +16,54 @@
 
 
 
-function DOCKER-Clean-Dangling-Images {
+function DOCKER-Amend-Manifest {
+	param(
+		[string]$__tag,
+		[string]$__list
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty(${__tag}) -or [string]::IsNullOrEmpty(${__list})) {
+		return 1
+	}
+
+	# execute
+	$env:BUILDX_NO_DEFAULT_ATTESTATIONS = 1
+	$__process = OS-Exec "docker" "manifest create `"${__tag}`" ${__list}"
+	$env:BUILDX_NO_DEFAULT_ATTESTATIONS = $null
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$env:BUILDX_NO_DEFAULT_ATTESTATIONS = 1
+	$__process = OS-Exec "docker" "manifest push `"${__tag}`""
+	$env:BUILDX_NO_DEFAULT_ATTESTATIONS = $null
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# report status
+	return 0
+}
+
+
+
+
+function DOCKER-Check-Login {
+	# validate input
+	if ([string]::IsNullOrEmpty(${env:DOCKER_USERNAME}) -or
+		[string]::IsNullOrEmpty(${env:DOCKER_PASSWORD})) {
+		return 1
+	}
+
+	# report status
+	return 0
+}
+
+
+
+
+function DOCKER-Clean-Up {
 	# validate input
 	$__process = DOCKER-Is-Available
 	if ($__process -ne 0) {
@@ -63,7 +110,7 @@ function DOCKER-Create {
 	}
 
 	$__dockerfile = ".\Dockerfile"
-	$__id = STRINGS-To-Lowercase "${__repo}\${__sku}_${__os}-${__arch}:${__version}"
+	$__tag = DOCKER-Get-ID "${__repo}" "${__sku}" "${__version}" "${__os}" "${__arch}"
 
 	$__process = FS-Is-File "${__dockerfile}"
 	if ($__process -ne 0) {
@@ -71,17 +118,35 @@ function DOCKER-Create {
 	}
 
 	# execute
-	$__arguments = "buildx build " `
-			+ "--platform `"${__os}/${__arch}`" " `
-			+ "--file `"${__dockerfile}`" " `
-			+ "--tag `"${__tag}`" " `
-			+ "."
-	$__process = OS-Exec "docker" $__arguments
+	$__process = DOCKER-Login "${__repo}"
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = DOCKER-Save-Image "${__id}" "${__destination}"
+	$__arguments = "buildx build " `
+			+ "--platform `"${__os}/${__arch}`" " `
+			+ "--file `"${__dockerfile}`" " `
+			+ "--tag `"${__tag}`" " `
+			+ "--provenance=false " `
+			+ "--sbom=false " `
+			+ "--label `"org.opencontainers.image.ref.name=${__tag}`" " `
+			+ "--push " `
+			+ "."
+	$env:BUILDX_NO_DEFAULT_ATTESTATIONS = 1
+	$__process = OS-Exec "docker" $__arguments
+	$env:BUILDX_NO_DEFAULT_ATTESTATIONS = $null
+	if ($__process -ne 0) {
+		$null = DOCKER-Logout
+		return 1
+	}
+
+	$__process = DOCKER-logout
+	if ($__process -ne 0) {
+		$null = DOCKER-Logout
+		return 1
+	}
+
+	$__process = DOCKER-Stage "${__destination}" "${__os}" "${__arch}" "${__tag}"
 
 	# report status
 	if ($__process -eq 0) {
@@ -91,6 +156,34 @@ function DOCKER-Create {
 	return 1
 }
 
+
+
+
+function DOCKER-Get-ID {
+	param(
+		[string]$__repo,
+		[string]$__sku,
+		[string]$__version,
+		[string]$__os,
+		[string]$__arch
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__repo) -or
+		[string]::IsNullOrEmpty($__sku) -or
+		[string]::IsNullOrEmpty($__version)) {
+		return 1
+	}
+
+	# execute
+	if ((-not [string]::IsNullOrEmpty($__os)) -and (-not [string]::IsNullOrEmpty($__arch))) {
+		return STRINGS-To-Lowercase "${__repo}/${__sku}:${__os}-${__arch}_${__version}"
+	} elseif ([string]::IsNullOrEmpty($__os) -and (-not [string]::IsNullOrEmpty($__arch))) {
+		return STRINGS-To-Lowercase "${__repo}/${__sku}:${__arch}_${__version}"
+	} elseif ((-not [string]::IsNullOrEmpty($__os)) -and [string]::IsNullOrEmpty($__arch)) {
+		return STRINGS-To-Lowercase "${__repo}/${__sku}:${__os}_${__version}"
+	}
+}
 
 
 
@@ -113,25 +206,164 @@ function DOCKER-Is-Available {
 
 
 
-function DOCKER-Save-Image {
-	param(
-		[string]$__id,
-		[string]$__destination
+function DOCKER-Is-Valid {
+	param (
+		[string]$__target
 	)
 
-	# validate input
-	if ([string]::IsNullOrEmpty($__id) -or
-		[string]::IsNullOrEmpty($__destination)) {
+	# execute
+	if (-not (-f "${__target}")) {
 		return 1
 	}
 
+	$__output = Split-Path -Leaf -Path "${__target}"
+	if (${__output} == "docker.txt") {
+		return 0
+	}
+
+	# report status
+	return 1
+}
+
+
+
+
+function DOCKER-Login {
+	param(
+		[string]$__repo
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__repo)) {
+		return 1
+	}
+
+	$__process = DOCKER-Check-Login
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# execute
+	$__process = Write-Output "${env:DOCKER_PASSWORD}" `
+		| Start-Process -NoNewWindow `
+			-FilePath "docker" `
+			-ArgumentList "login --username foo --password-stdin" `
+			-PassThru
+
+	# report status
+	if ($__process.ExitCode -eq 0) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
+function DOCKER-Logout {
+	return OS-Exec "docker" "logout"
+}
+
+
+
+
+function DOCKER-Release {
+	param (
+		[string]$__target,
+		[string]$__directory,
+		[string]$__datastore,
+		[string]$__version
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		[string]::IsNullOrEmpty($__directory) -or
+		[string]::IsNullOrEmpty($__datastore) -or
+		(-not (Test-Path -Path "${__target}")) -or
+		(-not (Test-Path -Path "${__directory}" -PathType Container)) -or
+		(-not (Test-Path -Path "${__datastore}" -PathType Container))) {
+		return 1
+	}
+
+	# execute
+	$__list = ""
+	$__repo = ""
+	$__sku = ""
+
+	Get-Content -Path "${__target}" | ForEach-Object {
+		if ([string]::IsNullOrEmpty(${_}) -or (${_} == "`n")) {
+			continue
+		}
+
+		$__entry = ${_}.Substring(${_}.LastIndexOf(" ") + 1)
+		$__repo = ${__entry}.Substring(0, ${__entry}.IndexOf(":"))
+		$__sku = ${__repo}.Substring(${__repo}.LastIndexOf("/") + 1)
+		$__repo = ${__repo}.Substring(0, ${__repo}.LastIndexOf("/"))
+
+		if (-not ([string]::IsNullOrEmpty($__list))) {
+			$__list = "${__list} "
+		}
+
+		$__list = "${__list}--amend $__entry"
+	}
+
+	if ([string]::IsNullOrEmpty($__list) -or
+		[string]::IsNullOrEmpty($__repo) -or
+		[string]::IsNullOrEmpty($__sku)) {
+		return 1
+	}
+
+	$__process = DOCKER-Login "${__repo}"
+	if ($__process -ne 0) {
+		$null = DOCKER-Logout
+		return 1
+	}
+
+	$__process = DOCKER-Amend-Manifest `
+		(DOCKER-Get-ID "${__repo}" "${__sku}" "latest") `
+		"${__list}"
+	if ($__process -ne 0) {
+		$null = DOCKER-Logout
+		return 1
+	}
+
+	$__process = DOCKER-Amend-Manifest `
+		(DOCKER-Get-ID "${__repo}" "${__sku}" "${__version}") `
+		"${__list}"
+	if ($__process -ne 0) {
+		$null = DOCKER-Logout
+		return 1
+	}
+
+	$__process = DOCKER-Logout
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# report status
+	return 0
+}
+
+
+
+
+function DOCKER-Setup-Builder-MultiArch {
+	# validate input
 	$__process = DOCKER-Is-Available
 	if ($__process -ne 0) {
 		return 1
 	}
 
 	# execute
-	$__process = OS-Exec "docker" "`"${__id}`" > ${__destination}"
+	$__name = "multiarch"
+
+	$__process = OS-Exec "docker" "buildx inspect `"${__name}`""
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	$__process = OS-Exec "docker" "buildx create --use --name `"${__name}`""
 
 	# report status
 	if ($__process -eq 0) {
@@ -139,4 +371,32 @@ function DOCKER-Save-Image {
 	}
 
 	return 1
+}
+
+
+
+
+function DOCKER-Stage {
+	param (
+		[string]$__target,
+		[string]$__os,
+		[string]$__arch,
+		[string]$__tag
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		[string]::IsNullOrEmpty($__os) -or
+		[string]::IsNullOrEmpty($__arch) -or
+		[string]::IsNullOrEmpty($__tag)) {
+		return 1
+	}
+
+	# execute
+	$__process = FS-Append-File "${__target}" @"
+${__os} ${__arch} ${__tag}`n
+"@
+
+	# report status
+	return 0
 }

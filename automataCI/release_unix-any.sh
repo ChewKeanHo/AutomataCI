@@ -26,6 +26,7 @@ fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-deb_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-rpm_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-docker_unix-any.sh"
 
 
 
@@ -112,6 +113,14 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         fi
 
         RELEASE::run_rpm \
+                "$TARGET" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE::run_docker \
                 "$TARGET" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"

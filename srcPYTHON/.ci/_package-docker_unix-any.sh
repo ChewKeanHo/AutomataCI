@@ -40,7 +40,7 @@ PACKAGE::assemble_docker_content() {
         fi
 
         case "$__target_os" in
-        linux)
+        linux|windows)
                 ;;
         *)
                 return 10
@@ -54,7 +54,13 @@ PACKAGE::assemble_docker_content() {
                 return 1
         fi
 
-        if [ "$PROJECT_OS" = "linux" ] && [ "$PROJECT_ARCH" = "amd64" ]; then
+        FS::touch_file "${__directory}/.blank"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # generate the Dockerfile
+        if [ "$__target_os" = "linux" ] && [ "$__target_arch" = "amd64" ]; then
                 OS::print_status info "transforming output file to full static binary...\n"
                 staticx "${__directory}/${PROJECT_SKU}" "${__directory}/.${PROJECT_SKU}"
                 if [ $? -ne 0 ]; then
@@ -67,20 +73,45 @@ PACKAGE::assemble_docker_content() {
                         OS::print_status error "transform failed.\n"
                         return 1
                 fi
-        fi
 
-        FS::touch_file "${__directory}/.blank"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        # generate the Dockerfile
-        __target="${1##*/}"
-        FS::write_file "${__directory}/Dockerfile" "\
+                FS::write_file "${__directory}/Dockerfile" "\
 # Defining baseline image
 FROM --platform=${__target_os}/${__target_arch} scratch
-MAINTAINER ${PROJECT_CONTACT_NAME} <${PROJECT_CONTACT_EMAIL}>
+"
+        elif [ "$__target_os" = "windows" ]; then
 
+                FS::write_file "${__directory}/Dockerfile" "\
+# Defining baseline image
+FROM --platform=${__target_os}/${__target_arch} mcr.microsoft.com/windows/nanoserver:ltsc2022
+"
+        else
+                FS::write_file "${__directory}/Dockerfile" "\
+# Defining baseline image
+FROM --platform=${__target_os}/${__target_arch} busybox:latest
+"
+        fi
+
+        FS::append_file "${__directory}/Dockerfile" "\
+LABEL org.opencontainers.image.title=\"${PROJECT_NAME}\"
+LABEL org.opencontainers.image.description=\"${PROJECT_PITCH}\"
+LABEL org.opencontainers.image.authors=\"${PROJECT_CONTACT_NAME} <${PROJECT_CONTACT_EMAIL}>\"
+LABEL org.opencontainers.image.version=\"${PROJECT_VERSION}\"
+LABEL org.opencontainers.image.revision=\"${PROJECT_CADENCE}\"
+"
+
+        if [ ! -z "$PROJECT_CONTACT_WEBSITE" ]; then
+                FS::append_file "${__directory}/Dockerfile" "\
+LABEL org.opencontainers.image.url=\"${PROJECT_CONTACT_WEBSITE}\"
+"
+        fi
+
+        if [ ! -z "$PROJECT_SOURCE_URL" ]; then
+                FS::append_file "${__directory}/Dockerfile" "\
+LABEL org.opencontainers.image.source=\"${PROJECT_SOURCE_URL}\"
+"
+        fi
+
+        FS::append_file "${__directory}/Dockerfile" "\
 # Defining environment variables
 ENV ARCH ${__target_arch}
 ENV OS ${__target_os}

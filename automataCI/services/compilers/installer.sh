@@ -11,6 +11,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/docker.sh"
 
 
 
@@ -111,12 +112,16 @@ INSTALLER::setup_docker() {
         fi
 
         OS::is_command_available "docker"
-        if [ $? -eq 0 ]; then
+        if [ $? -ne 0 ]; then
+                # NOTE: do nothing since docker requires host to provide anyway.
                 return 0
         fi
 
         # execute
-        # NOTE: do nothing since docker requires host to provide anyway.
+        DOCKER::setup_builder_multiarch
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
         # report status
         return 0

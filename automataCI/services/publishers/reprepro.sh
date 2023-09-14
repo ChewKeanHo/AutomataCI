@@ -44,6 +44,8 @@ REPREPRO::publish() {
         fi
 
         # execute
+        FS::remake_directory "${__datastore}/db"
+        FS::remake_directory "${__directory}"
         reprepro --basedir "${__datastore}" \
                 --outdir "${__directory}" \
                 includedeb "${__codename}" \

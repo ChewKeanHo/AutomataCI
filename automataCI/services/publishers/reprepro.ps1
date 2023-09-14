@@ -47,6 +47,8 @@ function REPREPRO-Publish {
 	}
 
 	# execute
+	$null = FS-Remake-Directory "${__datastore}\db"
+	$null = FS-Remake-Directory "${__directory}"
 	$__arguments = "--basedir `"${__datastore}`" " `
 			+ "--outdir `"${__directory}`" " `
 			+ "includedeb `"${__codename}`" " `

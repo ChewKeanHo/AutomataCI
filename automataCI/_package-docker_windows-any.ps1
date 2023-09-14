@@ -43,7 +43,7 @@ function PACKAGE-Run-DOCKER {
 
 	# prepare workspace and required values
 	$_src = "${__target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
-	$_target_path = "${_dest}\docker_${_src}.tar"
+	$_target_path = "${_dest}\docker.txt"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\docker_${_src}"
 	OS-Print-Status info "dockering ${_src} for ${_target_os}-${_target_arch}"
 	OS-Print-Status info "remaking workspace directory ${_src}"
@@ -61,11 +61,11 @@ function PACKAGE-Run-DOCKER {
 		return 1
 	}
 	$__process = PACKAGE-Assemble-DOCKER-Content `
-		${_target} `
-		${_src} `
-		${_target_filename} `
-		${_target_os} `
-		${_target_arch}
+		"${_target}" `
+		"${_src}" `
+		"${_target_filename}" `
+		"${_target_os}" `
+		"${_target_arch}"
 	switch ($__process) {
 	10 {
 		$null = FS-Remove-Silently "${_src}"
@@ -96,7 +96,7 @@ function PACKAGE-Run-DOCKER {
 		"${_target_path}" `
 		"${_target_os}" `
 		"${_target_arch}" `
-		"${env:PROJECT_REPO_ID}" `
+		"${env:PROJECT_DOCKER_REGISTRY}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}"
 	if ($__process -ne 0) {
@@ -104,7 +104,15 @@ function PACKAGE-Run-DOCKER {
 		return 1
 	}
 
-	$__process = DOCKER-Clean-Dangling-Images
+	# logout
+	OS-Print-Status info "logging out docker account..."
+	$__process = DOCKER-Logout
+	if ($__process -ne 0) {
+		OS-Print-Status error "logout failed."
+		return 1
+	}
+
+	$__process = DOCKER-Clean-Up
 	if ($__process -ne 0) {
 		OS-Print-Status error "package failed."
 		return 1

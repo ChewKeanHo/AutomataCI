@@ -20,7 +20,8 @@
 # This is the known product ID used as a command, marketing brand, etc.
 # It should not be using dash ('-'), underscore ('_'), and space (' ') for
 # maximum compatibility.
-PROJECT_SKU = "myproject"
+PROJECT_SKU = "automataci"
+
 
 # PROJECT_APP_ID
 # This is the known application complying to the unique 3-parts identifier
@@ -28,17 +29,20 @@ PROJECT_SKU = "myproject"
 # must be a reversed domain with no dash ('-') and underscore ('_'). For GitHub
 # projects, it's advisable to use 'io.github.[owner].[project]' format instead
 # to avoid naming conflict.
-PROJECT_APP_ID = "com.company.myproject"
+PROJECT_APP_ID = "com.github.chewkeanho.automataci"
+
 
 # PROJECT_NAME
 # This is the name of the product used in documentation, marketing addresses
 # etc only. For programming purposes, PROJECT_SKU is used instead.
-PROJECT_NAME = "My Project"
+PROJECT_NAME = "AutomataCI"
+
 
 # PROJECT_PITCH
 # A short elevator pitch about the project used as a short description. Max
 # Max: 60 characters.
-PROJECT_PITCH = "To Do Things Seamlessly Easy."
+PROJECT_PITCH = "Solid Foundation for Kickstarting Software Development"
+
 
 # PROJECT_VERSION
 # This is to declare the current project's version. It can be used for
@@ -50,7 +54,8 @@ PROJECT_PITCH = "To Do Things Seamlessly Easy."
 # like '0.0.1~rc1' instead of dashes (-). Some distribution ecosystem have
 # strict and reserved rules for version sorting using dashes so tlide will be
 # the best choice.
-PROJECT_VERSION = "0.0.1"
+PROJECT_VERSION = "1.4.0"
+
 
 # PROJECT_CADENCE
 # The build cadence number usually to indicate the multiple builds of the same
@@ -60,10 +65,17 @@ PROJECT_VERSION = "0.0.1"
 # When it doubt or unused, set to 1 and use numerical increment only.
 PROJECT_CADENCE = "1"
 
-# PROJECT_REPO_ID
-# The repository ID (e.g. GitHub user ID or group ID) used for tagging purposes
-# (e.g. Docker and Homebrew).
-PROJECT_REPO_ID = "local"
+
+# PROJECT_SOURCE_URL
+# The Project's source code URL. This URL points to the source code location.
+# The URL can be used for other purposes such as The Docker's OCI Image source
+# field (org.opencontainers.image.source) which can be used for other connecting
+# purposes like GitHub Repo-Packages linking. See:
+#     1. https://docs.github.com/en/packages/learn-github-packages/connecting-a-repository-to-a-package
+#
+# Example:
+#     1. GitHub Packages : https://github.com/OWNER/REPO
+PROJECT_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI"
 
 
 
@@ -81,6 +93,7 @@ PROJECT_REPO_ID = "local"
 # To enable it: simply supply the path (e.g. default is 'srcPYTHON').
 # To disable it: simply supply an empty path (e.g. default is '').
 PROJECT_PYTHON = 'srcPYTHON'
+
 
 # PROJECT_PATH_PYTHON_ENGINE
 # This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
@@ -205,6 +218,19 @@ PROJECT_STATIC_REPO="git@github.com:ChewKeanHo/AutomataCI.wiki.git"
 # distribution ecosystems.
 PROJECT_STATIC_URL="https://github.com/ChewKeanHo/AutomataCI/wiki/"
 
+
+# PROJECT_DOCKER_REGISTRY
+# The Docker registry URI value. DO NOT end with a slash. Example:
+#     1. DockerHub     : registry.hub.docker.com/[ NAMESPACE ]
+#     2. GitHub Package: ghcr.io/[ NAMESPACE ]
+#     2. Local         : localhost:5000/[ NAMESPACE ]
+PROJECT_DOCKER_REGISTRY = "ghcr.io/chewkeanho"
+
+
+# DOCKER_CLI_EXPERIMENTAL
+# Enable the Docker's experimental CLI features for using buildx. If disabled,
+# is shall break many of the CI job.
+DOCKER_CLI_EXPERIMENTAL = "enabled"
 
 
 
