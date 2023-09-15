@@ -101,6 +101,25 @@ PROJECT_PYTHON = 'srcPYTHON'
 PROJECT_PATH_PYTHON_ENGINE = "python-engine"
 
 
+# PROJECT_PYPI_REPO_URL
+# The PyPi upstream repo to push the PyPi package. The defualt PyPi values are:
+#     Test Zone : https://test.pypi.org/legacy/
+#     Actual    : https://upload.pypi.org/legacy/
+PROJECT_PYPI_REPO_URL = "https://test.pypi.org/legacy/"
+
+
+# PROJECT_PYPI_README
+# The PyPi README file relative to PROJECT_PATH_ROOT directory. Default is the
+# the common README.md. Please use UNIX pathing (/) for sub-directories.
+PROJECT_PYPI_README = "README.md"
+
+
+# PROJECT_PYPI_README_MIME
+# The PyPi README file relative to PROJECT_PATH_ROOT directory. Default is the
+# the common README.md which is a 'text/markdown' MIME type.
+PROJECT_PYPI_README_MIME = "text/markdown"
+
+
 
 
 ##########################

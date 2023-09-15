@@ -85,8 +85,8 @@ function PACKAGE-Run-PYPI {
 		${env:PROJECT_CONTACT_EMAIL} `
 		${env:PROJECT_CONTACT_WEBSITE} `
 		${env:PROJECT_PITCH} `
-		"${env:PROJECT_PATH_ROOT}\README.md" `
-		"text/markdown"
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYPI_README}" `
+		"${env:PROJECT_PYPI_README_MIME}"
 	if ($__process -eq 2) {
 		OS-Print-Status info "manual injection detected."
 	} elseif ($__process -ne 0) {

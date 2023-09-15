@@ -88,8 +88,8 @@ PACKAGE::run_pypi() {
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE" \
                 "$PROJECT_PITCH" \
-                "${PROJECT_PATH_ROOT}/README.md" \
-                "text/markdown"
+                "${PROJECT_PATH_ROOT}/${PROJECT_PYPI_README}" \
+                "$PROJECT_PYPI_README_MIME"
         case $? in
         2)
                 OS::print_status info "manual injection detected.\n"

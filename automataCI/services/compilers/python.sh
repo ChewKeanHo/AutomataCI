@@ -12,6 +12,7 @@
 # the License.
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
 
 
 
@@ -145,6 +146,18 @@ PYTHON::setup_venv() {
 
 
 
+PYPI::check_login() {
+        # validate input
+        if [ -z "$TWINE_USERNAME" ] || [ -z "$TWINE_PASSWORD" ]; then
+                return 1
+        fi
+
+        return 0
+}
+
+
+
+
 PYPI::is_available() {
         # validate input
         if [ -z "$PROJECT_PYTHON" ]; then
@@ -164,6 +177,43 @@ PYPI::is_available() {
 
         # report status
         return 0
+}
+
+
+
+
+PYPI::is_valid() {
+        #__target="$1"
+
+        # validate input
+        if [ -z "$1" ] || [ ! -d "$1" ]; then
+                return 1
+        fi
+
+        # execute
+        STRINGS::has_prefix "pypi" "${1##*/}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        __hasWHL=false
+        __hasTAR=false
+        for __file in "${1}/"*; do
+                if [ ! "${__file%%.whl*}" = "${__file}" ]; then
+                        __hasWHL=true
+                fi
+
+                if [ ! "${__file%%.tar*}" = "${__file}" ]; then
+                        __hasTAR=true
+                fi
+        done
+
+        if [ "$__hasWHL" = "true" -a "$__hasTAR" = "true" ]; then
+                return 0
+        fi
+
+        # report status
+        return 1
 }
 
 
@@ -264,6 +314,46 @@ PYPI::create_archive() {
                         return 1
                 fi
         done
+
+        # report status
+        return 0
+}
+
+
+
+
+PYPI::release() {
+        __target="$1"
+        __gpg="$2"
+        __url="$3"
+
+        # validate input
+        if [ -z "$__target" ] ||
+                [ -z "$__gpg" ] ||
+                [ -z "$__url" ] ||
+                [ ! -d "$__target" ]; then
+                return 1
+        fi
+
+        PYPI::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        twine check "${__target}/"*
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # execute
+        twine upload "${__target}/"* \
+                --sign \
+                --identity "$__gpg" \
+                --repository-url "$__url" \
+                --non-interactive
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
         # report status
         return 0

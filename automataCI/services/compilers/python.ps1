@@ -11,36 +11,7 @@
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-
-
-
-
-function PYTHON-Is-Available {
-	$__program = Get-Command python -ErrorAction SilentlyContinue
-	if ($__program) {
-		return 0
-	}
-
-	return 1
-}
-
-
-
-
-function PYTHON-Is-VENV-Activated {
-	if ($env:VIRTUAL_ENV) {
-		return 0
-	}
-
-	return 1
-}
-
-
-
-
-function PYTHON-Has-PIP {
-	return OS-Is-Command-Available "pip"
-}
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
 
 
 
@@ -65,6 +36,59 @@ function PYTHON-Activate-VENV {
 	if ($env:VIRTUAL_ENV) {
 		return 0
 	}
+	return 1
+}
+
+
+
+
+function PYTHON-Clean-Artifact {
+	param (
+		[string]$__target
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		(-not (Test-Path -Path "${__target}" -PathType Container))) {
+		return 1
+	}
+
+	# execute
+	$null = Get-ChildItem -Path "${__target}" -Recurse `
+		| Where-Object {$_.Name -match "__pycache__|\.pyc$" } `
+		| Remove-Item -Force -Recurse
+
+	# report status
+	return 0
+}
+
+
+
+
+function PYTHON-Has-PIP {
+	return OS-Is-Command-Available "pip"
+}
+
+
+
+
+function PYTHON-Is-Available {
+	$__program = Get-Command python -ErrorAction SilentlyContinue
+	if ($__program) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
+function PYTHON-Is-VENV-Activated {
+	if ($env:VIRTUAL_ENV) {
+		return 0
+	}
+
 	return 1
 }
 
@@ -115,23 +139,12 @@ function PYTHON-Setup-VENV {
 
 
 
-function PYTHON-Clean-Artifact {
-	param (
-		[string]$__target
-	)
-
-	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or
-		(-not (Test-Path -Path "${__target}" -PathType Container))) {
+function PYPI-Check-Login {
+	if ([string]::IsNullOrEmpty($env:TWINE_USERNAME) -or
+		[string]::IsNullOrEmpty($env:TWINE_PASSWORD)) {
 		return 1
 	}
 
-	# execute
-	$null = Get-ChildItem -Path "${__target}" -Recurse `
-		| Where-Object {$_.Name -match "__pycache__|\.pyc$" } `
-		| Remove-Item -Force -Recurse
-
-	# report status
 	return 0
 }
 
@@ -157,6 +170,43 @@ function PYPI-Is-Available {
 
 	# report status
 	return 0
+}
+
+
+
+
+function PYPI-Is-Valid {
+	param(
+		[string]$__target
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty(${__target}) -or
+		(-not (Test-Path -Path "${__target}" -PathType Container))) {
+		return 1
+	}
+
+	# execute
+	$__process = STRINGS-Has-Prefix "pypi" (Split-Path -Leaf -Path "${__target}")
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__hasWHL = $false
+	$__hasTAR = $false
+	foreach ($__file in (Get-ChildItem -Path ${__target})) {
+		if ($file.Extension -eq ".whl") {
+			$__hasWHL = $true
+		} elseif ($file.Extension -like ".tar.*") {
+			$__hasTAR = $true
+		}
+	}
+	if ($__hasWHL -and $__hasTAR) {
+		return 0
+	}
+
+	# report status
+	return 1
 }
 
 
@@ -263,6 +313,49 @@ function PYPI-Create-Archive {
 		if ($__process -ne 0) {
 			return 1
 		}
+	}
+
+	# report status
+	return 0
+}
+
+
+
+
+function PYPI-Release {
+	param(
+		[string]$__target,
+		[string]$__gpg,
+		[string]$__url
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		[string]::IsNullOrEmpty($__gpg) -or
+		[string]::IsNullOrEmpty($__url) -or
+		(-not (Test-Path -PathType Container -Path $__target))) {
+		return 1
+	}
+
+	$__process = PYPI-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = OS-Exec "twine" "check ${__target}\*"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# execute
+	$__arguments = "upload " `
+			+ "--sign " `
+			+ "--identity `"${__gpg}`" " `
+			+ "--repository-url `"${__url}`" " `
+			+ "--non-interactive"
+	$__process = OS-Exec "twine" "${__arguments}"
+	if ($__process -ne 0) {
+		return 1
 	}
 
 	# report status
