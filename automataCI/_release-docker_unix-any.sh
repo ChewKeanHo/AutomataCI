@@ -43,6 +43,9 @@ RELEASE::run_docker() {
                 return 1
         fi
 
+        OS::print_status info "remove package artifact...\n"
+        FS::remove_silently "$_target"
+
         # report status
         return 0
 }

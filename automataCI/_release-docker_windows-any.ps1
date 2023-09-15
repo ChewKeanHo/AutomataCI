@@ -18,13 +18,13 @@
 
 function RELEASE-Run-DOCKER {
 	param(
-		[string]$__target,
-		[string]$__directory,
-		[string]$__datastore
+		[string]$_target,
+		[string]$_directory,
+		[string]$_datastore
 	)
 
 	# validate input
-	$__process = DOCKER-Is-Valid "${__target}"
+	$__process = DOCKER-Is-Valid "${_target}"
 	if ($__process -ne 0) {
 		return 0
 	}
@@ -39,14 +39,17 @@ function RELEASE-Run-DOCKER {
 	# execute
 	OS-Print-Status info "releasing docker as the latest version..."
 	$__process = DOCKER-Release `
-		"${__target}" `
-		"${__directory}" `
-		"${__datastore}" `
+		"${_target}" `
+		"${_directory}" `
+		"${_datastore}" `
 		"${env:PROJECT_VERSION}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "release failed."
 		return 1
 	}
+
+	OS-Print-Status info "remove package artifact..."
+	$null = FS-Remove-Silently "${_target}"
 
 	# report status
 	return 0
