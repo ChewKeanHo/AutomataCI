@@ -81,7 +81,8 @@ LABEL org.opencontainers.image.title=`"${env:PROJECT_NAME}`"
 LABEL org.opencontainers.image.description=`"${env:PROJECT_PITCH}`"
 LABEL org.opencontainers.image.authors=`"${env:PROJECT_CONTACT_NAME} <${env:PROJECT_CONTACT_EMAIL}>`"
 LABEL org.opencontainers.image.version=`"${env:PROJECT_VERSION}`"
-LABEL org.opencontainers.image.revision=`"${PROJECT_CADENCE}`"
+LABEL org.opencontainers.image.revision=`"${env:PROJECT_CADENCE}`"
+LABEL org.opencontainers.image.licenses=`"${env:PROJECT_LICENSE}`"
 "@
 
 	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_CONTACT_WEBSITE}))) {

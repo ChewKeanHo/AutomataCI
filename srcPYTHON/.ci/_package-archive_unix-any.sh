@@ -71,7 +71,7 @@ PACKAGE::assemble_archive_content() {
         fi
 
         # copy license file
-        __target="${PROJECT_PATH_ROOT}/LICENSE-EN.pdf"
+        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
         OS::print_status info "copying $__target to $__directory\n"
         FS::copy_file "$__target" "${__directory}/."
         if [ $? -ne 0 ]; then

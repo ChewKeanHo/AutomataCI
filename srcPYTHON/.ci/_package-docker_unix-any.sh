@@ -97,6 +97,7 @@ LABEL org.opencontainers.image.description=\"${PROJECT_PITCH}\"
 LABEL org.opencontainers.image.authors=\"${PROJECT_CONTACT_NAME} <${PROJECT_CONTACT_EMAIL}>\"
 LABEL org.opencontainers.image.version=\"${PROJECT_VERSION}\"
 LABEL org.opencontainers.image.revision=\"${PROJECT_CADENCE}\"
+LABEL org.opencontainers.image.licenses=\"${PROJECT_LICENSE}\"
 "
 
         if [ ! -z "$PROJECT_CONTACT_WEBSITE" ]; then

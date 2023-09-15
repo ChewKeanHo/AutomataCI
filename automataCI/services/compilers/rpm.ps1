@@ -87,7 +87,8 @@ function RPM-Create-Spec {
 		[string]$__pitch,
 		[string]$__name,
 		[string]$__email,
-		[string]$__website
+		[string]$__website,
+		[string]$__license
 	)
 
 	# validate input
@@ -101,7 +102,8 @@ function RPM-Create-Spec {
 		[string]::IsNullOrEmpty($__pitch) -or
 		[string]::IsNullOrEmpty($__name) -or
 		[string]::IsNullOrEmpty($__email) -or
-		[string]::IsNullOrEmpty($__website)) {
+		[string]::IsNullOrEmpty($__website) -or
+		[string]::IsNullOrEmpty($__license)) {
 		return 1
 	}
 
@@ -109,20 +111,6 @@ function RPM-Create-Spec {
 	$__location = "${__directory}\SPECS\${__sku}.spec"
 	if (Test-Path $__location) {
 		return 2
-	}
-
-	# obtain license SPDX
-	$__license = "proprietary"
-	if (Test-Path "${__resources}\licenses\SPDX.txt") {
-		foreach($__line in Get-Content "${__resources}\licenses\SPDX.txt") {
-			$__line = $_ -replace '#.*'
-			if ([string]::IsNullOrEmpty($__line)) {
-				continue
-			}
-
-			$__license = $__line
-			break
-		}
 	}
 
 	# create housing directory path

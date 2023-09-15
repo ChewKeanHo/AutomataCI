@@ -72,7 +72,7 @@ function PACKAGE-Assemble-Archive-Content {
 	}
 
 	# copy license file
-	$__target = "${env:PROJECT_PATH_ROOT}\LICENSE-EN.pdf"
+	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
 	OS-Print-Status info "copying ${__target} to ${__directory}"
 	FS-Copy-File "${__target}" "${__directory}"
 	if ($__process -ne 0) {

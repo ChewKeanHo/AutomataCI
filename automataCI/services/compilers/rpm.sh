@@ -85,6 +85,7 @@ RPM::create_spec() {
         __name="$7"
         __email="$8"
         __website="$9"
+        __license="${10}"
 
         # validate input
         if [ -z "$__directory" ] ||
@@ -97,7 +98,8 @@ RPM::create_spec() {
                 [ -z "$__pitch" ] ||
                 [ -z "$__name" ] ||
                 [ -z "$__email" ] ||
-                [ -z "$__website" ]; then
+                [ -z "$__website" ] ||
+                [ -z "$__license" ]; then
                 return 1
         fi
 
@@ -105,22 +107,6 @@ RPM::create_spec() {
         __location="${__directory}/SPECS/${__sku}.spec"
         if [ -f "$__location" ]; then
                 return 2
-        fi
-
-        # obtain license SPDX
-        __license="proprietary"
-        if [ -f "${__resources}/licenses/SPDX.txt" ]; then
-                __old_IFS="$IFS"
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        __line="${__line%%#*}"
-                        if [ -z "$__line" ]; then
-                                continue
-                        fi
-
-                        __license="$__line"
-                        break
-                done < "${__resources}/licenses/SPDX.txt"
-                IFS="$__old_IFS" && unset __old_IFS __line
         fi
 
         # create housing directory path

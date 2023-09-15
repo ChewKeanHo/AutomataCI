@@ -141,7 +141,8 @@ PACKAGE::run_rpm() {
                 "$PROJECT_PITCH" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
-                "$PROJECT_CONTACT_WEBSITE"
+                "$PROJECT_CONTACT_WEBSITE" \
+                "$PROJECT_LICENSE"
         case $? in
         2)
                 OS::print_status info "manual injection detected.\n"

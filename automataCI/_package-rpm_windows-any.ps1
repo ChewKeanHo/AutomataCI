@@ -125,7 +125,8 @@ function PACKAGE-Run-RPM {
 		${env:PROJECT_PITCH} `
 		${env:PROJECT_CONTACT_NAME} `
 		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE}
+		${env:PROJECT_CONTACT_WEBSITE} `
+		${env:PROJECT_LICENSE}
 	if ($__process -eq 2) {
 		OS-Print-Status info "manual injection detected."
 	} elseif ($__process -ne 0) {

@@ -66,6 +66,12 @@ PROJECT_VERSION = "1.4.0"
 PROJECT_CADENCE = "1"
 
 
+# PROJECT_LICENSE
+# The SPDX license tag. Refer https://spdx.org/licenses/ for finding or
+# constructing your license identifier.
+PROJECT_LICENSE = "Apache-2.0"
+
+
 # PROJECT_SOURCE_URL
 # The Project's source code URL. This URL points to the source code location.
 # The URL can be used for other purposes such as The Docker's OCI Image source
