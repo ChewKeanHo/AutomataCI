@@ -40,9 +40,6 @@ cygwin*|mingw*|mingw32*|msys*)
 dragonfly*)
         export PROJECT_OS='dragonfly'
         ;;
-x86_64)
-        export PROJECT_OS="amd64"
-        ;;
 *)
         ;;
 esac

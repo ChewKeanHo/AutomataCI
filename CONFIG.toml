@@ -41,7 +41,7 @@ PROJECT_NAME = "AutomataCI"
 # PROJECT_PITCH
 # A short elevator pitch about the project used as a short description. Max
 # Max: 60 characters.
-PROJECT_PITCH = "Solid Foundation for Kickstarting Software Development"
+PROJECT_PITCH = "Solid Foundation for Kickstarting Your Software Development"
 
 
 # PROJECT_VERSION
