@@ -206,10 +206,6 @@ release|Release|RELEASE)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/release_unix-any.sh"
         code=$?
         ;;
-publish|Publish|PUBLISH)
-        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/publish_unix-any.sh"
-        code=$?
-        ;;
 stop|Stop|STOP)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/stop_unix-any.sh"
         code=$?
@@ -243,7 +239,6 @@ purge|Purge|PURGE)
         printf "        To build the repo 🠚             $ ./ci.cmd build\n"
         printf "        To package the repo product 🠚   $ ./ci.cmd package\n"
         printf "        To release the repo product 🠚   $ ./ci.cmd release\n"
-        printf "        To publish the documents 🠚      $ ./ci.cmd publish\n"
         printf "        To stop a development 🠚         $ ./ci.cmd stop\n"
         printf "        To clean the workspace 🠚        $ ./ci.cmd clean\n"
         printf "        To purge everything 🠚           $ ./ci.cmd purge\n"
@@ -602,30 +597,6 @@ IF "%1"=="env" (
                 set code=1
         )
         goto end
-) ELSE IF "%1"=="publish" (
-        Powershell.exe ^
-                -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\publish_windows-any.ps1"
-        IF "!ERRORLEVEL!" NEQ "0" (
-                set code=1
-        )
-        goto end
-) ELSE IF "%1"=="Publish" (
-        Powershell.exe ^
-                -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\publish_windows-any.ps1"
-        IF "!ERRORLEVEL!" NEQ "0" (
-                set code=1
-        )
-        goto end
-) ELSE IF "%1"=="PUBLISH" (
-        Powershell.exe ^
-                -executionpolicy remotesigned ^
-                -File "%PROJECT_PATH_ROOT%\%PROJECT_PATH_AUTOMATA%\publish_windows-any.ps1"
-        IF "!ERRORLEVEL!" NEQ "0" (
-                set code=1
-        )
-        goto end
 ) ELSE IF "%1"=="stop" (
         Powershell.exe ^
                 -executionpolicy remotesigned ^
@@ -770,7 +741,6 @@ IF "%1"=="env" (
         echo "        To package the repo product 🠚   $ .\ci.cmd package\n"
         echo "        To release the repo product 🠚   $ .\ci.cmd release\n"
         echo "        To compose the documents 🠚      $ .\ci.cmd compose\n"
-        echo "        To publish the documents 🠚      $ .\ci.cmd publish\n"
         echo "        To stop a development 🠚         $ .\ci.cmd stop\n"
         echo "        To clean the workspace 🠚        $ .\ci.cmd clean\n"
         echo "        To purge everything 🠚           $ .\ci.cmd purge\n"
