@@ -1,64 +1,192 @@
 # AutomataCI
-[![AutomataCI](resources/icons/icon-1200x400.svg)](#automataci)
+[![AutomataCI](https://cdn.githubraw.com/ChewKeanHo/AutomataCI/experimental/resources/icons/icon-1200x400.svg)](#automataci)
 
-This repo is a project template repository equipped with the AutomataCI serving
-as a development foundation for software production of the supported kinds. The
-development was started since 2022 under the
-[ZORALab's Monteur](https://github.com/zoralab/monteur) Project to secure a
-software production from the imminent supply chain threat across the software
-industry globally.
+This is a template git repository equipped with a native built-in
+semi-autonomous CI tools known as `AutomataCI`. This allows one to run CI with
+or without solely relying on 3rd-party service provider which can becomes a
+supply chain threat at least in the 2021-2023 era.
 
 
 
 
 ## Why It Matters
-Some good reasons to use AutomataCI:
 
-1. **Start off with a tested foundation with pinpoint accuracy** - don't have to
-   start from scratch anymore and just focus on your product development.
-2. **Steadily for continuous improvement** - version controlled and improve
-   iteratively.
-3. **Simple and scalable** - just one git and some changes; you get a decent
-   repo ready to deploy.
-4. **Nimble and Adaptable** - don't let your suppliers' dirty business tricks
-   threatens you.
+Some good business reasons why AutomataCI is made:
+
+1. **Start off with a tested and solid foundation** - all the templates and
+   CI jobs are tested and have default configured for immediate software
+   development.
+2. **Avoid being threatend by your CI provider** - CI it's a life-support system
+   for your project; handle it in-house and natively rather than leaving it
+   vulnerable for 3rd-party vendors to extort it.
+3. **Steadily improvable** - AutomataCI itself are designed to be adaptive to
+   market changes, self-improvable, and cater to common use cases.
+4. **Simple and scalable** - Only uses `POSIX` shell and `PowerShell` so it
+   works natively without much external installation.
 
 
 
 
-> ## How to Use
->
-> **IMPORTANT: REMEMBER TO REMOVE THIS SECTION AFTER COMPLETION.**
->
-> 1. Git clone and re-init or click the "Use This Template" button on GitHub.
-> 2. Update all the files in `resources` directories and regenerate the
->    `resources/logos/logo.svg`, `resources/logos/logo-48x48.png`,
->    `resources/logos/logo-128x128.png`, `DEVELOPER_GUIDES_[LANG].pdf`, and
->    `USER_GUIDES_[LANG].pdf`.
-> 3. Generate and update the LICENSE file(s).
-> 4. `[OPTIONAL]` - Add a `CODE_OF_CONDUCT.md` file with the appropriate legal
->    clauses(s).
-> 5. Update the `CONFIG.toml` matching your project metadata.
-> 6. Select your tech (e.g. `srcGO` for Go or `srcPYTHON` for python) by
->    updating the `PROJECT_PATH_SOURCE` in `CONFIG.toml` to target it. Remove
->    all unused placeholders.
-> 7. `[OPTIONAL]` - Update your `src[TECH]/.ci` job recipes matching your
->    project needs.
-> 8. Update the README.md with your Project's metadata.
-> 9. Delete this blockquote once everything is done.
+## How To Use AutomataCI
+
+The entire Git repository is a actually a template repository. Hence, you would
+either have to `git clone` it or download a copy of the latest source codes from
+the [Release](https://github.com/ChewKeanHo/AutomataCI/releases) section. Then,
+execute the following steps to make sure everything is correct.
+
+
+
+### Refresh The Git Hooks
+
+Once unpacked, you will need to refresh the `git` hooks by deleting the hidden
+`.git` directory at the root of the repository and then git init again. A POSIX
+Shell command looks as follow:
+
+```
+$ rm -rf .git
+$ git init --initial-branch=main
+$ git remote add origin <YOUR REMOTE URL>
+```
+
+
+
+### Update Software License
+
+By default, the presented product license (`LICENSE.txt`) is using the
+AutomataCI license. The goal is to change and update it matching to your product
+license.
+
+Files inside `resources/licenses` shall be updated to match your product
+license as well. The `resources/licenses/LICENSE-EN.odt` file is a
+[LibreOffice](https://www.libreoffice.org/) writer file. You're free to use
+other document generator product as long as it can produce
+`resources/licenses/LICENSE-EN.pdf` that will be distributed in various
+ecosystem via packages.
+
+
+
+### Update Logo
+
+By default, the presented icons and banners are of AutomataCI inside
+`resources/icons/` directory generated from the materials in
+`resources/icons/principle-canvas` using [Inkscape](https://inkscape.org/)
+design software. You're free to use other design software as long as it can
+generate the required output artifacts.
+
+Once you're done designing your product brand in
+`resources/icons/principle-canvas` directory, please generate an optimized and
+usable graphic artifacts as follow:
+
+1. `resources/icons/icon.svg` - generic and widely-compatible icon file used
+   everywhere.
+2. `resources/icons/icon-48x48.png` - PNG 48x48 icon file used in Linux system's
+   icon and shortcuts.
+3. `resources/icons/icon-128x128.png` - PNG 48x48 icon file used in Linux
+   system's icon and shortcuts.
+4. `resources/icons/icon-1200x400.svg` - used in README.md or marketing
+   promotion.
+
+
+
+### Update `CODE_OF_CONDUCT.md`
+
+If required, please update `CODE_OF_CONDUCT.md` with your appropriate legal
+clauses.
+
+
+
+### Update `CONFIG.toml`
+
+By default, AutomataCI is deploying its own `CONFIG.toml` product data. You
+should update it entirely matching your product.
+
+#### Technological Selections
+
+AutomataCI is capable of running multiple supported technologies in a
+repository. For example, you can enable Python technology by defining the
+`PROJECT_PYTHON` directory name (default is `srcPYTHON`) and Go technology by
+defining the `PROJECT_GO` directory name (default is `srcGO`) at the same time.
+
+Choose wisely as the multiple tech feature consideration was made solely for
+those who wants to use dedicated tech for other purposes (e.g. `SCULLY` for
+static documents).
+
+
+
+### Update Selected Tech's CI Specific Job Recipes
+
+The default source codes directory (`src[TECH]`) comes with their tech-specific
+AutomataCI job recipes inside its `src[TECH]/.ci` directory. Feel free to
+modify them matching your needs using your POSIX Shell and PowerShell knowledge.
+
+
+
+### Update Distribution Resource files
+
+All the data resource files in `resources/{docs,packages,publishers}` shall be
+updated matching to your product needs. Their specifications are made available
+in the `automataCI/AutomataCI-Engineering-Specification.pdf` documentation.
+
+
+
+### Update GitHub Integration Configurations
+
+Why usually not required, you can update the GitHub integration files inside
+`.github` directory. Notable files are:
+
+1. `.github/ISSUE_TEMPLATES/*` - issue templates.
+2. `.github/PULL_REQUEST_TEMPLATE/*` - pull request template.
+2. `.github/workflows/*` - GitHub Actions workflow recipes.
+
+
+
+### Update README.md
+
+Lastly, please update this `README.md` file. Currently, it's written for
+AutomataCI project. You can remove it and write a new one.
+
+
+
+### Clean Up Unused Source Directories
+
+AutomataCI supplied a large number of source directories by tech. Once you had
+decided your tech, you may remove all the unused source directories
+(`src[TECH]`) and clean up the repository.
+
+
+### Git Commit Initial Setup
+
+At this point, your repo is now ready. Feel free to git commit your
+initialization:
+
+```
+$ git add .
+$ git commit -s
+... WRITE YOUR COMMIT ...
+$ git push -u origin main:main
+```
 
 
 
 
 ## To Contribute
-For all contributors, please refer to the `DEVELOPER-GUIDES-[LANG].pdf` to
-before starting anything. The guide contains all the required instructions,
-knowledge, specifications, and guidelines for operating the repository.
+
+AutomataCI cannot be made successfully without contributions from (Holloway)
+Chew, Kean Ho and supports from external folks. If you had been using AutomataCI
+and wish to contribute back, there are 2 ways to do so:
+
+
+### Financial Support
+
+TBD
+
+### Craftmanship Support
+
+If you wish to bring in codes contribution, bug report, and ideas, please feel
+free to refer the PDF engineering spec located in the `automataCI/` directory.
 
 
 
 
 ## License
-This project is licensed under multiple licenses:
-
-1. Main license - [??? License](LICENSE)
+AutomataCI is licensed under OSI compatible [Apache 2.0 License](LICENSE.txt)
