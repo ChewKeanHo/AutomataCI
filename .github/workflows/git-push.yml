@@ -49,10 +49,6 @@ jobs:
         id: native_ci_build
         run: |
           ./ci.cmd build
-      - name: Execute repo's native CI - COMPOSE
-        id: native_ci_compose
-        run: |
-          ./ci.cmd compose
       - name: Execute repo's native CI - PACKAGE
         id: native_ci_package
         run: |
