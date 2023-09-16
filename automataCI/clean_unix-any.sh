@@ -14,7 +14,7 @@
 
 
 
-# (0) initialize
+# initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
@@ -26,7 +26,7 @@ fi
 
 
 
-# (1) execute tech-specific CI job
+# execute tech specific CI jobs if available
 if [ ! -z "$PROJECT_PYTHON" ]; then
         __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
         __recipe="${__recipe}/clean_unix-any.sh"
@@ -47,5 +47,5 @@ fi
 
 
 
-# (2) use default response since there is no localized jobs
+# report status
 return 0

@@ -13,10 +13,10 @@
 
 
 
-# (0) initialize
+# initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run me from ci.cmd instead!\n"
-        exit 1
+	Write-Error "[ ERROR ] - Please run me from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -34,27 +34,27 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# (1) source locally provided functions
+# source locally provided functions
 $DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
 $DEST = "${DEST}\package_windows-any.ps1"
 OS-Print-Status info "sourcing content assembling functions from: ${DEST}"
 $__process = FS-Is-Target-Exist "${DEST}"
 if ($__process -ne 0) {
 	OS-Print-Status error "Source failed."
-	exit 1
+	return 1
 }
 . "${DEST}"
 
 
 
 
-# (2) 1-time setup job required materials
+# 1-time setup job required materials
 $DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
 OS-Print-Status info "remaking package directory: $DEST"
 $__process = FS-Remake-Directory $DEST
 if ($__process -ne 0) {
 	OS-Print-Status error "remake failed."
-	exit 1
+	return 1
 }
 
 
@@ -68,7 +68,7 @@ if ($__process -ne 0) {
 
 
 
-# (3) begin packaging
+# begin packaging
 foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}")) {
 	$i = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${i}"
 	$__process = FS-Is-Directory "$i"
@@ -107,7 +107,7 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		"$TARGET_OS" `
 		"$TARGET_ARCH"
 	if ($__process -ne 0) {
-		exit 1
+		return 1
 	}
 
 	$__process = PACKAGE-Run-DEB `
@@ -118,7 +118,7 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		"$TARGET_ARCH" `
 		"$FILE_CHANGELOG_DEB"
 	if ($__process -ne 0) {
-		exit 1
+		return 1
 	}
 
 	$__process = PACKAGE-Run-RPM `
@@ -128,7 +128,7 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		"$TARGET_OS" `
 		"$TARGET_ARCH"
 	if ($__process -ne 0) {
-		exit 1
+		return 1
 	}
 
 	$__process = PACKAGE-Run-FLATPAK `
@@ -139,7 +139,7 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		"$TARGET_ARCH" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\flatpak"
 	if ($__process -ne 0) {
-		exit 1
+		return 1
 	}
 
 	$__process = PACKAGE-Run-PYPI `
@@ -149,7 +149,7 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		"$TARGET_OS" `
 		"$TARGET_ARCH"
 	if ($__process -ne 0) {
-		exit 1
+		return 1
 	}
 
 	$__process = PACKAGE-Run-DOCKER `
@@ -159,11 +159,15 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		"$TARGET_OS" `
 		"$TARGET_ARCH"
 	if ($__process -ne 0) {
-		exit 1
+		return 1
 	}
 
 	# report task verdict
 	OS-Print-Status success ""
 }
 
-exit 0
+
+
+
+# report status
+return 0

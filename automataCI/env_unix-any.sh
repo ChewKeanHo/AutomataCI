@@ -10,8 +10,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/installer.sh"
 
 
 
@@ -21,6 +19,9 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
+
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/installer.sh"
 
 
 
@@ -64,6 +65,17 @@ if [ ! -z "$PROJECT_PYTHON" ]; then
         if [ $? -ne 0 ]; then
                 OS::print_status error "install failed.\n"
                 return 1
+        fi
+
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/env_unix-any.sh"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "Detected Python custom job recipe. Installing...\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 fi
 

@@ -13,10 +13,10 @@
 
 
 
-# (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -41,7 +41,6 @@ function PACKAGE-Assemble-FLATPAK-Content {
 	}
 
 	# copy main program
-	# TIP: (1) copy all files into "${__directory}/BUILD" directory.
 	$__filepath = "${__directory}\${env:PROJECT_SKU}"
 	OS-Print-Status info "copying ${__target} to ${__filepath}"
 	FS-Copy-File "${__target}" "${__filepath}"

@@ -14,7 +14,7 @@
 
 
 
-# (0) initialize
+# initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
@@ -26,7 +26,7 @@ fi
 
 
 
-# (1) safety checking control surfaces
+# safety checking control surfaces
 OS::print_status info "checking python|python3 availability...\n"
 PYTHON::is_available
 if [ $? -ne 0 ]; then
@@ -53,7 +53,7 @@ fi
 
 
 
-# (2) run prepare services
+# run prepare services
 OS::print_status info "updating pip to the latest...\n"
 python -m pip install --upgrade pip
 if [ $? -ne 0 ]; then
@@ -73,6 +73,6 @@ fi
 
 
 
-# (3) report successful status
+# report status
 OS::print_status success "\n\n"
 return 0

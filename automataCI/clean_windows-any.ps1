@@ -13,10 +13,10 @@
 
 
 
-# (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -25,7 +25,7 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# (1) execute tech specific CI jobs if available
+# execute tech specific CI jobs if available
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
 	$__recipe = "${__recipe}\clean_windows-any.ps1"
@@ -34,17 +34,17 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 	$__process = FS-Is-File $__recipe
 	if ($__process -ne 0) {
 		OS-Print-Status error "Parse failed - missing file."
-		exit 1
+		return 1
 	}
 
-	. $__recipe
-	if (-not $?) {
-		exit 1
+	$__process = . $__recipe
+	if ($__process -ne 0) {
+		return 1
 	}
 }
 
 
 
 
-# (2) use default response since no localized CI jobs
-exit 0
+# report status
+return 0

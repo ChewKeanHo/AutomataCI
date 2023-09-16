@@ -14,7 +14,7 @@
 
 
 
-# (0) initialize
+# initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
@@ -28,7 +28,7 @@ fi
 
 
 
-# (1) safety checking control surfaces
+# safety checking control surfaces
 OS::print_status info "checking changelog availability...\n"
 CHANGELOG::is_available
 if [ $? -ne 0 ]; then
@@ -53,24 +53,24 @@ fi
 
 
 
-# (2) run build services
-compiler="pyinstaller"
-OS::print_status info "checking ${compiler} availability...\n"
-if [ -z "$(type -t "$compiler")" ]; then
-        OS::print_status error "missing ${compiler} command.\n"
+# run build services
+__compiler="pyinstaller"
+OS::print_status info "checking ${__compiler} availability...\n"
+if [ -z "$(type -t "$__compiler")" ]; then
+        OS::print_status error "missing ${__compiler} command.\n"
         return 1
 fi
 
 
-file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
-OS::print_status info "building output file: ${file}\n"
+__file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
+OS::print_status info "building output file: ${__file}\n"
 pyinstaller --noconfirm \
         --onefile \
         --clean \
         --distpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}" \
         --workpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}" \
         --specpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}" \
-        --name "$file" \
+        --name "$__file" \
         --hidden-import=main \
         "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/main.py"
 if [ $? -ne 0 ]; then
@@ -79,9 +79,9 @@ if [ $? -ne 0 ]; then
 fi
 
 
-file="${PROJECT_SKU}-src_${PROJECT_OS}-${PROJECT_ARCH}"
-OS::print_status info "building output file: ${file}\n"
-touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${file}"
+__file="${PROJECT_SKU}-src_${PROJECT_OS}-${PROJECT_ARCH}"
+OS::print_status info "building output file: ${__file}\n"
+touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
         OS::print_status error "build failed.\n"
         return 1
@@ -90,10 +90,10 @@ fi
 
 
 
-# (3) build changelog entries
-file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog"
+# build changelog entries
+__file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog"
 OS::print_status info "building ${PROJECT_VERSION} data changelog entry...\n"
-CHANGELOG::build_data_entry "$file"
+CHANGELOG::build_data_entry "$__file"
 if [ $? -ne 0 ]; then
         OS::print_status error "build failed.\n"
         return 1
@@ -102,7 +102,7 @@ fi
 
 OS::print_status info "building ${PROJECT_VERSION} deb changelog entry...\n"
 CHANGELOG::build_deb_entry \
-        "$file" \
+        "$__file" \
         "$PROJECT_VERSION" \
         "$PROJECT_SKU" \
         "$PROJECT_DEBIAN_DISTRIBUTION" \
@@ -118,6 +118,6 @@ fi
 
 
 
-# (3) report successful status
+# report status
 OS::print_status success "\n\n"
 return 0

@@ -14,9 +14,9 @@
 
 
 # initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -44,7 +44,7 @@ if ($__process -eq 2) {
 	OS-Print-Status info "Existing directory detected. Skipping..."
 } elseif ($__process -ne 0) {
 	OS-Print-Status error "Setup failed."
-	exit 1
+	return 1
 }
 
 
@@ -59,12 +59,12 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 	$__process = FS-Is-File "${__recipe}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "Parse failed - missing file."
-		exit 1
+		return 1
 	}
 
-	. "${__recipe}"
-	if (-not $?) {
-		exit 1
+	$__process = . "${__recipe}"
+	if ($__process -ne 0) {
+		return 1
 	}
 }
 
@@ -162,6 +162,6 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 
 
 
-# use default response since there is no localized CI jobs
+# report status
 OS-Print-Status success ""
-exit 0
+return 0

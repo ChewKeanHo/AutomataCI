@@ -14,7 +14,7 @@
 
 
 
-# (0) initialize
+# initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1

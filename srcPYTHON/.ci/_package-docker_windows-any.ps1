@@ -13,8 +13,8 @@
 
 
 
-# (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
         Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
         exit 1
 }

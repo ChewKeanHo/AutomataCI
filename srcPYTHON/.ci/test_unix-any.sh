@@ -14,7 +14,7 @@
 
 
 
-# (0) initialize
+# initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
@@ -26,7 +26,7 @@ fi
 
 
 
-# (1) safety checking control surfaces
+# safety checking control surfaces
 OS::print_status info "checking python|python3 availability...\n"
 PYTHON::is_available
 if [ $? -ne 0 ]; then
@@ -45,13 +45,15 @@ fi
 
 
 
-# (2) run test services
+# run test services
 report_location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/python-test-report"
 OS::print_status info "preparing report vault: ${report_location}\n"
 mkdir -p "$report_location"
 
 
-# (2.1) execute test run
+
+
+# execute test run
 OS::print_status info "executing all tests with coverage...\n"
 python -m coverage run \
         --data-file="${report_location}/.coverage" \
@@ -64,7 +66,9 @@ if [ $? -ne 0 ]; then
 fi
 
 
-# (2.2) process test report
+
+
+# process test report
 OS::print_status info "processing test coverage data to html...\n"
 python -m coverage html \
         --data-file="${report_location}/.coverage" \
@@ -77,6 +81,6 @@ fi
 
 
 
-# (3) report successful status
+# return status
 OS::print_status success "\n\n"
 return 0

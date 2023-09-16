@@ -13,10 +13,10 @@
 
 
 
-# (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -27,97 +27,98 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# (1) safety checking control surfaces
+# safety checking control surfaces
 OS-Print-Status info "checking changelog availability..."
-$process = CHANGELOG-Is-Available
-if ($process -ne 0) {
+$__process = CHANGELOG-Is-Available
+if ($__process -ne 0) {
 	OS-Print-Status error "changelog builder is unavailable."
-	exit 1
+	return 1
 }
 
 OS-Print-Status info "checking python availability..."
-$process = PYTHON-Is-Available
-if ($process -ne 0) {
+$__process = PYTHON-Is-Available
+if ($__process -ne 0) {
 	OS-Print-Status error "missing python intepreter."
-	exit 1
+	return 1
 }
 
 OS-Print-Status info "activating python venv..."
-$process = PYTHON-Activate-VENV
-if ($process -ne 0) {
+$__process = PYTHON-Activate-VENV
+if ($__process -ne 0) {
 	OS-Print-Status error "activation failed."
-	exit 1
+	return 1
 }
 
 
 
 
-# (2) run build service
+# run build service
 OS-Print-Status info "checking pyinstaller availability..."
-$compiler = "pyinstaller"
-$process = OS-Is-Command-Available $compiler
-if ($process -ne 0) {
-	OS-Print-Status error "missing $compiler command."
-	exit 1
+$__compiler = "pyinstaller"
+$__process = OS-Is-Command-Available $__compiler
+if ($__process -ne 0) {
+	OS-Print-Status error "missing $__compiler command."
+	return 1
 }
 
 
-$file = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
-OS-Print-Status info "building output file: $file"
-$argument = "--noconfirm " `
+$__file = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
+OS-Print-Status info "building output file: ${__file}"
+$__argument = "--noconfirm " `
 	+ "--onefile " `
 	+ "--clean " `
 	+ "--distpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}`" " `
 	+ "--workpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}`" " `
 	+ "--specpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}`" " `
-	+ "--name `"${file}`" " `
+	+ "--name `"${__file}`" " `
 	+ "--hidden-import=main " `
 	+ "`"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\main.py`""
-$process = OS-Exec $compiler $argument
-if ($process -ne 0) {
+$__process = OS-Exec "${__compiler}" "${__argument}"
+if ($__process -ne 0) {
 	OS-Print-Status error "build failed."
-	exit 1
+	return 1
 }
 
 
-$file = "${env:PROJECT_SKU}-src_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
-OS-Print-Status info "building output file: $file"
-$process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${file}"
-if ($process -ne 0) {
+$__file = "${env:PROJECT_SKU}-src_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
+OS-Print-Status info "building output file: ${__file}"
+$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
+if ($__process -ne 0) {
 	OS-Print-Status error "build failed."
-	exit 1
+	return 1
 }
 
 
 
-# (3) build changelog entries
-$file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog"
+
+# build changelog entries
+$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog"
 OS-Print-Status info "building ${env:PROJECT_VERSION} data changelog entry..."
-$process = CHANGELOG-Build-Data-Entry $file
-if ($process -ne 0) {
+$__process = CHANGELOG-Build-Data-Entry $__file
+if ($__process -ne 0) {
 	OS-Print-Status error "build failed."
-	exit 1
+	return 1
 }
 
 
 OS-Print-Status info "building ${env:PROJECT_VERSION} deb changelog entry..."
-$process = CHANGELOG-Build-DEB-Entry `
-	$file `
-	$env:PROJECT_VERSION `
-	$env:PROJECT_SKU `
-	$env:PROJECT_DEBIAN_DISTRIBUTION `
-	$env:PROJECT_DEBIAN_URGENCY `
-	$env:PROJECT_CONTACT_NAME `
-	$env:PROJECT_CONTACT_EMAIL `
+$__process = CHANGELOG-Build-DEB-Entry `
+	"${__file}" `
+	"$env:PROJECT_VERSION" `
+	"$env:PROJECT_SKU" `
+	"$env:PROJECT_DEBIAN_DISTRIBUTION" `
+	"$env:PROJECT_DEBIAN_URGENCY" `
+	"$env:PROJECT_CONTACT_NAME" `
+	"$env:PROJECT_CONTACT_EMAIL" `
 	(Get-Date -Format 'R')
-if ($process -ne 0) {
+if ($__process -ne 0) {
 	OS-Print-Status error "build failed."
-	exit 1
+	return 1
 }
 
 
 
 
-# (3) report successful status
+# report status
 OS-Print-Status success ""
-exit 0
+return 0

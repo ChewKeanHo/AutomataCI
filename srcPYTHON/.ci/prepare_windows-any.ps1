@@ -13,10 +13,10 @@
 
 
 
-# (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -25,51 +25,53 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# (1) safety checking control surfaces
+# safety checking control surfaces
 OS-Print-Status info "checking python availability..."
-$process = PYTHON-Is-Available
-if ($process -ne 0) {
+$__process = PYTHON-Is-Available
+if ($__process -ne 0) {
 	OS-Print-Status error "missing python intepreter."
-	exit 1
+	return 1
 }
+
 
 OS-Print-Status info "activating python venv..."
-$process = PYTHON-Activate-VENV
-if ($process -ne 0) {
+$__process = PYTHON-Activate-VENV
+if ($__process -ne 0) {
 	OS-Print-Status error "activation failed."
-	exit 1
+	return 1
 }
+
 
 OS-Print-Status info "checking pip availability..."
-$process = PYTHON-Has-PIP
-if ($process -ne 0) {
+$__process = PYTHON-Has-PIP
+if ($__process -ne 0) {
 	OS-Print-Status error "missing pip module manager."
-	exit 1
+	return 1
 }
 
 
 
 
-# (3) start prepare the service
+# run prepare service
 OS-Print-Status info "upgrading pip to the latest..."
-$process = OS-Exec "python" "-m pip install --upgrade pip"
-if ($process -ne 0) {
+$__process = OS-Exec "python" "-m pip install --upgrade pip"
+if ($__process -ne 0) {
 	OS-Print-Status error "pip update failed."
-	exit 1
+	return 1
 }
 
 
-$file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\requirements.txt"
-OS-Print-Status info "executing pip install against ${file}"
-$process = OS-Exec "pip" "install -r $file"
-if ($process -ne 0) {
+$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\requirements.txt"
+OS-Print-Status info "executing pip install against ${__file}"
+$__process = OS-Exec "pip" "install -r ${__file}"
+if ($__process -ne 0) {
 	OS-Print-Status error "pip install failed."
-	exit 1
+	return 1
 }
 
 
 
 
-# (3) report successful status
+# return status
 OS-Print-Status success ""
-exit 0
+return 0

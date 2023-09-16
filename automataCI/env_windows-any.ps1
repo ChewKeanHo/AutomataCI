@@ -15,8 +15,8 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -30,7 +30,7 @@ OS-Print-Status info "Installing choco..."
 $__process = INSTALLER-Setup
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
-	exit 1
+	return 1
 }
 
 
@@ -38,7 +38,7 @@ OS-Print-Status info "Installing curl..."
 $__process = INSTALLER-Setup-Curl
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
-	exit 1
+	return 1
 }
 
 
@@ -46,7 +46,7 @@ OS-Print-Status info "Installing docker..."
 $__process = INSTALLER-Setup-Docker
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
-	exit 1
+	return 1
 }
 
 
@@ -54,7 +54,7 @@ OS-Print-Status info "Installing reprepro..."
 $__process = INSTALLER-Setup-Reprepro
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
-	exit 1
+	return 1
 }
 
 
@@ -63,7 +63,18 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
 	$__process = INSTALLER-Setup-Python
 	if ($__process -ne 0) {
 		OS-Print-Status error "install failed."
-		exit 1
+		return 1
+	}
+
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
+	$__recipe = "${__recipe}\env_windows-any.ps1"
+	$__process = FS-Is-File $__recipe
+	if ($__process -eq 0) {
+		OS-Print-Status info "Detected Python custom job recipe. Installing..."
+		$__process = . $__recipe
+		if ($__process -ne 0) {
+			return 1
+		}
 	}
 }
 
@@ -71,4 +82,4 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
 
 
 # report status
-exit 0
+return 0

@@ -14,7 +14,7 @@
 
 
 
-# (0) initialize
+# initialize
 if [ "$PROJECT_PATH_ROOT" = "" ]; then
         >&2 printf "[ ERROR ] - Please run me from ci.cmd instead!\n"
         return 1
@@ -35,7 +35,7 @@ fi
 
 
 
-# (1) source locally provided functions
+# source locally provided functions
 DEST="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
 DEST="${DEST}/package_unix-any.sh"
 OS::print_status info "sourcing content assembling functions from: ${DEST}\n"
@@ -49,7 +49,7 @@ fi
 
 
 
-# (2) 1-time setup job required materials
+# 1-time setup job required materials
 DEST="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
 OS::print_status info "remaking package directory: $DEST\n"
 FS::remake_directory "$DEST"
@@ -69,7 +69,7 @@ fi
 
 
 
-# (3) begin packaging
+# begin packaging
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         if [ -d "$i" ]; then
                 continue
@@ -160,4 +160,9 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         # report job verdict
         OS::print_status success "\n\n"
 done
+
+
+
+
+# report status
 return 0

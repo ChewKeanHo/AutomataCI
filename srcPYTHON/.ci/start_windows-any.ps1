@@ -13,10 +13,10 @@
 
 
 
-# (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -24,25 +24,26 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# (1) safety checking control surfaces
+
+# safety checking control surfaces
 OS-Print-Status info "checking python availability..."
-$process = PYTHON-Is-Available
-if ($process -ne 0) {
+$__process = PYTHON-Is-Available
+if ($__process -ne 0) {
 	OS-Print-Status error "missing python intepreter."
-	exit 1
+	return 1
 }
 
 OS-Print-Status info "activating python venv..."
-$process = PYTHON-Activate-VENV
-if ($process -ne 0) {
+$__process = PYTHON-Activate-VENV
+if ($__process -ne 0) {
 	OS-Print-Status error "activation failed."
-	exit 1
+	return 1
 }
 
 
 
 
-# (2) report what to do since AutomataCI is executable, not sourcable
+# report what to do since AutomataCI is executable, not sourcable
 OS-Print-Status info ""
 OS-Print-Status info "IMPORTANT NOTE"
 OS-Print-Status info "please perform the following command at your terminal manually:"
@@ -52,6 +53,6 @@ OS-Print-Status info ""
 
 
 
-# (3) report successful status
+# report status
 OS-Print-Status success ""
-exit 0
+return 0
