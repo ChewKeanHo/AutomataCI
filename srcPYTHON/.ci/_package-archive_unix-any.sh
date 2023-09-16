@@ -63,7 +63,7 @@ PACKAGE::assemble_archive_content() {
         fi
 
         # copy user guide
-        __target="${PROJECT_PATH_ROOT}/USER-GUIDES-EN.pdf"
+        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
         OS::print_status info "copying $__target to $__directory\n"
         FS::copy_file "$__target" "${__directory}/."
         if [ $? -ne 0 ]; then

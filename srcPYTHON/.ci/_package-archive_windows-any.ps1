@@ -64,7 +64,7 @@ function PACKAGE-Assemble-Archive-Content {
 	}
 
 	# copy user guide
-	$__target = "${env:PROJECT_PATH_ROOT}\USER-GUIDES-EN.pdf"
+	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
 	OS-Print-Status info "copying ${__target} to ${__directory}"
 	FS-Copy-File "${__target}" "${__directory}"
 	if ($__process -ne 0) {
