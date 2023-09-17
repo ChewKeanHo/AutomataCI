@@ -22,6 +22,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\checksum\shasum.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\crypto\gpg.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-deb_windows-any.ps1"
@@ -150,16 +151,51 @@ foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT
 
 
 
-# checksum all finalized payloads
+# certify all payloads
 $__sha256_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha256.txt"
 $__sha256_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\sha256.txt"
 $__sha512_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha512.txt"
 $__sha512_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\sha512.txt"
 
+
 $null = FS-Remove-Silently "${__sha256_file}"
 $null = FS-Remove-Silently "${__sha256_target}"
 $null = FS-Remove-Silently "${__sha512_file}"
 $null = FS-Remove-Silently "${__sha512_target}"
+
+
+$__process = GPG-Is-Available "${env:PROJECT_GPG_ID}"
+if ($__process -eq 0) {
+	foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
+		$TARGET = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${TARGET}"
+		if ($TARGET.EndsWith(".asc") {
+			continue # it's a gpg cert
+		}
+
+		OS-Print-Status info "gpg signing: ${TARGET}"
+		FS-Remove-Silently "${TARGET}.asc"
+		$__process = GPG-Detach-Sign-File "${TARGET}" "${env:PROJECT_GPG_ID}"
+		if ($__process -ne 0) {
+			OS-Print-Status error "sign failed."
+			return 1
+		}
+	}
+
+	OS-Print-Status info "exporting GPG public key..."
+	$__keyfile = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${env:PROJECT_SKU}.gpg.asc"
+	$__process = GPG-Export-Public-Key "${__keyfile}" "${env:PROJECT_GPG_ID}"
+	if ($__process -ne 0) {
+		OS-Print-Status error "export failed."
+		return 1
+	}
+
+	$__process = FS-Copy-File "${__keyfile}" "${env:PROJECT_GPG_ID}"
+	if ($__process -ne 0) {
+		OS-Print-Status error "export failed."
+		return 1
+	}
+}
+
 
 foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
 	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_RELEASE_SHA256}))) {

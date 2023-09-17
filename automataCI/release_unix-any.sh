@@ -23,6 +23,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/checksum/shasum.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/gpg.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-deb_unix-any.sh"
@@ -154,16 +155,52 @@ done
 
 
 
-# checksum all finalized payloads
+# certify all payloads
 __sha256_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha256.txt"
 __sha256_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/sha256.txt"
 __sha512_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha512.txt"
 __sha512_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/sha512.txt"
 
+
 FS::remove_silently "$__sha256_file"
 FS::remove_silently "$__sha256_target"
 FS::remove_silently "$__sha512_file"
 FS::remove_silently "$__sha512_target"
+
+
+GPG::is_available "$PROJECT_GPG_ID"
+if [ $? -eq 0 ]; then
+        for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
+                if [ "${TARGET%%.asc*}" != "${TARGET}" ]; then
+                        continue # it's a gpg cert
+                fi
+
+                OS::print_status info "gpg signing: ${TARGET}\n"
+                FS::remove_silently "${TARGET}.asc"
+                GPG::detach_sign_file "$TARGET" "$PROJECT_GPG_ID"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "sign failed\n"
+                        return 1
+                fi
+        done
+
+        OS::print_status info "exporting GPG public key...\n"
+        __keyfile="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${PROJECT_SKU}.gpg.asc"
+        GPG::export_public_key "$__keyfile" "$PROJECT_GPG_ID"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "export failed\n"
+                return 1
+        fi
+
+        FS::copy_file \
+                "$__keyfile" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_SKU}.gpg.asc"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "export failed\n"
+                return 1
+        fi
+fi
+
 
 for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         if [ ! -z "$PROJECT_RELEASE_SHA256" ]; then
