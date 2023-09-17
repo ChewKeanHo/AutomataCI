@@ -1,7 +1,7 @@
 __copyright__ = """
-    Copyright <YEAR> <NAME>
+Copyright <YEAR> <NAME>
 
-    [ LICENSE_NOTICE_HERE ]
+[ LICENSE_NOTICE_HERE ]
 """
 __license__ = "[ LICENSE_SPDX_ID_HERE ]"
 ################################################################################
@@ -11,6 +11,10 @@ from Libs.Sample import Location
 from Libs.Sample import Strings
 
 def main() -> int:
+    '''
+    Primary program for demonstrating the deployment of Python in AutomataCI.
+    To run: `$ ./bin`
+    '''
     print("Hello " + Strings.Process(Entity.NAME, Location.NAME))
     return 0
 

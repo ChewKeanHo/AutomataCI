@@ -1,5 +1,10 @@
 automataci (1.4.0) stable; urgency=low
 
+  * srcPYTHON: added clean CI job recipe
+  * automataCI: added Purge CI job recipe
+  * automataCI: fixed docker-desktop choco install bug
+  * automataCI: added static repo publishing function
+  * automataCI: added Changelog Markdown assembling function
   * automataCI: refactored Release Job executions for maintainability
   * automataCI: added GPG package crypto-signing for release job
   * automataCI: refactored reprepro release job executions
@@ -76,4 +81,4 @@ automataci (1.4.0) stable; urgency=low
   * root: ported python starter artifacts
   * .github: added experimental branch into CI
 
--- Your Legal Full Name Here <contact@youremail.example>  Sun, 17 Sep 2023 12:52:36 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Mon, 18 Sep 2023 06:35:15 +0800

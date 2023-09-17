@@ -36,12 +36,14 @@ if [ $? -ne 0 ]; then
         return 1
 fi
 
+
 OS::print_status info "checking python|python3 availability...\n"
 PYTHON::is_available
 if [ $? -ne 0 ]; then
         OS::print_status error "missing python|python3 intepreter.\n"
         return 1
 fi
+
 
 OS::print_status info "activating python venv...\n"
 PYTHON::activate_venv
@@ -51,17 +53,23 @@ if [ $? -ne 0 ]; then
 fi
 
 
-
-
-# run build services
-__compiler="pyinstaller"
-OS::print_status info "checking ${__compiler} availability...\n"
-if [ -z "$(type -t "$__compiler")" ]; then
-        OS::print_status error "missing ${__compiler} command.\n"
+OS::print_status info "checking pyinstaller availability...\n"
+if [ -z "$(type -t "pyinstaller")" ]; then
+        OS::print_status error "missing pyintaller command.\n"
         return 1
 fi
 
 
+OS::print_status info "checking pdoc availability...\n"
+if [ -z "$(type -t "pdoc")" ]; then
+        OS::print_status error "missing pdoc command.\n"
+        return 1
+fi
+
+
+
+
+# build output binary file
 __file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
 OS::print_status info "building output file: ${__file}\n"
 pyinstaller --noconfirm \
@@ -79,11 +87,29 @@ if [ $? -ne 0 ]; then
 fi
 
 
+
+
+# placeholding source code flag
 __file="${PROJECT_SKU}-src_${PROJECT_OS}-${PROJECT_ARCH}"
 OS::print_status info "building output file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
         OS::print_status error "build failed.\n"
+        return 1
+fi
+
+
+
+
+# compose documentations
+OS::print_status info "printing html documentations...\n"
+__output="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/python"
+FS::remake_directory "${__output}/${PROJECT_OS}-${PROJECT_ARCH}"
+pdoc --html \
+        --output-dir "${__output}/${PROJECT_OS}-${PROJECT_ARCH}" \
+        "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/"
+if [ $? -ne 0 ]; then
+        OS::print_status error "compose failed.\n"
         return 1
 fi
 

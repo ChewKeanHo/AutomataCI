@@ -1,3 +1,8 @@
+srcPYTHON: added clean CI job recipe
+automataCI: added Purge CI job recipe
+automataCI: fixed docker-desktop choco install bug
+automataCI: added static repo publishing function
+automataCI: added Changelog Markdown assembling function
 automataCI: refactored Release Job executions for maintainability
 automataCI: added GPG package crypto-signing for release job
 automataCI: refactored reprepro release job executions

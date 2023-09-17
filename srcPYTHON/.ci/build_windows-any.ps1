@@ -50,18 +50,25 @@ if ($__process -ne 0) {
 }
 
 
-
-
-# run build service
 OS-Print-Status info "checking pyinstaller availability..."
-$__compiler = "pyinstaller"
-$__process = OS-Is-Command-Available $__compiler
+$__process = OS-Is-Command-Available "pyinstaller"
 if ($__process -ne 0) {
-	OS-Print-Status error "missing $__compiler command."
+	OS-Print-Status error "missing pyinstaller command."
 	return 1
 }
 
 
+OS-Print-Status info "checking pdoc availability..."
+$__process = OS-Is-Command-Available "pdoc"
+if ($__process -ne 0) {
+	OS-Print-Status error "missing pdoc command."
+	return 1
+}
+
+
+
+
+# build output binary file
 $__file = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 OS-Print-Status info "building output file: ${__file}"
 $__argument = "--noconfirm " `
@@ -73,16 +80,35 @@ $__argument = "--noconfirm " `
 	+ "--name `"${__file}`" " `
 	+ "--hidden-import=main " `
 	+ "`"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\main.py`""
-$__process = OS-Exec "${__compiler}" "${__argument}"
+$__process = OS-Exec "pyinstaller" "${__argument}"
 if ($__process -ne 0) {
 	OS-Print-Status error "build failed."
 	return 1
 }
 
 
+
+
+# placeholding source code flag
 $__file = "${env:PROJECT_SKU}-src_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 OS-Print-Status info "building output file: ${__file}"
 $__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
+if ($__process -ne 0) {
+	OS-Print-Status error "build failed."
+	return 1
+}
+
+
+
+
+# compose documentations
+OS-Print-Status info "printing html documentations..."
+$__output = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}\python"
+FS-Remake-Directory "${__output}\${env:PROJECT_OS}-${env:PROJECT_ARCH}"
+$__arguments = "--html " +
+		"--output-dir `"${__output}\${env:PROJECT_OS}-${env:PROJECT_ARCH}`" " +
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs\"
+$__process = OS-Exec "pdoc" "${__arguments}"
 if ($__process -ne 0) {
 	OS-Print-Status error "build failed."
 	return 1
