@@ -27,6 +27,10 @@ jobs:
       - name: Checking out designated commit - GITHUB ACTIONS
         id: git_check_out
         uses: actions/checkout@v4
+      - name: Execute repo's native CI - PURGE
+        id: native_ci_purge
+        run: |
+          ./ci.cmd purge
       - name: Execute repo's native CI - ENVIRONMENT
         id: native_ci_env
         run: |

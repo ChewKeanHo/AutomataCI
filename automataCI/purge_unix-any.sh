@@ -27,22 +27,29 @@ fi
 
 
 # execute tech specific CI jobs if available
-if [ ! -z "$PROJECT_PYTHON" ]; then
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
-        __recipe="${__recipe}/purge_unix-any.sh"
-        OS::print_status info "Python technology detected. Parsing job recipe: ${__recipe}\n"
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}"
+OS::print_status info "nuking ${__target}...\n"
+FS::remove_silently "$__target"
 
-        FS::is_file "$__recipe"
-        if [ $? -ne 0 ]; then
-                OS::print_status error "Parse failed - missing file.\n"
-                return 1
-        fi
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+OS::print_status info "nuking ${__target}...\n"
+FS::remove_silently "$__target"
 
-        . "$__recipe"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-fi
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}"
+OS::print_status info "nuking ${__target}...\n"
+FS::remove_silently "$__target"
+
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+OS::print_status info "nuking ${__target}...\n"
+FS::remove_silently "$__target"
+
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+OS::print_status info "nuking ${__target}...\n"
+FS::remove_silently "$__target"
+
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}"
+OS::print_status info "nuking ${__target}...\n"
+FS::remove_silently "$__target"
 
 
 
