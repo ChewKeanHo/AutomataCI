@@ -21,9 +21,29 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 
 
 
 
-OS::print_status success "(placeholder)\n"
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}"
+OS::print_status info "cleaning ${__target}...\n"
+FS::remove_silently "$__target"
+
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+OS::print_status info "cleaning ${__target}...\n"
+FS::remove_silently "$__target"
+
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}"
+OS::print_status info "cleaning ${__target}...\n"
+FS::remove_silently "$__target"
+
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+OS::print_status info "cleaning ${__target}...\n"
+FS::remove_silently "$__target"
+
+
+
+
+# report status
 return 0
