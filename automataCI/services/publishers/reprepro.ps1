@@ -32,6 +32,7 @@ function REPREPRO-Publish {
 		[string]$__target,
 		[string]$__directory,
 		[string]$__datastore,
+		[string]$__db_directory,
 		[string]$__codename
 	)
 
@@ -50,6 +51,7 @@ function REPREPRO-Publish {
 	$null = FS-Remake-Directory "${__datastore}\db"
 	$null = FS-Remake-Directory "${__directory}"
 	$__arguments = "--basedir `"${__datastore}`" " `
+			+ "--dbdir `"${__db_directory}`" " `
 			+ "--outdir `"${__directory}`" " `
 			+ "includedeb `"${__codename}`" " `
 			+ "`"${__target}`""

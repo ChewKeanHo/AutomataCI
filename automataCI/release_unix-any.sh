@@ -120,7 +120,8 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         RELEASE::run_deb \
                 "$TARGET" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

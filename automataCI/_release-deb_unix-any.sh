@@ -22,6 +22,7 @@ RELEASE::run_deb() {
         __target="$1"
         __directory="$2"
         __datastore="$3"
+        __db_directory="$4"
 
         # validate input
         DEB::is_valid "$__target"
@@ -48,9 +49,10 @@ RELEASE::run_deb() {
         OS::print_status info "publishing with reprepro...\n"
         REPREPRO::publish \
                 "$__target" \
-                "${__dest}" \
+                "$__dest" \
                 "${__datastore}/publishers/reprepro" \
-                "${PROJECT_REPREPRO_CODENAME}"
+                "${__db_directory}/reprepro" \
+                "$PROJECT_REPREPRO_CODENAME"
         if [ $? -ne 0 ]; then
                 OS::print_status error "publish failed.\n"
                 return 1

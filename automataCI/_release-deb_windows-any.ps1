@@ -21,7 +21,8 @@ function RELEASE-Run-DEB {
 	param(
 		[string]$__target,
 		[string]$__directory,
-		[string]$__datastore
+		[string]$__datastore,
+		[string]$__db_directory
 	)
 
 	# validate input
@@ -49,8 +50,9 @@ function RELEASE-Run-DEB {
 	OS-Print-Status info "publishing with reprepro..."
 	$__process = REPREPRO-Publish `
 		"${__target}" `
-		"${__directory}\deb" `
+		"${__dest}" `
 		"${__datastore}\publishers\reprepro" `
+		"${__db_directory}\reprepro" `
 		"${env:PROJECT_REPREPRO_CODENAME}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "publish failed."

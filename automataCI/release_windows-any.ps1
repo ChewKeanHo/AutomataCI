@@ -117,7 +117,8 @@ foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT
 	$__process = RELEASE-Run-DEB `
 		"$TARGET" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}"
 	if ($__process -ne 0) {
 		return 1
 	}

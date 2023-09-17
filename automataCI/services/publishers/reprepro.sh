@@ -31,7 +31,8 @@ REPREPRO::publish() {
         __target="$1"
         __directory="$2"
         __datastore="$3"
-        __codename="$4"
+        __db_directory="$4"
+        __codename="$5"
 
         # validate input
         if [ -z "$__target" ] ||
@@ -44,9 +45,10 @@ REPREPRO::publish() {
         fi
 
         # execute
-        FS::remake_directory "${__datastore}/db"
+        FS::remake_directory "${__db_directory}"
         FS::remake_directory "${__directory}"
         reprepro --basedir "${__datastore}" \
+                --dbdir "${__db_directory}" \
                 --outdir "${__directory}" \
                 includedeb "${__codename}" \
                 "$__target"
