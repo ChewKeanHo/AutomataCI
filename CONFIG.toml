@@ -152,6 +152,22 @@ PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
 PROJECT_GPG_ID = "49B7878749107ED9C456267ACFD3316C29873FB5"
 
 
+# PROJECT_RELEASE_SHA256
+# Perform SHA256 checksum file generation in Release job. To disable it, simply
+# let it empty.
+#
+# Otherwise, as long as it's not empty, it is enabled.
+PROJECT_RELEASE_SHA256 = "enabled"
+
+
+# PROJECT_RELEASE_SHA512
+# Perform SHA512 checksum file generation. To disable it, simply let it
+# empty.
+#
+# Otherwise, as long as it's not empty, it is enabled.
+PROJECT_RELEASE_SHA512 = "enabled"
+
+
 # PROJECT_DEBIAN_IS_NATIVE
 # Flag to determine the project is Debian natively sponsored package. Usually
 # is false.

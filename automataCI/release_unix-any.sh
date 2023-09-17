@@ -22,12 +22,24 @@ fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/checksum/shasum.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-deb_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-rpm_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-docker_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-pypi_unix-any.sh"
+
+
+
+
+# safety check control surfaces
+OS::print_status info "Checking shasum availability...\n"
+SHASUM::is_available
+if [ $? -ne 0 ]; then
+        OS::print_status error "Check failed.\n"
+        return 1
+fi
 
 
 
@@ -137,6 +149,77 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 done
+
+
+
+
+# checksum all finalized payloads
+__sha256_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha256.txt"
+__sha256_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/sha256.txt"
+__sha512_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha512.txt"
+__sha512_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/sha512.txt"
+
+FS::remove_silently "$__sha256_file"
+FS::remove_silently "$__sha256_target"
+FS::remove_silently "$__sha512_file"
+FS::remove_silently "$__sha512_target"
+
+for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
+        if [ ! -z "$PROJECT_RELEASE_SHA256" ]; then
+                OS::print_status info "sha256 checksuming $TARGET\n"
+                __value="$(SHASUM::create_file "$TARGET" "256")"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "sha256 failed.\n"
+                        return 1
+                fi
+
+                FS::append_file "${__sha256_file}" "\
+${__value}  ${TARGET##*/}
+"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "sha256 failed.\n"
+                        return 1
+                fi
+        fi
+
+
+        if [ ! -z "$PROJECT_RELEASE_SHA512" ]; then
+                OS::print_status info "sha512 checksuming $TARGET\n"
+                __value="$(SHASUM::create_file "$TARGET" "512")"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "sha512 failed.\n"
+                        return 1
+                fi
+
+                FS::append_file "${__sha512_file}" "\
+${__value}  ${TARGET##*/}
+"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "sha512 failed.\n"
+                        return 1
+                fi
+        fi
+done
+
+
+if [ -f "${__sha256_file}" ]; then
+        OS::print_status info "exporting sha256.txt...\n"
+        FS::move "${__sha256_file}" "$__sha256_target"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "export failed.\n"
+                return 1
+        fi
+fi
+
+
+if [ -f "${__sha512_file}" ]; then
+        OS::print_status info "exporting sha512.txt...\n"
+        FS::move "${__sha512_file}" "$__sha512_target"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "export failed.\n"
+                return 1
+        fi
+fi
 
 
 

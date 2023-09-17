@@ -21,12 +21,24 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\checksum\shasum.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-deb_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-rpm_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-docker_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-pypi_windows-any.ps1"
+
+
+
+
+# safety check control surfaces
+OS-Print-Status info "Checking shasum availability..."
+$__process = SHASUM-Is-Available
+if ($__process -ne 0) {
+	OS-Print-Status error "Check failed."
+	return 1
+}
 
 
 
@@ -99,6 +111,7 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 
 # loop through each package and publish accordingly
 foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
+	$TARGET = $TARGET.FullName
 	OS-Print-Status info "processing ${TARGET}"
 
 	$__process = RELEASE-Run-DEB `
@@ -130,6 +143,67 @@ foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
 	if ($__process -ne 0) {
+		return 1
+	}
+}
+
+
+
+# checksum all finalized payloads
+$__sha256_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha256.txt"
+$__sha256_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\sha256.txt"
+$__sha512_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha512.txt"
+$__sha512_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\sha512.txt"
+
+$null = FS-Remove-Silently "${__sha256_file}"
+$null = FS-Remove-Silently "${__sha256_target}"
+$null = FS-Remove-Silently "${__sha512_file}"
+$null = FS-Remove-Silently "${__sha512_target}"
+
+foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
+	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_RELEASE_SHA256}))) {
+		OS-Print-Status info "sha256 checksuming ${TARGET}"
+		$__value = SHASUM-Checksum-File $TARGET.FullName "256"
+		if ([string]::IsNullOrEmpty(${__value})) {
+			OS-Print-Status error "sha256 failed."
+			return 1
+		}
+
+		FS-Append-File "${__sha256_file}" @"
+${__value}  $TARGET
+"@
+	}
+
+	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_RELEASE_SHA512}))) {
+		OS-Print-Status info "sha512 checksuming ${TARGET}"
+		$__value = SHASUM-Checksum-File $TARGET.FullName "512"
+		if ([string]::IsNullOrEmpty(${__value})) {
+			OS-Print-Status error "sha512 failed."
+			return 1
+		}
+
+		FS-Append-File "${__sha512_file}" @"
+${__value}  $TARGET
+"@
+	}
+}
+
+
+if (Test-Path -Path "${__sha256_file}") {
+	OS-Print-Status info "exporting sha256.txt..."
+	$__process = FS-Move "${__sha256_file}" "${__sha256_target}"
+	if ($__process -ne 0) {
+		OS-Print-Status error "export failed."
+		return 1
+	}
+}
+
+
+if (Test-Path -Path "${__sha512_file}") {
+	OS-Print-Status info "exporting sha512.txt..."
+	$__process = FS-Move "${__sha512_file}" "${__sha512_target}"
+	if ($__process -ne 0) {
+		OS-Print-Status error "export failed."
 		return 1
 	}
 }
