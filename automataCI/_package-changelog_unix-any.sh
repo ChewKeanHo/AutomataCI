@@ -52,7 +52,8 @@ PACKAGE::run_changelog() {
         CHANGELOG::assemble_md \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
                 "$__changelog_md" \
-                "$PROJECT_VERSION"
+                "$PROJECT_VERSION" \
+                "$PROJECT_CHANGELOG_TITLE"
         if [ $? -ne 0 ]; then
                 OS::print_status error "assembly failed.\n"
                 return 1

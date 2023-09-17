@@ -1,3 +1,19 @@
+automataCI: refactored Release Job executions for maintainability
+automataCI: added GPG package crypto-signing for release job
+automataCI: refactored reprepro release job executions
+automataCI: added sha256 and sha512 checksum function
+root: have critical functions packed inside automataCI directory
+automataCI: removed redundant Publish job recipe
+automataCI: removed duplicated compose CI job
+root: shift USER-GUIDES-EN.pdf into resources directory
+README.md: updated README.md to match the latest
+root: added CODE_OF_CONDUCT.md
+repo: cleaned up license files and its data sources
+automataCI: added PyPi release CI job function
+automataCI: clean up Docker release job implementations
+root: updated documentations
+root: added Docker's multi-arch image build release job recipe
+root: added flatpak release function
 automataCI: added .rpm createrepo release job function
 srcPYTHON: added stricter requirements for staticx
 .github: tidy up github actions script

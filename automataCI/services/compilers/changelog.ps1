@@ -213,7 +213,7 @@ function CHANGELOG-Assemble-DEB {
 		}
 
 		foreach ($__line in (Get-Content "${__directory}\${__tag}")) {
-			$__process = FS-Append-File "${__target}" "$`n${__line}"
+			$__process = FS-Append-File "${__target}" "`n${__line}"
 			if ($__process -ne 0) {
 				return 1
 			}
@@ -297,12 +297,48 @@ function CHANGELOG-Assemble-RPM {
 
 
 function CHANGELOG-Assemble-MD {
-	param(
+	param (
 		[string]$__directory,
 		[string]$__target,
-		[string]$__version
+		[string]$__version,
+		[string]$__title
 	)
 
+	if ([string]::IsNullOrEmpty($__directory) -or
+		[string]::IsNullOrEmpty($__target) -or
+		[string]::IsNullOrEmpty($__version) -or
+		[string]::IsNullOrEmpty($__title)) {
+		return 1
+	}
+
+	$__directory = "${__directory}\data"
+
+	# assemble file
+	$null = FS-Remove-Silently "${__target}"
+	$null = FS-Make-Housing-Directory "${__target}"
+	$null = FS-Write-File "${__target}" "# ${__title}`n"
+	$null = FS-Append-File "${__target}" "`n## ${__version}`n"
+	foreach ($__line in (Get-Content "${__directory}\latest")) {
+		$__process = FS-Append-File "${__target}" "* ${__line}"
+		if ($__process -ne 0) {
+			return 1
+		}
+	}
+
+	foreach ($__tag in (git tag --sort version:refname)) {
+		if (-not (Test-Path "${__directory}\${__tag}")) {
+			continue
+		}
+
+		$null = FS-Append-File "${__target}" "`n`n##${__tag}`n"
+		foreach ($__line in (Get-Content "${__directory}\${__tag}")) {
+			$__process = FS-Append-File "${__target}" "* ${__line}"
+			if ($__process -ne 0) {
+				return 1
+			}
+		}
+	}
+
 	# report status
-	return 0
+	return $__process
 }

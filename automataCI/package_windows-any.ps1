@@ -58,7 +58,7 @@ if ($__process -ne 0) {
 }
 
 
-$FILE_CHANGELOG_MD = "${env:PROJECT_PATH_ROOT}\MARKDOWN.md"
+$FILE_CHANGELOG_MD = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\CHANGELOG.md"
 $FILE_CHANGELOG_DEB = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb\changelog.gz"
 $__process = Package-Run-Changelog "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
 if ($__process -ne 0) {

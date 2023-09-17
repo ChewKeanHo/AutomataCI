@@ -53,7 +53,8 @@ function PACKAGE-Run-Changelog {
 	$__process = CHANGELOG-Assemble-MD `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog" `
 		"${__changelog_md}" `
-		"${env:PROJECT_VERSION}"
+		"${env:PROJECT_VERSION}" `
+		"${env:PROJECT_CHANGELOG_TITLE}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "assembly failed."
 		return 1

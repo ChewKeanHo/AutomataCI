@@ -299,7 +299,51 @@ CHANGELOG::assemble_md() {
         __directory="$1"
         __target="$2"
         __version="$3"
+        __title="$4"
+
+        # validate input
+        if [ -z "$__directory" ] ||
+                [ -z "$__target" ] ||
+                [ -z "$__version" ] ||
+                [ -z "$__title" ]; then
+                return 1
+        fi
+
+        __directory="${__directory}/data"
+
+        # assemble file
+        FS::remove_silently "$__target"
+        FS::make_housing_directory "$__target"
+        FS::write_file "$__target" "# ${__title}\n\n"
+        FS::append_file "$__target" "\n## ${__version}\n\n"
+        old_IFS="$IFS"
+        while IFS="" read -r __line || [ -n "$__line" ]; do
+                FS::append_file "$__target" "* ${__line}\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        done < "${__directory}/latest"
+
+        for __tag in "$(git tag --sort version:refname)"; do
+                if [ ! -f "${__directory}/${__tag}" ]; then
+                        continue
+                fi
+
+                FS::append_file "$__target" "\n\n## ${__tag}\n\n"
+                while IFS="" read -r __line || [ -n "$__line" ]; do
+                        FS::append_file "$__target" "* ${__line}\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                done < "${__directory}/${__tag}"
+        done
+        IFS="$old_IFS"
+        unset old_IFS __line __tag
 
         # report status
-        return 0
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
 }

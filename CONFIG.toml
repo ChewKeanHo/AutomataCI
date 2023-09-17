@@ -152,6 +152,10 @@ PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
 PROJECT_GPG_ID = "49B7878749107ED9C456267ACFD3316C29873FB5"
 
 
+# PROJECT_CHANGELOG_TITLE
+# The title of the changelog file.
+PROJECT_CHANGELOG_TITLE = "Changelog | 更新日志 | Endringslogg | Cacatan Perubahan | Ändringslogg | 変更履歴"
+
 # PROJECT_RELEASE_SHA256
 # Perform SHA256 checksum file generation in Release job. To disable it, simply
 # let it empty.
