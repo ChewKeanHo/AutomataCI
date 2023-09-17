@@ -111,9 +111,10 @@ INSTALLER::setup_docker() {
                 return 1
         fi
 
-        OS::is_command_available "docker"
+        DOCKER::is_available
         if [ $? -ne 0 ]; then
-                # NOTE: do nothing since docker requires host to provide anyway.
+                # NOTE: nothing else can be done since it's host-specific.
+                #       DO NOT brew install Docker-Desktop autonomously.
                 return 0
         fi
 

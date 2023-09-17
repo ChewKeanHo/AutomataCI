@@ -84,17 +84,10 @@ function INSTALLER-Setup-Docker {
 		return 1
 	}
 
-	$__process = choco list --local-only --exact 'docker-desktop'
-	if (-not ($LASTEXITCODE -eq 0 -and $packageList -match $dockerDesktopPackage)) {
-		$__process = OS-Exec "choco" "install docker-desktop -y"
-		if ($__process -ne 0) {
-			return 1
-		}
-	}
-
-	$__process =  OS-Is-Command-Available "docker"
+	$__process = DOCKER-Is-Available
 	if ($__process -ne 0) {
-		# NOTE: nothing else can be done since docker is host-specific
+		# NOTE: nothing else can be done since it's host-specific.
+		#       DO NOT choco install Docker-Desktop autonomously.
 		return 0
 	}
 

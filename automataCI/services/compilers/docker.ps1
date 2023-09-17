@@ -187,6 +187,7 @@ function DOCKER-Get-ID {
 
 
 
+
 function DOCKER-Is-Available {
 	# execute
 	$__process = OS-Is-Command-Available "docker"
@@ -194,8 +195,19 @@ function DOCKER-Is-Available {
 		return 1
 	}
 
-	$__process = OS-Exec "docker" "ps"
-	if ($__process -ne 0) {
+	$null = Invoke-Expression `
+		-Command "docker ps" `
+		-ErrorAction SilentlyContinue `
+		2> $null
+	if ($LASTEXITCODE -ne 0) {
+		return 1
+	}
+
+	$null = Invoke-Expression `
+		-Command "docker buildx prune --force" `
+		-ErrorAction SilentlyContinue `
+		2> $null
+	if ($LASTEXITCODE -ne 0) {
 		return 1
 	}
 
@@ -364,13 +376,12 @@ function DOCKER-Setup-Builder-MultiArch {
 	}
 
 	$__process = OS-Exec "docker" "buildx create --use --name `"${__name}`""
-
-	# report status
-	if ($__process -eq 0) {
-		return 0
+	if ($__process -ne 0) {
+		return 1
 	}
 
-	return 1
+	# report status
+	return 0
 }
 
 

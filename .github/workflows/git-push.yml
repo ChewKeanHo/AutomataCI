@@ -24,7 +24,9 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checking out designated commit - GITHUB ACTIONS
+        id: git_check_out
+        uses: actions/checkout@v4
       - name: Execute repo's native CI - ENVIRONMENT
         id: native_ci_env
         run: |

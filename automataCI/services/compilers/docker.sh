@@ -192,6 +192,11 @@ DOCKER::is_available() {
                 return 1
         fi
 
+        docker buildx prune --force &> /dev/null
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
         # report status
         return 0
 }
