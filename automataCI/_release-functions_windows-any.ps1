@@ -163,17 +163,55 @@ function RELEASE-Initiate {
 
 
 
-function RELEASE-Run-Release-Repo-Setup {
+function Release-Run-Release-Repo-Conclude {
+	# validate input
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		OS-Print-Status error "Missing required git dependency."
+		return 1
+	}
+
+	OS-Print-Status info "Sourcing commit id for tagging..."
+	$__tag = GIT-Get-Latest-Commit-ID
+	if ([string]::IsNullOrEmpty(${__tag})) {
+		OS-Print-Status error "Source failed."
+		return 1
+	}
+
 	# execute
-	OS-Print-Status info "Setup artifact release repo..."
 	$__current_path = Get-Location
-	$null = Set-Location "${env:PROJECT_PATH_ROOT}"
-	$__process = GIT-clone "${env:PROJECT_STATIC_REPO}" "${env:PROJECT_PATH_RELEASE}"
-	$__current_path = Get-Location
-	$null = Set-Location "${__current_path}"
+	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
+
+	OS-Print-Status info "Committing release repo..."
+	$__process = Git-Autonomous-Force-Commit `
+		"${__tag}" `
+		"${env:PROJECT_STATIC_REPO_KEY}" `
+		"${env:PROJECT_STATIC_REPO_BRANCH}"
+	if ($__process -ne 0) {
+		$null = Set-Location "${__curent_path}"
+		$null = Remove-Variable __current_path
+		OS-Print-Status error "Commit failed."
+		return 1
+	}
+
+	$null = Set-Location "${__curent_path}"
 	$null = Remove-Variable __current_path
 
-	# report status
+	# return status
+	return 0
+}
+
+
+
+
+function RELEASE-Run-Release-Repo-Setup {
+	# execute
+	$__current_path = Get-Location
+	$null = Set-Location "${env:PROJECT_PATH_ROOT}"
+
+
+	OS-Print-Status info "Setup artifact release repo..."
+	$__process = GIT-clone "${env:PROJECT_STATIC_REPO}" "${env:PROJECT_PATH_RELEASE}"
 	if ($__process -eq 2) {
 		OS-Print-Status info "Existing directory detected. Skipping..."
 	} elseif ($__process -ne 0) {
@@ -181,5 +219,22 @@ function RELEASE-Run-Release-Repo-Setup {
 		return 1
 	}
 
+
+	OS-Print-Status info "Hard resetting git to first commit..."
+	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
+	$__process = GIT-Hard-Reset-To-Init
+	if ($__process -ne 0) {
+		$__current_path = Get-Location
+		$null = Set-Location "${__current_path}"
+		$null = Remove-Variable __current_path
+		OS-Print-Status error "Reset failed."
+		return 1
+	}
+
+	$__current_path = Get-Location
+	$null = Set-Location "${__current_path}"
+	$null = Remove-Variable __current_path
+
+	# report status
 	return 0
 }

@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 
 
 
@@ -58,6 +59,158 @@ function GIT-Clone {
 	} else {
 		$__process = Os-Exec "git" "clone ${__url}"
 	}
+
+	# report status
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
+function GIT-Get-Latest-Commit-ID {
+	# validate input
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		return ""
+	}
+
+	# execute
+	$__tag = Invoke-Expression "git rev-list --max-parents=0 --abbrev-commit HEAD"
+	if (-not [string]::IsNullOrEmpty($__first)) {
+		return $__tag
+	}
+	return ""
+}
+
+
+
+
+function GIT-Hard-Reset-To-Init {
+	# validate input
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# execute
+	$__first = Invoke-Expression `
+		-Command "git rev-list --max-parents=0 --abbrev-commit HEAD"
+	if ([string]::IsNullOrEmpty($__first)) {
+		return 1
+	}
+
+	$__process = OS-Exec "git" "reset --hard ${__first}"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = OS-Exec "git" "clean -fd"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# report status
+	return 0
+}
+
+
+
+
+function GIT-Autonomous-Force-Commit {
+	param(
+		[string]$__tracker,
+		[string]$__repo,
+		[string]$__branch
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__tracker) -or
+		[string]::IsNullOrEmpty($__repo) -or
+		[string]::IsNullOrEmpty($__branch)) {
+		return 1
+	}
+
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# execute
+	$__process = OS-Exec "git" "add ."
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = OS-Exec "git" "commit -m 'Publish as of ${__tracker}'"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = OS-Exec "git" "push -f ${__repo} ${__branch}"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# report status
+	return 0
+}
+
+
+
+
+function GIT-Remove-Worktree {
+	param (
+		[string]$__destination
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__destination)) {
+		return 1
+	}
+
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# execute
+	$__process = OS-Exec "git" "worktree remove `"${__destination}`""
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$null = FS-Remove-Silently "${__destination}"
+
+	# report status
+	return 0
+}
+
+
+
+
+function GIT-Setup-Worktree {
+	param (
+		[string]$__branch,
+		[string]$__destination
+	)
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__branch) -or [string]::IsNullOrEmpty($__destination)) {
+		return 1
+	}
+
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# execute
+	$null = FS-Make-Directory "${__destination}"
+	$__process = OS-Exec "git" "worktree add `"${__destination}`" `"${__branch}`""
 
 	# report status
 	if ($__process -eq 0) {

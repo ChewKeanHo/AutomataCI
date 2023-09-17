@@ -257,6 +257,16 @@ PROJECT_REPREPRO_CODENAME="main"
 PROJECT_STATIC_REPO="git@github.com:ChewKeanHo/AutomataCI.wiki.git"
 
 
+# PROJECT_STATIC_REPO_KEY
+# The git upstream key. Default is 'origin'.
+PROJECT_STATIC_REPO_KEY="origin"
+
+
+# PROJECT_STATIC_REPO_BRANCH
+# The git upstream branch. Default is 'master' or 'main'.
+PROJECT_STATIC_REPO_BRANCH="master"
+
+
 # PROJECT_STATIC_URL
 # The public facing base URL for accessing the published static repo. This URL
 # shall be used to construct the final user instructions across various
