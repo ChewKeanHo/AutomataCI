@@ -13,7 +13,7 @@ supply chain threat at least in the 2021-2023 era.
 
 Some good business reasons why AutomataCI is made:
 
-1. **Start off with a tested and solid foundation** - all the templates and
+1. **Start off with a tested and solid foundation** - All the templates and
    CI jobs are tested and have default configured for immediate software
    development.
 2. **Avoid being threatend by your CI provider** - CI it's a life-support system
@@ -157,14 +157,46 @@ decided your tech, you may remove all the unused source directories
 ### Git Commit Initial Setup
 
 At this point, your repo is now ready. Feel free to git commit your
-initialization:
+initialization (assuming you're using `main` as primary branch):
 
 ```
 $ git add .
 $ git commit -s
 ... WRITE YOUR COMMIT ...
 $ git push -u origin main:main
+$ git switch --orphan gh-pages
+$ git commit --allow-empty -m "Initial Commit"
+$ git push origin gh-pages:gh-pages
+$ git checkout main
 ```
+
+
+
+
+## Operating AutomataCI
+
+To operate AutomataCI, simply execute the `ci.cmd` help section:
+
+```
+$ ./ci.cmd help
+
+Please try any of the following:
+        To seek commands' help 🠚        $ ./ci.cmd help
+        To initialize environment 🠚     $ ./ci.cmd env
+        To setup the repo for work 🠚    $ ./ci.cmd setup
+        To start a development 🠚        $ ./ci.cmd start
+        To test the repo 🠚              $ ./ci.cmd test
+        To prepare the repo 🠚           $ ./ci.cmd prepare
+        To build the repo 🠚             $ ./ci.cmd build
+        To package the repo product 🠚   $ ./ci.cmd package
+        To release the repo product 🠚   $ ./ci.cmd release
+        To stop a development 🠚         $ ./ci.cmd stop
+        To clean the workspace 🠚        $ ./ci.cmd clean
+        To purge everything 🠚           $ ./ci.cmd purge
+```
+
+The CI jobs are arranged in a storyline manner from top to bottom. Feel free
+to execute accordingly.
 
 
 
