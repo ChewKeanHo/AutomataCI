@@ -13,6 +13,7 @@
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\crypto\gpg.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\checksum\shasum.ps1"
 
 
@@ -163,7 +164,24 @@ function RELEASE-Initiate {
 
 
 
-function Release-Run-Release-Repo-Conclude {
+function RELEASE-Run-Changelog-Conclude {
+	# execute
+	OS-Print-Status info "Sealing changelog latest entries..."
+	$__process = CHANGELOG-Seal `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog" `
+		"${env:PROJECT_VERSION}"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# report status
+	return 0
+}
+
+
+
+
+function RELEASE-Run-Release-Repo-Conclude {
 	# validate input
 	$__process = GIT-Is-Available
 	if ($__process -ne 0) {

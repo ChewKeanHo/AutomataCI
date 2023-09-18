@@ -109,6 +109,12 @@ if [ $? -ne 0 ]; then
 fi
 
 
+RELEASE::run_changelog_conclude
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
 
 
 # report status

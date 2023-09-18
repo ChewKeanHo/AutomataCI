@@ -14,6 +14,7 @@
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/gpg.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/changelog.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/checksum/shasum.sh"
 
 
@@ -133,6 +134,7 @@ ${__value}  ${TARGET##*/}
 
 
 
+
 RELEASE::initiate() {
         # safety check control surfaces
         OS::print_status info "Checking shasum availability...\n"
@@ -159,6 +161,23 @@ RELEASE::initiate() {
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
+        fi
+
+        # report status
+        return 0
+}
+
+
+
+
+RELEASE::run_changelog_conclude() {
+        # execute
+        OS::print_status info "Sealing changelog latest entries...\n"
+        CHANGELOG::seal \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
+                "$PROJECT_VERSION"
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
         # report status

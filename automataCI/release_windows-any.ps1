@@ -108,6 +108,12 @@ if ($__process -ne 0) {
 }
 
 
+$__process = RELEASE-Run-Changelog-Conclude
+if ($__process -ne 0) {
+	return 1
+}
+
+
 
 
 # report status

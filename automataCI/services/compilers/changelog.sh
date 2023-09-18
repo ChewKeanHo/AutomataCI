@@ -16,16 +16,180 @@
 
 
 
-CHANGELOG::is_available() {
-        if [ -z "$(type -t git)" ]; then
+CHANGELOG::assemble_deb() {
+        __directory="$1"
+        __target="$2"
+        __version="$3"
+
+        # validate input
+        if [ -z "$__directory" ] || [ -z "$__target" ] || [ -z "$__version" ]; then
                 return 1
         fi
 
-        GZ::is_available
+        __directory="${__directory}/deb"
+        __target="${__target%.gz*}"
+
+        # assemble file
+        FS::remove_silently "$__target"
+        FS::remove_silently "${__target}.gz"
+        FS::make_housing_directory "$__target"
+
+        old_IFS="$IFS"
+        while IFS="" read -r __line || [ -n "$__line" ]; do
+                FS::append_file "$__target" "$__line\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        done < "${__directory}/latest"
+
+        for __tag in "$(git tag --sort version:refname)"; do
+                if [ ! -f "${__directory}/${__tag}" ]; then
+                        continue
+                fi
+
+                while IFS="" read -r __line || [ -n "$__line" ]; do
+                        FS::append_file "$__target" "\n$__line\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                done < "${__directory}/${__tag}"
+        done
+        IFS="$old_IFS"
+        unset old_IFS __line __tag
+
+        # gunzip
+        GZ::create "$__target"
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+CHANGELOG::assemble_md() {
+        __directory="$1"
+        __target="$2"
+        __version="$3"
+        __title="$4"
+
+        # validate input
+        if [ -z "$__directory" ] ||
+                [ -z "$__target" ] ||
+                [ -z "$__version" ] ||
+                [ -z "$__title" ]; then
+                return 1
+        fi
+
+        __directory="${__directory}/data"
+
+        # assemble file
+        FS::remove_silently "$__target"
+        FS::make_housing_directory "$__target"
+        FS::write_file "$__target" "# ${__title}\n\n"
+        FS::append_file "$__target" "\n## ${__version}\n\n"
+        old_IFS="$IFS"
+        while IFS="" read -r __line || [ -n "$__line" ]; do
+                FS::append_file "$__target" "* ${__line}\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        done < "${__directory}/latest"
+
+        for __tag in "$(git tag --sort version:refname)"; do
+                if [ ! -f "${__directory}/${__tag}" ]; then
+                        continue
+                fi
+
+                FS::append_file "$__target" "\n\n## ${__tag}\n\n"
+                while IFS="" read -r __line || [ -n "$__line" ]; do
+                        FS::append_file "$__target" "* ${__line}\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                done < "${__directory}/${__tag}"
+        done
+        IFS="$old_IFS"
+        unset old_IFS __line __tag
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+CHANGELOG::assemble_rpm() {
+        __target="$1"
+        __resources="$2"
+        __date="$3"
+        __name="$4"
+        __email="$5"
+        __version="$6"
+        __cadence="$7"
+
+        # validate input
+        if [ -z "$__target" ] ||
+                [ -z "$__resources" ] ||
+                [ -z "$__date" ] ||
+                [ -z "$__name" ] ||
+                [ -z "$__email" ] ||
+                [ -z "$__version" ] ||
+                [ -z "$__cadence" ] ||
+                [ ! -f "$__target" ] ||
+                [ ! -d "$__resources" ]; then
+                return 1
+        fi
+
+        # emit stanza
+        FS::append_file "$__target" "%%changelog\n"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+        # emit latest changelog
+        if [ -f "${__resources}/changelog/data/latest" ]; then
+                FS::append_file "$__target" \
+                        "* ${__date} ${__name} <${__email}> - ${__version}-${__cadence}\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+                __old_IFS="$IFS"
+                while IFS="" read -r __line || [ -n "$__line" ]; do
+                        __line="${__line%%#*}"
+                        if [ -z "$__line" ]; then
+                                continue
+                        fi
+
+                        FS::append_file "$__target" "- ${__line}\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                done < "${__resources}/changelog/data/latest"
+                IFS="$__old_IFS" && unset __old_IFS __line
+        else
+                FS::append_file "$__target" "# unavailable\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+        # emit tailing newline
+        FS::append_file "$__target" "\n"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # report status
         return 0
 }
 
@@ -171,179 +335,50 @@ CHANGELOG::compatible_deb_version() {
 
 
 
-CHANGELOG::assemble_deb() {
-        __directory="$1"
-        __target="$2"
-        __version="$3"
-
-        # validate input
-        if [ -z "$__directory" ] || [ -z "$__target" ] || [ -z "$__version" ]; then
+CHANGELOG::is_available() {
+        if [ -z "$(type -t git)" ]; then
                 return 1
         fi
 
-        __directory="${__directory}/deb"
-        __target="${__target%.gz*}"
-
-        # assemble file
-        FS::remove_silently "$__target"
-        FS::remove_silently "${__target}.gz"
-        FS::make_housing_directory "$__target"
-
-        old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                FS::append_file "$__target" "$__line\n"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-        done < "${__directory}/latest"
-
-        for __tag in "$(git tag --sort version:refname)"; do
-                if [ ! -f "${__directory}/${__tag}" ]; then
-                        continue
-                fi
-
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        FS::append_file "$__target" "\n$__line\n"
-                        if [ $? -ne 0 ]; then
-                                return 1
-                        fi
-                done < "${__directory}/${__tag}"
-        done
-        IFS="$old_IFS"
-        unset old_IFS __line __tag
-
-        # gunzip
-        GZ::create "$__target"
-
-        # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
-}
-
-
-
-
-CHANGELOG::assemble_rpm() {
-        __target="$1"
-        __resources="$2"
-        __date="$3"
-        __name="$4"
-        __email="$5"
-        __version="$6"
-        __cadence="$7"
-
-        # validate input
-        if [ -z "$__target" ] ||
-                [ -z "$__resources" ] ||
-                [ -z "$__date" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__version" ] ||
-                [ -z "$__cadence" ] ||
-                [ ! -f "$__target" ] ||
-                [ ! -d "$__resources" ]; then
-                return 1
-        fi
-
-        # emit stanza
-        FS::append_file "$__target" "%%changelog\n"
+        GZ::is_available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        # emit latest changelog
-        if [ -f "${__resources}/changelog/data/latest" ]; then
-                FS::append_file "$__target" \
-                        "* ${__date} ${__name} <${__email}> - ${__version}-${__cadence}\n"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-
-                __old_IFS="$IFS"
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        __line="${__line%%#*}"
-                        if [ -z "$__line" ]; then
-                                continue
-                        fi
-
-                        FS::append_file "$__target" "- ${__line}\n"
-                        if [ $? -ne 0 ]; then
-                                return 1
-                        fi
-                done < "${__resources}/changelog/data/latest"
-                IFS="$__old_IFS" && unset __old_IFS __line
-        else
-                FS::append_file "$__target" "# unavailable\n"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-        fi
-
-        # emit tailing newline
-        FS::append_file "$__target" "\n"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        # report status
         return 0
 }
 
 
 
 
-CHANGELOG::assemble_md() {
+CHANGELOG::seal() {
         __directory="$1"
-        __target="$2"
-        __version="$3"
-        __title="$4"
+        __version="$2"
 
         # validate input
-        if [ -z "$__directory" ] ||
-                [ -z "$__target" ] ||
-                [ -z "$__version" ] ||
-                [ -z "$__title" ]; then
+        if [ -z "$__directory" ] || [ -z "$__version" ] || [ ! -d "$__directory" ]; then
                 return 1
         fi
 
-        __directory="${__directory}/data"
-
-        # assemble file
-        FS::remove_silently "$__target"
-        FS::make_housing_directory "$__target"
-        FS::write_file "$__target" "# ${__title}\n\n"
-        FS::append_file "$__target" "\n## ${__version}\n\n"
-        old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                FS::append_file "$__target" "* ${__line}\n"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-        done < "${__directory}/latest"
-
-        for __tag in "$(git tag --sort version:refname)"; do
-                if [ ! -f "${__directory}/${__tag}" ]; then
-                        continue
-                fi
-
-                FS::append_file "$__target" "\n\n## ${__tag}\n\n"
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        FS::append_file "$__target" "* ${__line}\n"
-                        if [ $? -ne 0 ]; then
-                                return 1
-                        fi
-                done < "${__directory}/${__tag}"
-        done
-        IFS="$old_IFS"
-        unset old_IFS __line __tag
-
-        # report status
-        if [ $? -eq 0 ]; then
-                return 0
+        if [ ! -f "${__directory}/data/latest" ]; then
+                return 1
         fi
 
-        return 1
+        if [ ! -f "${__directory}/deb/latest" ]; then
+                return 1
+        fi
+
+        # execute
+        FS::move "${__directory}/data/latest" "${__directory}/data/${__version}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::move "${__directory}/deb/latest" "${__directory}/deb/${__version}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # report status
+        return 0
 }
