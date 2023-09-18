@@ -1,0 +1,7 @@
+automataCI: fixed changelog assembling bug
+automataCI: added static repo compulsory notice file
+automataCI: documented updates SOP and Upstream SOP
+automataCI: added changelog entries seal function for Release job
+root: added stop recipe for srcPYTHON
+automataCI: added notice type to OS::print_status
+root: set v1.4.1 development

@@ -34,25 +34,34 @@ CHANGELOG::assemble_deb() {
         FS::remove_silently "${__target}.gz"
         FS::make_housing_directory "$__target"
 
+        __initiated=""
         old_IFS="$IFS"
         while IFS="" read -r __line || [ -n "$__line" ]; do
                 FS::append_file "$__target" "$__line\n"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
+
+                __initiated="true"
         done < "${__directory}/latest"
 
-        for __tag in "$(git tag --sort version:refname)"; do
-                if [ ! -f "${__directory}/${__tag}" ]; then
+        for __tag in $(git tag --sort -version:refname); do
+                if [ ! -f "${__directory}/${__tag##*v}" ]; then
                         continue
                 fi
 
+                if [ ! -z "$__initiated" ]; then
+                        FS::append_file "$__target" "\n\n"
+                fi
+
                 while IFS="" read -r __line || [ -n "$__line" ]; do
-                        FS::append_file "$__target" "\n$__line\n"
+                        FS::append_file "$__target" "$__line\n"
                         if [ $? -ne 0 ]; then
                                 return 1
                         fi
-                done < "${__directory}/${__tag}"
+
+                        __initiated="true"
+                done < "${__directory}/${__tag##*v}"
         done
         IFS="$old_IFS"
         unset old_IFS __line __tag
@@ -100,8 +109,8 @@ CHANGELOG::assemble_md() {
                 fi
         done < "${__directory}/latest"
 
-        for __tag in "$(git tag --sort version:refname)"; do
-                if [ ! -f "${__directory}/${__tag}" ]; then
+        for __tag in $(git tag --sort -version:refname); do
+                if [ ! -f "${__directory}/${__tag##*v}" ]; then
                         continue
                 fi
 
@@ -111,7 +120,7 @@ CHANGELOG::assemble_md() {
                         if [ $? -ne 0 ]; then
                                 return 1
                         fi
-                done < "${__directory}/${__tag}"
+                done < "${__directory}/${__tag##*v}"
         done
         IFS="$old_IFS"
         unset old_IFS __line __tag

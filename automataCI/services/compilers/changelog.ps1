@@ -36,23 +36,35 @@ function CHANGELOG-Assemble-DEB {
 	$null = FS-Remove-Silently "${__target}.gz"
 	$null = FS-Make-Housing-Directory "${__target}"
 
+	$__initiated = ""
 	foreach ($__line in (Get-Content "${__directory}\latest")) {
 		$__process = FS-Append-File "${__target}" "${__line}"
 		if ($__process -ne 0) {
 			return 1
 		}
+
+		$__initiated = "true"
 	}
 
-	foreach ($__tag in (git tag --sort version:refname)) {
-		if (-not (Test-Path "${__directory}\${__tag}")) {
+	foreach ($__tag in (Invoke-Expression "git tag --sort -version:refname")) {
+		if (-not (Test-Path "${__directory}\$($__tag -replace ".*v")")) {
 			continue
 		}
 
-		foreach ($__line in (Get-Content "${__directory}\${__tag}")) {
-			$__process = FS-Append-File "${__target}" "`n${__line}"
+		if (-not [string]::IsNullOrEmpty($__initiated)) {
+			$__process = FS-Append-File "${__target}" "`n"
 			if ($__process -ne 0) {
 				return 1
 			}
+		}
+
+		foreach ($__line in (Get-Content "${__directory}\$($__tag -replace ".*v")")) {
+			$__process = FS-Append-File "${__target}" "${__line}"
+			if ($__process -ne 0) {
+				return 1
+			}
+
+			$__initiated = "true"
 		}
 	}
 
@@ -95,13 +107,13 @@ function CHANGELOG-Assemble-MD {
 		}
 	}
 
-	foreach ($__tag in (git tag --sort version:refname)) {
-		if (-not (Test-Path "${__directory}\${__tag}")) {
+	foreach ($__tag in (Invoke-Expression "git tag --sort -version:refname")) {
+		if (-not (Test-Path "${__directory}\$($__tag -replace ".*v")")) {
 			continue
 		}
 
-		$null = FS-Append-File "${__target}" "`n`n##${__tag}`n"
-		foreach ($__line in (Get-Content "${__directory}\${__tag}")) {
+		$null = FS-Append-File "${__target}" "`n`n## ${__tag}`n"
+		foreach ($__line in (Get-Content "${__directory}\$($__tag -replace ".*v")")) {
 			$__process = FS-Append-File "${__target}" "* ${__line}"
 			if ($__process -ne 0) {
 				return 1
