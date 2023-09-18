@@ -81,6 +81,9 @@ function OS-Print-Status {
 	} "info" {
 		$__msg = "[ INFO    ] "
 		$__color = "36"
+	} "note" {
+		$__msg = "[ NOTE    ] "
+		$__color = "35"
 	} "success" {
 		$__msg = "[ SUCCESS ] "
 		$__color = "32"

@@ -47,9 +47,9 @@ fi
 
 # report what to do since AutomataCI is executable, not sourcable
 OS::print_status info "\n"
-OS::print_status info "IMPORTANT NOTE\n"
-OS::print_status info "please perform the following command at your terminal manually:\n"
-OS::print_status info "    $ . ${VIRTUAL_ENV}/bin/activate\n"
+OS::print_status note "IMPORTANT NOTICE\n"
+OS::print_status note "please perform the following command at your terminal manually:\n"
+OS::print_status note "    $ . ${VIRTUAL_ENV}/bin/activate\n"
 OS::print_status info "\n"
 
 

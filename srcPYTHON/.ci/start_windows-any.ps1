@@ -45,9 +45,9 @@ if ($__process -ne 0) {
 
 # report what to do since AutomataCI is executable, not sourcable
 OS-Print-Status info ""
-OS-Print-Status info "IMPORTANT NOTE"
-OS-Print-Status info "please perform the following command at your terminal manually:"
-OS-Print-Status info "    $ ${env:VIRTUAL_ENV}\bin\activate"
+OS-Print-Status note "IMPORTANT NOTE"
+OS-Print-Status note "please perform the following command at your terminal manually:"
+OS-Print-Status note "    $ ${env:VIRTUAL_ENV}\bin\activate"
 OS-Print-Status info ""
 
 
