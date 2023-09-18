@@ -26,6 +26,28 @@ Some good business reasons why AutomataCI is made:
 
 
 
+### Supported Technologies
+
+* Nim Programming Language (*Coming Soon*)
+* Go Programming Language (*Coming Soon*)
+* C Programming Language (*Coming Soon*)
+* Node Programming Language (*Coming Soon*)
+* Python Programming Language
+* Some Manual MISC stuffs
+
+
+
+### Deployable Distributions
+
+* `.deb` repo (for `apt-get install`)
+* `.rpm` repo (for `yum install`)
+* `.flatpak` repo (for `flatpak install`)
+* `OCI` images (for `docker run`, GitHub Packages)
+* `PyPi` Python Package (for `pip install`)
+* GitHub Pages
+
+
+
 
 ## How To Use AutomataCI
 
