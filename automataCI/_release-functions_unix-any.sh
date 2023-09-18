@@ -199,6 +199,17 @@ RELEASE::run_release_repo_conclude() {
         # execute
         __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
 
+
+        OS::print_status info "Generate required notice file...\n"
+        FS::write_file "Home.md" "\
+# ${PROJECT_NAME} Static Distribution Repository
+
+This is a re-purposed repository for housing various distribution ecosystem
+such as but not limited to \`.deb\`, \`.rpm\`, \`.flatpak\`, and etc for folks
+to \`apt-get install\`, \`yum install\`, or \`flatpak install\`.
+"
+
+
         OS::print_status info "Committing release repo...\n"
         GIT::autonomous_force_commit \
                 "$__tag" \

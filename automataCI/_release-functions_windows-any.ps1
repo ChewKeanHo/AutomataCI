@@ -200,6 +200,15 @@ function RELEASE-Run-Release-Repo-Conclude {
 	$__current_path = Get-Location
 	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
 
+	OS-Print-Status info "Generate required notice file..."
+	$null = FS-Write-File "Home.md" @"
+# ${env:PROJECT_NAME} Static Distribution Repository
+
+This is a re-purposed repository for housing various distribution ecosystem
+such as but not limited to ``.deb``, ``.rpm``, ``.flatpak``, and etc for folks
+to ``apt-get install``, ``yum install``, or ``flatpak install``.
+"@
+
 	OS-Print-Status info "Committing release repo..."
 	$__process = Git-Autonomous-Force-Commit `
 		"${__tag}" `
