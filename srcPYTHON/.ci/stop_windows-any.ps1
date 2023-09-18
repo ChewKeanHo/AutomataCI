@@ -24,5 +24,16 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-OS-Print-Status success "(placeholder)"
+# report what to do since AutomataCI is executable, not sourcable
+OS-Print-Status info ""
+OS-Print-Status note "IMPORTANT NOTE"
+OS-Print-Status note "please perform the following command at your terminal manually:"
+OS-Print-Status note "    $ deactivate"
+OS-Print-Status info ""
+
+
+
+
+# report status
+OS-Print-Status success ""
 return 0
