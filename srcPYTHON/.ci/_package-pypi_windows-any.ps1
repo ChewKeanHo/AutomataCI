@@ -52,21 +52,40 @@ function PACKAGE-Assemble-PYPI-Content {
 		return 1
 	}
 
-	# generate the setup.py
-	$__process = FS-Write-File "${__directory}/setup.py" @"
-from setuptools import setup, find_packages
+	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYPI_README}" `
+				"${__directory}\${env:PROJECT_PYPI_README}"
+	if ($__process -ne 0) {
+		return 1
+	}
 
-setup(
-    name='${env:PROJECT_NAME}',
-    version='${env:PROJECT_VERSION}',
-    author='${env:PROJECT_CONTACT_NAME}',
-    author_email='${env:PROJECT_CONTACT_EMAIL}',
-    url='${env:PROJECT_CONTACT_WEBSITE}',
-    description='${env:PROJECT_PITCH}',
-    packages=find_packages(),
-    long_description=open('${env:PROJECT_PATH_ROOT}\README.md').read(),
-    long_description_content_type='text/markdown',
-)
+	# generate the pyproject.toml
+	$__process = FS-Write-File "${__directory}\pyproject.toml" @"
+[build-system]
+requires = [ 'setuptools' ]
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = '${env:PROJECT_NAME}'
+version = '${env:PROJECT_VERSION}'
+description = '${env:PROJECT_PITCH}'
+
+[project.license]
+text = '${env:PROJECT_LICENSE}'
+
+[project.readme]
+file = '${env:PROJECT_PYPI_README}'
+'content-type' = '${env:PROJECT_PYPI_README_MIME}'
+
+[[project.authors]]
+name = '${env:PROJECT_CONTACT_NAME}'
+email = '${env:PROJECT_CONTACT_EMAIL}'
+
+[[project.maintainers]]
+name = '${env:PROJECT_CONTACT_NAME}'
+email = '${env:PROJECT_CONTACT_EMAIL}'
+
+[project.urls]
+Homepage = '${env:PROJECT_CONTACT_WEBSITE}'
 "@
 	if ($__process -ne 0) {
 		return 1

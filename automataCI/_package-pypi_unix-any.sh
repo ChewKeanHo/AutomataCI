@@ -88,8 +88,8 @@ PACKAGE::run_pypi() {
         esac
 
         # generate required files
-        OS::print_status info "creating setup.py file...\n"
-        PYPI::create_setup_py \
+        OS::print_status info "creating pyproject.toml file...\n"
+        PYPI::create_config \
                 "$_src" \
                 "$PROJECT_NAME" \
                 "$PROJECT_VERSION" \
@@ -97,8 +97,9 @@ PACKAGE::run_pypi() {
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE" \
                 "$PROJECT_PITCH" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PYPI_README}" \
-                "$PROJECT_PYPI_README_MIME"
+                "$PROJECT_PYPI_README" \
+                "$PROJECT_PYPI_README_MIME" \
+                "$PROJECT_LICENSE"
         case $? in
         2)
                 OS::print_status info "manual injection detected.\n"

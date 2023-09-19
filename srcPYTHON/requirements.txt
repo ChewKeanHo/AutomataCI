@@ -4,8 +4,8 @@
 
 
 # CI required libraries. Please DO NOT remove. TQ!
-pdoc3
 coverage
 pyinstaller
-wheel
+pdoc3
+build
 twine

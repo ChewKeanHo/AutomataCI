@@ -163,11 +163,6 @@ function PYPI-Is-Available {
 		return 1
 	}
 
-	$__process = OS-Is-Command-Available "twine"
-	if (-not ($__process)) {
-		return 1
-	}
-
 	# report status
 	return 0
 }
@@ -212,7 +207,7 @@ function PYPI-Is-Valid {
 
 
 
-function PYPI-Create-Setup-PY {
+function PYPI-Create-Config {
 	param(
 		[string]$__directory,
 		[string]$__project_name,
@@ -222,7 +217,8 @@ function PYPI-Create-Setup-PY {
 		[string]$__website,
 		[string]$__pitch,
 		[string]$__readme_path,
-		[string]$__readme_type
+		[string]$__readme_type,
+		[string]$__license
 	)
 
 	# validate input
@@ -234,31 +230,46 @@ function PYPI-Create-Setup-PY {
 		[string]::IsNullOrEmpty($__website) -or
 		[string]::IsNullOrEmpty($__pitch) -or
 		[string]::IsNullOrEmpty($__readme_path) -or
-		[string]::IsNullOrEmpty($__readtme_type) -or
-		(-not (Test-Path -PathType Container -Path $__directory))) {
+		[string]::IsNullOrEmpty($__readme_type) -or
+		[string]::IsNullOrEmpty($__license) -or
+		(-not (Test-Path -PathType Container -Path "${__directory}")) -or
+		(-not (Test-Path -Path "${__directory}\${__readme_path}"))) {
 		return 1
 	}
 
 	# check existing overriding file
-	if (Test-Path -Path "${__directory}/setup.py") {
+	if (Test-Path -Path "${__directory}\pyproject.toml") {
 		return 2
 	}
 
 	# create default file
-	$__process = FS-Write-File "${__directory}/setup.py" @"
-from setuptools import setup, find_packages
+	$__process = FS-Write-File "${__directory}\pyproject.toml" @"
+[build-system]
+requires = [ 'setuptools' ]
+build-backend = 'setuptools.build_meta'
 
-setup(
-    name='${__project_name}',
-    version='${__version}',
-    author='${__name}',
-    author_email='${__email}',
-    url='${__website}',
-    description='${__pitch}',
-    packages=find_packages(),
-    long_description=open('${__readme_path}').read(),
-    long_description_content_type='${__readme_type}',
-)
+[project]
+name = '${__project_name}'
+version = '${__version}'
+description = '${__pitch}'
+
+[project.license]
+text = '${__license}'
+
+[project.readme]
+file = '${__readme_path}'
+'content-type' = '${__readme_type}'
+
+[[project.authors]]
+name = '${__name}'
+email = '${__email}'
+
+[[project.maintainers]]
+name = '${__name}'
+email = '${__email}'
+
+[project.urls]
+Homepage = '${__website}'
 "@
 
 	# report status
@@ -278,7 +289,7 @@ function PYPI-Create-Archive {
 	if ([string]::IsNullOrEmpty($__directory) -or
 		[string]::IsNullOrEmpty($__destination) -or
 		(-not (Test-Path -PathType Container -Path $__directory)) -or
-		(-not (Test-Path -Path "${__directory}\setup.py")) -or
+		(-not (Test-Path -Path "${__directory}\pyproject.toml")) -or
 		(-not (Test-Path -PathType Container -Path $__destination))) {
 		return 1
 	}
@@ -291,7 +302,8 @@ function PYPI-Create-Archive {
 	# construct archive
 	$__current_path = Get-Location
 	Set-Location -Path $__directory
-	$__process = OS-Exec "python" "`"${__directory}\setup.py`" sdist bdist_wheel"
+
+	$__process = OS-Exec "python" "-m build --sdist --wheel ${__directory}\."
 	if ($__process -ne 0) {
 		Set-Location -Path $__current_path
 		Remove-Variable -Name __current_path
@@ -308,8 +320,8 @@ function PYPI-Create-Archive {
 	Remove-Variable -Name __current_path
 
 	# export to destination
-	$null = Get-ChildItem -Path "${__directory}\dist" -Recurse | Where-Object {
-		$__process = FS-Move "${_}.FullName" "${__destination}\."
+	foreach ($__file in (Get-ChildItem -Path "${__directory}\dist")) {
+		$__process = FS-Move "${__directory}\dist\${__file}" "${__destination}"
 		if ($__process -ne 0) {
 			return 1
 		}

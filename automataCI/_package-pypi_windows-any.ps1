@@ -34,7 +34,7 @@ function PACKAGE-Run-PYPI {
 		[string]$_target_arch
 	)
 
-	if ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
+	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 		$null = PYTHON-Activate-VENV
 	}
 
@@ -85,17 +85,18 @@ function PACKAGE-Run-PYPI {
 	}
 
 	# generate required files
-	OS-Print-Status info "creating setup.py file..."
-	$__process = PYPI-Create-Setup-PY `
-		${_src} `
-		${env:PROJECT_NAME} `
-		${env:PROJECT_VERSION} `
-		${env:PROJECT_CONTACT_NAME} `
-		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE} `
-		${env:PROJECT_PITCH} `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYPI_README}" `
-		"${env:PROJECT_PYPI_README_MIME}"
+	OS-Print-Status info "creating pyproject.toml file..."
+	$__process = PYPI-Create-Config `
+		"${_src}" `
+		"${env:PROJECT_NAME}" `
+		"${env:PROJECT_VERSION}" `
+		"${env:PROJECT_CONTACT_NAME}" `
+		"${env:PROJECT_CONTACT_EMAIL}" `
+		"${env:PROJECT_CONTACT_WEBSITE}" `
+		"${env:PROJECT_PITCH}" `
+		"${env:PROJECT_PYPI_README}" `
+		"${env:PROJECT_PYPI_README_MIME}" `
+		"${env:PROJECT_LICENSE}"
 	if ($__process -eq 2) {
 		OS-Print-Status info "manual injection detected."
 	} elseif ($__process -ne 0) {
@@ -104,7 +105,7 @@ function PACKAGE-Run-PYPI {
 	}
 
 	# archive the assembled payload
-	OS-Print-Status info "archiving .pypi package..."
+	OS-Print-Status info "archiving PyPi package..."
 	$null = FS-Make-Directory "${_target_path}"
 	$__process = PYPI-Create-Archive "${_src}" "${_target_path}"
 	if ($__process -ne 0) {

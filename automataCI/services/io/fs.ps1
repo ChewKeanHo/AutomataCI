@@ -21,7 +21,7 @@ function FS-Append-File {
 	}
 
 	# perform file write
-	$__content | Out-File -FilePath $__target -Encoding utf8 -Append
+	$null = Add-Content -Path $__target -Value $__content
 
 	# report status
 	if ($?) {
@@ -267,14 +267,17 @@ function FS-Move {
 	}
 
 	# execute
-	Move-Item -Path $__source -Destination $__destination -Force
-
-	# report status
-	if ($?) {
-		return 0
+	try {
+		Move-Item -Path $__source -Destination $__destination -Force
+		if (!$?) {
+			return 1
+		}
+	} catch {
+		return 1
 	}
 
-	return 1
+	# report status
+	return 0
 }
 
 
@@ -402,7 +405,7 @@ function FS-Write-File {
 	}
 
 	# perform file write
-	$__content | Out-File -FilePath $__target -Encoding utf8
+	$null = Set-Content -Path $__target -Value $__content
 
 	# report status
 	if ($?) {

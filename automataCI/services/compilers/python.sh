@@ -170,11 +170,6 @@ PYPI::is_available() {
                 return 1
         fi
 
-        OS::is_command_available "twine"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
         # report status
         return 0
 }
@@ -219,7 +214,7 @@ PYPI::is_valid() {
 
 
 
-PYPI::create_setup_py() {
+PYPI::create_config() {
         __directory="$1"
         __project_name="$2"
         __version="$3"
@@ -229,6 +224,7 @@ PYPI::create_setup_py() {
         __pitch="$7"
         __readme_path="$8"
         __readme_type="$9"
+        __license="${10}"
 
         # validate input
         if [ -z "$__directory" ] ||
@@ -240,31 +236,45 @@ PYPI::create_setup_py() {
                 [ -z "$__pitch" ] ||
                 [ -z "$__readme_path" ] ||
                 [ -z "$__readme_type" ] ||
-                [ ! -d "$__directory" ]; then
+                [ -z "$__license" ] ||
+                [ ! -d "$__directory" ] ||
+                [ ! -f "${__directory}/${__readme_path}" ]; then
                 return 1
         fi
 
         # check existing overriding file
-        if [ -f "${__directory}/setup.py" ]; then
+        if [ -f "${__directory}/pyproject.toml" ]; then
                 return 2
         fi
 
         # create default file
-        FS::write_file "${__directory}/setup.py" "\
-from setuptools import setup, find_packages
+        FS::write_file "${__directory}/pyproject.toml" "\
+[build-system]
+requires = [ 'setuptools' ]
+build-backend = 'setuptools.build_meta'
 
+[project]
+name = '${__project_name}'
+version = '${__version}'
+description = '${__pitch}'
 
-setup(
-    name='${__project_name}',
-    version='${__version}',
-    author='${__name}',
-    author_email='${__email}',
-    url='${__website}',
-    description='${__pitch}',
-    packages=find_packages(),
-    long_description=open('${__readme_path}').read(),
-    long_description_content_type='${__readme_type}',
-)
+[project.license]
+text = '${__license}'
+
+[project.readme]
+file = '${__readme_path}'
+'content-type' = '${__readme_type}'
+
+[[project.authors]]
+name = '${__name}'
+email = '${__email}'
+
+[[project.maintainers]]
+name = '${__name}'
+email = '${__email}'
+
+[project.urls]
+Homepage = '${__website}'
 "
 
         # report status
@@ -282,7 +292,7 @@ PYPI::create_archive() {
         if [ -z "$__directory" ] ||
                 [ -z "$__destination" ] ||
                 [ ! -d "$__directory" ] ||
-                [ ! -f "${__directory}/setup.py" ] ||
+                [ ! -f "${__directory}/pyproject.toml" ] ||
                 [ ! -d "$__destination" ]; then
                 return 1
         fi
@@ -294,7 +304,7 @@ PYPI::create_archive() {
 
         # construct archive
         __current_path="$PWD" && cd "$__directory"
-        python "${__directory}/setup.py" sdist bdist_wheel
+        python -m build --sdist --wheel .
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
                 return 1

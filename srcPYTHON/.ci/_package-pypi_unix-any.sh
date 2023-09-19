@@ -50,21 +50,41 @@ PACKAGE::assemble_pypi_content() {
                 return 1
         fi
 
-        # generate the setup.py
-        FS::write_file "${__directory}/setup.py" "\
-from setuptools import setup, find_packages
+        FS::copy_file \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PYPI_README}" \
+                "${__directory}/${PROJECT_PYPI_README}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
-setup(
-    name='${PROJECT_NAME}',
-    version='${PROJECT_VERSION}',
-    author='${PROJECT_CONTACT_NAME}',
-    author_email='${PROJECT_CONTACT_EMAIL}',
-    url='${PROJECT_CONTACT_WEBSITE}',
-    description='${PROJECT_PITCH}',
-    packages=find_packages(),
-    long_description=open('${PROJECT_PATH_ROOT}/README.md').read(),
-    long_description_content_type='text/markdown',
-)
+        # generate the pyproject.toml
+        FS::write_file "${__directory}/pyproject.toml" "\
+[build-system]
+requires = [ 'setuptools' ]
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = '${PROJECT_NAME}'
+version = '${PROJECT_VERSION}'
+description = '${PROJECT_PITCH}'
+
+[project.license]
+text = '${PROJECT_LICENSE}'
+
+[project.readme]
+file = '${PROJECT_PYPI_README}'
+'content-type' = '${PROJECT_PYPI_README_MIME}'
+
+[[project.authors]]
+name = '${PROJECT_CONTACT_NAME}'
+email = '${PROJECT_CONTACT_EMAIL}'
+
+[[project.maintainers]]
+name = '${PROJECT_CONTACT_NAME}'
+email = '${PROJECT_CONTACT_EMAIL}'
+
+[project.urls]
+Homepage = '${PROJECT_CONTACT_WEBSITE}'
 "
         if [ $? -ne 0 ]; then
                 return 1

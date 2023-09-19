@@ -116,7 +116,7 @@ PROJECT_PYPI_REPO_URL = "https://test.pypi.org/legacy/"
 
 # PROJECT_PYPI_README
 # The PyPi README file relative to PROJECT_PATH_ROOT directory. Default is the
-# the common README.md. Please use UNIX pathing (/) for sub-directories.
+# the common README.md. It **MUST** be a file.
 PROJECT_PYPI_README = "README.md"
 
 
