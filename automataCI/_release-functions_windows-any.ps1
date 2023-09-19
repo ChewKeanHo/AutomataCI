@@ -140,20 +140,32 @@ function RELEASE-Initiate {
 	}
 
 	# execute
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
+	$__recipe = "${__recipe}\release_windows-any.ps1"
+	$__process = FS-Is-File "${__recipe}"
+	if ($__process -eq 0) {
+		OS-Print-Status info \
+			"Baseline source detected. Parsing job recipe: ${__recipe}"
+		$__process = . "${__recipe}"
+		if ($__process -ne 0) {
+			OS-Print-Status error "Parse failed."
+			return 1
+		}
+	}
+
+
 	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 		$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
 		$__recipe = "${__recipe}\release_windows-any.ps1"
-		OS-Print-Status info "Python technology detected. Parsing job recipe: ${__recipe}"
-
 		$__process = FS-Is-File "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Parse failed - missing file."
-			return 1
-		}
-
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			return 1
+		if ($__process -eq 0) {
+			OS-Print-Status info `
+				"Python technology detected. Parsing job recipe: ${__recipe}"
+			$__process = . "${__recipe}"
+			if ($__process -ne 0) {
+				OS-Print-Status error "Parse failed."
+				return 1
+			}
 		}
 	}
 

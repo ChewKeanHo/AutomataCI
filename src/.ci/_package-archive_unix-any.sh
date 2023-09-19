@@ -36,14 +36,8 @@ PACKAGE::assemble_archive_content() {
         # package based on target's nature
         FS::is_target_a_source "$__target"
         if [ $? -eq 0 ]; then
-                # it's a source code target
-                PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/"
-                FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/" "${__directory}"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-
-                return 0
+                # it's a source target
+                return 10
         else
                 # it's a binary target
                 case "$__target_os" in

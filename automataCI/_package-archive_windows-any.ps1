@@ -17,6 +17,15 @@
 
 
 
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return
+}
+
+
+
+
 function PACKAGE-Run-Archive {
 	param (
 		[string]$_dest,

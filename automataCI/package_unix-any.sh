@@ -36,15 +36,7 @@ fi
 
 
 # source locally provided functions
-DEST="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
-DEST="${DEST}/package_unix-any.sh"
-OS::print_status info "sourcing content assembling functions from: ${DEST}\n"
-FS::is_target_exist "$DEST"
-if [ $? -ne 0 ]; then
-        OS::print_status error "Sourcing failed\n"
-        return 1
-fi
-. "$DEST"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-sourcing_unix-any.sh"
 
 
 

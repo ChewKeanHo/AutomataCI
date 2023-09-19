@@ -45,7 +45,7 @@ if ($__process -ne 0) {
 
 
 
-# run test service
+# execute
 $__report_location = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\python-test-report"
 OS-Print-Status info "preparing report value: ${__report_location}"
 $__process = FS-Make-Directory "${__report_location}"
@@ -55,9 +55,6 @@ if ($__process -ne 0) {
 }
 
 
-
-
-# execute test run
 OS-Print-Status info "executing all tests with coverage..."
 $__argument = "-m coverage run " `
 	+ "--data-file=`"${__report_location}\.coverage`" " `
@@ -71,9 +68,6 @@ if ($__process -ne 0) {
 }
 
 
-
-
-# process test report
 OS-Print-Status info "processing test coverage data to html..."
 $__argument = "-m coverage html " `
 	+ "--data-file=`"${__report_location}\.coverage`" " `
@@ -88,5 +82,4 @@ if ($__process -ne 0) {
 
 
 # report status
-OS-Print-Status success ""
 return 0

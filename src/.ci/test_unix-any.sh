@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
 # the License at:
-#                 http://www.apache.org/licenses/LICENSE-2.0
+#                http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -21,15 +21,12 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 
 
 
 
 # execute
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}"
-OS::print_status info "cleaning ${__target}...\n"
-PYTHON::clean_artifact "$__target"
 
 
 

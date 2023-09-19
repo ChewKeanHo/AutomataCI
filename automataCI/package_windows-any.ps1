@@ -35,15 +35,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 # source locally provided functions
-$DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
-$DEST = "${DEST}\package_windows-any.ps1"
-OS-Print-Status info "sourcing content assembling functions from: ${DEST}"
-$__process = FS-Is-Target-Exist "${DEST}"
-if ($__process -ne 0) {
-	OS-Print-Status error "Source failed."
-	return 1
-}
-. "${DEST}"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-sourcing_windows-any.ps1"
 
 
 

@@ -139,26 +139,37 @@ if (Test-Path -Path "${env:PROJECT_PATH_ROOT}\SECRETS.toml" -PathType leaf) {
 # execute command
 switch ($args[0]) {
 { $_ -in 'env', 'Env', 'ENV' } {
+	$env:PROJECT_CI_JOB = "env"
 	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\env_windows-any.ps1"
 } { $_ -in 'setup', 'Setup', 'SETUP' } {
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\setup_windows-any.ps1"
+	$env:PROJECT_CI_JOB = "setup"
+	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
 } { $_ -in 'start', 'Start', 'START' } {
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\start_windows-any.ps1"
+	$env:PROJECT_CI_JOB = "start"
+	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
 } { $_ -in 'test', 'Test', 'TEST' } {
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\test_windows-any.ps1"
+	$env:PROJECT_CI_JOB = "test"
+	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
 } { $_ -in 'prepare', 'Prepare', 'PREPARE' } {
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\prepare_windows-any.ps1"
+	$env:PROJECT_CI_JOB = "prepare"
+	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
 } { $_ -in 'build', 'Build', 'BUILD' } {
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\build_windows-any.ps1"
+	$env:PROJECT_CI_JOB = "build"
+	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
 } { $_ -in 'package', 'Package', 'PACKAGE' } {
+	$env:PROJECT_CI_JOB = "package"
 	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\package_windows-any.ps1"
 } { $_ -in 'release', 'Release', 'RELEASE' } {
+	$env:PROJECT_CI_JOB = "release"
 	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\release_windows-any.ps1"
 } { $_ -in 'stop', 'Stop', 'STOP' } {
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\stop_windows-any.ps1"
+	$env:PROJECT_CI_JOB = "stop"
+	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
 } { $_ -in 'clean', 'Clean', 'CLEAN' } {
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\clean_windows-any.ps1"
+	$env:PROJECT_CI_JOB = "clean"
+	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
 } { $_ -in 'purge', 'Purge', 'PURGE' } {
+	$env:PROJECT_CI_JOB = "purge"
 	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\purge_windows-any.ps1"
 } Default {
 	switch ($args[0]) {
@@ -173,9 +184,9 @@ switch ($args[0]) {
 	Write-Host "        To seek commands' help 🠚        $ ./ci.cmd help"
 	Write-Host "        To initialize environment 🠚     $ ./ci.cmd env"
 	Write-Host "        To setup the repo for work 🠚    $ ./ci.cmd setup"
+	Write-Host "        To prepare the repo 🠚           $ ./ci.cmd prepare"
 	Write-Host "        To start a development 🠚        $ ./ci.cmd start"
 	Write-Host "        To test the repo 🠚              $ ./ci.cmd test"
-	Write-Host "        To prepare the repo 🠚           $ ./ci.cmd prepare"
 	Write-Host "        To build the repo 🠚             $ ./ci.cmd build"
 	Write-Host "        To package the repo product 🠚   $ ./ci.cmd package"
 	Write-Host "        To release the repo product 🠚   $ ./ci.cmd release"

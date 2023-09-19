@@ -15,33 +15,17 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 
 
 
 
-function RELEASE-Run-Python-Post-Processor {
-	param(
-		[string]$__directory
-	)
-
-	return 0
-}
-
-
-
-
-function RELEASE-Run-Python-Pre-Processor {
-	param(
-		[string]$__directory
-	)
-
-	return 0
-}
+# execute
 
 
 

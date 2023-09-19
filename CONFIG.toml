@@ -304,6 +304,13 @@ DOCKER_CLI_EXPERIMENTAL = "enabled"
 # PROJECT_PATH_AUTOMATA = "automataCI" # Reserved - determined by ci.cmd automatically.
 
 
+# PROJECT_PATH_SOURCE
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# baseline source directory independent of technological section and acts as an
+# overall controls.
+PROJECT_PATH_SOURCE = "src"
+
+
 # PROJECT_PATH_TOOLS
 # This is the relative pathing to PROJECT_PATH_ROOT where it locates the
 # project's tooling directory like programming languages' engine or executables.

@@ -36,22 +36,33 @@ PACKAGE::assemble_deb_content() {
         # validate target before job
         FS::is_target_a_source "$__target"
         if [ $? -eq 0 ]; then
+                # it's a source target
                 return 10
-        fi
+        else
+                # it's a binary target
+                case "$__target_os" in
+                windows)
+                        __dest="${__directory}/${PROJECT_SKU}.exe"
+                        ;;
+                *)
+                        __dest="${__directory}/${PROJECT_SKU}"
+                        ;;
+                esac
 
-        # copy main program
-        # TIP: (1) usually is: usr/local/bin or usr/local/sbin
-        #      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
-        __filepath="${__directory}/data/usr/local/bin/${PROJECT_SKU}"
-        OS::print_status info "copying $__target to ${__filepath}/\n"
-        FS::make_housing_directory "$__filepath"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
+                # copy main program
+                # TIP: (1) usually is: usr/local/bin or usr/local/sbin
+                #      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
+                __filepath="${__directory}/data/usr/local/bin/${PROJECT_SKU}"
+                OS::print_status info "copying $__target to ${__filepath}/\n"
+                FS::make_housing_directory "$__filepath"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
 
-        FS::copy_file "$1" "$__filepath"
-        if [ $? -ne 0 ]; then
-                return 1
+                FS::copy_file "$1" "$__filepath"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
         # OPTIONAL (overrides): copy usr/share/docs/${PROJECT_SKU}/changelog.gz

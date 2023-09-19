@@ -13,10 +13,10 @@
 
 
 
-# (0) initialize
-IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	exit 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -24,7 +24,7 @@ IF (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# report what to do since AutomataCI is executable, not sourcable
+# execute
 OS-Print-Status info ""
 OS-Print-Status note "IMPORTANT NOTE"
 OS-Print-Status note "please perform the following command at your terminal manually:"
@@ -35,5 +35,4 @@ OS-Print-Status info ""
 
 
 # report status
-OS-Print-Status success ""
 return 0

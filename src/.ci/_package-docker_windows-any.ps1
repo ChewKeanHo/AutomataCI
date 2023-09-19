@@ -46,7 +46,6 @@ function PACKAGE-Assemble-DOCKER-Content {
 	} Default {
 		return 10
 	}}
-	OS-Print-Status info "running python specific content assembling function..."
 
 	# assemble the package
 	$__process = FS-Copy-File "${__target}" "${__directory}\${env:PROJECT_SKU}"
@@ -69,7 +68,7 @@ FROM --platform=${__target_os}/${__target_arch} mcr.microsoft.com/windows/nanose
 "@
 	} else {
 		$__process = FS-Append-File "${__directory}\Dockerfile" @"
-FROM --platform=${__target_os}/${__target_arch} linuxcontainers/debian-slim:latest
+FROM --platform=${__target_os}/${__target_arch} busybox:latest
 "@
 	}
 

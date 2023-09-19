@@ -45,7 +45,7 @@ fi
 
 
 
-# report what to do since AutomataCI is executable, not sourcable
+# execute
 OS::print_status info "\n"
 OS::print_status note "IMPORTANT NOTICE\n"
 OS::print_status note "please perform the following command at your terminal manually:\n"
@@ -56,5 +56,4 @@ OS::print_status info "\n"
 
 
 # report status
-OS::print_status success "\n\n"
 return 0

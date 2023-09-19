@@ -53,7 +53,7 @@ fi
 
 
 
-# run prepare services
+# execute
 OS::print_status info "updating pip to the latest...\n"
 python -m pip install --upgrade pip
 if [ $? -ne 0 ]; then
@@ -74,5 +74,4 @@ fi
 
 
 # report status
-OS::print_status success "\n\n"
 return 0

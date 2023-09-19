@@ -20,29 +20,15 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
 
 
 
 
-$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}"
+# execute
+$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
 OS-Print-Status info "cleaning ${__target}..."
-FS-Remove-Silently "${__target}"
-
-
-$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
-OS-Print-Status info "cleaning ${__target}..."
-FS-Remove-Silently "${__target}"
-
-
-$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}"
-OS-Print-Status info "cleaning ${__target}..."
-FS-Remove-Silently "${__target}"
-
-
-$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
-OS-Print-Status info "cleaning ${__target}..."
-FS-Remove-Silently "${__target}"
+$null = PYTHON-Clean-Artifact "${__target}"
 
 
 

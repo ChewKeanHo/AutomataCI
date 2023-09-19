@@ -46,9 +46,9 @@ PACKAGE::assemble_docker_content() {
                 return 10
                 ;;
         esac
-        OS::print_status info "running python specific content assembling function...\n"
 
         # assemble the package
+        __target="$1"
         FS::copy_file "$__target" "${__directory}/${PROJECT_SKU}"
         if [ $? -ne 0 ]; then
                 return 1
@@ -69,7 +69,7 @@ FROM --platform=${__target_os}/${__target_arch} mcr.microsoft.com/windows/nanose
 "
         else
                 FS::append_file "${__directory}/Dockerfile" "\
-FROM --platform=${__target_os}/${__target_arch} linuxcontainers/debian-slim:latest
+FROM --platform=${__target_os}/${__target_arch} busybox:latest
 "
         fi
 

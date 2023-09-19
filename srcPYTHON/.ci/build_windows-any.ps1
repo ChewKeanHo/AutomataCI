@@ -35,12 +35,14 @@ if ($__process -ne 0) {
 	return 1
 }
 
+
 OS-Print-Status info "checking python availability..."
 $__process = PYTHON-Is-Available
 if ($__process -ne 0) {
 	OS-Print-Status error "missing python intepreter."
 	return 1
 }
+
 
 OS-Print-Status info "activating python venv..."
 $__process = PYTHON-Activate-VENV
@@ -146,5 +148,4 @@ if ($__process -ne 0) {
 
 
 # report status
-OS-Print-Status success ""
 return 0

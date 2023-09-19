@@ -3,7 +3,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
 # of the License at:
-#                 http://www.apache.org/licenses/LICENSE-2.0
+#               http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,8 +15,8 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-	return 1
+        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+        exit 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -25,22 +25,23 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# execute tech specific CI jobs if available
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\clean_windows-any.ps1"
-	OS-Print-Status info "Python technology detected. Parsing job recipe: ${__recipe}"
+function RELEASE-Run-Post-Processor {
+	param(
+		[string]$__directory
+	)
 
-	$__process = FS-Is-File $__recipe
-	if ($__process -ne 0) {
-		OS-Print-Status error "Parse failed - missing file."
-		return 1
-	}
+	return 0
+}
 
-	$__process = . $__recipe
-	if ($__process -ne 0) {
-		return 1
-	}
+
+
+
+function RELEASE-Run-Pre-Processor {
+	param(
+		[string]$__directory
+	)
+
+	return 0
 }
 
 

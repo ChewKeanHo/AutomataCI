@@ -36,7 +36,7 @@ if ($__process -ne 0) {
 
 
 
-# run services
+# execute
 OS-Print-Status info "setup python venv..."
 $__process = PYTHON-Setup-VENV
 if ($__process -ne 0) {
@@ -48,5 +48,4 @@ if ($__process -ne 0) {
 
 
 # report status
-OS-Print-Status success ""
 return 0

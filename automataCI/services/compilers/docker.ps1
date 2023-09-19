@@ -159,6 +159,13 @@ function DOCKER-Create {
 
 
 
+function DOCKER-Get-Builder-ID {
+	return "multiarch"
+}
+
+
+
+
 function DOCKER-Get-ID {
 	param(
 		[string]$__repo,
@@ -204,7 +211,7 @@ function DOCKER-Is-Available {
 	}
 
 	$null = Invoke-Expression `
-		-Command "docker buildx prune --force" `
+		-Command "docker buildx inspect `"$(DOCKER-Get-Builder-ID)`"" `
 		-ErrorAction SilentlyContinue `
 		2> $null
 	if ($LASTEXITCODE -ne 0) {
@@ -368,7 +375,7 @@ function DOCKER-Setup-Builder-MultiArch {
 	}
 
 	# execute
-	$__name = "multiarch"
+	$__name = DOCKER-Get-Builder-ID
 
 	$__process = OS-Exec "docker" "buildx inspect `"${__name}`""
 	if ($__process -eq 0) {

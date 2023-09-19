@@ -145,23 +145,35 @@ RELEASE::initiate() {
         fi
 
         # execute
-        if [ ! -z "$PROJECT_PYTHON" ]; then
-                __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
-                __recipe="${__recipe}/release_unix-any.sh"
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/release_unix-any.sh"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
                 OS::print_status info \
-                        "Python technology detected. Parsing job recipe: ${__recipe}\n"
-
-                FS::is_file "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Parse failed - missing file.\n"
-                        return 1
-                fi
-
+                        "Baseline source detected. Parsing job recipe: ${__recipe}\n"
                 . "$__recipe"
                 if [ $? -ne 0 ]; then
+                        OS::print_status error "Parse failed.\n"
                         return 1
                 fi
         fi
+
+
+        if [ ! -z "$PROJECT_PYTHON" ]; then
+                __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
+                __recipe="${__recipe}/release_unix-any.sh"
+                FS::is_file "$__recipe"
+                if [ $? -eq 0 ]; then
+                        OS::print_status info \
+                                "Python technology detected. Parsing job recipe: ${__recipe}\n"
+                        . "$__recipe"
+                        if [ $? -ne 0 ]; then
+                                OS::print_status error "Parse failed.\n"
+                                return 1
+                        fi
+                fi
+        fi
+
 
         # report status
         return 0

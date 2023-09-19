@@ -20,38 +20,20 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 
 
 
 
-# safety checking control surfaces
-OS-Print-Status info "checking python availability..."
-$__process = PYTHON-Is-Available
-if ($__process -ne 0) {
-	OS-Print-Status error "missing python intepreter."
-	return 1
+function PACKAGE-Assemble-PYPI-Content {
+	param (
+		[string]$__target,
+		[string]$__directory,
+		[string]$__target_name,
+		[string]$__target_os,
+		[string]$__target_arch
+	)
+
+	# validate project
+	return 10 # NOTE: please do it inside python source instead.
 }
-
-OS-Print-Status info "activating python venv..."
-$__process = PYTHON-Activate-VENV
-if ($__process -ne 0) {
-	OS-Print-Status error "activation failed."
-	return 1
-}
-
-
-
-
-# execute
-OS-Print-Status info ""
-OS-Print-Status note "IMPORTANT NOTE"
-OS-Print-Status note "please perform the following command at your terminal manually:"
-OS-Print-Status note "    $ ${env:VIRTUAL_ENV}\bin\activate"
-OS-Print-Status info ""
-
-
-
-
-# report status
-return 0

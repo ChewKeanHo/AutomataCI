@@ -174,47 +174,58 @@ fi
 # execute command
 case "$1" in
 env|Env|ENV)
+        export PROJECT_CI_JOB="env"
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/env_unix-any.sh"
         code=$?
         ;;
 setup|Setup|SETUP)
-        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/setup_unix-any.sh"
+        export PROJECT_CI_JOB="setup"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
         code=$?
         ;;
 start|Start|START)
-        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/start_unix-any.sh"
+        export PROJECT_CI_JOB="start"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
         code=$?
         ;;
 test|Test|TEST)
-        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/test_unix-any.sh"
+        export PROJECT_CI_JOB="test"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
         code=$?
         ;;
 prepare|Prepare|PREPARE)
-        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/prepare_unix-any.sh"
+        export PROJECT_CI_JOB="prepare"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
         code=$?
         ;;
 build|Build|BUILD)
-        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/build_unix-any.sh"
+        export PROJECT_CI_JOB="build"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
         code=$?
         ;;
 package|Package|PACKAGE)
+        export PROJECT_CI_JOB="package"
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/package_unix-any.sh"
         code=$?
         ;;
 release|Release|RELEASE)
+        export PROJECT_CI_JOB="release"
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/release_unix-any.sh"
         code=$?
         ;;
 stop|Stop|STOP)
-        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/stop_unix-any.sh"
+        export PROJECT_CI_JOB="stop"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
         code=$?
         unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
         ;;
 clean|Clean|CLEAN)
-        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/clean_unix-any.sh"
+        export PROJECT_CI_JOB="clean"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
         code=$?
         ;;
 purge|Purge|PURGE)
+        export PROJECT_CI_JOB="purge"
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/purge_unix-any.sh"
         code=$?
         ;;
@@ -232,9 +243,9 @@ purge|Purge|PURGE)
         printf "        To seek commands' help 🠚        $ ./ci.cmd help\n"
         printf "        To initialize environment 🠚     $ ./ci.cmd env\n"
         printf "        To setup the repo for work 🠚    $ ./ci.cmd setup\n"
+        printf "        To prepare the repo 🠚           $ ./ci.cmd prepare\n"
         printf "        To start a development 🠚        $ ./ci.cmd start\n"
         printf "        To test the repo 🠚              $ ./ci.cmd test\n"
-        printf "        To prepare the repo 🠚           $ ./ci.cmd prepare\n"
         printf "        To build the repo 🠚             $ ./ci.cmd build\n"
         printf "        To package the repo product 🠚   $ ./ci.cmd package\n"
         printf "        To release the repo product 🠚   $ ./ci.cmd release\n"

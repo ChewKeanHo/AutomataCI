@@ -21,11 +21,12 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 
 
 
 
-RELEASE::run_python_post_processor() {
+RELEASE::run_post_processor() {
         #__directory="$1"
 
         return 0
@@ -34,7 +35,7 @@ RELEASE::run_python_post_processor() {
 
 
 
-RELEASE::run_python_pre_processor() {
+RELEASE::run_pre_processor() {
         #__directory="$1"
 
         return 0

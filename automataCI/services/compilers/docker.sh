@@ -146,6 +146,13 @@ DOCKER::create() {
 
 
 
+DOCKER::get_builder_id() {
+        printf "multiarch"
+}
+
+
+
+
 DOCKER::get_id() {
         #__repo="$1"
         #__sku="$2"
@@ -192,7 +199,7 @@ DOCKER::is_available() {
                 return 1
         fi
 
-        docker buildx prune --force &> /dev/null
+        docker buildx inspect "$(DOCKER::get_builder_id)" &> /dev/null
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -350,14 +357,14 @@ DOCKER::setup_builder_multiarch() {
         fi
 
         # execute
-        __name="multiarch"
+        __name="$(DOCKER::get_builder_id)"
 
-        docker buildx inspect "$__name" &> /dev/null
+        docker buildx inspect "${__name}" &> /dev/null
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
-        docker buildx create --use --name "$__name"
+        docker buildx create --use --name "${__name}"
 
         # report status
         if [ $? -eq 0 ]; then

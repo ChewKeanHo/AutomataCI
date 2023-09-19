@@ -37,7 +37,7 @@ fi
 
 
 
-# run services
+# execute
 OS::print_status info "setup python venv...\n"
 PYTHON::setup_venv
 if [ $? -ne 0 ]; then
@@ -49,5 +49,4 @@ fi
 
 
 # report status
-OS::print_status success "\n\n"
 return 0

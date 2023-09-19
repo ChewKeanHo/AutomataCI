@@ -45,15 +45,12 @@ fi
 
 
 
-# run test services
+# execute
 report_location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/python-test-report"
 OS::print_status info "preparing report vault: ${report_location}\n"
 mkdir -p "$report_location"
 
 
-
-
-# execute test run
 OS::print_status info "executing all tests with coverage...\n"
 python -m coverage run \
         --data-file="${report_location}/.coverage" \
@@ -66,9 +63,6 @@ if [ $? -ne 0 ]; then
 fi
 
 
-
-
-# process test report
 OS::print_status info "processing test coverage data to html...\n"
 python -m coverage html \
         --data-file="${report_location}/.coverage" \
@@ -82,5 +76,4 @@ fi
 
 
 # return status
-OS::print_status success "\n\n"
 return 0

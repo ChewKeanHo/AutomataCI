@@ -25,7 +25,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-function PACKAGE-Assemble-Archive-Content {
+function PACKAGE-Assemble-DEB-Content {
 	param(
 		[string]$__target,
 		[string]$__directory,
@@ -34,19 +34,11 @@ function PACKAGE-Assemble-Archive-Content {
 		[string]$__target_arch
 	)
 
-	# copy main program
+	# validate target before job
 	$__process = FS-Is-Target-A-Source "${__target}"
 	if ($__process -eq 0) {
 		# it's a source code target
-		PYTHON-Clean-Artifact "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
-		$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs"
-		OS-Print-Status info "copying ${__target} to ${__directory}"
-		$__process = FS-Copy-All "${__target}" "${__directory}"
-		if ($__process -ne 0) {
-			return 1
-		}
-
-		return 0
+		return 10
 	} else {
 		# it's a binary target
 		switch (${__target_os}) {
@@ -56,28 +48,27 @@ function PACKAGE-Assemble-Archive-Content {
 			$__dest = "${__directory}\${env:PROJECT_SKU}"
 		}}
 
-		OS-Print-Status info "copying ${__target} to ${__dest}"
-		$__process = Fs-Copy-File "${__target}" "${__dest}"
+		# copy main program
+		# TIP: (1) usually is: usr/local/bin or usr/local/sbin
+		#      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
+		$__filepath = "${__directory}\data\user\local\bin\${env:PROJECT_SKU}"
+		OS-Print-Status info "copying ${__target} to ${__filepath}"
+		$__process = FS-Make-Housing-Directory "${__filepath}"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = FS-Copy-File "${__target}" "${__filepath}"
 		if ($__process -ne 0) {
 			return 1
 		}
 	}
 
-	# copy user guide
-	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
-	OS-Print-Status info "copying ${__target} to ${__directory}"
-	FS-Copy-File "${__target}" "${__directory}"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	# copy license file
-	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
-	OS-Print-Status info "copying ${__target} to ${__directory}"
-	FS-Copy-File "${__target}" "${__directory}"
-	if ($__process -ne 0) {
-		return 1
-	}
+	# OPTIONAL (overrides): copy usr/share/docs/${env:PROJECT_SKU}/changelog.gz
+	# OPTIONAL (overrides): copy usr/share/docs/${env:PROJECT_SKU}/copyright.gz
+	# OPTIONAL (overrides): copy usr/share/man/man1/${env:PROJECT_SKU}.1.gz
+	# OPTIONAL (overrides): generate ${__directory}/control/md5sum
+	# OPTIONAL (overrides): generate ${__directory}/control/control
 
 	# report status
 	return 0

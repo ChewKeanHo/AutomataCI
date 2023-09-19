@@ -16,10 +16,10 @@
 
 
 RELEASE::run_post_processors() {
-        OS::is_command_available "RELEASE::run_python_post_processor"
+        OS::is_command_available "RELEASE::run_post_processor"
         if [ $? -eq 0 ]; then
-                OS::print_status info "running python post-processing function...\n"
-                RELEASE::run_python_post_processor "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+                OS::print_status info "running post-processing function...\n"
+                RELEASE::run_post_processor "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
                 case $? in
                 10|0)
                         ;;
@@ -38,10 +38,10 @@ RELEASE::run_post_processors() {
 
 
 RELEASE::run_pre_processors() {
-        OS::is_command_available "RELEASE::run_python_pre_processor"
+        OS::is_command_available "RELEASE::run_pre_processor"
         if [ $? -eq 0 ]; then
-                OS::print_status info "running python pre-processing function...\n"
-                RELEASE::run_python_pre_processor "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+                OS::print_status info "running pre-processing function...\n"
+                RELEASE::run_pre_processor "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
                 case $? in
                 10)
                         OS::print_status warning "release is not required. Skipping process.\n"

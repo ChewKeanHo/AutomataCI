@@ -14,22 +14,19 @@
 
 
 
-# initialize
+# (0) initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-archive_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-deb_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-rpm_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-flatpak_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-docker_unix-any.sh"
 
-
-
-
-# execute
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}"
-OS::print_status info "cleaning ${__target}...\n"
-PYTHON::clean_artifact "$__target"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-pypi_unix-any.sh"
 
 
 

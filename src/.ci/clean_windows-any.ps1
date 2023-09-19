@@ -15,8 +15,8 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-        Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
-        exit 1
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -25,26 +25,28 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# execute tech specific CI jobs if available
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\prepare_windows-any.ps1"
-	OS-Print-Status info "Python technology detected. Parsing job recipe: ${__recipe}"
-
-	$__process = FS-Is-File $__recipe
-	if ($__process -ne 0) {
-		OS-Print-Status error "Parse failed - missing file."
-		return 1
-	}
-
-	$__process = . $__recipe
-	if ($__process -ne 0) {
-		return 1
-	}
-}
+# execute
+$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}"
+OS-Print-Status info "cleaning ${__target}..."
+FS-Remove-Silently "${__target}"
 
 
+$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
+OS-Print-Status info "cleaning ${__target}..."
+FS-Remove-Silently "${__target}"
 
 
-# return status
+$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}"
+OS-Print-Status info "cleaning ${__target}..."
+FS-Remove-Silently "${__target}"
+
+
+$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
+OS-Print-Status info "cleaning ${__target}..."
+FS-Remove-Silently "${__target}"
+
+
+
+
+# report status
 return 0

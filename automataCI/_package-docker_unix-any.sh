@@ -17,6 +17,15 @@
 
 
 
+# initialize
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run me from ci.cmd instead!\n"
+        return 1
+fi
+
+
+
+
 PACKAGE::run_docker() {
         _dest="$1"
         _target="$2"

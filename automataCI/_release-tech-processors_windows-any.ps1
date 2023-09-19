@@ -10,16 +10,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 
 
 
 
 function RELEASE-Run-Post-Processors {
-	$__process = OS-Is-Command-Available "RELEASE-Run-Python-Post-Processor"
+	$__process = OS-Is-Command-Available "RELEASE-Run-Post-Processor"
 	if ($__process -eq 0) {
-		OS-Print-Status info "running python post-processing function..."
-		$__process = RELEASE-Run-Python-Post-Processor `
+		OS-Print-Status info "running post-processing function..."
+		$__process = RELEASE-Run-Post-Processor `
 			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
 		switch ($__process) {
 		10 {
@@ -40,11 +39,11 @@ function RELEASE-Run-Post-Processors {
 
 
 function RELEASE-Run-Pre-Processors {
-	$__process = OS-Is-Command-Available "RELEASE-Run-Python-Pre-Processor"
+	$__process = OS-Is-Command-Available "RELEASE-Run-Pre-Processor"
 	if ($__process -eq 0) {
-		OS-Print-Status info "running python pre-processing function..."
+		OS-Print-Status info "running pre-processing function..."
 
-		$__process = RELEASE-Run-Python-Pre-Processor `
+		$__process = RELEASE-Run-Pre-Processor `
 			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
 		switch ($__process) {
 		10 {

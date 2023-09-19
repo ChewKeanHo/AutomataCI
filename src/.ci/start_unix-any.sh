@@ -26,23 +26,7 @@ fi
 
 
 
-# execute tech specific CI jobs if available
-if [ ! -z "$PROJECT_PYTHON" ]; then
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
-        __recipe="${__recipe}/stop_unix-any.sh"
-        OS::print_status info "Python technology detected. Parsing job recipe: ${__recipe}\n"
-
-        FS::is_file "$__recipe"
-        if [ $? -ne 0 ]; then
-                OS::print_status error "Parse failed - missing file.\n"
-                return 1
-        fi
-
-        . "$__recipe"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-fi
+# execute
 
 
 

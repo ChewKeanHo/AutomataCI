@@ -25,26 +25,10 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# execute tech specific CI jobs if available
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\test_windows-any.ps1"
-	OS-Print-Status info "Python technology detected. Parsing job recipe: ${__recipe}"
-
-	$__process = FS-Is-File $__recipe
-	if ($__process -ne 0) {
-		OS-Print-Status error "Parse failed - missing file."
-		return 1
-	}
-
-	$__process = . $__recipe
-	if ($__process -ne 0) {
-		return 1
-	}
-}
+# execute
 
 
 
 
-# return status
+# report status
 return 0

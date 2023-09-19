@@ -52,7 +52,7 @@ if ($__process -ne 0) {
 
 
 
-# run prepare service
+# execute
 OS-Print-Status info "upgrading pip to the latest..."
 $__process = OS-Exec "python" "-m pip install --upgrade pip"
 if ($__process -ne 0) {
@@ -73,5 +73,4 @@ if ($__process -ne 0) {
 
 
 # return status
-OS-Print-Status success ""
 return 0
