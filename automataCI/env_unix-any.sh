@@ -59,24 +59,21 @@ if [ $? -ne 0 ]; then
 fi
 
 
-if [ ! -z "$PROJECT_PYTHON" ]; then
-        OS::print_status info "Python tech detected. Installing...\n"
-        INSTALLER::setup_python
-        if [ $? -ne 0 ]; then
-                OS::print_status error "install failed.\n"
-                return 1
-        fi
+OS::print_status info "Setting up release repo...\n"
+if [ -f "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" ]; then
+        OS::print_status error "setup failed - target '${PROJECT_PATH_RELEASE}' is a file!\n"
+        return 1
+fi
 
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
-        __recipe="${__recipe}/env_unix-any.sh"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info "Detected Python custom job recipe. Installing...\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-        fi
+INSTALLER::setup_release_repo \
+        "$PROJECT_PATH_ROOT" \
+        "$PROJECT_PATH_RELEASE" \
+        "$PWD" \
+        "$PROJECT_STATIC_REPO" \
+        "$PROJECT_SIMULATE_RELEASE_REPO"
+if [ $? -ne 0 ]; then
+        OS::print_status error "setup failed.\n"
+        return 1
 fi
 
 

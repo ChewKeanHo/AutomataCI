@@ -244,26 +244,10 @@ to \`apt-get install\`, \`yum install\`, or \`flatpak install\`.
 
 RELEASE::run_release_repo_setup() {
         # execute
-        __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}"
-
-        OS::print_status info "Setup artifact release repo...\n"
-        GIT::clone "${PROJECT_STATIC_REPO}" "${PROJECT_PATH_RELEASE}"
-        case $? in
-        2)
-                OS::print_status info "Existing directory detected. Skipping...\n"
-                ;;
-        0)
-                ;;
-        *)
-                cd "$__current_path" && unset __current_path
-                OS::print_status error "Setup failed.\n"
-                return 1
-                ;;
-        esac
+        __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
 
         OS::print_status info "Hard resetting git to first commit...\n"
-        cd "$PROJECT_PATH_RELEASE"
-        GIT::hard_reset_to_init
+        GIT::hard_reset_to_init "$PROJECT_PATH_ROOT"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
                 OS::print_status error "Reset failed.\n"

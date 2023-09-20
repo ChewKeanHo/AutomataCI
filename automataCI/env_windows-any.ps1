@@ -58,24 +58,23 @@ if ($__process -ne 0) {
 }
 
 
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
-	OS-Print-Status info "Python tech detected. Installing..."
-	$__process = INSTALLER-Setup-Python
-	if ($__process -ne 0) {
-		OS-Print-Status error "install failed."
-		return 1
-	}
+OS-Print-Status info "Setting up release repo..."
+if (Test-Path -PathType Container -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}") {
+	# ACCEPTED - do nothing
+} elseif (Test-Path -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}") {
+	OS-Print-Status error "setup failed - target '${env:PROJECT_PATH_RELEASE}' is a file!"
+	return 1
+}
 
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\env_windows-any.ps1"
-	$__process = FS-Is-File $__recipe
-	if ($__process -eq 0) {
-		OS-Print-Status info "Detected Python custom job recipe. Installing..."
-		$__process = . $__recipe
-		if ($__process -ne 0) {
-			return 1
-		}
-	}
+$__process = INSTALLER-Setup-Release-Repo `
+	"${env:PROJECT_PATH_ROOT}" `
+	"${env:PROJECT_PATH_RELEASE}" `
+	"$(Get-Location)" `
+	"${env:PROJECT_STATIC_REPO}" `
+	"${env:PROJECT_SIMULATE_RELEASE_REPO}"
+if ($__process -ne 0) {
+	OS-Print-Status error "setup failed."
+	return 1
 }
 
 

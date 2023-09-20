@@ -70,6 +70,24 @@ GIT::clone() {
 
 
 
+GIT::get_first_commit_id() {
+        # validate input
+        GIT::is_available
+        if [ $? -ne 0 ]; then
+                printf ""
+                return 1
+        fi
+
+        # execute
+        printf -- "$(git rev-list --max-parents=0 --abbrev-commit HEAD)"
+
+        # report status
+        return 0
+}
+
+
+
+
 GIT::get_latest_commit_id() {
         # validate input
         GIT::is_available
@@ -79,28 +97,53 @@ GIT::get_latest_commit_id() {
         fi
 
         # execute
-        __tag="$(git rev-list --max-parents=0 --abbrev-commit HEAD)"
-        if [ ! -z "$__tag" ]; then
-                printf -- "$__tag"
-                return 0
-        else
+        printf -- "$(git rev-parse HEAD)"
+
+        # report status
+        return 0
+}
+
+
+
+
+GIT::get_root_directory() {
+        # validate input
+        GIT::is_available
+        if [ $? -ne 0 ]; then
                 printf ""
                 return 1
         fi
+
+        # execute
+        printf -- "$(git rev-parse --show-toplevel)"
+
+        # report status
+        return 0
 }
 
 
 
 
 GIT::hard_reset_to_init() {
+        #__root="$1"
+
         # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
         GIT::is_available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+        __first="$(GIT::get_root_directory)"
+        if [ "$__first" = "$1" ]; then
+                return 1
+        fi
+
         # execute
-        __first="$(git rev-list --max-parents=0 --abbrev-commit HEAD)"
+        __first="$(GIT::get_first_commit_id)"
         if [ "$__first" = "" ]; then
                 return 1
         fi

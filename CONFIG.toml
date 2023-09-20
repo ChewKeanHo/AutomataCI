@@ -267,12 +267,24 @@ PROJECT_STATIC_REPO_KEY="origin"
 PROJECT_STATIC_REPO_BRANCH="master"
 
 
+# PROJECT_SIMULATE_RELEASE_REPO
+# A flag to disable PROJECT_STATIC_REPO supplied from an external automated
+# ecosystem to construct a simulated blank repository instead of sourcing. This
+# is made primarily created for situation where release repository has complex
+# security access or the ecosystem is not using Release Job at all (e.g. GitHub
+# Actions).
+#
+# To disable it: leave it empty.
+# To enable it: make it non-empty (e.g. 'true' string).
+#
+# PROJECT_SIMULATE_RELEASE_REPO=""  # Reserved - provided by external ecosystem.
+
+
 # PROJECT_STATIC_URL
 # The public facing base URL for accessing the published static repo. This URL
 # shall be used to construct the final user instructions across various
 # distribution ecosystems.
 PROJECT_STATIC_URL="https://github.com/ChewKeanHo/AutomataCI/wiki/"
-
 
 # PROJECT_DOCKER_REGISTRY
 # The Docker registry URI value. DO NOT end with a slash. Example:

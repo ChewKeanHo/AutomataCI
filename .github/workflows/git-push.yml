@@ -23,10 +23,16 @@ jobs:
         TERM: xterm-256color
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        PROJECT_SIMULATE_RELEASE_REPO: true
     steps:
       - name: Checking out designated commit - GITHUB ACTIONS
         id: git_check_out
         uses: actions/checkout@v4
+      - name: Initialize git - GITHUB ACTIONS
+        id: git_initialize
+        run: |
+          git config --global user.email "github.actions.runner@github.com"
+          git config --global user.name "Github Action Automated Runner"
       - name: Execute repo's native CI - PURGE
         id: native_ci_purge
         run: |

@@ -248,22 +248,10 @@ function RELEASE-Run-Release-Repo-Setup {
 	$__current_path = Get-Location
 	$null = Set-Location "${env:PROJECT_PATH_ROOT}"
 
-
-	OS-Print-Status info "Setup artifact release repo..."
-	$__process = GIT-clone "${env:PROJECT_STATIC_REPO}" "${env:PROJECT_PATH_RELEASE}"
-	if ($__process -eq 2) {
-		OS-Print-Status info "Existing directory detected. Skipping..."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "Setup failed."
-		return 1
-	}
-
-
 	OS-Print-Status info "Hard resetting git to first commit..."
 	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
-	$__process = GIT-Hard-Reset-To-Init
+	$__process = GIT-Hard-Reset-To-Init "${env:PROJECT_PATH_ROOT}"
 	if ($__process -ne 0) {
-		$__current_path = Get-Location
 		$null = Set-Location "${__current_path}"
 		$null = Remove-Variable __current_path
 		OS-Print-Status error "Reset failed."

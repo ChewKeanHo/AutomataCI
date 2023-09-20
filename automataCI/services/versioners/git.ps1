@@ -43,7 +43,7 @@ function GIT-Clone {
 		return 1
 	}
 
-	if (-not ([string]::IsNullOrEmpty($__url)) {
+	if (-not ([string]::IsNullOrEmpty($__url))) {
 		if (Test-Path $__name) {
 			return 1
 		}
@@ -54,7 +54,7 @@ function GIT-Clone {
 	}
 
 	# execute
-	if (-not ([string]::IsNullOrEmpty($__url)) {
+	if (-not ([string]::IsNullOrEmpty($__url))) {
 		$__process = Os-Exec "git" "clone ${__url} ${__name}"
 	} else {
 		$__process = Os-Exec "git" "clone ${__url}"
@@ -71,7 +71,7 @@ function GIT-Clone {
 
 
 
-function GIT-Get-Latest-Commit-ID {
+function GIT-Get-First-Commit-ID {
 	# validate input
 	$__process = GIT-Is-Available
 	if ($__process -ne 0) {
@@ -83,6 +83,43 @@ function GIT-Get-Latest-Commit-ID {
 	if (-not [string]::IsNullOrEmpty($__first)) {
 		return $__tag
 	}
+
+	return ""
+}
+
+
+
+
+function GIT-Get-Latest-Commit-ID {
+	# validate input
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		return ""
+	}
+
+	# execute
+	$__tag = Invoke-Expression "git rev-parse HEAD"
+	if (-not [string]::IsNullOrEmpty($__first)) {
+		return $__tag
+	}
+	return ""
+}
+
+
+
+
+function GIT-Get-Root-Directory {
+	# validate input
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		return ""
+	}
+
+	# execute
+	$__tag = Invoke-Expression "git rev-parse --show-toplevel"
+	if (-not [string]::IsNullOrEmpty($__first)) {
+		return $__tag
+	}
 	return ""
 }
 
@@ -90,15 +127,27 @@ function GIT-Get-Latest-Commit-ID {
 
 
 function GIT-Hard-Reset-To-Init {
+	param (
+		[string]$__root
+	)
+
 	# validate input
+	if ([string]::IsNullOrEmpty($__root)) {
+		return 1
+	}
+
 	$__process = GIT-Is-Available
 	if ($__process -ne 0) {
 		return 1
 	}
 
 	# execute
-	$__first = Invoke-Expression `
-		-Command "git rev-list --max-parents=0 --abbrev-commit HEAD"
+	$__first = GIT-Get-Root-Directory
+	if ($__first -eq $__root) {
+		return 1
+	}
+
+	$__first = GIT-Get-First-Commit-ID
 	if ([string]::IsNullOrEmpty($__first)) {
 		return 1
 	}
