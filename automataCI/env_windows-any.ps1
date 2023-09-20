@@ -82,4 +82,5 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
 
 
 # report status
+OS-Print-Status success "`n"
 return 0

@@ -83,4 +83,5 @@ fi
 
 
 # report status
+OS::print_status success "\n\n"
 return 0

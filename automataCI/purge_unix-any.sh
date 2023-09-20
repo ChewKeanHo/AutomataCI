@@ -54,5 +54,6 @@ FS::remove_silently "$__target"
 
 
 
-# return status
+# report status
+OS::print_status success "\n\n"
 return 0

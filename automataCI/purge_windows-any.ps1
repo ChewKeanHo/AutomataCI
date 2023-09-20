@@ -58,5 +58,6 @@ FS-Remove-Silently "${__target}"
 
 
 
-# return status
+# report status
+OS-Print-Status success "`n"
 return 0
