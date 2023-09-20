@@ -28,7 +28,7 @@ jobs:
       - name: Checking out designated commit - GITHUB ACTIONS
         id: git_check_out
         uses: actions/checkout@v4
-      - name: Initialize git - GITHUB ACTIONS
+      - name: Initialize - GITHUB ACTIONS
         id: git_initialize
         run: |
           git config --global user.email "github.actions.runner@github.com"

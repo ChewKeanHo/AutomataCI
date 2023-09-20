@@ -206,9 +206,9 @@ Please try any of the following:
         To seek commands' help 🠚        $ ./ci.cmd help
         To initialize environment 🠚     $ ./ci.cmd env
         To setup the repo for work 🠚    $ ./ci.cmd setup
+        To prepare the repo 🠚           $ ./ci.cmd prepare
         To start a development 🠚        $ ./ci.cmd start
         To test the repo 🠚              $ ./ci.cmd test
-        To prepare the repo 🠚           $ ./ci.cmd prepare
         To build the repo 🠚             $ ./ci.cmd build
         To package the repo product 🠚   $ ./ci.cmd package
         To release the repo product 🠚   $ ./ci.cmd release
