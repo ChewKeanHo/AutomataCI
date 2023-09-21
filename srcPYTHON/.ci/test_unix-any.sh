@@ -30,7 +30,7 @@ fi
 OS::print_status info "checking python|python3 availability...\n"
 PYTHON::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing python|python3 intepreter..\n"
+        OS::print_status error "missing python|python3 intepreter.\n"
         return 1
 fi
 

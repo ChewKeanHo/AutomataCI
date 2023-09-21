@@ -31,7 +31,7 @@ TAR::create_xz() {
         # __source="$2"
 
         # validate input
-        if [ -z "$2" ] || [ -z "$1" ] || [ -f "$1" ] || [ -d "$1" ]; then
+        if [ -z "$2" ] || [ -z "$1" ] || [ -e "$1" ]; then
                 return 1
         fi
 
@@ -45,12 +45,20 @@ TAR::create_xz() {
                 return 1
         fi
 
-        # create tar.xz archive
-        XZ_OPT='-9' tar -cvJf "$1" $2
+        __dest="${1%%.xz*}"
+
+        # create tar archive
+        tar -cvf "${__dest}" $2
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # compress archive
+        XZ::create "${__dest}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-        return 1
+        return 0
 }

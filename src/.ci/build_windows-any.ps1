@@ -21,11 +21,46 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
+
+
+
+
+# safety checking control surfaces
+OS-Print-Status info "checking changelog availability..."
+$__process = CHANGELOG-Is-Available
+if ($__process -ne 0) {
+	OS-Print-Status error "changelog builder is unavailable."
+	return 1
+}
 
 
 
 
 # execute
+$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog"
+OS-Print-Status info "building ${env:PROJECT_VERSION} data changelog entry..."
+$__process = CHANGELOG-Build-Data-Entry $__file
+if ($__process -ne 0) {
+	OS-Print-Status error "build failed."
+	return 1
+}
+
+
+OS-Print-Status info "building ${env:PROJECT_VERSION} deb changelog entry..."
+$__process = CHANGELOG-Build-DEB-Entry `
+	"${__file}" `
+	"$env:PROJECT_VERSION" `
+	"$env:PROJECT_SKU" `
+	"$env:PROJECT_DEBIAN_DISTRIBUTION" `
+	"$env:PROJECT_DEBIAN_URGENCY" `
+	"$env:PROJECT_CONTACT_NAME" `
+	"$env:PROJECT_CONTACT_EMAIL" `
+	(Get-Date -Format 'R')
+if ($__process -ne 0) {
+	OS-Print-Status error "build failed."
+	return 1
+}
 
 
 

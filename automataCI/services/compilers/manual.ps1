@@ -48,7 +48,7 @@ function MANUAL-Create-DEB-Manpage {
 		return 2
 	}
 
-	if ($__is_native == "true") {
+	if ($__is_native -eq "true") {
 		$__location = "${__directory}\data\usr\share\man\man1\${__sku}.1"
 		$__process = FS-Is-File "${__location}"
 		if ($__process -eq 0) {
@@ -121,7 +121,7 @@ function MANUAL-Create-Baseline-Manpage {
 	param(
 		[string]$__location,
 		[string]$__sku,
-		[stirng]$__name,
+		[string]$__name,
 		[string]$__email,
 		[string]$__website
 	)

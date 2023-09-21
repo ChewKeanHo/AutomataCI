@@ -43,7 +43,7 @@ function COPYRIGHT-Create-DEB {
 		return 0
 	}
 
-	if ($__is_native == "true") {
+	if ($__is_native -eq "true") {
 		$__location = "${__directory}\data\usr\share\doc\${__sku}\copyright"
 		if (Test-Path "${__location}") {
 			return 0

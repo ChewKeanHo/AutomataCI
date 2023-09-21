@@ -28,24 +28,6 @@ function DEB-Is-Available {
 		return 1
 	}
 
-	# check compatible target os
-	switch ($__os) {
-	windows {
-		return 2
-	} darwin {
-		return 2
-	} Default {
-		Break
-	}}
-
-	# check compatible target cpu architecture
-	switch ($__arch) {
-	any {
-		return 3
-	} Default {
-		Break
-	}}
-
 	# validate dependencies
 	$__process = MD5-Is-Available
 	if ($__process -ne 0) {
@@ -66,6 +48,22 @@ function DEB-Is-Available {
 	if ($__process -ne 0) {
 		return 1
 	}
+
+	# check compatible target os
+	switch ($__os) {
+	{ $_ -in 'windows', 'darwin' } {
+		return 2
+	} Default {
+		# accepted
+	}}
+
+	# check compatible target cpu architecture
+	switch ($__arch) {
+	{ $_ -in 'any' } {
+		return 3
+	} Default {
+		# accepted
+	}}
 
 	# report status
 	return 0
@@ -156,7 +154,7 @@ function DEB-Create-Changelog {
 		return 2
 	}
 
-	if ($__is_native == "true") {
+	if ($__is_native -eq "true") {
 		$__location = "${__directory}\data\usr\share\doc\${__sku}\changelog.gz"
 		if (Test-Path -Path "${__location}") {
 			return 2

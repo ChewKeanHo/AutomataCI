@@ -28,24 +28,6 @@ DEB::is_available() {
                 return 1
         fi
 
-        # check compatible target os
-        case "$__os" in
-        windows|darwin)
-                return 2
-                ;;
-        *)
-                ;;
-        esac
-
-        # check compatible target cpu architecture
-        case "$__arch" in
-        any)
-                return 3
-                ;;
-        *)
-                ;;
-        esac
-
         # validate dependencies
         MD5::is_available
         if [ $? -ne 0 ]; then
@@ -71,6 +53,24 @@ DEB::is_available() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
+        # check compatible target os
+        case "$__os" in
+        windows|darwin)
+                return 2
+                ;;
+        *)
+                ;;
+        esac
+
+        # check compatible target cpu architecture
+        case "$__arch" in
+        any)
+                return 3
+                ;;
+        *)
+                ;;
+        esac
 
         # report status
         return 0

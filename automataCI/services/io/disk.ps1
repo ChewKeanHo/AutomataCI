@@ -25,9 +25,13 @@ function DISK-Calculate-Size {
 	}
 
 	# execute
-	return Get-ChildItem -Recurse ${__location} `
-		| Measure-Object -Sum Length `
-		| select { $_.sum / 1KB }
+	$__value  = Get-ChildItem ${__location} -Recurse -Force `
+			-ErrorAction SilentlyContinue -Include * `
+		| Where-Object {$_.psiscontainer -eq $false} `
+		| Measure-Object -Property length -sum `
+		| Select-Object sum
+	$__value = [math]::Round($__value.sum / 1000,0)   #.ToString("#")
+	return $__value
 }
 
 

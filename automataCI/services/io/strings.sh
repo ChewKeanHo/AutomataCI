@@ -52,7 +52,7 @@ STRINGS::has_suffix() {
 STRINGS::to_lowercase() {
         #__content="$1"
 
-        printf "$1" | tr '[:upper:]' '[:lower:]'
+        printf -- "%b" "$1" | tr '[:upper:]' '[:lower:]'
         return 0
 }
 
@@ -62,7 +62,7 @@ STRINGS::to_lowercase() {
 STRINGS::trim_whitespace_left() {
         #__content="$1"
 
-        printf "${1#"${1%%[![:space:]]*}"}"
+        printf -- "%b" "${1#"${1%%[![:space:]]*}"}"
         return 0
 }
 
@@ -72,7 +72,7 @@ STRINGS::trim_whitespace_left() {
 STRINGS::trim_whitespace_right() {
         #__content="$1"
 
-        printf "${1%"${1##*[![:space:]]}"}"
+        printf -- "%b" "${1%"${1##*[![:space:]]}"}"
         return 0
 }
 
@@ -82,7 +82,10 @@ STRINGS::trim_whitespace_right() {
 STRINGS::trim_whitespace() {
         #__content="$1"
 
-        printf "$(STRINGS::trim_whitespace_right "$(STRINGS::trim_whitespace_left "$1")")"
+        ___content="$(STRINGS::trim_whitespace_left "$1")"
+        ___content="$(STRINGS::trim_whitespace_right "$___content")"
+        printf -- "%b" "$___content"
+        unset ___content
         return 0
 }
 
@@ -92,6 +95,6 @@ STRINGS::trim_whitespace() {
 STRINGS::to_uppercase() {
         #__content="$1"
 
-        printf "$1" | tr '[:lower:]' '[:upper:]'
+        printf -- "%b" "$1" | tr '[:lower:]' '[:upper:]'
         return 0
 }

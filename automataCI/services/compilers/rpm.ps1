@@ -22,6 +22,12 @@ function RPM-Is-Available {
 		[string]$__arch
 	)
 
+	# validate dependencies
+	$__process = OS-Is-Command-Available "rpmbuild"
+	if ($__process -ne 0) {
+		return 1
+	}
+
 	# check compatible target os
 	switch ($__os) {
 	windows {
@@ -39,12 +45,6 @@ function RPM-Is-Available {
 	} Default {
 		Break
 	}}
-
-	# validate dependencies
-	$__process = OS-Is-Command-Available "rpmbuild"
-	if ($__process -ne 0) {
-		return 1
-	}
 
 	# report status
 	return 0

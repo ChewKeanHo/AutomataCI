@@ -105,7 +105,7 @@ function PACKAGE-Run-DOCKER {
 		"${_target_path}" `
 		"${_target_os}" `
 		"${_target_arch}" `
-		"${env:PROJECT_DOCKER_REGISTRY}" `
+		"${env:PROJECT_CONTAINER_REGISTRY}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}"
 	if ($__process -ne 0) {

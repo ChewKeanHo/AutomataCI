@@ -39,6 +39,10 @@ PACKAGE::assemble_flatpak_content() {
                 return 10
         fi
 
+        if [ ! "$__target_os" = "linux" ]; then
+                return 10
+        fi
+
         # copy main program
         __target="$1"
         __filepath="${__directory}/${PROJECT_SKU}"

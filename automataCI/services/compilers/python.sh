@@ -25,20 +25,19 @@ PYTHON::activate_venv() {
         fi
 
         # execute
-        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
-        __location="${__location}/bin/activate"
+        __location="$(PYTHON::get_activator_path)"
         if [ ! -f "$__location" ]; then
                 return 1
         fi
 
         . "$__location"
+        PYTHON::is_venv_activated
+        if [ $? -ne 0 ] ; then
+                return 1
+        fi
 
         # report status
-        PYTHON::is_venv_activated
-        if [ $? -eq 0 ] ; then
-                return 0
-        fi
-        return 1
+        return 0
 }
 
 
@@ -62,6 +61,15 @@ PYTHON::clean_artifact() {
 
         # report status
         return 0
+}
+
+
+
+
+PYTHON::get_activator_path() {
+        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
+        __location="${__location}/bin/activate"
+        printf -- "$__location"
 }
 
 
@@ -125,22 +133,23 @@ PYTHON::setup_venv() {
 
 
         # check if the repo is already established...
-        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
-        if [ -f "${__location}/bin/activate" ]; then
+        if [ -f "$(PYTHON::get_activator_path)" ]; then
                 return 0
         fi
 
         # it's a clean repo. Start setting up virtual environment...
+        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
         $__program -m venv "$__location"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        # report status
-        if [ -f "${__location}/bin/activate" ]; then
-                return 0
+        if [ ! -f "$(PYTHON::get_activator_path)" ]; then
+                return 1
         fi
-        return 1
+
+        # report status
+        return 0
 }
 
 

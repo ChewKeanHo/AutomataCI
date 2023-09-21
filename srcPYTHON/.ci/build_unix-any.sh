@@ -23,20 +23,11 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/changelog.sh"
 
 
 
 
 # safety checking control surfaces
-OS::print_status info "checking changelog availability...\n"
-CHANGELOG::is_available
-if [ $? -ne 0 ]; then
-        OS::print_status error "changelog builder is unavailable.\n"
-        return 1
-fi
-
-
 OS::print_status info "checking python|python3 availability...\n"
 PYTHON::is_available
 if [ $? -ne 0 ]; then
@@ -110,34 +101,6 @@ pdoc --html \
         "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/"
 if [ $? -ne 0 ]; then
         OS::print_status error "compose failed.\n"
-        return 1
-fi
-
-
-
-
-# build changelog entries
-__file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog"
-OS::print_status info "building ${PROJECT_VERSION} data changelog entry...\n"
-CHANGELOG::build_data_entry "$__file"
-if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
-        return 1
-fi
-
-
-OS::print_status info "building ${PROJECT_VERSION} deb changelog entry...\n"
-CHANGELOG::build_deb_entry \
-        "$__file" \
-        "$PROJECT_VERSION" \
-        "$PROJECT_SKU" \
-        "$PROJECT_DEBIAN_DISTRIBUTION" \
-        "$PROJECT_DEBIAN_URGENCY" \
-        "$PROJECT_CONTACT_NAME" \
-        "$PROJECT_CONTACT_EMAIL" \
-        "$(date -R)"
-if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
         return 1
 fi
 

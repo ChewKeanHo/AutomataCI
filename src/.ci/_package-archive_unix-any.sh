@@ -49,18 +49,20 @@ PACKAGE::assemble_archive_content() {
                         ;;
                 esac
 
-                OS::print_status info "copying $__target to $__dest\n"
-                FS::copy_file "$__target" "${__dest}"
+                OS::print_status info "copying ${__target} to ${__dest}\n"
+                FS::copy_file "$__target" "$__dest"
                 if [ $? -ne 0 ]; then
+                        OS::print_status error "copy failed.\n"
                         return 1
                 fi
         fi
 
         # copy user guide
         __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        OS::print_status info "copying $__target to $__directory\n"
+        OS::print_status info "copying ${__target} to ${__directory}\n"
         FS::copy_file "$__target" "${__directory}/."
         if [ $? -ne 0 ]; then
+                OS::print_status error "copy failed.\n"
                 return 1
         fi
 
@@ -69,6 +71,7 @@ PACKAGE::assemble_archive_content() {
         OS::print_status info "copying $__target to $__directory\n"
         FS::copy_file "$__target" "${__directory}/."
         if [ $? -ne 0 ]; then
+                OS::print_status error "copy failed.\n"
                 return 1
         fi
 

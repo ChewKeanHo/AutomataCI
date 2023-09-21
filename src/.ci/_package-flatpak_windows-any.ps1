@@ -40,6 +40,10 @@ function PACKAGE-Assemble-FLATPAK-Content {
 		return 10
 	}
 
+	if ($__target_os -ne "linux") {
+		return 10
+	}
+
 	# copy main program
 	$__filepath = "${__directory}\${env:PROJECT_SKU}"
 	OS-Print-Status info "copying ${__target} to ${__filepath}"

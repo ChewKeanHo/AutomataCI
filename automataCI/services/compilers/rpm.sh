@@ -25,6 +25,11 @@ RPM::is_available() {
                 return 1
         fi
 
+        # validate dependencies
+        if [ -z "$(type -t 'rpmbuild')" ]; then
+                return 1
+        fi
+
         # check compatible target os
         case "$__os" in
         windows|darwin)
@@ -42,11 +47,6 @@ RPM::is_available() {
         *)
                 ;;
         esac
-
-        # validate dependencies
-        if [ -z "$(type -t 'rpmbuild')" ]; then
-                return 1
-        fi
 
         # report status
         return 0

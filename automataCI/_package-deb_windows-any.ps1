@@ -136,7 +136,7 @@ function PACKAGE-Run-DEB {
 	}
 
 	OS-Print-Status info "creating man page files..."
-	MANUAL-Create-DEB_Manpage `
+	MANUAL-Create-DEB-Manpage `
 		${_src} `
 		${env:PROJECT_DEBIAN_IS_NATIVE} `
 		${env:PROJECT_SKU} `

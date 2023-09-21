@@ -27,21 +27,6 @@ fi
 
 
 # execute
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}"
-OS::print_status info "cleaning ${__target}...\n"
-FS::remove_silently "$__target"
-
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
-OS::print_status info "cleaning ${__target}...\n"
-FS::remove_silently "$__target"
-
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}"
-OS::print_status info "cleaning ${__target}...\n"
-FS::remove_silently "$__target"
-
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
-OS::print_status info "cleaning ${__target}...\n"
-FS::remove_silently "$__target"
 
 
 

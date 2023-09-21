@@ -129,7 +129,7 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		"$TARGET_FILENAME" `
 		"$TARGET_OS" `
 		"$TARGET_ARCH" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\flatpak"
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${env:PROJECT_PATH_RELEASE}\flatpak"
 	if ($__process -ne 0) {
 		return 1
 	}

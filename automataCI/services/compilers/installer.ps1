@@ -17,7 +17,7 @@
 
 
 
-function INSTALLER-setup {
+function INSTALLER-Setup {
 	# validate input
 	$__process = OS-Is-Command-Available "choco"
 	if ($__process -eq 0) {
@@ -100,6 +100,36 @@ function INSTALLER-Setup-Docker {
 
 	# report status
 	return 0
+}
+
+
+
+
+function INSTALLER-Setup-Go {
+	# validate input
+	$__process =  OS-Is-Command-Available "choco"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process =  OS-Is-Command-Available "go"
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	# execute
+	$__process = OS-Exec "choco" "install go -y"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	# report status
+	$__process = OS-Is-Command-Available "go"
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	return 1
 }
 
 

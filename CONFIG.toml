@@ -87,18 +87,40 @@ PROJECT_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI"
 
 
 ######################
+# GO TECHNOLOGY      #
+######################
+# PROJECT_GO
+# This is a control variable used for enabling Go technology and also defining
+# its source codes directory relative to PROJECT_PATH_ROOT. Depending on the
+# offered service (e.g. GitHub Actions), setting this variable with value shall
+# notify the CI provider to setup Go development environment automatically.
+#
+# To enable it: simply supply the path (e.g. default is 'srcGO').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_GO = 'srcGO'
+
+
+# PROJECT_PATH_GO_ENGINE
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
+# setting up localized environment.
+PROJECT_PATH_GO_ENGINE = "go-engine"
+
+
+
+
+######################
 # PYTHON TECHNOLOGY  #
 ######################
 # PROJECT_PYTHON
-# This is a reserved variable used for enabling Python technology and also
+# This is a control variable used for enabling Python technology and also
 # defining its source codes directory relative to PROJECT_PATH_ROOT.
-# Depending on the offered service (e.g. GitHub CI), setting this
+# Depending on the offered service (e.g. GitHub Actions), setting this
 # variable with value shall notify the CI provider to setup Python development
 # environment automatically.
 #
 # To enable it: simply supply the path (e.g. default is 'srcPYTHON').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_PYTHON = 'srcPYTHON'
+PROJECT_PYTHON = ''
 
 
 # PROJECT_PATH_PYTHON_ENGINE
@@ -286,18 +308,19 @@ PROJECT_STATIC_REPO_BRANCH="master"
 # distribution ecosystems.
 PROJECT_STATIC_URL="https://github.com/ChewKeanHo/AutomataCI/wiki/"
 
-# PROJECT_DOCKER_REGISTRY
-# The Docker registry URI value. DO NOT end with a slash. Example:
+# PROJECT_CONTAINER_REGISTRY
+# The container registry URI value. DO NOT end with a slash. Example:
 #     1. DockerHub     : registry.hub.docker.com/[ NAMESPACE ]
 #     2. GitHub Package: ghcr.io/[ NAMESPACE ]
 #     2. Local         : localhost:5000/[ NAMESPACE ]
-PROJECT_DOCKER_REGISTRY = "ghcr.io/chewkeanho"
+PROJECT_CONTAINER_REGISTRY = "ghcr.io/chewkeanho"
 
 
 # DOCKER_CLI_EXPERIMENTAL
 # Enable the Docker's experimental CLI features for using buildx. If disabled,
 # is shall break many of the CI job.
 DOCKER_CLI_EXPERIMENTAL = "enabled"
+
 
 
 

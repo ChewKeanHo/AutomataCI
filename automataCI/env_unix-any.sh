@@ -59,6 +59,26 @@ if [ $? -ne 0 ]; then
 fi
 
 
+if [ ! -z "$PROJECT_PYTHON" ]; then
+        OS::print_status info "Installing python...\n"
+        INSTALLER::setup_python
+        if [ $? -ne 0 ]; then
+                OS::print_status error "install failed.\n"
+                return 1
+        fi
+fi
+
+
+if [ ! -z "$PROJECT_GO" ]; then
+        OS::print_status info "Installing go...\n"
+        INSTALLER::setup_go
+        if [ $? -ne 0 ]; then
+                OS::print_status error "install failed.\n"
+                return 1
+        fi
+fi
+
+
 OS::print_status info "Setting up release repo...\n"
 if [ -f "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" ]; then
         OS::print_status error "setup failed - target '${PROJECT_PATH_RELEASE}' is a file!\n"

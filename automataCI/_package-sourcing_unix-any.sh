@@ -41,7 +41,7 @@ fi
 
 
 
-# source from python and overrides existing
+# source from Python and overrides existing
 if [ ! -z "$PROJECT_PYTHON" ]; then
         __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
         __recipe="${__recipe}/package_unix-any.sh"
@@ -49,6 +49,24 @@ if [ ! -z "$PROJECT_PYTHON" ]; then
         if [ $? -eq 0 ]; then
                 OS::print_status info \
                         "sourcing Python content assembling functions: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Sourcing failed\n"
+                        return 1
+                fi
+        fi
+fi
+
+
+
+
+# source from Go and overrides existing
+if [ ! -z "$PROJECT_GO" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_GO}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/package_unix-any.sh"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "sourcing Go content assembling functions: ${__recipe}\n"
                 . "$__recipe"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "Sourcing failed\n"

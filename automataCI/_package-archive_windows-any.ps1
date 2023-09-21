@@ -99,7 +99,7 @@ function PACKAGE-Run-Archive {
 	} Default {
 		$_target_path = "${_target_path}.tar.xz"
 		OS-Print-Status info "packaging ${_target_path}"
-		$__process = Tar-Create-XZ "${_target_path}" "*"
+		$__process = TAR-Create-XZ "${_target_path}" "*"
 	}}
 
 	# head back to current directory

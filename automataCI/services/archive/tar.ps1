@@ -34,11 +34,9 @@ function TAR-Create-XZ {
 	)
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__source) -or
-		[string]::IsNullOrEmpty($__destination) -or
-		(-not (Test-Path $__source -PathType Container)) -or
-		(Test-Path -PathType Leaf -Path $__destination) -or
-		(Test-Path $__destination -PathType Container)) {
+	if ([string]::IsNullOrEmpty($__destination) -or
+		[string]::IsNullOrEmpty($__source) -or
+		(Test-Path -Path $__destination)) {
 		return 1
 	}
 
@@ -52,9 +50,19 @@ function TAR-Create-XZ {
 		return 1
 	}
 
-	# create tar.xz archive
-	$__process = OS-Exec "tar -cvJf `"${__destination}`" ${__source}"
+	$__dest = $__destination -replace '\.xz.*$'
+
+	# create tar archive
+	$__process = OS-Exec "tar" "-cvf `"${__dest}`" ${__source}"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = XZ-Create "${__dest}"
+	if ($__process -ne 0) {
+		return 1
+	}
 
 	# report status
-	return $__process
+	return 0
 }

@@ -124,7 +124,7 @@ PACKAGE::run_docker() {
                 "$_target_path" \
                 "$_target_os" \
                 "$_target_arch" \
-                "$PROJECT_DOCKER_REGISTRY" \
+                "$PROJECT_CONTAINER_REGISTRY" \
                 "$PROJECT_SKU" \
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then

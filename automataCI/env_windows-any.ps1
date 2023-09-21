@@ -58,6 +58,24 @@ if ($__process -ne 0) {
 }
 
 
+if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
+	OS-Print-Status info "Installing python..."
+	$__process = INSTALLER-Setup-Python
+	if ($__process -ne 0) {
+		return 1
+	}
+}
+
+
+if (-not ([string]::IsNullOrEmpty(${env:PROJECT_GO}))) {
+	OS-Print-Status info "Installing go..."
+	$__process = INSTALLER-Setup-Go
+	if ($__process -ne 0) {
+		return 1
+	}
+}
+
+
 OS-Print-Status info "Setting up release repo..."
 if (Test-Path -PathType Container -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}") {
 	# ACCEPTED - do nothing

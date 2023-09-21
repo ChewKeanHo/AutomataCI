@@ -18,25 +18,25 @@
 
 function PYTHON-Activate-VENV {
 	# validate input
-	if ($env:VIRTUAL_ENV) {
+	$__process = PYTHON-Is-VENV-Activated
+	if ($__process -ne 0) {
 		return 0
 	}
 
 	# execute
-	$__location = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}" `
-			+ "\${env:PROJECT_PATH_PYTHON_ENGINE}\Scripts" `
-			+ "\Activate.ps1"
+	$__location = "$(PYTHON-Get-Activator-Path)"
 	if (-not (Test-Path "${__location}")) {
 		return 1
 	}
 
 	. $__location
+	$__process = PYTHON-Is-VENV-Activated
+	if ($__process -ne 0) {
+		return 1
+	}
 
 	# report status
-	if ($env:VIRTUAL_ENV) {
-		return 0
-	}
-	return 1
+	return 0
 }
 
 
@@ -60,6 +60,15 @@ function PYTHON-Clean-Artifact {
 
 	# report status
 	return 0
+}
+
+
+
+
+function PYTHON-Get-Activator-Path {
+	return "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}" `
+		+ "\${env:PROJECT_PATH_PYTHON_ENGINE}\Scripts" `
+		+ "\Activate.ps1"
 }
 
 
@@ -116,24 +125,25 @@ function PYTHON-Setup-VENV {
 	}
 
 	# check if the repo is already established...
-	$__location = "${env:PROJECT_PATH_ROOT}" `
-			+ "\${env:PROJECT_PATH_TOOLS}" `
-			+ "\${env:PROJECT_PATH_PYTHON_ENGINE}"
-	if (Test-Path "${__location}\Scripts\Activate.ps1") {
+	if (Test-Path "$(PYTHON-Get-Activator-Path)") {
 		return 0
 	}
 
 	# it's a clean repo. Start setting up virtual environment...
+	$__location = "${env:PROJECT_PATH_ROOT}" `
+		+ "\${env:PROJECT_PATH_TOOLS}" `
+		+ "\${env:PROJECT_PATH_PYTHON_ENGINE}"
 	$__process = OS-Exec "python" "-m venv `"${__location}`""
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	# report status
-	if (Test-Path "${__location}\Scripts\Activate.ps1") {
-		return 0
+	if (-not (Test-Path "$(PYTHON-Get-Activator-Path)")) {
+		return 1
 	}
-	return 1
+
+	# report status
+	return 0
 }
 
 
