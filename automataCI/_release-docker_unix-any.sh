@@ -37,14 +37,23 @@ RELEASE::run_docker() {
 
         # execute
         OS::print_status info "releasing docker as the latest version...\n"
-        DOCKER::release "$_target" "$_directory" "$_datastore" "$PROJECT_VERSION"
-        if [ $? -ne 0 ]; then
-                OS::print_status error "release failed.\n"
-                return 1
-        fi
+        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+                OS::print_status warning "Simulating multiarch docker manifest release...\n"
+                OS::print_status warning "Simulating remove package artifact...\n"
+        else
+                DOCKER::release \
+                        "$_target" \
+                        "$_directory" \
+                        "$_datastore" \
+                        "$PROJECT_VERSION"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "release failed.\n"
+                        return 1
+                fi
 
-        OS::print_status info "remove package artifact...\n"
-        FS::remove_silently "$_target"
+                OS::print_status info "remove package artifact...\n"
+                FS::remove_silently "$_target"
+        fi
 
         # report status
         return 0

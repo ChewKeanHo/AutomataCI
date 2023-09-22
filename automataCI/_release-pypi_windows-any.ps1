@@ -52,17 +52,22 @@ function RELEASE-Run-PYPI {
 
 	# execute
 	OS-Print-Status info "releasing pypi package..."
-	$__process = PYPI-Release `
-		"${_target}" `
-		"${env:PROJECT_GPG_ID}" `
-		"${env:PROJECT_PYPI_REPO_URL}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "release failed."
-		return 1
-	}
+	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
+		OS-Print-Status warning "Simulating pypi package push..."
+		OS-Print-Status warning "Simulating remove package artifact..."
+	} else {
+		$__process = PYPI-Release `
+			"${_target}" `
+			"${env:PROJECT_GPG_ID}" `
+			"${env:PROJECT_PYPI_REPO_URL}"
+		if ($__process -ne 0) {
+			OS-Print-Status error "release failed."
+			return 1
+		}
 
-	OS-Print-Status info "processing package artifact for local distribution..."
-	$null = FS-Remove-Silently "${_target}"
+		OS-Print-Status info "processing package artifact for local distribution..."
+		$null = FS-Remove-Silently "${_target}"
+	}
 
 	# report status
 	return 0

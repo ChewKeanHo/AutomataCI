@@ -14,12 +14,17 @@
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\crypto\gpg.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\installer.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\checksum\shasum.ps1"
 
 
 
 
 function RELEASE-Run-Checksum-Seal {
+	param (
+		[string]$__static_repo
+	)
+
 	# execute
 	$__sha256_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha256.txt"
 	$__sha256_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\sha256.txt"
@@ -38,7 +43,7 @@ function RELEASE-Run-Checksum-Seal {
 	if ($__process -eq 0) {
 		foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
 			$TARGET = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${TARGET}"
-			if ($TARGET.EndsWith(".asc") {
+			if ($TARGET.EndsWith(".asc")) {
 				continue # it's a gpg cert
 			}
 
@@ -61,7 +66,7 @@ function RELEASE-Run-Checksum-Seal {
 
 		$__process = FS-Copy-File `
 			"${__keyfile}" `
-			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_SKU}.gpg.asc"
+			"${__static_repo}\${env:PROJECT_SKU}.gpg.asc"
 		if ($__process -ne 0) {
 			OS-Print-Status error "export failed."
 			return 1
@@ -139,35 +144,6 @@ function RELEASE-Initiate {
 		return 1
 	}
 
-	# execute
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\release_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info \
-			"Baseline source detected. Parsing job recipe: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Parse failed."
-			return 1
-		}
-	}
-
-
-	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
-		$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
-		$__recipe = "${__recipe}\release_windows-any.ps1"
-		$__process = FS-Is-File "${__recipe}"
-		if ($__process -eq 0) {
-			OS-Print-Status info `
-				"Python technology detected. Parsing job recipe: ${__recipe}"
-			$__process = . "${__recipe}"
-			if ($__process -ne 0) {
-				OS-Print-Status error "Parse failed."
-				return 1
-			}
-		}
-	}
 
 	# report status
 	return 0
@@ -210,7 +186,7 @@ function RELEASE-Run-Release-Repo-Conclude {
 
 	# execute
 	$__current_path = Get-Location
-	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
+	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
 
 	OS-Print-Status info "Generate required notice file..."
 	$null = FS-Write-File "Home.md" @"
@@ -244,23 +220,41 @@ to ``apt-get install``, ``yum install``, or ``flatpak install``.
 
 
 function RELEASE-Run-Release-Repo-Setup {
-	# execute
-	$__current_path = Get-Location
-	$null = Set-Location "${env:PROJECT_PATH_ROOT}"
+	# clean up base directory
+	OS-Print-Status info "Safety checking release directory is a file..."
+	if (Test-Path -PathType Leaf `
+		-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}") {
+		OS-Print-Status error "check failed."
+		return 1
+	}
+	$null = FS-Remake-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
 
-	OS-Print-Status info "Hard resetting git to first commit..."
-	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
-	$__process = GIT-Hard-Reset-To-Init "${env:PROJECT_PATH_ROOT}"
+	# execute
+	OS-Print-Status info "Setting up release static repo..."
+
+	$__process = INSTALLER-Setup-Release-Repo `
+		"${env:PROJECT_PATH_ROOT}" `
+		"${env:PROJECT_PATH_RELEASE}" `
+		"$(Get-Location)" `
+		"${env:PROJECT_STATIC_REPO}" `
+		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
+		"${env:PROJECT_STATIC_REPO_DIRECTORY}"
 	if ($__process -ne 0) {
-		$null = Set-Location "${__current_path}"
-		$null = Remove-Variable __current_path
-		OS-Print-Status error "Reset failed."
+		OS-Print-Status error "setup failed."
 		return 1
 	}
 
-	$__current_path = Get-Location
-	$null = Set-Location "${__current_path}"
-	$null = Remove-Variable __current_path
+	# execute
+	$__staging = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${env:PROJECT_PATH_RELEASE}"
+	$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
+	if (Test-Path -PathType Container -Path "${__staging}") {
+		OS-Print-Status info "exporting staging contents to static repo..."
+		$__process = FS-Copy-All "${__staging}/" "$__dest"
+		if ($__process -ne 0) {
+			OS-Print-Status error "export failed."
+			return 1
+		}
+	}
 
 	# report status
 	return 0

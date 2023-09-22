@@ -138,6 +138,13 @@ GIT::hard_reset_to_init() {
         fi
 
         __first="$(GIT::get_root_directory)"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        # CVE-2023-42798 - Make sure the directory is not the same as the root
+        #                  directory. If it does, bail out immediately and DO
+        #                  not proceed.
         if [ "$__first" = "$1" ]; then
                 return 1
         fi

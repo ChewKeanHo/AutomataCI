@@ -79,24 +79,6 @@ if [ ! -z "$PROJECT_GO" ]; then
 fi
 
 
-OS::print_status info "Setting up release repo...\n"
-if [ -f "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" ]; then
-        OS::print_status error "setup failed - target '${PROJECT_PATH_RELEASE}' is a file!\n"
-        return 1
-fi
-
-INSTALLER::setup_release_repo \
-        "$PROJECT_PATH_ROOT" \
-        "$PROJECT_PATH_RELEASE" \
-        "$PWD" \
-        "$PROJECT_STATIC_REPO" \
-        "$PROJECT_SIMULATE_RELEASE_REPO"
-if [ $? -ne 0 ]; then
-        OS::print_status error "setup failed.\n"
-        return 1
-fi
-
-
 
 
 # report status

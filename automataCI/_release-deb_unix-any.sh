@@ -47,15 +47,19 @@ RELEASE::run_deb() {
         fi
 
         OS::print_status info "publishing with reprepro...\n"
-        REPREPRO::publish \
-                "$__target" \
-                "$__dest" \
-                "${__datastore}/publishers/reprepro" \
-                "${__db_directory}/reprepro" \
-                "$PROJECT_REPREPRO_CODENAME"
-        if [ $? -ne 0 ]; then
-                OS::print_status error "publish failed.\n"
-                return 1
+        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+                OS::print_status warning "Simulating reprepro release...\n"
+        else
+                REPREPRO::publish \
+                        "$__target" \
+                        "$__dest" \
+                        "${__datastore}/publishers/reprepro" \
+                        "${__db_directory}/reprepro" \
+                        "$PROJECT_REPREPRO_CODENAME"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "publish failed.\n"
+                        return 1
+                fi
         fi
 
         # report status

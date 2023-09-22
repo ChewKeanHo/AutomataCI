@@ -15,12 +15,15 @@
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/gpg.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/changelog.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/installer.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/checksum/shasum.sh"
 
 
 
 
 RELEASE::run_checksum_seal() {
+        #__static_repo="$1"
+
         # execute
         __sha256_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha256.txt"
         __sha256_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/sha256.txt"
@@ -59,9 +62,8 @@ RELEASE::run_checksum_seal() {
                         return 1
                 fi
 
-                FS::copy_file \
-                        "$__keyfile" \
-                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_SKU}.gpg.asc"
+                OS::print_status info "exporting GPG public key to static repo...\n"
+                FS::copy_file "$__keyfile" "${1}/${PROJECT_SKU}.gpg.asc"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "export failed\n"
                         return 1
@@ -137,43 +139,16 @@ ${__value}  ${TARGET##*/}
 
 RELEASE::initiate() {
         # safety check control surfaces
+        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+                OS::print_status warning "Running in simulation mode...\n"
+        fi
+
         OS::print_status info "Checking shasum availability...\n"
         SHASUM::is_available
         if [ $? -ne 0 ]; then
                 OS::print_status error "Check failed.\n"
                 return 1
         fi
-
-        # execute
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
-        __recipe="${__recipe}/release_unix-any.sh"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info \
-                        "Baseline source detected. Parsing job recipe: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Parse failed.\n"
-                        return 1
-                fi
-        fi
-
-
-        if [ ! -z "$PROJECT_PYTHON" ]; then
-                __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
-                __recipe="${__recipe}/release_unix-any.sh"
-                FS::is_file "$__recipe"
-                if [ $? -eq 0 ]; then
-                        OS::print_status info \
-                                "Python technology detected. Parsing job recipe: ${__recipe}\n"
-                        . "$__recipe"
-                        if [ $? -ne 0 ]; then
-                                OS::print_status error "Parse failed.\n"
-                                return 1
-                        fi
-                fi
-        fi
-
 
         # report status
         return 0
@@ -209,7 +184,8 @@ RELEASE::run_release_repo_conclude() {
         fi
 
         # execute
-        __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+        __current_path="$PWD"
+        cd "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_STATIC_REPO_DIRECTORY}"
 
 
         OS::print_status info "Generate required notice file...\n"
@@ -243,19 +219,39 @@ to \`apt-get install\`, \`yum install\`, or \`flatpak install\`.
 
 
 RELEASE::run_release_repo_setup() {
-        # execute
-        __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+        # clean up base directory
+        OS::print_status info "Safety checking release directory is a file...\n"
+        if [ -f "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" ]; then
+                OS::print_status error "check failed.\n"
+                return 1
+        fi
+        FS::remake_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
 
-        OS::print_status info "Hard resetting git to first commit...\n"
-        GIT::hard_reset_to_init "$PROJECT_PATH_ROOT"
+        # execute
+        OS::print_status info "Setting up release static repo...\n"
+        INSTALLER::setup_release_repo \
+                "$PROJECT_PATH_ROOT" \
+                "$PROJECT_PATH_RELEASE" \
+                "$PWD" \
+                "$PROJECT_STATIC_REPO" \
+                "$PROJECT_SIMULATE_RELEASE_REPO" \
+                "$PROJECT_STATIC_REPO_DIRECTORY"
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
-                OS::print_status error "Reset failed.\n"
+                OS::print_status error "setup failed.\n"
                 return 1
         fi
 
-        cd "$__current_path" && unset __current_path
-
+        # move existing items to static repo
+        __staging="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${PROJECT_PATH_RELEASE}"
+        __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_STATIC_REPO_DIRECTORY}"
+        if [ -d "$__staging" ]; then
+                OS::print_status info "exporting staging contents to static repo...\n"
+                FS::copy_all "${__staging}/" "$__dest"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "export failed.\n"
+                        return 1
+                fi
+        fi
 
         # report status
         return 0

@@ -25,15 +25,15 @@ function SHASUM-Checksum-File {
 	# execute
 	switch ($__algo) {
 	'1' {
-		return (Get-FileHash -Path $__target.FullName -Algorithm SHA1).Hash
+		$__hasher = New-Object System.Security.Cryptography.SHA1CryptoServiceProvider
 	} '224' {
 		return ""
 	} '256' {
-		return (Get-FileHash -Path $__target.FullName -Algorithm SHA256).Hash
+		$__hasher = New-Object System.Security.Cryptography.SHA256CryptoServiceProvider
 	} '384' {
-		return (Get-FileHash -Path $__target.FullName -Algorithm SHA384).Hash
+		$__hasher = New-Object System.Security.Cryptography.SHA384CryptoServiceProvider
 	} '512' {
-		return (Get-FileHash -Path $__target.FullName -Algorithm SHA512).Hash
+		$__hasher = New-Object System.Security.Cryptography.SHA512CryptoServiceProvider
 	} '512224' {
 		return ""
 	} '512256' {
@@ -41,6 +41,10 @@ function SHASUM-Checksum-File {
 	} Default {
 		return ""
 	}}
+
+	$__fileStream = [System.IO.File]::OpenRead($__target)
+	$__hash = $__hasher.ComputeHash($__fileStream)
+	return [System.BitConverter]::ToString($__hash).Replace("-", "").ToLower()
 }
 
 

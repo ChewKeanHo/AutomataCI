@@ -24,7 +24,6 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-functions_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-tech-processors_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-deb_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-rpm_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-docker_unix-any.sh"
@@ -40,14 +39,62 @@ if [ $? -ne 0 ]; then
 fi
 
 
-RELEASE::run_release_repo_setup
-if [ $? -ne 0 ]; then
-        OS::print_status error "Check failed.\n"
-        return 1
+__recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
+__recipe="${__recipe}/release_unix-any.sh"
+FS::is_file "$__recipe"
+if [ $? -eq 0 ]; then
+        OS::print_status info "Baseline source detected. Parsing job recipe: ${__recipe}\n"
+        . "$__recipe"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "Parse failed.\n"
+                return 1
+        fi
 fi
 
 
-RELEASE::run_pre_processors
+if [ ! -z "$PROJECT_PYTHON" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/release_unix-any.sh"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "Python tech detected. Parsing job recipe: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Parse failed.\n"
+                        return 1
+                fi
+        fi
+fi
+
+
+if [ ! -z "$PROJECT_GO" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_GO}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/release_unix-any.sh"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "Go tech detected. Parsing job recipe: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Parse failed.\n"
+                        return 1
+                fi
+        fi
+fi
+
+
+OS::is_command_available "RELEASE::run_pre_processors"
+if [ $? -eq 0 ]; then
+        RELEASE::run_pre_processors
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+fi
+
+
+STATIC_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_STATIC_REPO_DIRECTORY}"
+
+
+RELEASE::run_release_repo_setup
 if [ $? -ne 0 ]; then
         return 1
 fi
@@ -58,7 +105,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
 
         RELEASE::run_deb \
                 "$TARGET" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" \
+                "$STATIC_REPO" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}"
         if [ $? -ne 0 ]; then
@@ -67,7 +114,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
 
         RELEASE::run_rpm \
                 "$TARGET" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" \
+                "$STATIC_REPO" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
         if [ $? -ne 0 ]; then
                 return 1
@@ -75,7 +122,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
 
         RELEASE::run_docker \
                 "$TARGET" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" \
+                "$STATIC_REPO" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
         if [ $? -ne 0 ]; then
                 return 1
@@ -83,7 +130,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
 
         RELEASE::run_pypi \
                 "$TARGET" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" \
+                "$STATIC_REPO" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
         if [ $? -ne 0 ]; then
                 return 1
@@ -91,27 +138,35 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
 done
 
 
-RELEASE::run_checksum_seal
+RELEASE::run_checksum_seal "$STATIC_REPO"
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-RELEASE::run_post_processors
-if [ $? -ne 0 ]; then
-        return 1
+OS::is_command_available "RELEASE::run_post_processors"
+if [ $? -eq 0 ]; then
+        RELEASE::run_post_processors
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 fi
 
 
-RELEASE::run_release_repo_conclude
-if [ $? -ne 0 ]; then
-        return 1
-fi
+if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+        OS::print_status warning "Simulating release repo conclusion...\n"
+        OS::print_status warning "Simulating changelog conclusion...\n"
+else
+        RELEASE::run_release_repo_conclude
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
-RELEASE::run_changelog_conclude
-if [ $? -ne 0 ]; then
-        return 1
+        RELEASE::run_changelog_conclude
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 fi
 
 

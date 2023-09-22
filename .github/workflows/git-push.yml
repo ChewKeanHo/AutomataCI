@@ -69,6 +69,10 @@ jobs:
         id: native_ci_package
         run: |
           ./ci.cmd package
+      - name: Execute repo's native CI - RELEASE
+        id: native_ci_release
+        run: |
+          ./ci.cmd release
       - name: Execute repo's native CI - STOP
         id: native_ci_stop
         run: |
@@ -91,3 +95,4 @@ jobs:
             bin/
             tmp/
             tool/
+            releases/

@@ -10,6 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/docker.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
@@ -195,13 +196,15 @@ INSTALLER::setup_release_repo() {
         __current="$3"
         __git_repo="$4"
         __simulate="$5"
+        __label="$6"
 
 
         # validate input
         if [ -z "$__root" ] ||
                 [ -z "$__release" ] ||
                 [ -z "$__current" ] ||
-                [ -z "$__git_repo" ]; then
+                [ -z "$__git_repo" ] ||
+                [ -z "$__label" ]; then
                 return 1
         fi
 
@@ -212,24 +215,28 @@ INSTALLER::setup_release_repo() {
 
 
         # execute
-        if [ -d "${__root}/${__release}" ]; then
-                cd "${__root}/${__release}"
+        FS::make_directory "${__root}/${__release}"
+
+        if [ -d "${__root}/${__release}/${__label}" ]; then
+                cd "${__root}/${__release}/${__label}"
                 __directory="$(GIT::get_root_directory)"
                 cd "$__current"
 
                 if [ "$__directory" = "$__root" ]; then
-                        FS::remove_silently "${__root}/${__release}"
+                        FS::remove_silently "${__root}/${__release}/${__label}"
                 fi
         fi
 
+
         if [ ! -z "$__simulate" ]; then
-                FS::make_directory "${__root}/${__release}"
-                cd "${__root}/${__release}"
+                FS::make_directory "${__root}/${__release}/${__label}"
+                cd "${__root}/${__release}/${__label}"
                 git init --initial-branch=main
                 git commit --allow-empty -m "Initial Commit"
                 cd "$__current"
         else
-                GIT::clone "$__git_repo" "$__release"
+                cd "${__root}/${__release}"
+                GIT::clone "$__git_repo" "$__label"
                 case $? in
                 0|2)
                         # Accepted
@@ -239,7 +246,7 @@ INSTALLER::setup_release_repo() {
                         ;;
                 esac
 
-                cd "${__root}/${__release}"
+                cd "${__root}/${__release}/${__label}"
                 GIT::hard_reset_to_init "$__root"
                 if [ $? -ne 0 ]; then
                         cd "$__current"

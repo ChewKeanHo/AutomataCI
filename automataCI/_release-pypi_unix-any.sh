@@ -51,15 +51,19 @@ RELEASE::run_pypi() {
 
         # execute
         OS::print_status info "releasing pypi package...\n"
-        PYPI::release "$_target" "$PROJECT_GPG_ID" "$PROJECT_PYPI_REPO_URL"
-        if [ $? -ne 0 ]; then
-                OS::print_status error "release failed.\n"
-                return 1
-        fi
+        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+                OS::print_status warning "simulating pypi package push...\n"
+                OS::print_status warning "simulating remove package artifact...\n"
+        else
+                PYPI::release "$_target" "$PROJECT_GPG_ID" "$PROJECT_PYPI_REPO_URL"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "release failed.\n"
+                        return 1
+                fi
 
-        OS::print_status info "remove package artifact...\n"
-        OS::print_status info "processing package artifact for local distribution...\n"
-        FS::remove_silently "$_target"
+                OS::print_status info "remove package artifact...\n"
+                FS::remove_silently "$_target"
+        fi
 
         # report status
         return 0

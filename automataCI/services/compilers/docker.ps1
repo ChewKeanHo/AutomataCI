@@ -231,12 +231,12 @@ function DOCKER-Is-Valid {
 	)
 
 	# execute
-	if (-not (-f "${__target}")) {
+	if (-not (Test-Path -PathType Leaf -Path "${__target}")) {
 		return 1
 	}
 
 	$__output = Split-Path -Leaf -Path "${__target}"
-	if (${__output} == "docker.txt") {
+	if (${__output} -eq "docker.txt") {
 		return 0
 	}
 

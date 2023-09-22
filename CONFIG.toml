@@ -171,7 +171,7 @@ PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
 # PROJECT_GPG_ID
 # Your GPG ID for signing here. Note that this requires GPG to be installed in
 # the system and the secret key is available for performing such transaction.
-PROJECT_GPG_ID = "49B7878749107ED9C456267ACFD3316C29873FB5"
+PROJECT_GPG_ID = ""
 
 
 # PROJECT_CHANGELOG_TITLE
@@ -287,6 +287,12 @@ PROJECT_STATIC_REPO_KEY="origin"
 # PROJECT_STATIC_REPO_BRANCH
 # The git upstream branch. Default is 'master' or 'main'.
 PROJECT_STATIC_REPO_BRANCH="master"
+
+
+# PROJECT_STATIC_REPO_DIRECTORY
+# The directory name housing the static repo. Value must not be empty.
+# Default is 'static'.
+PROJECT_STATIC_REPO_DIRECTORY="static"
 
 
 # PROJECT_SIMULATE_RELEASE_REPO

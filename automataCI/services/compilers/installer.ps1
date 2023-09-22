@@ -171,7 +171,8 @@ function INSTALLER-Setup-Release-Repo {
 		[string]$__release,
 		[string]$__current,
 		[string]$__git_repo,
-		[string]$__simulate
+		[string]$__simulate,
+		[string]$__label
 	)
 
 
@@ -179,7 +180,8 @@ function INSTALLER-Setup-Release-Repo {
 	if ([string]::IsNullOrEmpty($__root) -or
 		[string]::IsNullOrEmpty($__release) -or
 		[string]::IsNullOrEmpty($__current) -or
-		[string]::IsNullOrEmpty($__git_repo)) {
+		[string]::IsNullOrEmpty($__git_repo) -or
+		[string]::IsNullOrEmpty($__label)) {
 		return 1
 	}
 
@@ -190,31 +192,34 @@ function INSTALLER-Setup-Release-Repo {
 
 
 	# execute
-	if (Test-Path -PathType Container -Path "${__root}\${__release}") {
-		$null = Set-Location "${__root}\${__release}"
+	$null = FS-Make-Directory "${__root}\${__release}"
+
+	if (Test-Path -PathType Container -Path "${__root}\${__release}\${__label}") {
+		$null = Set-Location "${__root}\${__release}\${__label}"
 		$__directory = GIT-Get-Root-Directory
 		$null = Set-Location "${__current}"
 
 		if ($__directory -eq $__root) {
-			$null = FS-Remove-Silently "${__root}\${__release}"
+			$null = FS-Remove-Silently "${__root}\${__release}\${__label}"
 		}
 	}
 
 	if (-not [string]::IsNullOrEmpty($__simulate)) {
-		$null = FS-Make-Directory "${__root}\${__release}"
-		$null = Set-Location "${__root}\${__release}"
+		$null = FS-Make-Directory "${__root}\${__release}\${__label}"
+		$null = Set-Location "${__root}\${__release}\${__label}"
 		$null = OS-Exec "git" "init --initial-branch=main"
 		$null = OS-Exec "git" "commit --allow-empty -m `"Initial Commit`""
 		$null = Set-Location "${__current}"
 	} else {
-		$__process = Git-Clone "${__git_repo}" "${__release}"
+		$null = Set-Location "${__root}\${__release}"
+		$__process = Git-Clone "${__git_repo}" "${__label}"
 		if (($__process -eq 2) -or ($__process -eq 0)) {
 			# Accepted
 		} else {
 			return 1
 		}
 
-		$null = Set-Location "${__root}\${__release}"
+		$null = Set-Location "${__root}\${__release}\${__label}"
 		$__process = GIT-Hard-Reset-To-Init "${__root}"
 		$null = Set-Location "${__current}"
 		if ($__process -ne 0) {

@@ -79,9 +79,9 @@ function GIT-Get-First-Commit-ID {
 	}
 
 	# execute
-	$__tag = Invoke-Expression "git rev-list --max-parents=0 --abbrev-commit HEAD"
-	if (-not [string]::IsNullOrEmpty($__first)) {
-		return $__tag
+	$__value = Invoke-Expression "git rev-list --max-parents=0 --abbrev-commit HEAD"
+	if (-not [string]::IsNullOrEmpty($__value)) {
+		return $__value
 	}
 
 	return ""
@@ -98,9 +98,9 @@ function GIT-Get-Latest-Commit-ID {
 	}
 
 	# execute
-	$__tag = Invoke-Expression "git rev-parse HEAD"
-	if (-not [string]::IsNullOrEmpty($__first)) {
-		return $__tag
+	$__value = Invoke-Expression "git rev-parse HEAD"
+	if (-not [string]::IsNullOrEmpty($__value)) {
+		return $__value
 	}
 	return ""
 }
@@ -116,10 +116,12 @@ function GIT-Get-Root-Directory {
 	}
 
 	# execute
-	$__tag = Invoke-Expression "git rev-parse --show-toplevel"
-	if (-not [string]::IsNullOrEmpty($__first)) {
-		return $__tag
+	$__value = Invoke-Expression "git rev-parse --show-toplevel"
+	if (-not [string]::IsNullOrEmpty($__value)) {
+		return $__value
 	}
+
+	# report status
 	return ""
 }
 
@@ -143,6 +145,10 @@ function GIT-Hard-Reset-To-Init {
 
 	# execute
 	$__first = GIT-Get-Root-Directory
+
+	# CVE-2023-42798 - Make sure the directory is not the same as the root
+	#                  directory. If it does, bail out immediately and DO
+	#                  not proceed.
 	if ($__first -eq $__root) {
 		return 1
 	}
@@ -232,7 +238,10 @@ function GIT-Remove-Worktree {
 		return 1
 	}
 
-	$null = FS-Remove-Silently "${__destination}"
+	$__process = FS-Remove-Silently "${__destination}"
+	if ($__process -ne 0) {
+		return 1
+	}
 
 	# report status
 	return 0
