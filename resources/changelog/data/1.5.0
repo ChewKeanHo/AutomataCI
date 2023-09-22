@@ -1,0 +1,12 @@
+automataCI: added checksum safety against directory targets
+automataCI: wrap Pypi login credentials inside simulation conditions
+root: updated to match the latest
+automataCI: generalized container registry's credentials
+automataCI: added simulation mechanism to test the Release Job API
+root: added Go Programming Language support
+root: updated repository metadata
+automataCI: fixed critical Release Job bug nuking the repo
+automataCI: added printout consistency for all jobs
+automataCI: updated PyPi packaging instructions
+root: added baseline source directory
+root: begin v1.5.0 development

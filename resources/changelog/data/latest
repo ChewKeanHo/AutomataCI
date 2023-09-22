@@ -1,6 +1,0 @@
-root: updated repository metadata
-automataCI: fixed critical Release Job bug nuking the repo
-automataCI: added printout consistency for all jobs
-automataCI: updated PyPi packaging instructions
-root: added baseline source directory
-root: begin v1.5.0 development
