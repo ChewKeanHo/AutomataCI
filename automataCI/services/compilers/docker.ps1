@@ -51,8 +51,8 @@ function DOCKER-Amend-Manifest {
 
 function DOCKER-Check-Login {
 	# validate input
-	if ([string]::IsNullOrEmpty(${env:DOCKER_USERNAME}) -or
-		[string]::IsNullOrEmpty(${env:DOCKER_PASSWORD})) {
+	if ([string]::IsNullOrEmpty(${env:CONTAINER_USERNAME}) -or
+		[string]::IsNullOrEmpty(${env:CONTAINER_PASSWORD})) {
 		return 1
 	}
 
@@ -263,10 +263,10 @@ function DOCKER-Login {
 	}
 
 	# execute
-	$__process = Write-Output "${env:DOCKER_PASSWORD}" `
+	$__process = Write-Output "${env:CONTAINER_PASSWORD}" `
 		| Start-Process -NoNewWindow `
 			-FilePath "docker" `
-			-ArgumentList "login --username foo --password-stdin" `
+			-ArgumentList "login --username `"${env:CONTAINER_USERNAME}`" --password-stdin" `
 			-PassThru
 
 	# report status

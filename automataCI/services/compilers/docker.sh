@@ -45,7 +45,7 @@ DOCKER::amend_manifest() {
 
 DOCKER::check_login() {
         # validate input
-        if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PASSWORD" ]; then
+        if [ -z "$CONTAINER_USERNAME" ] || [ -z "$CONTAINER_PASSWORD" ]; then
                 return 1
         fi
 
@@ -244,9 +244,9 @@ DOCKER::login() {
         fi
 
         # execute
-        printf "$DOCKER_PASSWORD" \
+        printf "$CONTAINER_PASSWORD" \
                 | docker login "$1" \
-                        --username "$DOCKER_USERNAME" \
+                        --username "$CONTAINER_USERNAME" \
                         --password-stdin
 
         # report status
