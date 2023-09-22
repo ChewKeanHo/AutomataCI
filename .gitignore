@@ -20,15 +20,15 @@ output/
 #####################
 # Native CI
 #####################
-SECRETS.toml
-bin/
-tools/
-tmp/
-log/
-build/
-pkg/
-releases/
-resources/changelog/*/.*
+/SECRETS.toml
+/bin
+/tools
+/tmp
+/log
+/build
+/pkg
+/releases
+/resources/changelog/*/.*
 
 #####################
 # LibreOffice

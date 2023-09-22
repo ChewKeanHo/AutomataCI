@@ -290,7 +290,7 @@ PROJECT_STATIC_REPO_BRANCH="master"
 
 
 # PROJECT_STATIC_REPO_DIRECTORY
-# The directory name housing the static repo. Value must not be empty.
+# The directory name housing the static repo. Value CANNOT be empty.
 # Default is 'static'.
 PROJECT_STATIC_REPO_DIRECTORY="static"
 
@@ -304,7 +304,6 @@ PROJECT_STATIC_REPO_DIRECTORY="static"
 #
 # To disable it: leave it empty.
 # To enable it: make it non-empty (e.g. 'true' string).
-#
 # PROJECT_SIMULATE_RELEASE_REPO=""  # Reserved - provided by external ecosystem.
 
 

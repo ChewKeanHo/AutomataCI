@@ -42,9 +42,11 @@ Some good business reasons why AutomataCI is made:
 * `.deb` repo (for `apt-get install`)
 * `.rpm` repo (for `yum install`)
 * `.flatpak` repo (for `flatpak install`)
-* `OCI` compatible images (for `docker run`, GitHub Packages)
-* `PyPi` Python Package (for `pip install`)
-* GitHub Pages
+* `OCI` compatible images (for `docker run`, [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry))
+* `PyPi` repo (for `pip install` [Python Packages](https://pypi.org/))
+* Static Sites ([GitHub Pages](https://pages.github.com/),
+  [Cloudflare Pages](https://pages.cloudflare.com/))
+* GitHub Security Advisory (for CVE management)
 
 
 
@@ -158,7 +160,8 @@ Why usually not required, you can update the GitHub integration files inside
 
 1. `.github/ISSUE_TEMPLATES/*` - issue templates.
 2. `.github/PULL_REQUEST_TEMPLATE/*` - pull request template.
-2. `.github/workflows/*` - GitHub Actions workflow recipes.
+3. `.github/workflows/*` - GitHub Actions workflow recipes.
+4. `.github/FUNDING.yml` - GitHub Sponsor button (Refer [Spec](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository)).
 
 
 
@@ -230,9 +233,15 @@ Chew, Kean Ho and supports from external folks. If you had been using AutomataCI
 and wish to contribute back, there are 2 ways to do so:
 
 
+
 ### Financial Support
 
-TBD
+To financially support the project, please head over to Holloway's sponorship
+store here: https://www.hollowaykeanho.com/stores/
+
+A small token purchase would helps a lot.
+
+
 
 ### Craftmanship Support
 
