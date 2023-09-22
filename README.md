@@ -44,7 +44,9 @@ Some good business reasons why AutomataCI is made:
 * `.flatpak` repo (for `flatpak install`)
 * `OCI` compatible images (for `docker run`, GitHub Packages)
 * `PyPi` Python Package (for `pip install`)
-* GitHub Pages
+* Static Sites ([GitHub Pages](https://pages.github.com/),
+  [Cloudflare Pages](https://pages.cloudflare.com/))
+* GitHub Security Advisory (for CVE management)
 
 
 
@@ -230,9 +232,15 @@ Chew, Kean Ho and supports from external folks. If you had been using AutomataCI
 and wish to contribute back, there are 2 ways to do so:
 
 
+
 ### Financial Support
 
-TBD
+To financially support the project, please head over to Holloway's sponorship
+store here: https://www.hollowaykeanho.com/stores/
+
+A small token purchase would helps a lot.
+
+
 
 ### Craftmanship Support
 
