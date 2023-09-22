@@ -43,19 +43,19 @@ function RELEASE-Run-PYPI {
 		return 1
 	}
 
-	OS-Print-Status info "checking pypi twine login credentials..."
-	$__process = PYPI-Check-Login
-	if ($__process -ne 0) {
-		OS-Print-Status error "check failed - (TWINE_USERNAME|TWINE_PASSWORD)."
-		return 1
-	}
-
 	# execute
 	OS-Print-Status info "releasing pypi package..."
 	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 		OS-Print-Status warning "Simulating pypi package push..."
 		OS-Print-Status warning "Simulating remove package artifact..."
 	} else {
+		OS-Print-Status info "checking pypi twine login credentials..."
+		$__process = PYPI-Check-Login
+		if ($__process -ne 0) {
+			OS-Print-Status error "check failed - (TWINE_USERNAME|TWINE_PASSWORD)."
+			return 1
+		}
+
 		$__process = PYPI-Release `
 			"${_target}" `
 			"${env:PROJECT_GPG_ID}" `

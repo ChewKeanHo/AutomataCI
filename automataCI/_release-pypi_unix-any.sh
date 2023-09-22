@@ -42,19 +42,19 @@ RELEASE::run_pypi() {
                 return 1
         fi
 
-        OS::print_status info "checking pypi twine login credentials...\n"
-        PYPI::check_login
-        if [ $? -ne 0 ]; then
-                OS::print_status error "check failed - (TWINE_USERNAME|TWINE_PASSWORD).\n"
-                return 1
-        fi
-
         # execute
         OS::print_status info "releasing pypi package...\n"
         if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
                 OS::print_status warning "simulating pypi package push...\n"
                 OS::print_status warning "simulating remove package artifact...\n"
         else
+                OS::print_status info "checking pypi twine login credentials...\n"
+                PYPI::check_login
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "check failed (TWINE_USERNAME|TWINE_PASSWORD).\n"
+                        return 1
+                fi
+
                 PYPI::release "$_target" "$PROJECT_GPG_ID" "$PROJECT_PYPI_REPO_URL"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "release failed.\n"
