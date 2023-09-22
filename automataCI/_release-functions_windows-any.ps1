@@ -76,6 +76,11 @@ function RELEASE-Run-Checksum-Seal {
 
 	# shasum all files
 	foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
+		if (Test-Path -PathType Container -Path "${TARGET}") {
+			OS-Print-Status warning "${TARGET} is a directory. Skipping..."
+			continue
+		}
+
 		if (-not ([string]::IsNullOrEmpty(${env:PROJECT_RELEASE_SHA256}))) {
 			OS-Print-Status info "sha256 checksuming ${TARGET}"
 			$__value = SHASUM-Checksum-File $TARGET.FullName "256"

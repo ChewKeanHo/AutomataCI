@@ -73,6 +73,11 @@ RELEASE::run_checksum_seal() {
 
         # shasum all files
         for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
+                if [ -d "$TARGET" ]; then
+                        OS::print_status warning "${TARGET} is a directory. Skipping...\n"
+                        continue
+                fi
+
                 if [ ! -z "$PROJECT_RELEASE_SHA256" ]; then
                         OS::print_status info "sha256 checksuming $TARGET\n"
                         __value="$(SHASUM::create_file "$TARGET" "256")"
