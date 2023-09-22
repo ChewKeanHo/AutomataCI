@@ -155,7 +155,7 @@ in the `automataCI/AutomataCI-Engineering-Specification.pdf` documentation.
 
 ### Update GitHub Integration Configurations
 
-Why usually not required, you can update the GitHub integration files inside
+While usually not required, you can update the GitHub integration files inside
 `.github` directory. Notable files are:
 
 1. `.github/ISSUE_TEMPLATES/*` - issue templates.
