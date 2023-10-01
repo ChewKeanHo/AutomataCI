@@ -12,6 +12,7 @@
 # the License.
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/c.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/docker.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
 
@@ -100,6 +101,56 @@ INSTALLER::setup_curl() {
                 return 0
         fi
 
+        return 1
+}
+
+
+
+
+INSTALLER::setup_c() {
+        #__os="$1"
+        #__arch="$2"
+
+
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        C::is_available
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        if [ "$1" = "darwin" ]; then
+                brew install \
+                        aarch64-elf-gcc \
+                        arm-none-eabi-gcc \
+                        riscv64-elf-gcc \
+                        x86_64-elf-gcc \
+                        i686-elf-gcc \
+                        mingw-w64 \
+                        gcc
+        else
+                brew install \
+                        aarch64-elf-gcc \
+                        arm-none-eabi-gcc \
+                        riscv64-elf-gcc \
+                        x86_64-elf-gcc \
+                        i686-elf-gcc \
+                        mingw-w64 \
+                        llvm \
+                        gcc
+        fi
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # report status
         return 1
 }
 

@@ -321,6 +321,8 @@ RPM::create_archive() {
         FS::make_directory "./tmp"
         rpmbuild \
                 --define "_topdir ${__directory}" \
+                --define "debug_package %{nil}" \
+                --define "__strip /bin/true" \
                 --target "$__arch" \
                 -ba "${__directory}/SPECS/${__sku}.spec"
         if [ $? -ne 0 ]; then

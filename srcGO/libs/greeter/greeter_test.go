@@ -13,7 +13,6 @@ type Scenario struct {
 	Name        string
 	Description string
 	Switches    []string
-	Logs        []string
 	Verdict     Verdict
 }
 

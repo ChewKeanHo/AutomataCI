@@ -79,6 +79,16 @@ if [ ! -z "$PROJECT_GO" ]; then
 fi
 
 
+if [ ! -z "$PROJECT_C" ]; then
+        OS::print_status info "Installing c...\n"
+        INSTALLER::setup_c "$PROJECT_OS" "$PROJECT_ARCH"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "install failed.\n"
+                return 1
+        fi
+fi
+
+
 
 
 # report status

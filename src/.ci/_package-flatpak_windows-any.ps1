@@ -34,15 +34,18 @@ function PACKAGE-Assemble-FLATPAK-Content {
 		[string]$__target_arch
 	)
 
+
 	# validate target before job
-	$__process = FS-Is-Target-A-Source "${__target}"
-	if ($__process -eq 0) {
+	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
+		return 10
+	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
 		return 10
 	}
 
 	if ($__target_os -ne "linux") {
 		return 10
 	}
+
 
 	# copy main program
 	$__filepath = "${__directory}\${env:PROJECT_SKU}"
@@ -51,6 +54,7 @@ function PACKAGE-Assemble-FLATPAK-Content {
 	if ($process -ne 0) {
 		return 1
 	}
+
 
 	# copy icon.svg
 	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
@@ -62,6 +66,7 @@ function PACKAGE-Assemble-FLATPAK-Content {
 		return 1
 	}
 
+
 	# copy icon-48x48.png
 	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
 	$__target = "${__target}\icons\icon-128x128.png"
@@ -71,6 +76,7 @@ function PACKAGE-Assemble-FLATPAK-Content {
 	if ($process -ne 0) {
 		return 1
 	}
+
 
 	# copy icon-128x128.png
 	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
@@ -82,8 +88,10 @@ function PACKAGE-Assemble-FLATPAK-Content {
 		return 1
 	}
 
+
 	# OPTIONAL (overrides): copy manifest.yml or manifest.json
 	# OPTIONAL (overrides): copy appdata.xml
+
 
 	# report status
 	return 0

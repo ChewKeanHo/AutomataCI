@@ -33,9 +33,11 @@ PACKAGE::assemble_docker_content() {
         __target_os="$4"
         __target_arch="$5"
 
+
         # validate project
-        FS::is_target_a_source "$__target"
-        if [ $? -eq 0 ]; then
+        if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
+                return 10
+        elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
                 return 10
         fi
 
@@ -46,6 +48,7 @@ PACKAGE::assemble_docker_content() {
                 return 10
                 ;;
         esac
+
 
         # assemble the package
         __target="$1"
@@ -58,6 +61,7 @@ PACKAGE::assemble_docker_content() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # generate the Dockerfile
         FS::write_file "${__directory}/Dockerfile" "\
@@ -113,6 +117,7 @@ ENTRYPOINT [\"/app/bin/${PROJECT_SKU}\"]
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0

@@ -30,8 +30,15 @@ TAR::create_xz() {
         # __destination="$1"
         # __source="$2"
 
+
+
+
         # validate input
-        if [ -z "$2" ] || [ -z "$1" ] || [ -e "$1" ]; then
+        if [ -z "$2" ] || [ -z "$1" ]; then
+                return 1
+        fi
+
+        if [ -e "$1" ]; then
                 return 1
         fi
 
@@ -45,16 +52,16 @@ TAR::create_xz() {
                 return 1
         fi
 
-        __dest="${1%%.xz*}"
 
         # create tar archive
-        tar -cvf "${__dest}" $2
+        tar -cvf "${1%%.xz*}" $2
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+
         # compress archive
-        XZ::create "${__dest}"
+        XZ::create "${1%%.xz*}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

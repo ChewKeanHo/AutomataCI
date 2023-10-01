@@ -128,13 +128,35 @@ function FS-Is-File {
 
 
 
+
+function FS-Is-Target-A-Library {
+	param (
+		[string]$__subject
+	)
+
+	# execute
+	if (($("${__subject}" -replace '^.*-lib') -ne "${__subject}") -or
+		($("${__subject}" -replace '^.*-libs') -ne "${__subject}") -or
+		($("${__subject}" -replace '^.*-library') -ne "${__subject}") -or
+		($("${__subject}" -replace '^.*-libraries') -ne "${__subject}")) {
+		return 0
+	}
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-Source {
 	param (
 		[string]$__subject
 	)
 
 	# execute
-	if ($("${__subject}" -replace '^.*-src') -ne "${__subject}") {
+	if (($("${__subject}" -replace '^.*-src') -ne "${__subject}") -or
+		($("${__subject}" -replace '^.*-source') -ne "${__subject}")) {
 		return 0
 	}
 

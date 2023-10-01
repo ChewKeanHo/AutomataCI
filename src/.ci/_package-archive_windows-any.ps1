@@ -34,13 +34,17 @@ function PACKAGE-Assemble-Archive-Content {
 		[string]$__target_arch
 	)
 
+
 	# copy main program
-	$__process = FS-Is-Target-A-Source "${__target}"
-	if ($__process -eq 0) {
-		# it's a source code target
+	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
 		return 10
+	} elseif ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
+		OS-Print-Status info "copying ${__target} to ${__directory}"
+		$__process = Fs-Copy-File "${__target}" "${__directory}"
+		if ($__process -ne 0) {
+			return 1
+		}
 	} else {
-		# it's a binary target
 		switch (${__target_os}) {
 		"windows" {
 			$__dest = "${__directory}\${env:PROJECT_SKU}.exe"
@@ -51,10 +55,10 @@ function PACKAGE-Assemble-Archive-Content {
 		OS-Print-Status info "copying ${__target} to ${__dest}"
 		$__process = Fs-Copy-File "${__target}" "${__dest}"
 		if ($__process -ne 0) {
-			OS-Print-Status info "copy failed."
 			return 1
 		}
 	}
+
 
 	# copy user guide
 	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
@@ -65,6 +69,7 @@ function PACKAGE-Assemble-Archive-Content {
 		return 1
 	}
 
+
 	# copy license file
 	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
 	OS-Print-Status info "copying ${__target} to ${__directory}"
@@ -73,6 +78,7 @@ function PACKAGE-Assemble-Archive-Content {
 		OS-Print-Status info "copy failed."
 		return 1
 	}
+
 
 	# report status
 	return 0

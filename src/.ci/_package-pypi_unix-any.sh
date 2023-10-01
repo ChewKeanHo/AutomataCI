@@ -33,6 +33,5 @@ PACKAGE::assemble_pypi_content() {
         __target_os="$4"
         __target_arch="$5"
 
-        # validate project
-        return 10 # NOTE: please do it inside python source instead.
+        return 10 # IMPORTANT: please do it inside python source instead.
 }

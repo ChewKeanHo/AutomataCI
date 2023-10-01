@@ -33,15 +33,18 @@ PACKAGE::assemble_flatpak_content() {
         __target_os="$4"
         __target_arch="$5"
 
+
         # validate target before job
-        FS::is_target_a_source "$__target"
-        if [ $? -eq 0 ]; then
+        if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
+                return 10
+        elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
                 return 10
         fi
 
         if [ ! "$__target_os" = "linux" ]; then
                 return 10
         fi
+
 
         # copy main program
         __target="$1"
@@ -52,6 +55,7 @@ PACKAGE::assemble_flatpak_content() {
                 return 1
         fi
 
+
         # copy icon.svg
         __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon.svg"
         __filepath="${__directory}/icon.svg"
@@ -60,6 +64,7 @@ PACKAGE::assemble_flatpak_content() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # copy icon-48x48.png
         __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon-48x48.png"
@@ -70,6 +75,7 @@ PACKAGE::assemble_flatpak_content() {
                 return 1
         fi
 
+
         # copy icon-128x128.png
         __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon-128x128.png"
         __filepath="${__directory}/icon-128x128.png"
@@ -79,8 +85,10 @@ PACKAGE::assemble_flatpak_content() {
                 return 1
         fi
 
+
         # OPTIONAL (overrides): copy manifest.yml or manifest.json
         # OPTIONAL (overrides): copy appdata.xml
+
 
         # report status
         return 0

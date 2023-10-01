@@ -34,13 +34,27 @@ function PACKAGE-Assemble-DEB-Content {
 		[string]$__target_arch
 	)
 
+
 	# validate target before job
-	$__process = FS-Is-Target-A-Source "${__target}"
-	if ($__process -eq 0) {
-		# it's a source code target
+	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
 		return 10
+	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
+		# copy main libary
+		# TIP: (1) usually is: usr/local/lib
+		#      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
+		$__filepath = "${__directory}\data\usr\local\lib\${env:PROJECT_SKU}"
+		$__filepath = "${__filepath}\${env:PROJECT_SKU}"
+		OS-Print-Status info "copying ${__target} to ${__filepath}"
+		$__process = FS-Make-Housing-Directory "${__filepath}"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = FS-Copy-File "${__target}" "${__filepath}"
+		if ($__process -ne 0) {
+			return 1
+		}
 	} else {
-		# it's a binary target
 		switch (${__target_os}) {
 		"windows" {
 			$__dest = "${__directory}\${env:PROJECT_SKU}.exe"
@@ -64,11 +78,13 @@ function PACKAGE-Assemble-DEB-Content {
 		}
 	}
 
+
 	# OPTIONAL (overrides): copy usr/share/docs/${env:PROJECT_SKU}/changelog.gz
 	# OPTIONAL (overrides): copy usr/share/docs/${env:PROJECT_SKU}/copyright.gz
 	# OPTIONAL (overrides): copy usr/share/man/man1/${env:PROJECT_SKU}.1.gz
 	# OPTIONAL (overrides): generate ${__directory}/control/md5sum
 	# OPTIONAL (overrides): generate ${__directory}/control/control
+
 
 	# report status
 	return 0

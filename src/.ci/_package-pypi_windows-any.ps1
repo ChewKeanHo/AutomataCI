@@ -34,6 +34,5 @@ function PACKAGE-Assemble-PYPI-Content {
 		[string]$__target_arch
 	)
 
-	# validate project
-	return 10 # NOTE: please do it inside python source instead.
+	return 10 # IMPORTANT: please do it inside python source instead.
 }

@@ -11,6 +11,7 @@
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\c.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\docker.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
 
@@ -24,6 +25,7 @@ function INSTALLER-Setup {
 		$null = choco upgrade chocolatey -y
 		return 0
 	}
+
 
 	# execute installation
 	$null = Invoke-RestMethod "https://community.chocolatey.org/install.ps1" `
@@ -40,6 +42,7 @@ function INSTALLER-Setup {
 		return 1
 	}
 	$null = FS-Remove-Silently ".\install.ps1"
+
 
 	# return status
 	return OS-Is-Command-Available "choco"
@@ -60,11 +63,13 @@ function INSTALLER-Setup-Curl {
 		return 0
 	}
 
+
 	# execute
 	$__process = OS-Exec "choco" "install curl -y"
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	$__process = OS-Is-Command-Available "curl"
@@ -73,6 +78,33 @@ function INSTALLER-Setup-Curl {
 	}
 
 	return 1
+}
+
+
+
+
+function INSTALLER-Setup-C {
+	# validate input
+	$__process =  OS-Is-Command-Available "choco"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$__process = OS-Exec "choco" "install gcc-arm-embedded -y"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = OS-Exec "choco" "install mingw -y"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
 }
 
 
@@ -92,11 +124,13 @@ function INSTALLER-Setup-Docker {
 		return 0
 	}
 
+
 	# execute
 	$__process = DOCKER-Setup-Builder-Multiarch
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0
@@ -117,11 +151,13 @@ function INSTALLER-Setup-Go {
 		return 0
 	}
 
+
 	# execute
 	$__process = OS-Exec "choco" "install go -y"
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	$__process = OS-Is-Command-Available "go"
@@ -147,11 +183,13 @@ function INSTALLER-Setup-Python {
 		return 0
 	}
 
+
 	# execute
 	$__process = OS-Exec "choco" "install python -y"
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	$__process = OS-Is-Command-Available "python"
@@ -226,6 +264,7 @@ function INSTALLER-Setup-Release-Repo {
 			return 1
 		}
 	}
+
 
 	# report status
 	return 0

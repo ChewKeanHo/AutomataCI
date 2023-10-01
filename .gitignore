@@ -76,6 +76,9 @@ certbot.log
 *.d
 !*.d/
 *.o
+*.a
+*.dll
+*.exe
 *.elf
 *.hex
 *.bin

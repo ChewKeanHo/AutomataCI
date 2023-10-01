@@ -120,15 +120,37 @@ FS::is_file() {
 
 
 
-FS::is_target_a_source() {
+FS::is_target_a_library() {
         # __target="$1"
 
         # execute
-        if [ "${1#*-src}" != "$1" ]; then
+        if [ "${1#*-lib}" != "$1" ] ||
+                [ "${1#*-libs}" != "$1" ] ||
+                [ "${1#*-library}" != "$1" ] ||
+                [ "${1#*-libraries}" != "$1" ]; then
+                printf -- "0"
                 return 0
         fi
 
         # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
+FS::is_target_a_source() {
+        # __target="$1"
+
+        # execute
+        if [ "${1#*-src}" != "$1" ] || [ "${1#*-source}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+        # report status
+        printf -- "1"
         return 1
 }
 

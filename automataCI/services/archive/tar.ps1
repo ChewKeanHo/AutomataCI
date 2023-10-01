@@ -35,8 +35,11 @@ function TAR-Create-XZ {
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__destination) -or
-		[string]::IsNullOrEmpty($__source) -or
-		(Test-Path -Path $__destination)) {
+		[string]::IsNullOrEmpty($__source)) {
+		return 1
+	}
+
+	if (Test-Path -Path $__destination) {
 		return 1
 	}
 

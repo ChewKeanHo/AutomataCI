@@ -311,6 +311,8 @@ function RPM-Create-Archive {
 	$null = FS-Make-Directory ".\SRPMCS"
 	$null = FS-Make-Directory ".\tmp"
 	$__arguments = "--define `"_topdir ${__directory}`" " +
+			"--define `"debug_package %{nil}`" " +
+			"--define `"__strip /bin/true`" " +
 			"--target `"$__arch`" " +
 			"-ba `"${__directory}\SPECS\${__sku}.spec`""
 	$__process = OS-Exec "rpmbuild" "$__arguments"

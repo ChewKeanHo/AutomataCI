@@ -131,7 +131,7 @@ func TestProcessAPI(t *testing.T) {
 			t.Logf("[ FAILED ] Not expecting output but got something.\n")
 			t.Fail()
 		default:
-			t.Logf("[ SUCCESS ]\n\n\n")
+			t.Logf("[ PASSED ]\n\n\n")
 		}
 	}
 }
