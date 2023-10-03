@@ -77,6 +77,39 @@ function GPG-Export-Public-Key {
 
 
 
+function GPG-Export-Public-Keyring {
+	param(
+		[string]$__destination,
+		[string]$__id
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__destination) -or [string]::IsNullOrEmpty($__id)) {
+		return 1
+	}
+
+	$__process = GPG-Is-Available "${__id}"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$null = FS-Remove-Silently "${__destination}"
+	$__process = OS-Exec "gpg" "--export `"${__id}`" > `"${__destination}`""
+
+
+	# report status
+	if ($__process -eq 0) {
+		return 0
+	}
+	return 1
+}
+
+
+
+
 function GPG-Is-Available {
 	param (
 		[string]$__id

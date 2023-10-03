@@ -15,6 +15,7 @@
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/disk.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/ar.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/gpg.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/checksum/md5.sh"
 
 
@@ -322,4 +323,68 @@ DEB::create_archive() {
 
         # report status
         return $__exit
+}
+
+
+
+
+DEB::create_source_list() {
+        __is_simulated="$1"
+        __directory="$2"
+        __gpg_id="$3"
+        __url="$4"
+        __codename="$5"
+        __distribution="$6"
+        __sku="$7"
+
+
+        # validate input
+        if [ ! -z "$__is_simulated" ]; then
+                return 11
+        fi
+
+        if [ -z "$__directory" ] ||
+                [ ! -d "$__directory" ] ||
+                [ -z "$__gpg_id" ] ||
+                [ -z "$__url" ] ||
+                [ -z "$__codename" ] ||
+                [ -z "$__distribution" ] ||
+                [ -z "$__sku" ]; then
+                return 1
+        fi
+
+
+        # execute
+        __key="usr/local/share/keyrings/${__sku}-keyring.gpg"
+        __filename="${__directory}/data/etc/apt/sources.list.d/${__sku}.list"
+
+        FS::is_file "$__filename"
+        if [ $? -eq 0 ]; then
+                return 10
+        fi
+
+        FS::is_file "${__directory}/data/$__key"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+
+        FS::make_housing_directory "$__filename"
+        FS::write_file "${__filename}" "\
+# WARNING: AUTO-GENERATED - DO NOT EDIT!
+deb [signed-by=/${__key}] ${__url} ${__codename} ${__distribution}
+"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::make_housing_directory "${__directory}/data/$__key"
+        GPG::export_public_keyring "${__directory}/data/$__key" "$__gpg_id"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
 }

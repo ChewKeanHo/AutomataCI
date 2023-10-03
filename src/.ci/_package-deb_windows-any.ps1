@@ -21,6 +21,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\deb.ps1"
 
 
 
@@ -54,6 +55,8 @@ function PACKAGE-Assemble-DEB-Content {
 		if ($__process -ne 0) {
 			return 1
 		}
+
+		$__keyring = "lib${env:PROJECT_SKU}"
 	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
@@ -80,6 +83,26 @@ function PACKAGE-Assemble-DEB-Content {
 		if ($__process -ne 0) {
 			return 1
 		}
+	}
+
+	OS-Print-Status info "overriding source.list file..."
+	if ([string]::IsNullOrEmpty($__keyring) {
+		$__keyring = "${env:PROJECT_SKU}"
+	}
+
+	$__url = "${env:PROJECT_STATIC_URL}/deb"
+	$__url = $__url -replace "//deb" "/deb"
+	$__process = DEB-Create-Source-List `
+		"${env:PROJECT_DEBIAN_CREATE_SOURCE_LIST}" `
+		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
+		"${__directory}" `
+		"${env:PROJECT_GPG_ID}" `
+		"${__url}" `
+		"${env:PROJECT_REPREPRO_CODENAME}" `
+		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
+		"${__keyring}"
+	if ($__process -ne 0) {
+		return 1
 	}
 
 

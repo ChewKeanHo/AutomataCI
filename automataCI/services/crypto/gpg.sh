@@ -70,6 +70,37 @@ GPG::export_public_key() {
 
 
 
+GPG::export_public_keyring() {
+        #__destination="$1"
+        #__id="$2"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ]; then
+                return 1
+        fi
+
+        GPG::is_available "$2"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        FS::remove_silently "$1"
+        gpg --export "$2" > "$1"
+
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+        return 1
+}
+
+
+
+
 GPG::is_available() {
         #__id="$1"
 

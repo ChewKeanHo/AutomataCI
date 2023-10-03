@@ -22,6 +22,7 @@ fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/deb.sh"
 
 
 
@@ -36,7 +37,7 @@ PACKAGE::assemble_deb_content() {
 
         # validate target before job
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
-                return 10
+                return 10 # not applicable
         elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
                 # copy main libary
                 # TIP: (1) usually is: usr/local/lib
@@ -51,9 +52,10 @@ PACKAGE::assemble_deb_content() {
 
                 FS::copy_file "$1" "$__filepath"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed.\n"
                         return 1
                 fi
+
+                __keyring="lib$PROJECT_SKU"
         elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
@@ -82,6 +84,23 @@ PACKAGE::assemble_deb_content() {
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
+        fi
+
+        OS::print_status info "overriding source.list file...\n"
+        __url="${PROJECT_STATIC_URL}/deb"
+        if [ -z "$__keyring" ]; then
+                __keyring="$PROJECT_SKU"
+        fi
+        DEB::create_source_list \
+                "$PROJECT_SIMULATE_RELEASE_REPO" \
+                "$__directory" \
+                "$PROJECT_GPG_ID" \
+                "${__url%//deb*}/deb" \
+                "$PROJECT_REPREPRO_CODENAME" \
+                "$PROJECT_DEBIAN_DISTRIBUTION" \
+                "$__keyring"
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
 

@@ -337,3 +337,74 @@ function DEB-Create-Archive {
 	# report status
 	return $__process
 }
+
+
+
+
+function DEB-Create-Source-List {
+	param(
+		[string]$__to_create,
+		[string]$__is_simulated,
+		[string]$__directory,
+		[string]$__gpg_id,
+		[string]$__url,
+		[string]$__codename,
+		[string]$__distribution,
+		[string]$__sku
+	)
+
+
+	# validate input
+	$__to_create = STRINGS-To-Lowercase "${__to_create}"
+	if ("${__to_create}" -ne "true") {
+		return 11
+	}
+
+	if (-not [string]::IsNullOrEmpty($__is_simulated)) {
+		return 12
+	}
+
+	if ([string]::IsNullOrEmpty(${__directory}) -or
+		(-not (Test-Path "${__directory}" -PathType Container)) -or
+		[string]::IsNullOrEmpty(${__gpg_id}) -or
+		[string]::IsNullOrEmpty(${__url}) -or
+		[string]::IsNullOrEmpty(${__codename}) -or
+		[string]::IsNullOrEmpty(${__distribution}) -or
+		[string]::IsNullOrEmpty(${__sku})) {
+		return 1
+	}
+
+
+	# execute
+	$__key = "usr\local\share\keyrings\${__sku}-keyring.gpg"
+	$__filename = "${__directory}\data\etc\apt\sources.list.d\${__sku}.list"
+
+	$__process = FS-Is-File "${__filename}"
+	if ($__process -eq 0) {
+		return 10
+	}
+
+	$__process = FS-Is-File "${__directory}\data\${__key}"
+	if ($__process -eq 0) {
+		return 1
+	}
+
+	$null = FS-Make-Housing-Directory "${__filename}"
+	$__process = FS-Write-File "${__filename}" @"
+# WARNING: AUTO-GENERATED - DO NOT EDIT!
+deb [signed-by=/${__key}] ${__url} ${__codename} ${__distribution}
+"@
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$null = FS-Make-Housing-Directory "${__directory}\data\${__key}"
+	$__process = GPG-Export-Public-Keyring "${__directory}\data\${__key}" "${__gpg_id}"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
