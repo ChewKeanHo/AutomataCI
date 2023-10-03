@@ -1,8 +1,9 @@
 automataci (1.6.0) stable; urgency=low
 
+  * srcPYTHON: backported all latest CI changes
   * srcGO: added wasm support
   * root: enabled Emscripten WASM compilation for C
   * root: added C Programming Language support
   * README.md: corrected typo
 
--- Your Legal Full Name Here <contact@youremail.example>  Tue, 03 Oct 2023 13:29:33 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Tue, 03 Oct 2023 13:53:07 +0800

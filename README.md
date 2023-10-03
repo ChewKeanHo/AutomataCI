@@ -1,5 +1,5 @@
 # AutomataCI
-[![AutomataCI](https://cdn.githubraw.com/ChewKeanHo/AutomataCI/experimental/resources/icons/icon-1200x400.svg)](#automataci)
+[![AutomataCI](https://cdn.githubraw.com/ChewKeanHo/AutomataCI/experimental/src/icons/icon-1200x400.svg)](#automataci)
 
 This is a template git repository equipped with a native built-in
 semi-autonomous CI tools known as `AutomataCI`. This allows one to run CI with
@@ -49,8 +49,8 @@ Some good business reasons why AutomataCI is made:
 
 ### Deployable Distributions
 
-* `.deb` repo (for `apt-get install`)
-* `.rpm` repo (for `yum install`)
+* `.deb` repo (with `apt-get install` capability)
+* `.rpm` repo (with `yum install` capability)
 * `.flatpak` repo (for `flatpak install`)
 * `OCI` compatible images (for `docker run`, [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry))
 * `PyPi` repo (for `pip install` [Python Packages](https://pypi.org/))

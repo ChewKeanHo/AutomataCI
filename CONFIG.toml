@@ -119,7 +119,7 @@ PROJECT_PATH_GO_ENGINE = "go-engine"
 #
 # To enable it: simply supply the path (e.g. default is 'srcC').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_C = ''
+PROJECT_C = 'srcC'
 
 
 
@@ -136,7 +136,7 @@ PROJECT_C = ''
 #
 # To enable it: simply supply the path (e.g. default is 'srcPYTHON').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_PYTHON = 'srcPYTHON'
+PROJECT_PYTHON = ''
 
 
 # PROJECT_PATH_PYTHON_ENGINE
@@ -418,4 +418,4 @@ PROJECT_PATH_DOCS = "public"
 # PROJECT_PATH_RESOURCES
 # This is the relative pathing to PROJECT_PATH_ROOT where it locates the
 # project's main non-code generative materials directory.
-PROJECT_PATH_RESOURCES = "resources"
+PROJECT_PATH_RESOURCES = "src"
