@@ -141,7 +141,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for darwin-amd64 microprocessor
+# compile for darwin-amd64 (microprocessor)
 if [ "$PROJECT_OS" = "darwin" ]; then
         BUILD::compile \
                 "c_binary" \
@@ -167,7 +167,7 @@ if [ "$PROJECT_OS" = "darwin" ]; then
 fi
 
 
-# compile for darwin-arm64 microprocessor
+# compile for darwin-arm64 (microprocessor)
 if [ "$PROJECT_OS" = "darwin" ]; then
         BUILD::compile \
                 "c_binary" \
@@ -193,7 +193,7 @@ if [ "$PROJECT_OS" = "darwin" ]; then
 fi
 
 
-# compile for linux-armel microprocessor
+# compile for linux-armel (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -206,7 +206,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-armhf microprocessor
+# compile for linux-armhf (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -219,7 +219,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-mips microprocessor
+# compile for linux-mips (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -232,7 +232,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-mips64 microprocessor
+# compile for linux-mips64 (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -245,7 +245,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-mips64el microprocessor
+# compile for linux-mips64el (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -258,7 +258,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-mips64r6 microprocessor
+# compile for linux-mips64r6 (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -271,7 +271,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-mips64r6el microprocessor
+# compile for linux-mips64r6el (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -284,7 +284,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-powerpc microprocessor
+# compile for linux-powerpc (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -297,7 +297,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-ppc64el microprocessor
+# compile for linux-ppc64el (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -310,7 +310,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-s390x microprocessor
+# compile for linux-s390x (microprocessor)
 BUILD::compile \
         "c_binary" \
         "linux" \
@@ -323,7 +323,7 @@ if [ $? -ne 0 -a $? -ne 10 ]; then
 fi
 
 
-# compile for linux-avr ATMEL microcontroller
+# compile for linux-avr (ATMEL microcontroller)
 OS::is_command_available "avr-objcopy"
 if [ $? -eq 0 ]; then
         BUILD::compile "c_binary" "linux" "avr" "automataCI.txt" "\
@@ -362,6 +362,19 @@ if [ $? -eq 0 ]; then
 
                 FS::remove_silently "$TARGET"
         fi
+fi
+
+
+# compile for js-wasm (web)
+ALLOW_MEMORY_GROWTH=1 BUILD::compile \
+        "c_binary" \
+        "js" \
+        "wasm" \
+        "automataCI.txt" \
+        "${SETTINGS_BIN} -fno-stack-protector -U_FORTIFY_SOURCE" \
+        "$COMPILER"
+if [ $? -ne 0 -a $? -ne 10 ]; then
+        EXIT_CODE=1
 fi
 
 

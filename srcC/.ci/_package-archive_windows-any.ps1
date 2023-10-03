@@ -49,6 +49,26 @@ function PACKAGE-Assemble-Archive-Content {
 		if ($__process -ne 0) {
 			return 1
 		}
+	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+		return 10 # handled by wasm instead
+	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+		OS-Print-Status info "copying ${__target} to ${__directory}"
+		$__process = Fs-Copy-File "${__target}" "${__directory}"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = FS-Is-File "$($__target -replace '\.wasm.*$', '.js')"
+		if ($__process -eq 0) {
+			OS-Print-Status info `
+				"copying $($__target -replace '\.wasm.*$', '.js') to ${__directory}"
+			$__process = Fs-Copy-File `
+					"$($__target -replace '\.wasm.*$', '.js')" `
+					"${__directory}"
+			if ($__process -ne 0) {
+				return 1
+			}
+		}
 	} else {
 		switch (${__target_os}) {
 		"windows" {

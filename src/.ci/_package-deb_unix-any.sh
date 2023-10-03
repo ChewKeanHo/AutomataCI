@@ -37,7 +37,7 @@ PACKAGE::assemble_deb_content() {
         # validate target before job
         FS::is_target_a_source "$__target"
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
-                return 10
+                return 10 # not applicable
         elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
                 # copy main libary
                 # TIP: (1) usually is: usr/local/lib
@@ -54,6 +54,10 @@ PACKAGE::assemble_deb_content() {
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
+        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+                return 10 # not applicable
         else
                 case "$__target_os" in
                 windows)

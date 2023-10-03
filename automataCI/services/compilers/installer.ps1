@@ -102,6 +102,13 @@ function INSTALLER-Setup-C {
 		return 1
 	}
 
+	# BUG: choco fails to install emscripten's dependency properly (git.install)
+	#      See: https://github.com/aminya/chocolatey-emscripten/issues/2
+	#$__process = OS-Exec "choco" "install emscripten -y"
+	#if ($__process -ne 0) {
+	#	return 1
+	#}
+
 
 	# report status
 	return 0

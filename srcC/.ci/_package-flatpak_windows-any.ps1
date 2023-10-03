@@ -37,11 +37,15 @@ function PACKAGE-Assemble-FLATPAK-Content {
 
 	# validate target before job
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
-		return 10
+		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
-		return 10
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+		return 10 # not applicable
 	} elseif ($__target_os -ne "linux") {
-		return 10
+		return 10 # not applicable
 	}
 
 

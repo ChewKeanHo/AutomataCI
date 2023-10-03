@@ -15,13 +15,16 @@ function FS-Append-File {
 		[string]$__content
 	)
 
+
 	# validate target
 	if ([string]::IsNullOrEmpty($__target)) {
 		return 1
 	}
 
+
 	# perform file write
 	$null = Add-Content -Path $__target -Value $__content
+
 
 	# report status
 	if ($?) {
@@ -40,13 +43,16 @@ function FS-Copy-All {
 		[string]$__destination
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
 		return 1
 	}
 
+
 	# execute
 	$null = Copy-Item -Path "${__source}\*" -Destination "${__destination}" -Recurse
+
 
 	# report status
 	if ($?) {
@@ -64,13 +70,16 @@ function FS-Copy-File {
 		[string]$__destination
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
 		return 1
 	}
 
+
 	# execute
 	$null = Copy-Item -Path "${__source}" -Destination "${__destination}"
+
 
 	# report status
 	if ($?) {
@@ -87,6 +96,7 @@ function FS-Is-Directory {
 	param (
 		[string]$__target
 	)
+
 
 	# execute
 	if ([string]::IsNullOrEmpty($__target)) {
@@ -107,6 +117,7 @@ function FS-Is-File {
 	param (
 		[string]$__target
 	)
+
 
 	# execute
 	if ([string]::IsNullOrEmpty($__target)) {
@@ -134,6 +145,7 @@ function FS-Is-Target-A-Library {
 		[string]$__subject
 	)
 
+
 	# execute
 	if (($("${__subject}" -replace '^.*-lib') -ne "${__subject}") -or
 		($("${__subject}" -replace '^.*-libs') -ne "${__subject}") -or
@@ -141,6 +153,7 @@ function FS-Is-Target-A-Library {
 		($("${__subject}" -replace '^.*-libraries') -ne "${__subject}")) {
 		return 0
 	}
+
 
 	# report status
 	return 1
@@ -154,14 +167,58 @@ function FS-Is-Target-A-Source {
 		[string]$__subject
 	)
 
+
 	# execute
 	if (($("${__subject}" -replace '^.*-src') -ne "${__subject}") -or
 		($("${__subject}" -replace '^.*-source') -ne "${__subject}")) {
 		return 0
 	}
 
+
 	# report status
 	return 1
+}
+
+
+
+
+function FS-Is-Target-A-WASM {
+	param (
+		[string]$__subject
+	)
+
+
+	# execute
+	if ($("${__subject}" -replace '^.*-wasm') -ne "${__subject}") {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
+function FS-Is-Target-A-WASM-JS {
+	param (
+		[string]$__subject
+	)
+
+
+	# execute
+	if ($("${__subject}" -replace '^.*-wasm') -eq "${__subject}") {
+		return 1
+	}
+
+	if ("$("${__subject}" -replace '^.*-wasm').js" -eq "${__subject}") {
+		return 1
+	}
+
+
+	# report status
+	return 0
 }
 
 
@@ -172,13 +229,16 @@ function FS-Is-Target-Exist {
 		[string]$__target
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty("${__target}")) {
 		return 1
 	}
 
+
 	# perform checking
 	$__process = Test-Path -Path "${__target}" -ErrorAction SilentlyContinue
+
 
 	# report status
 	if ($__process) {
@@ -195,10 +255,12 @@ function FS-List-All {
 		[string]$__target
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty("${__target}")) {
 		return 1
 	}
+
 
 	# execute
 	if ((FS-Is-Directory "${__target}") -ne 0) {
@@ -224,6 +286,7 @@ function FS-Make-Directory {
 		[string]$__target
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty("${__target}")) {
 		return 1
@@ -239,13 +302,16 @@ function FS-Make-Directory {
 		return 1
 	}
 
+
 	# execute
 	$__process = New-Item -ItemType Directory -Force -Path "${__target}"
+
 
 	# report status
 	if ($__process) {
 		return 0
 	}
+
 	return 1
 }
 
@@ -257,6 +323,7 @@ function FS-Make-Housing-Directory {
 		[string]$__target
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target)) {
 		return 1
@@ -267,8 +334,10 @@ function FS-Make-Housing-Directory {
 		return 0
 	}
 
+
 	# perform create
 	$__process = FS-Make-Directory (Split-Path -Path $__target)
+
 
 	# report status
 	return $__process
@@ -283,10 +352,12 @@ function FS-Move {
 		[string]$__destination
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
 		return 1
 	}
+
 
 	# execute
 	try {
@@ -297,6 +368,7 @@ function FS-Move {
 	} catch {
 		return 1
 	}
+
 
 	# report status
 	return 0
@@ -310,14 +382,17 @@ function FS-Remake-Directory {
 		[string]$__target
 	)
 
+
 	# execute
 	$null = FS-Remove-Silently "${__target}"
 	$__process = FS-Make-Directory "${__target}"
+
 
 	# report status
 	if ($__process -eq 0) {
 		return 0
 	}
+
 	return 1
 }
 
@@ -329,13 +404,16 @@ function FS-Remove {
 		[string]$__target
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target)) {
 		return 1
 	}
 
+
 	# execute
 	$__process = Remove-Item $__target -Force -Recurse
+
 
 	# report status
 	if ($__process -eq $null) {
@@ -353,13 +431,16 @@ function FS-Remove-Silently {
 		[string]$__target
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target)) {
 		return 0
 	}
 
+
 	# execute
 	$null = Remove-Item $__target -Force -Recurse -ErrorAction SilentlyContinue
+
 
 	# report status
 	return 0
@@ -374,6 +455,7 @@ function FS-Rename {
 		[string]$__target
 	)
 
+
 	# execute
 	return FS-Move "${__source}" "${__target}"
 }
@@ -386,6 +468,7 @@ function FS-Touch-File {
 		[string]$__target
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target)) {
 		return 1
@@ -396,8 +479,10 @@ function FS-Touch-File {
 		return 0
 	}
 
+
 	# execute
 	$__process = New-Item -Path "${__target}"
+
 
 	# report status
 	if ($__process) {
@@ -416,6 +501,7 @@ function FS-Write-File {
 		[string]$__content
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target)) {
 		return 1
@@ -426,8 +512,10 @@ function FS-Write-File {
 		return 1
 	}
 
+
 	# perform file write
 	$null = Set-Content -Path $__target -Value $__content
+
 
 	# report status
 	if ($?) {

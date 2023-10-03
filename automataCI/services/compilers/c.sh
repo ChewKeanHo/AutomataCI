@@ -240,6 +240,9 @@ C::get_compiler_by_arch() {
         s390x)
                 __compiler="s390x-linux-gnu-gcc"
                 ;;
+        wasm)
+                __compiler="emcc"
+                ;;
         *)
                 ;;
         esac
@@ -362,6 +365,7 @@ C::is_available() {
                 ! -z "$(C::get_compiler_by_arch "darwin" "arm64")" -a \
                 ! -z "$(C::get_compiler_by_arch "" "arm64")" -a \
                 ! -z "$(C::get_compiler_by_arch "" "i386")" -a \
+                ! -z "$(C::get_compiler_by_arch "" "wasm")" -a \
                 ! -z "$(C::get_compiler_by_arch "" "riscv64")" ]; then
                 return 0
         fi

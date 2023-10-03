@@ -37,9 +37,13 @@ function PACKAGE-Assemble-DOCKER-Content {
 
 	# validate project
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
-		return 10
+		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
-		return 10
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+		return 10 # not applicable
 	}
 
 	switch ($__target_os) {

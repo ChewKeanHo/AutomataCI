@@ -212,6 +212,8 @@ function C-Get-Compiler-By-Arch {
 		$__compiler = "riscv64-elf-gcc"
 	} s390x {
 		$__compiler = "s390x-linux-gnu-gcc"
+	} wasm {
+		$__compiler = "emcc"
 	} default {
 	}}
 
@@ -308,8 +310,9 @@ function C-Get-Strict-Settings {
 
 
 function C-Is-Available {
-	if ([string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "windows" "amd64")) -and
-		[string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "windows" "arm64"))) {
+	if (-not ([string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "windows" "amd64"))) -and
+		(-not [string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "" "wasm"))) -and
+		(-not [string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "windows" "arm64")))) {
 		return 0
 	}
 

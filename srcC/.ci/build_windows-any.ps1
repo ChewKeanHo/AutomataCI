@@ -114,6 +114,19 @@ if (($__process -ne 0) -and ($__process -ne 10)) {
 }
 
 
+# compile for js-wasm (web)
+$__process = BUILD-Compile `
+	"c_binary" `
+	"js" `
+	"wasm" `
+	"automataCI.txt" `
+	"${SETTINGS_BIN} -fno-stack-protector -U_FORTIFY_SOURCE" `
+	"$COMPILER"
+if (($__process -ne 0) -and ($__process -ne 10)) {
+	$EXIT_CODE = 1
+}
+
+
 
 
 # report status

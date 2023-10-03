@@ -246,7 +246,13 @@ function BUILD-_Exec-Build {
 		$_target_source = "${env:PROJECT_C}"
 		$_target_type = "bin"
 		$_target_directory = "${_target_directory}\cbin_${_target}"
-		$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${_target}.exe"
+		switch ($_target_arch) {
+		wasm {
+			$_target = "${_target}.wasm"
+		} default {
+			$_target = "${_target}.exe"
+		}}
+		$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${_target}"
 	} c_library {
 		$_target_source = "${env:PROJECT_C}"
 		$_target_type = "lib"

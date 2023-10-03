@@ -240,7 +240,15 @@ BUILD::_exec_build() {
                 _target_source="$PROJECT_C"
                 _target_type="bin"
                 _target_directory="${_target_directory}/cbin_${_target}"
-                _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${_target}.elf"
+                case "$_target_arch" in
+                wasm)
+                        _target="${_target}.wasm"
+                        ;;
+                *)
+                        _target="${_target}.elf"
+                        ;;
+                esac
+                _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${_target}"
                 ;;
         c_library)
                 _target_source="$PROJECT_C"

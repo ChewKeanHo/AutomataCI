@@ -30,7 +30,7 @@ Some good business reasons why AutomataCI is made:
 
 * Nim Programming Language (*Coming Soon*)
 * [Go Programming Language](https://go.dev/)
-* C Programming Language - covering
+* C Programming Language
   1. [i386 & amd64 GCC Compilers](https://gcc.gnu.org/)
   2. [ARM (-64, -el, -hf) Cross-Compilers](https://wiki.debian.org/CrossToolchains)
   3. [MIPS (-64 -64el, -64r6, -64r6el, -el, -r6, -r6el) Cross-Compilers](https://wiki.debian.org/CrossToolchains)
@@ -40,6 +40,7 @@ Some good business reasons why AutomataCI is made:
   7. [AVR Cross-Compiler](https://tldp.org/HOWTO/Avr-Microcontrollers-in-Linux-Howto/x207.html)
   8. [Clang](https://clang.llvm.org/)
   9. [MinGW](https://www.mingw-w64.org/)
+  10. [Emscripten WASM](https://emscripten.org/)
 * Node Programming Language (*Coming Soon*)
 * [Python Programming Language](https://www.python.org/)
 * Some Manual MISC stuffs

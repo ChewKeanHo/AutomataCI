@@ -76,6 +76,10 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
+        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+                return 10 # not applicable
         else
                 # copy main program
                 # TIP: (1) copy all files into "${__directory}/BUILD" directory.

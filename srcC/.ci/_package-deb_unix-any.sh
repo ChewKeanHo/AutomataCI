@@ -54,6 +54,10 @@ PACKAGE::assemble_deb_content() {
                         OS::print_status error "copy failed.\n"
                         return 1
                 fi
+        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+                return 10 # not applicable
         else
                 case "$__target_os" in
                 windows)

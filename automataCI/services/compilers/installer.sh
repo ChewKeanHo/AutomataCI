@@ -133,6 +133,7 @@ INSTALLER::setup_c() {
                         x86_64-elf-gcc \
                         i686-elf-gcc \
                         mingw-w64 \
+                        emscripten \
                         gcc
         else
                 brew install \
@@ -142,6 +143,7 @@ INSTALLER::setup_c() {
                         x86_64-elf-gcc \
                         i686-elf-gcc \
                         mingw-w64 \
+                        emscripten \
                         llvm \
                         gcc
         fi

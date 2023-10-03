@@ -37,7 +37,7 @@ function PACKAGE-Assemble-RPM-Content {
 
 	# validate target before job
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
-		return 10
+		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
 		# copy main libary
 		# TIP: (1) usually is: usr/local/lib
@@ -76,6 +76,10 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 		if ($__process -ne 0) {
 			return 1
 		}
+	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+		return 10 # not applicable
 	} else {
 		switch (${__target_os}) {
 		"windows" {

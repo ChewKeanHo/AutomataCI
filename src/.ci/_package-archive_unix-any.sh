@@ -36,12 +36,30 @@ PACKAGE::assemble_archive_content() {
 
         # package based on target's nature
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
-                return 10
+                return 10 # not applicable
         elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
                 OS::print_status info "copying ${__target} to ${__directory}\n"
                 FS::copy_file "$__target" "$__directory"
                 if [ $? -ne 0 ]; then
                         return 1
+                fi
+        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+                return 10 # handled by wasm instead
+        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+                OS::print_status info "copying ${__target} to ${__directory}\n"
+                FS::copy_file "$__target" "$__directory"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+                FS::is_file "${__target%.wasm*}.js"
+                if [ $? -eq 0 ]; then
+                        OS::print_status info \
+                                "copying ${__target%.wasm*}.js to ${__directory}\n"
+                        FS::copy_file "${__target%.wasm*}.js" "$__directory"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
                 fi
         else
                 case "$__target_os" in
