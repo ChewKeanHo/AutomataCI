@@ -85,12 +85,12 @@ function PACKAGE-Assemble-DEB-Content {
 	}
 
 	OS-Print-Status info "overriding source.list file..."
-	if ([string]::IsNullOrEmpty($__keyring) {
+	if ([string]::IsNullOrEmpty($__keyring)) {
 		$__keyring = "${env:PROJECT_SKU}"
 	}
 
 	$__url = "${env:PROJECT_STATIC_URL}/deb"
-	$__url = $__url -replace "//deb" "/deb"
+	$__url = $__url -replace "//deb", "/deb"
 	$__process = DEB-Create-Source-List `
 		"${env:PROJECT_DEBIAN_CREATE_SOURCE_LIST}" `
 		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `

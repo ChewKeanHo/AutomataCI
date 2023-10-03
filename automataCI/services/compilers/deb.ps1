@@ -18,113 +18,79 @@
 
 
 
-function DEB-Is-Available {
-	param(
-		[string]$__os,
-		[string]$__arch
-	)
-
-	if ([string]::IsNullOrEmpty($__os) -or [string]::IsNullOrEmpty($__arch)) {
-		return 1
-	}
-
-	# validate dependencies
-	$__process = MD5-Is-Available
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = TAR-Is-Available
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = AR-Is-Available
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = DISK-Is-Available
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	# check compatible target os
-	switch ($__os) {
-	{ $_ -in 'windows', 'darwin' } {
-		return 2
-	} Default {
-		# accepted
-	}}
-
-	# check compatible target cpu architecture
-	switch ($__arch) {
-	{ $_ -in 'any' } {
-		return 3
-	} Default {
-		# accepted
-	}}
-
-	# report status
-	return 0
-}
-
-
-
-
-function DEB-Is-Valid {
+function DEB-Create-Archive {
 	param (
-		[string]$__target
+		[string]$__directory,
+		[string]$__destination
 	)
+
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or
-		(Test-Path "${__target}" -PathType Container) -or
-		(-not (Test-Path "${__target}"))) {
+	if ([string]::IsNullOrEmpty(${__directory}) -or
+		(-not (Test-Path "${__directory}" -PathType Container)) -or
+		(-not (Test-Path "${__directory}\control" -PathType Container)) -or
+		(-not (Test-Path "${__directory}\data" -PathType Container)) -or
+		(-not (Test-Path "${__directory}\control\control"))) {
 		return 1
 	}
 
-	# execute
-	if ($(${__target} -split '\.')[-1] -eq "deb") {
-		return 0
-	}
 
-	# report status
-	return 1
-}
+	# change directory into workspace
+	$__current_path = Get-Location
 
 
-
-
-function DEB-Create-Checksum {
-	param (
-		[string]$__directory
-	)
-
-	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path "${__directory}" -PathType Container))) {
+	# package control
+	Set-Location "${__directory}\control"
+	$__process = TAR-Create-XZ "..\control.tar.xz" "*"
+	if ($__process -ne 0) {
+		Set-Location $__current_path
+		Remove-Variable -Name __current_path
 		return 1
 	}
 
-	# check if is the document already injected
-	$__location = "${__directory}\control\md5sums"
-	if (Test-Path -Path "${__location}") {
-		return 2
+
+	# package data
+	Set-Location "${__directory}\data"
+	$__process = TAR-Create-XZ "..\data.tar.xz" ".\[a-z]*"
+	if ($__process -ne 0) {
+		Set-Location $__current_path
+		Remove-Variable -Name __current_path
+		return 1
 	}
 
-	# create housing directory path
-	$null = FS-Make-Housing-Directory "${__location}"
 
-	# checksum each file
-	foreach ($__file in (Get-ChildItem -Path "${__directory}/data" -File)) {
-		$__checksum = MD5-Checksum-File $__file.FullName
-		$__path = $__file.FullName -replace [regex]::Escape("${__directory}/data/"), ""
-		FS-Append-File "${__location}" "${__checksum} ${__path}"
+	# generate debian-binary
+	Set-Location "${__directory}"
+	$__process = FS-Write-File "${__directory}\debian-binary" "2.0`n"
+	if ($__process -ne 0) {
+		Set-Location $__current_path
+		Remove-Variable -Name __current_path
+		return 1
 	}
+
+
+	# archive into deb
+	$__file = "package.deb"
+	$__process = AR-Create "${__file}" "debian-binary control.tar.xz data.tar.xz"
+	if ($__process -ne 0) {
+		Set-Location $__current_path
+		Remove-Variable -Name __current_path
+		return 1
+	}
+
+
+	# move to destination
+	$null = FS-Remove-Silently "${__destination}"
+	$__process = FS-Move "${__file}" "${__destination}"
+
+
+	# return back to current path
+	Set-Location -Path $__current_path
+	Remove-Variable -Name __current_path
+
 
 	# report status
-	return 0
+	return $__process
 }
 
 
@@ -138,6 +104,7 @@ function DEB-Create-Changelog {
 		[string]$__sku
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
 		(-not (Test-Path $__directory -PathType Container)) -or
@@ -147,6 +114,7 @@ function DEB-Create-Changelog {
 		[string]::IsNullOrEmpty($__sku)) {
 		return 1
 	}
+
 
 	# check if the document has already injected
 	$__location = "${__directory}\data\usr\local\share\doc\${__sku}\changelog.gz"
@@ -161,14 +129,56 @@ function DEB-Create-Changelog {
 		}
 	}
 
+
 	# create housing directory path
 	$null = FS-Make-Housing-Directory "${__location}"
+
 
 	# copy processed file to the target location
 	$__process = FS-Copy-File "${__filepath}" "${__location}"
 
+
 	# report status
 	return $__process
+}
+
+
+
+
+function DEB-Create-Checksum {
+	param (
+		[string]$__directory
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__directory) -or
+		(-not (Test-Path "${__directory}" -PathType Container))) {
+		return 1
+	}
+
+
+	# check if is the document already injected
+	$__location = "${__directory}\control\md5sums"
+	if (Test-Path -Path "${__location}") {
+		return 2
+	}
+
+
+	# create housing directory path
+	$null = FS-Make-Housing-Directory "${__location}"
+
+
+	# checksum each file
+	foreach ($__file in (Get-ChildItem -Path "${__directory}/data" -File)) {
+		$__checksum = MD5-Checksum-File $__file.FullName
+		$__path = $__file.FullName -replace [regex]::Escape("${__directory}/data/"), ""
+		FS-Append-File "${__location}" "${__checksum} ${__path}"
+	}
+
+
+	# report status
+	return 0
 }
 
 
@@ -188,6 +198,7 @@ function DEB-Create-Control {
 		[string]$__priority,
 		[string]$__section
 	)
+
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
@@ -221,14 +232,44 @@ function DEB-Create-Control {
 		return 1
 	}}
 
+
 	# check if is the document already injected
 	$__location = "${__directory}\control\control"
 	if (Test-Path -Path "${__location}") {
 		return 2
 	}
 
+
+	# ensures architecture is the correct value
+	switch ($__arch) {
+	{ $_ -in "386", "486", "586", "686" } {
+		$__arch = "i386"
+	} mipsle {
+		$__arch = "mipsel"
+	} mipsr6le {
+		$__arch = "mipsr6el"
+	} mips32le {
+		$__arch = "mips32el"
+	} mipsn32r6le {
+		$__arch = "mipsn32r6el"
+	} mips64le {
+		$__arch = "mips64el"
+	} mips64r6le {
+		$__arch = "mips64r6el"
+	} powerpcle {
+		$__arch = "powerpcel"
+	} ppc64le {
+		$__arch = "ppc64el"
+	} x86_64 {
+		$__arch = "amd64"
+	} default {
+		# Accepted - DO NOTHING
+	}}
+
+
 	# create housing directory path
 	$null = FS-Make-Housing-Directory "${__location}"
+
 
 	# generate control file
 	$__size = DISK-Calculate-Size "${__directory}\data"
@@ -248,6 +289,7 @@ Homepage: ${__website}
 Description: ${__pitch}
 "@
 
+
 	# append description data file
 	Get-Content -Path "${__resources}/packages/DESCRIPTION.txt" | ForEach-Object {
 		$__line = $_
@@ -265,6 +307,7 @@ Description: ${__pitch}
 		$null = FS-Append-File $__location $__line
 	}
 
+
 	# report status
 	return 0
 }
@@ -272,78 +315,8 @@ Description: ${__pitch}
 
 
 
-function DEB-Create-Archive {
-	param (
-		[string]$__directory,
-		[string]$__destination
-	)
-
-	# validate input
-	if ([string]::IsNullOrEmpty(${__directory}) -or
-		(-not (Test-Path "${__directory}" -PathType Container)) -or
-		(-not (Test-Path "${__directory}\control" -PathType Container)) -or
-		(-not (Test-Path "${__directory}\data" -PathType Container)) -or
-		(-not (Test-Path "${__directory}\control\control"))) {
-		return 1
-	}
-
-	# change directory into workspace
-	$__current_path = Get-Location
-
-	# package control
-	Set-Location "${__directory}\control"
-	$__process = TAR-Create-XZ "..\control.tar.xz" "*"
-	if ($__process -ne 0) {
-		Set-Location $__current_path
-		Remove-Variable -Name __current_path
-		return 1
-	}
-
-	# package data
-	Set-Location "${__directory}\data"
-	$__process = TAR-Create-XZ "..\data.tar.xz" ".\[a-z]*"
-	if ($__process -ne 0) {
-		Set-Location $__current_path
-		Remove-Variable -Name __current_path
-		return 1
-	}
-
-	# generate debian-binary
-	Set-Location "${__directory}"
-	$__process = FS-Write-File "${__directory}\debian-binary" "2.0`n"
-	if ($__process -ne 0) {
-		Set-Location $__current_path
-		Remove-Variable -Name __current_path
-		return 1
-	}
-
-	# archive into deb
-	$__file = "package.deb"
-	$__process = AR-Create "${__file}" "debian-binary control.tar.xz data.tar.xz"
-	if ($__process -ne 0) {
-		Set-Location $__current_path
-		Remove-Variable -Name __current_path
-		return 1
-	}
-
-	# move to destination
-	$null = FS-Remove-Silently "${__destination}"
-	$__process = FS-Move "${__file}" "${__destination}"
-
-	# return back to current path
-	Set-Location -Path $__current_path
-	Remove-Variable -Name __current_path
-
-	# report status
-	return $__process
-}
-
-
-
-
 function DEB-Create-Source-List {
 	param(
-		[string]$__to_create,
 		[string]$__is_simulated,
 		[string]$__directory,
 		[string]$__gpg_id,
@@ -355,13 +328,8 @@ function DEB-Create-Source-List {
 
 
 	# validate input
-	$__to_create = STRINGS-To-Lowercase "${__to_create}"
-	if ("${__to_create}" -ne "true") {
-		return 11
-	}
-
 	if (-not [string]::IsNullOrEmpty($__is_simulated)) {
-		return 12
+		return 0
 	}
 
 	if ([string]::IsNullOrEmpty(${__directory}) -or
@@ -407,4 +375,89 @@ deb [signed-by=/${__key}] ${__url} ${__codename} ${__distribution}
 
 	# report status
 	return 0
+}
+
+
+
+
+function DEB-Is-Available {
+	param(
+		[string]$__os,
+		[string]$__arch
+	)
+
+	if ([string]::IsNullOrEmpty($__os) -or [string]::IsNullOrEmpty($__arch)) {
+		return 1
+	}
+
+
+	# validate dependencies
+	$__process = MD5-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = TAR-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = AR-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = DISK-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# check compatible target os
+	switch ($__os) {
+	{ $_ -in 'windows', 'darwin' } {
+		return 2
+	} Default {
+		# accepted
+	}}
+
+
+	# check compatible target cpu architecture
+	switch ($__arch) {
+	{ $_ -in 'any' } {
+		return 3
+	} Default {
+		# accepted
+	}}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function DEB-Is-Valid {
+	param (
+		[string]$__target
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target) -or
+		(Test-Path "${__target}" -PathType Container) -or
+		(-not (Test-Path "${__target}"))) {
+		return 1
+	}
+
+
+	# execute
+	if ($(${__target} -split '\.')[-1] -eq "deb") {
+		return 0
+	}
+
+
+	# report status
+	return 1
 }

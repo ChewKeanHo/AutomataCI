@@ -16,26 +16,31 @@
 
 
 function TAR-Is-Available {
+	# validate input
 	$__process = Get-Command "tar" -ErrorAction SilentlyContinue
 	if (-not ($__process)) {
 		return 1
 	}
 
+
+	# execute
 	return 0
 }
 
 
 
 
-function TAR-Create-XZ {
+function TAR-Create {
 	param (
 		[string]$__destination,
-		[string]$__source
+		[string]$__source,
+		[string]$__owner,
+		[string]$__group
 	)
 
+
 	# validate input
-	if ([string]::IsNullOrEmpty($__destination) -or
-		[string]::IsNullOrEmpty($__source)) {
+	if ([string]::IsNullOrEmpty($__destination) -or [string]::IsNullOrEmpty($__source)) {
 		return 1
 	}
 
@@ -48,23 +53,59 @@ function TAR-Create-XZ {
 		return 1
 	}
 
-	$__process = XZ-Is-Available
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__dest = $__destination -replace '\.xz.*$'
 
 	# create tar archive
-	$__process = OS-Exec "tar" "-cvf `"${__dest}`" ${__source}"
+	$__dest = $__destination -replace '\.xz.*$'
+	if ((-not [string]::IsNullOrEmpty($__owner)) -and [string]::IsNullOrEmpty($__group)) {
+		$__process = OS-Exec "tar" "--numeric-owner --group=`"${4}`" --owner=`"${3}`" -cvf `"${__dest}`" ${__source}"
+		if ($__process -ne 0) {
+			return 1
+		}
+	} else {
+		$__process = OS-Exec "tar" "-cvf `"${__dest}`" ${__source}"
+		if ($__process -ne 0) {
+			return 1
+		}
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function TAR-Create-XZ {
+	param (
+		[string]$__destination,
+		[string]$__source,
+		[string]$__owner,
+		[string]$__group
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__destination) -or [string]::IsNullOrEmpty($__source)) {
+		return 1
+	}
+
+	if (Test-Path -Path $__destination) {
+		return 1
+	}
+
+
+	# create tar archive
+	$__process = TAR-Create "${__destination}" "${__source}" "0" "0"
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = XZ-Create "${__dest}"
+	$__process = XZ-Create "${__destination}"
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0

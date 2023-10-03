@@ -16,21 +16,24 @@
 
 
 TAR::is_available() {
+        # execute
         if [ -z "$(type -t tar)" ]; then
                 return 1
         fi
 
+
+        # report status
         return 0
 }
 
 
 
 
-TAR::create_xz() {
-        # __destination="$1"
-        # __source="$2"
-
-
+TAR::create() {
+        #__destination="$1"
+        #__source="$2"
+        #__owner="$3"
+        #__group="$4"
 
 
         # validate input
@@ -47,14 +50,47 @@ TAR::create_xz() {
                 return 1
         fi
 
-        XZ::is_available
-        if [ $? -ne 0 ]; then
+
+        # create tar archive
+        if [ ! -z "$3" -a ! -z "$4" ]; then
+                tar --numeric-owner --group="$4" --owner="$3" -cvf "${1%%.xz*}" $2
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        else
+                tar -cvf "${1%%.xz*}" $2
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+TAR::create_xz() {
+        #__destination="$1"
+        #__source="$2"
+        #__owner="$3"
+        #__group="$4"
+
+
+        # validate input
+        if [ -z "$2" ] || [ -z "$1" ]; then
+                return 1
+        fi
+
+        if [ -e "$1" ]; then
                 return 1
         fi
 
 
         # create tar archive
-        tar -cvf "${1%%.xz*}" $2
+        TAR::create "$1" "$2" "$3" "$4"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -65,6 +101,7 @@ TAR::create_xz() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0

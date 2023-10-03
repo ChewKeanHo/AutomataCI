@@ -21,111 +21,73 @@
 
 
 
-DEB::is_available() {
-        __os="$1"
-        __arch="$2"
-
-        if [ -z "$__os" ] || [ -z "$__arch" ]; then
-                return 1
-        fi
-
-        # validate dependencies
-        MD5::is_available
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        TAR::is_available
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        AR::is_available
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        DISK::is_available
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        OS::is_command_available "find"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        # check compatible target os
-        case "$__os" in
-        windows|darwin)
-                return 2
-                ;;
-        *)
-                ;;
-        esac
-
-        # check compatible target cpu architecture
-        case "$__arch" in
-        any)
-                return 3
-                ;;
-        *)
-                ;;
-        esac
-
-        # report status
-        return 0
-}
-
-
-
-
-DEB::is_valid() {
-        #__target="$1"
-
-        # validate input
-        if [ -z "$1" ] || [ -d "$1" ] || [ ! -f "$1" ]; then
-                return 1
-        fi
-
-        # execute
-        if [ "${1##*.}" = "deb" ]; then
-                return 0
-        fi
-
-        # return status
-        return 1
-}
-
-
-
-
-DEB::create_checksum() {
+DEB::create_archive() {
         __directory="$1"
+        __destination="$2"
+
 
         # validate input
-        if [ -z "$__directory" ] || [ ! -d "$__directory" ]; then
+        if [ -z "$__directory" ] ||
+                [ ! -d "$__directory" ] ||
+                [ ! -d "${__directory}/control" ] ||
+                [ ! -d "${__directory}/data" ] ||
+                [ ! -f "${__directory}/control/control" ]; then
                 return 1
         fi
 
-        # check if the document has already injected
-        __location="${__directory}/control/md5sums"
-        if [ -f "$__location" ]; then
-                return 2
+
+        # capture current directory
+        __current_path="$PWD"
+
+
+        # package control
+        cd "${__directory}/control"
+        TAR::create_xz "../control.tar.xz" "*" "0" "0"
+        if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
+                return 1
         fi
 
-        # create housing directory path
-        FS::make_housing_directory "$__location"
 
-        # checksum
-        for __line in $(find "${__directory}/data" -type f); do
-                __checksum="$(MD5::checksum_file "$__line")"
-                FS::append_file "$__location" \
-                        "${__checksum%% *} ${__line##*${__directory}/data/}\n"
-        done
+        # package data
+        cd "${__directory}/data"
+        TAR::create_xz "../data.tar.xz" "./[a-z]*" "0" "0"
+        if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
+                return 1
+        fi
+
+
+        # generate debian-binary
+        cd "${__directory}"
+        FS::write_file "${__directory}/debian-binary" "2.0\n"
+        if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
+                return 1
+        fi
+
+
+        # archive into deb
+        __file="package.deb"
+        AR::create "$__file" "debian-binary control.tar.xz data.tar.xz"
+        if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
+                return 1
+        fi
+
+
+        # move to destination
+        FS::remove_silently "$__destination"
+        FS::move "$__file" "$__destination"
+        __exit=$?
+
+
+        # return to current directory
+        cd "$__current_path" && unset __current_path
+
 
         # report status
-        return 0
+        return $__exit
 }
 
 
@@ -137,6 +99,7 @@ DEB::create_changelog() {
         __is_native="$3"
         __sku="$4"
 
+
         # validate input
         if [ -z "$__directory" ] ||
                 [ ! -d "$__directory" ] ||
@@ -146,6 +109,7 @@ DEB::create_changelog() {
                 [ -z "$__sku" ]; then
                 return 1
         fi
+
 
         # check if the document has already injected
         __location="${__directory}/data/usr/local/share/doc/${__sku}/changelog.gz"
@@ -160,16 +124,56 @@ DEB::create_changelog() {
                 fi
         fi
 
+
         # create housing directory path
         FS::make_housing_directory "$__location"
 
+
         # copy processed file to target location
         FS::copy_file "$__filepath" "$__location"
+
 
         # report status
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
+        return 0
+}
+
+
+
+
+DEB::create_checksum() {
+        __directory="$1"
+
+
+        # validate input
+        if [ -z "$__directory" ] || [ ! -d "$__directory" ]; then
+                return 1
+        fi
+
+
+        # check if the document has already injected
+        __location="${__directory}/control/md5sums"
+        if [ -f "$__location" ]; then
+                return 2
+        fi
+
+
+        # create housing directory path
+        FS::make_housing_directory "$__location"
+
+
+        # checksum
+        for __line in $(find "${__directory}/data" -type f); do
+                __checksum="$(MD5::checksum_file "$__line")"
+                FS::append_file "$__location" \
+                        "${__checksum%% *} ${__line##*${__directory}/data/}\n"
+        done
+
+
+        # report status
         return 0
 }
 
@@ -188,6 +192,7 @@ DEB::create_control() {
         __pitch="$9"
         __priority="${10}"
         __section="${11}"
+
 
         # validate input
         if [ -z "$__directory" ] ||
@@ -214,14 +219,54 @@ DEB::create_control() {
                 ;;
         esac
 
+
         # check if the document has already injected
         __location="${__directory}/control/control"
         if [ -f "$__location" ]; then
                 return 2
         fi
 
+
+        # ensures architecture is the correct value
+        case "$__arch" in
+        386|486|586|686)
+                __arch="i386"
+                ;;
+        mipsle)
+                __arch="mipsel"
+                ;;
+        mipsr6le)
+                __arch="mipsr6el"
+                ;;
+        mips32le)
+                __arch="mips32el"
+                ;;
+        mipsn32r6le)
+                __arch="mipsn32r6el"
+                ;;
+        mips64le)
+                __arch="mips64el"
+                ;;
+        mips64r6le)
+                __arch="mips64r6el"
+                ;;
+        powerpcle)
+                __arch="powerpcel"
+                ;;
+        ppc64le)
+                __arch="ppc64el"
+                ;;
+        x86_64)
+                __arch="amd64"
+                ;;
+        *)
+                ;;
+        esac
+
+
         # create housing directory path
         FS::make_housing_directory "${__location}"
+
 
         # generate control file
         __size="$(DISK::calculate_size "${__directory}/data")"
@@ -241,6 +286,7 @@ Homepage: $__website
 Description: $__pitch
 "
 
+
         # append description data file
         old_IFS="$IFS"
         while IFS="" read -r __line || [ -n "$__line" ]; do
@@ -258,71 +304,9 @@ Description: $__pitch
         done < "${__resources}/packages/DESCRIPTION.txt"
         IFS="$old_IFS" && unset old_IFS __line
 
+
         # report status
         return 0
-}
-
-
-
-
-DEB::create_archive() {
-        __directory="$1"
-        __destination="$2"
-
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ ! -d "${__directory}/control" ] ||
-                [ ! -d "${__directory}/data" ] ||
-                [ ! -f "${__directory}/control/control" ]; then
-                return 1
-        fi
-
-        # capture current directory
-        __current_path="$PWD"
-
-        # package control
-        cd "${__directory}/control"
-        TAR::create_xz "../control.tar.xz" *
-        if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
-                return 1
-        fi
-
-        # package data
-        cd "${__directory}/data"
-        TAR::create_xz "../data.tar.xz" "./[a-z]*"
-        if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
-                return 1
-        fi
-
-        # generate debian-binary
-        cd "${__directory}"
-        FS::write_file "${__directory}/debian-binary" "2.0\n"
-        if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
-                return 1
-        fi
-
-        # archive into deb
-        __file="package.deb"
-        AR::create "$__file" "debian-binary control.tar.xz data.tar.xz"
-        if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
-                return 1
-        fi
-
-        # move to destination
-        FS::remove_silently "$__destination"
-        FS::move "$__file" "$__destination"
-        __exit=$?
-
-        # return to current directory
-        cd "$__current_path" && unset __current_path
-
-        # report status
-        return $__exit
 }
 
 
@@ -340,7 +324,7 @@ DEB::create_source_list() {
 
         # validate input
         if [ ! -z "$__is_simulated" ]; then
-                return 11
+                return 0
         fi
 
         if [ -z "$__directory" ] ||
@@ -387,4 +371,90 @@ deb [signed-by=/${__key}] ${__url} ${__codename} ${__distribution}
 
         # report status
         return 0
+}
+
+
+
+
+DEB::is_available() {
+        __os="$1"
+        __arch="$2"
+
+        if [ -z "$__os" ] || [ -z "$__arch" ]; then
+                return 1
+        fi
+
+
+        # validate dependencies
+        MD5::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        TAR::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        AR::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        DISK::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "find"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # check compatible target os
+        case "$__os" in
+        windows|darwin)
+                return 2
+                ;;
+        *)
+                ;;
+        esac
+
+
+        # check compatible target cpu architecture
+        case "$__arch" in
+        any)
+                return 3
+                ;;
+        *)
+                ;;
+        esac
+
+
+        # report status
+        return 0
+}
+
+
+
+
+DEB::is_valid() {
+        #__target="$1"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -d "$1" ] || [ ! -f "$1" ]; then
+                return 1
+        fi
+
+
+        # execute
+        if [ "${1##*.}" = "deb" ]; then
+                return 0
+        fi
+
+
+        # return status
+        return 1
 }

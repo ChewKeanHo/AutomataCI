@@ -21,6 +21,7 @@ function GPG-Detach-Sign-File {
 		[string]$__id
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or
 		(-not (Test-Path -Path "${__target}")) -or
@@ -33,14 +34,17 @@ function GPG-Detach-Sign-File {
 		return 1
 	}
 
+
 	# execute
 	$__process = OS-Exec `
 		"gpg" "--armor --detach-sign --local-user `"${__id}`" `"${__target}`""
+
 
 	# report status
 	if ($__process -eq 0) {
 		return 0
 	}
+
 	return 1
 }
 
@@ -53,6 +57,7 @@ function GPG-Export-Public-Key {
 		[string]$__id
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__destination) -or [string]::IsNullOrEmpty($__id)) {
 		return 1
@@ -63,14 +68,17 @@ function GPG-Export-Public-Key {
 		return 1
 	}
 
+
 	# execute
 	$null = FS-Remove-Silently "${__destination}"
 	$__process = OS-Exec "gpg" "--armor --export `"${__id}`" > `"${__destination}`""
+
 
 	# report status
 	if ($__process -eq 0) {
 		return 0
 	}
+
 	return 1
 }
 
@@ -104,6 +112,7 @@ function GPG-Export-Public-Keyring {
 	if ($__process -eq 0) {
 		return 0
 	}
+
 	return 1
 }
 
@@ -115,16 +124,19 @@ function GPG-Is-Available {
 		[string]$__id
 	)
 
+
+	# execute
 	$__process = OS-Is-Command-Available "gpg"
 	if ($__process -ne 0) {
 		return 1
 	}
-
 
 	$__process = OS-Exec "gpg" "--list-key `"${__id}`""
 	if ($__process -ne 0) {
 		return 1
 	}
 
+
+	# report status
 	return 0
 }

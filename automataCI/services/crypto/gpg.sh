@@ -19,6 +19,7 @@ GPG::detach_sign_file() {
         #__target="$1"
         #__id="$2"
 
+
         # validate input
         if [ -z "$1" ] || [ ! -f "$1" ] || [ -z "$2" ]; then
                 return 1
@@ -29,13 +30,16 @@ GPG::detach_sign_file() {
                 return 1
         fi
 
+
         # execute
         gpg --armor --detach-sign --local-user "$2" "$1"
+
 
         # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
+
         return 1
 }
 
@@ -45,6 +49,7 @@ GPG::detach_sign_file() {
 GPG::export_public_key() {
         #__destination="$1"
         #__id="$2"
+
 
         # validate input
         if [ -z "$1" ] || [ -z "$2" ]; then
@@ -56,14 +61,17 @@ GPG::export_public_key() {
                 return 1
         fi
 
+
         # execute
         FS::remove_silently "$1"
         gpg --armor --export "$2" > "$1"
+
 
         # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
+
         return 1
 }
 
@@ -95,6 +103,7 @@ GPG::export_public_keyring() {
         if [ $? -eq 0 ]; then
                 return 0
         fi
+
         return 1
 }
 
@@ -104,6 +113,8 @@ GPG::export_public_keyring() {
 GPG::is_available() {
         #__id="$1"
 
+
+        # execute
         if [ -z "$(type -t gpg)" ]; then
                 return 1
         fi
@@ -113,5 +124,7 @@ GPG::is_available() {
                 return 1
         fi
 
+
+        # report status
         return 0
 }
