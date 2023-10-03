@@ -35,7 +35,6 @@ PACKAGE::assemble_archive_content() {
 
 
         # package based on target's nature
-        FS::is_target_a_source "$__target"
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
                 __target="${PROJECT_PATH_ROOT}/${PROJECT_C}/libs"
                 OS::print_status info "copying ${__target} to ${__directory}\n"

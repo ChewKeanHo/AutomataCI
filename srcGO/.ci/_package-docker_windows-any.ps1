@@ -34,13 +34,20 @@ function PACKAGE-Assemble-DOCKER-Content {
 		[string]$__target_arch
 	)
 
+
 	# validate project
-	$__process = FS-Is-Target-A-Source "${__target}"
-	if ($__process -ne 0) {
-		return 10
+	if ($(FS-Is-Target-A-Source "${__target}") -ne 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Library "${__target}") -ne 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+		return 10 # not applicable
 	}
 
 	OS-Print-Status info "Running Go specific content assembling function..."
+
 
 	# assemble the package
 	$__process = FS-Copy-File "${__target}" "${__directory}\${env:PROJECT_SKU}"
@@ -52,6 +59,7 @@ function PACKAGE-Assemble-DOCKER-Content {
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# generate the Dockerfile
 	$__process = FS-Write-File "${__directory}\Dockerfile" @"
@@ -96,6 +104,7 @@ ENTRYPOINT ["/app/bin/${env:PROJECT_SKU}"]
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0

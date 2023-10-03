@@ -50,15 +50,20 @@ fi
 __output_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 for __platform in $(go tool dist list); do
         # select supported platforms
+        __os="${__platform%%/*}"
+        __arch="${__platform##*/}"
         __arguments=""
+
         case "$__platform" in
         aix/ppc64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         android/amd64)
                 if [ "$PROJECT_OS" = "darwin" ]; then
                         continue
                 fi
 
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 __arguments="-buildmode=pie"
                 ;;
         android/arm64)
@@ -66,64 +71,97 @@ for __platform in $(go tool dist list); do
                         continue
                 fi
 
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 __arguments="-buildmode=pie"
                 ;;
         darwin/amd64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 __arguments="-buildmode=pie"
                 ;;
         darwin/arm64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 __arguments="-buildmode=pie"
                 ;;
         dragonfly/amd64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         freebsd/amd64)
                 if [ "$PROJECT_OS" = "darwin" ]; then
                         continue
                 fi
 
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 __arguments="-buildmode=pie"
                 ;;
         illumos/amd64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         ios/amd64)
                 if [ ! "$PROJECT_OS" = "darwin" ]; then
                         continue
                 fi
+
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         ios/arm64)
-                continue # both linux and darwin can't link without cgo
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
+                continue # impossible without cgo
+                ;;
+        js/wasm)
+                __filename="${__output_directory}/${PROJECT_SKU}_${__os}-${__arch}.js"
+                FS::remove_silently "$__filename"
+                FS::copy_file "$(go env GOROOT)/misc/wasm/wasm_exec.js" "$__filename"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+                __filename="${PROJECT_SKU}_${__os}-${__arch}.wasm"
                 ;;
         linux/amd64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 __arguments="-buildmode=pie"
                 ;;
         linux/arm64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 __arguments="-buildmode=pie"
                 ;;
         linux/ppc64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         linux/ppc64le)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 __arguments="-buildmode=pie"
                 ;;
         linux/riscv64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         linux/s390x)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         netbsd/amd64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         netbsd/arm64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         openbsd/amd64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         openbsd/arm64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         plan9/amd64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         solaris/amd64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         windows/amd64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}.exe"
                 __arguments="-buildmode=pie"
                 ;;
         windows/arm64)
+                __filename="${PROJECT_SKU}_${__os}-${__arch}.exe"
                 __arguments="-buildmode=pie"
                 ;;
         *)
@@ -132,10 +170,6 @@ for __platform in $(go tool dist list); do
         esac
 
         # building target
-        __os="${__platform%%/*}"
-        __arch="${__platform##*/}"
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-
         OS::print_status info "building ${__filename}...\n"
         FS::remove_silently "${__output_directory}/${__filename}"
         CGO_ENABLED=0 GOOS="$__os" GOARCH="$__arch" go build \

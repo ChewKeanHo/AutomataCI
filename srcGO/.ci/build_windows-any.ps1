@@ -54,52 +54,83 @@ $__go_arch = ${env:GOARCH}
 ${env:CGO_ENABLED} = 0
 :loop foreach ($__platform in (Invoke-Expression "go tool dist list")) {
 	# select supported platforms
+	$__os = $__platform.Split("/")[0]
+	$__arch = $__platform.Split("/")[1]
 	$__arguments = ""
+
 	switch ($__platform) {
 	"aix/ppc64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "android/amd64" {
 		continue loop
 	} "android/arm64" {
 		continue loop
 	} "darwin/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 		$__arguments = "-buildmode=pie "
 	} "darwin/arm64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 		$__arguments = "-buildmode=pie "
 	} "dragonfly/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "freebsd/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "illumos/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "ios/amd64" {
 		continue loop
 	} "ios/arm64" {
 		continue loop
+	} "js/wasm" {
+		$__filename = "${__output_directory}\${env:PROJECT_SKU}_${__os}-${__arch}.js"
+		$null = FS-Remove-Silently "${__filename}"
+		$__process = FS-Copy-File `
+			"$(Invoke-Expression "go env GOROOT")/misc/wasm/wasm_exec.js" `
+			"${__filename}"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}.wasm"
 	} "linux/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 		$__arguments = "-buildmode=pie "
 	} "linux/arm64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 		$__arguments = "-buildmode=pie "
 	} "linux/ppc64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "linux/ppc64le" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 		$__arguments = "-buildmode=pie "
 	} "linux/riscv64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "linux/s390x" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "netbsd/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "netbsd/arm64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "openbsd/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "openbsd/arm64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "plan9/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "solaris/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 	} "windows/amd64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}.exe"
 		$__arguments = "-buildmode=pie "
 	} "windows/arm64" {
+		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}.exe"
 		$__arguments = "-buildmode=pie "
 	} Default {
 		continue loop
 	}}
 
-	# building target
-	$__os = $__platform.Split("/")[0]
-	$__arch = $__platform.Split("/")[1]
-	$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
 
+	# building target
 	OS-Print-Status info "building ${__filename}..."
 	$null = FS-Remove-Silently "${__output_directory}\${__filename}"
 	${env:GOOS} = $__os

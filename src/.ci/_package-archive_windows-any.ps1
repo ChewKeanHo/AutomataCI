@@ -38,7 +38,7 @@ function PACKAGE-Assemble-Archive-Content {
 	# copy main program
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
 		OS-Print-Status info "copying ${__target} to ${__directory}"
 		$__process = Fs-Copy-File "${__target}" "${__directory}"
 		if ($__process -ne 0) {

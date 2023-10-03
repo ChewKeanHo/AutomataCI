@@ -1,2 +1,3 @@
+root: enabled Emscripten WASM compilation for C
 root: added C Programming Language support
 README.md: corrected typo
