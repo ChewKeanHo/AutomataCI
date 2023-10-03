@@ -103,11 +103,7 @@ foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT
 	$TARGET = $TARGET.FullName
 	OS-Print-Status info "processing ${TARGET}"
 
-	$__process = RELEASE-Run-DEB `
-		"$TARGET" `
-		"$STATIC_REPO" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}"
+	$__process = RELEASE-Run-DEB "$TARGET" "$STATIC_REPO"
 	if ($__process -ne 0) {
 		return 1
 	}

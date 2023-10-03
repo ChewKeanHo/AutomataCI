@@ -20,10 +20,9 @@
 function RELEASE-Run-DEB {
 	param(
 		[string]$__target,
-		[string]$__directory,
-		[string]$__datastore,
-		[string]$__db_directory
+		[string]$__directory
 	)
+
 
 	# validate input
 	$__process = DEB-Is-Valid "${__target}"
@@ -38,9 +37,24 @@ function RELEASE-Run-DEB {
 		return 0
 	}
 
+
 	# execute
-	$__dest = "${__directory}/deb"
+	OS-Print-Status info "create reprepro configuration file..."
+	$__conf = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb"
+	$__process = REPREPRO-Create-Conf `
+		"${__conf}" `
+		"${env:PROJECT_REPREPRO_CODENAME}" `
+		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
+		"${env:PROJECT_REPREPRO_COMPONENT}" `
+		"${env:PROJECT_REPREPRO_ARCH}" `
+		"${env:PROJECT_GPG_ID}"
+	if ($__process -ne 0) {
+		OS-Print-Status error "create failed."
+		return 1
+	}
+
 	OS-Print-Status info "creating destination path..."
+	$__dest = "${__directory}/deb"
 	$__process = FS-Make-Directory "${__dest}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "create failed."
@@ -51,13 +65,14 @@ function RELEASE-Run-DEB {
 	$__process = REPREPRO-Publish `
 		"${__target}" `
 		"${__dest}" `
-		"${__datastore}\publishers\reprepro" `
-		"${__db_directory}\reprepro" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\publishers\reprepro" `
+		"${__conf}" `
 		"${env:PROJECT_REPREPRO_CODENAME}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "publish failed."
 		return 1
 	}
+
 
 	# report status
 	return 0

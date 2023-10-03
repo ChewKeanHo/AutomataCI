@@ -284,8 +284,35 @@ PROJECT_FLATPAK_SDK="org.freedesktop.Sdk"
 # PROJECT_REPREPRO_CODENAME
 # The codename used by .deb's Reprepro for publishing any detected .deb package
 # file. In any cases, the value **MUST** match any one of the 'Codename:' field
-# defined in PROJECT_PATH_RESOURCES/publishers/deb/conf/distributions data list.
+# understood by the reprepro.
+#
+# When in doubt or unused, set the value to 'main'.
 PROJECT_REPREPRO_CODENAME="main"
+
+
+# PROJECT_REPREPRO_COMPONENT
+# The component used by .deb's Reprepro for publishing any detected .deb package
+# file. In any case, the value **MUST** match any one of the 'Component:' field
+# understood by the reprepro.
+#
+# This is mainly used to group the packages by categories (e.g. 'firmware',
+# 'gui', 'models', etc).
+#
+# When in doubt or unused, set the value matching PROJECT_DEBIAN_DISTRIBUTION.
+PROJECT_REPREPRO_COMPONENT="stable"
+
+
+# PROJECT_REPREPRO_ARCH
+# The list of accepted reprepro architecture used by .deb's Reprepro for
+# gatekeeping a given .deb package. It accepts a list of values separated by
+# space (' ') based on dpkg supported architectures. The command:
+#                   "$ dpkg-architecture --list-known"
+# will print out a list of supported architectures' value based on the host
+# syste.
+#
+# When left empty, AutomataCI shall generate a full list of arch-only hard-coded
+# arch values.
+PROJECT_REPREPRO_ARCH=""
 
 
 # PROJECT_STATIC_REPO

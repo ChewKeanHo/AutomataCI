@@ -10,6 +10,101 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+
+
+
+
+function REPREPRO-Create-Conf {
+	param(
+		[string]$__directory,
+		[string]$__codename,
+		[string]$__suite,
+		[string]$__components,
+		[string]$__architectures,
+		[string]$__gpg
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__directory) -or
+		(-not (Test-Path "${__directory}" -PathType Container)) -or
+		[string]::IsNullOrEmpty($__codename) -or
+		[string]::IsNullOrEmpty($__suite) -or
+		[string]::IsNullOrEmpty($__components) -or
+		[string]::IsNullOrEmpty($__gpg)) {
+		return 1
+	}
+
+	if ([string]::IsNullOrEmpty($__architectures)) {
+		$__architectures = "armhf " `
+			+ "armel " `
+			+ "mipsn32 " `
+			+ "mipsn32el " `
+			+ "mipsn32r6 " `
+			+ "mipsn32r6el " `
+			+ "mips64 " `
+			+ "mips64el " `
+			+ "mips64r6 " `
+			+ "mips64r6el " `
+			+ "powerpcspe " `
+			+ "x32 " `
+			+ "arm64ilp32 " `
+			+ "alpha " `
+			+ "amd64 " `
+			+ "arc " `
+			+ "armeb " `
+			+ "arm " `
+			+ "arm64 " `
+			+ "avr32 " `
+			+ "hppa " `
+			+ "loong64 " `
+			+ "i386 " `
+			+ "ia64 " `
+			+ "m32r " `
+			+ "m68k " `
+			+ "mips " `
+			+ "mipsel " `
+			+ "mipsr6 " `
+			+ "mipsr6el " `
+			+ "nios2 " `
+			+ "or1k " `
+			+ "powerpc " `
+			+ "powerpcel " `
+			+ "ppc64 " `
+			+ "ppc64el " `
+			+ "riscv64 " `
+			+ "s390 " `
+			+ "s390x " `
+			+ "sh3 " `
+			+ "sh3eb " `
+			+ "sh4 " `
+			+ "sh4eb " `
+			+ "sparc " `
+			+ "sparc64 " `
+			+ "tilegx"
+	}
+
+
+	# execute
+	$__filename = "${__directory}\conf\distributions"
+	$null = FS-Make-Housing-Directory "${__filename}"
+	$null = FS-Remove-Silently "${__filename}"
+	$__process = FS-Write-File "${__filename}" @"
+Codename: ${__codename}
+Suite: ${__suite}
+Architectures: ${__architectures}
+Components: ${__components}
+SignWith: ${__gpg}
+"@
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
 
 
 
@@ -36,6 +131,7 @@ function REPREPRO-Publish {
 		[string]$__codename
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or
 		[string]::IsNullOrEmpty($__directory) -or
@@ -47,6 +143,7 @@ function REPREPRO-Publish {
 		return 1
 	}
 
+
 	# execute
 	$null = FS-Remake-Directory "${__datastore}\db"
 	$null = FS-Remake-Directory "${__directory}"
@@ -56,6 +153,7 @@ function REPREPRO-Publish {
 			+ "includedeb `"${__codename}`" " `
 			+ "`"${__target}`""
 	$__process = OS-Exec "reprepro" "${__arguments}"
+
 
 	# report status
 	if ($__process -eq 0) {

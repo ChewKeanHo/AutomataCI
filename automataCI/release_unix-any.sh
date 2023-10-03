@@ -103,11 +103,7 @@ fi
 for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         OS::print_status info "processing ${TARGET}\n"
 
-        RELEASE::run_deb \
-                "$TARGET" \
-                "$STATIC_REPO" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}"
+        RELEASE::run_deb "$TARGET" "$STATIC_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi

@@ -21,8 +21,7 @@
 RELEASE::run_deb() {
         __target="$1"
         __directory="$2"
-        __datastore="$3"
-        __db_directory="$4"
+
 
         # validate input
         DEB::is_valid "$__target"
@@ -37,9 +36,24 @@ RELEASE::run_deb() {
                 return 0
         fi
 
+
         # execute
-        __dest="${__directory}/deb"
+        OS::print_status info "create reprepro configuration file...\n"
+        __conf="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb"
+        REPREPRO::create_conf \
+                "$__conf" \
+                "$PROJECT_REPREPRO_CODENAME" \
+                "$PROJECT_DEBIAN_DISTRIBUTION" \
+                "$PROJECT_REPREPRO_COMPONENT" \
+                "$PROJECT_REPREPRO_ARCH" \
+                "$PROJECT_GPG_ID"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "create failed.\n"
+                return 1
+        fi
+
         OS::print_status info "creating destination path: ${__dest}\n"
+        __dest="${__directory}/deb"
         FS::make_directory "${__dest}"
         if [ $? -ne 0 ]; then
                 OS::print_status error "create failed.\n"
@@ -53,14 +67,15 @@ RELEASE::run_deb() {
                 REPREPRO::publish \
                         "$__target" \
                         "$__dest" \
-                        "${__datastore}/publishers/reprepro" \
-                        "${__db_directory}/reprepro" \
+                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/publishers/reprepro" \
+                        "$__conf" \
                         "$PROJECT_REPREPRO_CODENAME"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "publish failed.\n"
                         return 1
                 fi
         fi
+
 
         # report status
         return 0
