@@ -34,9 +34,9 @@ PACKAGE::assemble_archive_content() {
         __target_os="$4"
         __target_arch="$5"
 
+
         # package based on target's nature
-        FS::is_target_a_source "$__target"
-        if [ $? -eq 0 ]; then
+        if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
                 # it's a source target
                 __target="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs"
                 PYTHON::clean_artifact "$__target"
@@ -45,6 +45,26 @@ PACKAGE::assemble_archive_content() {
                 if [ $? -ne 0 ]; then
                         OS::print_status error "copy failed."
                         return 1
+                fi
+        elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+                return 10 # handled by wasm instead
+        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+                OS::print_status info "copying ${__target} to ${__directory}\n"
+                FS::copy_file "$__target" "$__directory"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+                FS::is_file "${__target%.wasm*}.js"
+                if [ $? -eq 0 ]; then
+                        OS::print_status info \
+                                "copying ${__target%.wasm*}.js to ${__directory}\n"
+                        FS::copy_file "${__target%.wasm*}.js" "$__directory"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
                 fi
         else
                 # it's a binary target
@@ -65,6 +85,7 @@ PACKAGE::assemble_archive_content() {
                 fi
         fi
 
+
         # copy user guide
         __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
         OS::print_status info "copying ${__target} to ${__directory}\n"
@@ -74,6 +95,7 @@ PACKAGE::assemble_archive_content() {
                 return 1
         fi
 
+
         # copy license file
         __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
         OS::print_status info "copying ${__target} to ${__directory}\n"
@@ -82,6 +104,7 @@ PACKAGE::assemble_archive_content() {
                 OS::print_status error "copy failed."
                 return 1
         fi
+
 
         # report status
         return 0

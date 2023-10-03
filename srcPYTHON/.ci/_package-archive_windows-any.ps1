@@ -35,10 +35,9 @@ function PACKAGE-Assemble-Archive-Content {
 		[string]$__target_arch
 	)
 
+
 	# copy main program
-	$__process = FS-Is-Target-A-Source "${__target}"
-	if ($__process -eq 0) {
-		# it's a source code target
+	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
 		$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs"
 		PYTHON-Clean-Artifact "${__target}"
 		OS-Print-Status info "copying ${__target} to ${__directory}"
@@ -47,8 +46,29 @@ function PACKAGE-Assemble-Archive-Content {
 			OS-Print-Status error "copy failed."
 			return 1
 		}
+	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+		return 10 # handled by wasm instead
+	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+		OS-Print-Status info "copying ${__target} to ${__directory}"
+		$__process = Fs-Copy-File "${__target}" "${__directory}"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = FS-Is-File "$($__target -replace '\.wasm.*$', '.js')"
+		if ($__process -eq 0) {
+			OS-Print-Status info `
+				"copying $($__target -replace '\.wasm.*$', '.js') to ${__directory}"
+			$__process = Fs-Copy-File `
+					"$($__target -replace '\.wasm.*$', '.js')" `
+					"${__directory}"
+			if ($__process -ne 0) {
+				return 1
+			}
+		}
 	} else {
-		# it's a binary target
 		switch (${__target_os}) {
 		"windows" {
 			$__dest = "${__directory}\${env:PROJECT_SKU}.exe"
@@ -64,6 +84,7 @@ function PACKAGE-Assemble-Archive-Content {
 		}
 	}
 
+
 	# copy user guide
 	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
 	OS-Print-Status info "copying ${__target} to ${__directory}"
@@ -73,6 +94,7 @@ function PACKAGE-Assemble-Archive-Content {
 		return 1
 	}
 
+
 	# copy license file
 	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
 	OS-Print-Status info "copying ${__target} to ${__directory}"
@@ -81,6 +103,7 @@ function PACKAGE-Assemble-Archive-Content {
 		OS-Print-Status error "copy failed."
 		return 1
 	}
+
 
 	# report status
 	return 0

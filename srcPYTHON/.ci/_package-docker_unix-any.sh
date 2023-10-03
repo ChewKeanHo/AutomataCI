@@ -33,10 +33,16 @@ PACKAGE::assemble_docker_content() {
         __target_os="$4"
         __target_arch="$5"
 
+
         # validate project
-        FS::is_target_a_source "$__target"
-        if [ $? -eq 0 ]; then
-                return 10
+        if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+                return 10 # not applicable
         fi
 
         case "$__target_os" in
@@ -46,7 +52,9 @@ PACKAGE::assemble_docker_content() {
                 return 10
                 ;;
         esac
+
         OS::print_status info "running python specific content assembling function...\n"
+
 
         # assemble the package
         FS::copy_file "$__target" "${__directory}/${PROJECT_SKU}"
@@ -58,6 +66,7 @@ PACKAGE::assemble_docker_content() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # generate the Dockerfile
         FS::write_file "${__directory}/Dockerfile" "\
@@ -113,6 +122,7 @@ ENTRYPOINT [\"/app/bin/${PROJECT_SKU}\"]
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0

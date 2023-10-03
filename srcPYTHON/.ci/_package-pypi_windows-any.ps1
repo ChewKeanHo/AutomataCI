@@ -34,6 +34,7 @@ function PACKAGE-Assemble-PYPI-Content {
 		[string]$__target_arch
 	)
 
+
 	# validate project
 	$__process = FS-Is-Target-A-Source "$__target"
 	if ($__process -ne 0) {
@@ -43,6 +44,7 @@ function PACKAGE-Assemble-PYPI-Content {
 	if ([string]::IsNullOrEmpty($env:PROJECT_PYTHON)) {
 		return 10
 	}
+
 
 	# assemble the python package
 	PYTHON-Clean-Artifact "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
@@ -57,6 +59,7 @@ function PACKAGE-Assemble-PYPI-Content {
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# generate the pyproject.toml
 	$__process = FS-Write-File "${__directory}\pyproject.toml" @"
@@ -90,6 +93,7 @@ Homepage = '${env:PROJECT_CONTACT_WEBSITE}'
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0

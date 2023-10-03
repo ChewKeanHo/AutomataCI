@@ -33,6 +33,7 @@ PACKAGE::assemble_pypi_content() {
         __target_os="$4"
         __target_arch="$5"
 
+
         # validate project
         FS::is_target_a_source "$__target"
         if [ $? -ne 0 ]; then
@@ -42,6 +43,7 @@ PACKAGE::assemble_pypi_content() {
         if [ -z "$PROJECT_PYTHON" ]; then
                 return 10
         fi
+
 
         # assemble the python package
         PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/"
@@ -56,6 +58,7 @@ PACKAGE::assemble_pypi_content() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # generate the pyproject.toml
         FS::write_file "${__directory}/pyproject.toml" "\
@@ -89,6 +92,7 @@ Homepage = '${PROJECT_CONTACT_WEBSITE}'
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0
