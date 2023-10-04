@@ -35,7 +35,7 @@ PACKAGE::assemble_rpm_content() {
 
 
         # validate target before job
-        FS::is_target_a_source "$__target"
+        __keyring="$PROJECT_SKU"
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
                 return 10
         elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
@@ -76,6 +76,8 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
+
+                __keyring="lib$PROJECT_SKU"
         elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
@@ -127,6 +129,19 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
         # OPTIONAL (overrides): ${__directory}/BUILD/copyright.gz
         # OPTIONAL (overrides): ${__directory}/BUILD/man.1.gz
         # OPTIONAL (overrides): ${__directory}/SPECS/${PROJECT_SKU}.spec
+
+
+        OS::print_status info "creating source.repo files...\n"
+        RPM::create_source_repo \
+                "$PROJECT_SIMULATE_RELEASE_REPO" \
+                "$__directory" \
+                "$PROJECT_GPG_ID" \
+                "$PROJECT_STATIC_URL" \
+                "$PROJECT_NAME" \
+                "$__keyring"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status

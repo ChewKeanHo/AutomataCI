@@ -344,6 +344,8 @@ function DEB-Create-Source-List {
 
 
 	# execute
+	$__url = "${__url}/deb"
+	$__url = $__url -replace "//deb", "/deb"
 	$__key = "usr\local\share\keyrings\${__sku}-keyring.gpg"
 	$__filename = "${__directory}\data\etc\apt\sources.list.d\${__sku}.list"
 

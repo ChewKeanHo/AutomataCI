@@ -36,6 +36,7 @@ PACKAGE::assemble_deb_content() {
 
 
         # validate target before job
+        __keyring="$PROJECT_SKU"
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
@@ -86,29 +87,26 @@ PACKAGE::assemble_deb_content() {
                 fi
         fi
 
-        OS::print_status info "overriding source.list file...\n"
-        __url="${PROJECT_STATIC_URL}/deb"
-        if [ -z "$__keyring" ]; then
-                __keyring="$PROJECT_SKU"
-        fi
-        DEB::create_source_list \
-                "$PROJECT_SIMULATE_RELEASE_REPO" \
-                "$__directory" \
-                "$PROJECT_GPG_ID" \
-                "${__url%//deb*}/deb" \
-                "$PROJECT_REPREPRO_CODENAME" \
-                "$PROJECT_DEBIAN_DISTRIBUTION" \
-                "$__keyring"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
 
         # OPTIONAL (overrides): copy usr/share/docs/${PROJECT_SKU}/changelog.gz
         # OPTIONAL (overrides): copy usr/share/docs/${PROJECT_SKU}/copyright.gz
         # OPTIONAL (overrides): copy usr/share/man/man1/${PROJECT_SKU}.1.gz
         # OPTIONAL (overrides): generate ${__directory}/control/md5sum
         # OPTIONAL (overrides): generate ${__directory}/control/control
+
+
+        OS::print_status info "creating source.list files...\n"
+        DEB::create_source_list \
+                "$PROJECT_SIMULATE_RELEASE_REPO" \
+                "$__directory" \
+                "$PROJECT_GPG_ID" \
+                "$PROJECT_STATIC_URL" \
+                "$PROJECT_REPREPRO_CODENAME" \
+                "$PROJECT_DEBIAN_DISTRIBUTION" \
+                "$__keyring"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status

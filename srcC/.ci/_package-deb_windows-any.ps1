@@ -35,7 +35,9 @@ function PACKAGE-Assemble-DEB-Content {
 		[string]$__target_arch
 	)
 
+
 	# validate target before job
+	$__keyring = "${env:PROJECT_SKU}"
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
@@ -84,32 +86,27 @@ function PACKAGE-Assemble-DEB-Content {
 		}
 	}
 
-	OS-Print-Status info "overriding source.list file..."
-	if ([string]::IsNullOrEmpty($__keyring)) {
-		$__keyring = "${env:PROJECT_SKU}"
-	}
-
-	$__url = "${env:PROJECT_STATIC_URL}/deb"
-	$__url = $__url -replace "//deb", "/deb"
-	$__process = DEB-Create-Source-List `
-		"${env:PROJECT_DEBIAN_CREATE_SOURCE_LIST}" `
-		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
-		"${__directory}" `
-		"${env:PROJECT_GPG_ID}" `
-		"${__url}" `
-		"${env:PROJECT_REPREPRO_CODENAME}" `
-		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
-		"${__keyring}"
-	if ($__process -ne 0) {
-		return 1
-	}
-
 
 	# OPTIONAL (overrides): copy usr/share/docs/${env:PROJECT_SKU}/changelog.gz
 	# OPTIONAL (overrides): copy usr/share/docs/${env:PROJECT_SKU}/copyright.gz
 	# OPTIONAL (overrides): copy usr/share/man/man1/${env:PROJECT_SKU}.1.gz
 	# OPTIONAL (overrides): generate ${__directory}/control/md5sum
 	# OPTIONAL (overrides): generate ${__directory}/control/control
+
+
+	OS-Print-Status info "creating source.list files..."
+	$__process = DEB-Create-Source-List `
+		"${env:PROJECT_DEBIAN_CREATE_SOURCE_LIST}" `
+		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
+		"${__directory}" `
+		"${env:PROJECT_GPG_ID}" `
+		"${env:PROJECT_STATIC_URL}" `
+		"${env:PROJECT_REPREPRO_CODENAME}" `
+		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
+		"${__keyring}"
+	if ($__process -ne 0) {
+		return 1
+	}
 
 
 	# report status

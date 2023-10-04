@@ -36,6 +36,7 @@ function PACKAGE-Assemble-RPM-Content {
 
 
 	# validate target before job
+	$__keyring = "${env:PROJECT_SKU}"
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
@@ -76,6 +77,8 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 		if ($__process -ne 0) {
 			return 1
 		}
+
+		$__keyring = "lib${env:PROJECT_SKU}"
 	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
@@ -135,6 +138,20 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 	# OPTIONAL (overrides): ${__directory}/BUILD/copyright.gz
 	# OPTIONAL (overrides): ${__directory}/BUILD/man.1.gz
 	# OPTIONAL (overrides): ${__directory}/SPECS/${env:PROJECT_SKU}.spec
+
+
+	OS-Print-Status info "creating source.repo files..."
+	$__process = RPM-Create-Source-Repo `
+		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
+		"${__directory}" `
+		"${env:PROJECT_GPG_ID}" `
+		"${env:PROJECT_STATIC_URL}" `
+		"${env:PROJECT_REPREPRO_CODENAME}" `
+		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
+		"${__keyring}"
+	if ($__process -ne 0) {
+		return 1
+	}
 
 
 	# report status

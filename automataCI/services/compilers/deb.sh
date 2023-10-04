@@ -339,6 +339,8 @@ DEB::create_source_list() {
 
 
         # execute
+        __url="${__url}/deb"
+        __url="${__url%//deb*}/deb"
         __key="usr/local/share/keyrings/${__sku}-keyring.gpg"
         __filename="${__directory}/data/etc/apt/sources.list.d/${__sku}.list"
 
