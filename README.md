@@ -1,5 +1,5 @@
 # AutomataCI
-[![AutomataCI](https://cdn.githubraw.com/ChewKeanHo/AutomataCI/experimental/src/icons/icon-1200x400.svg)](#automataci)
+[![AutomataCI](src/icons/icon-1200x400.svg)](#automataci)
 
 This is a template git repository equipped with a native built-in
 semi-autonomous CI tools known as `AutomataCI`. This allows one to run CI with
@@ -247,7 +247,9 @@ and wish to contribute back, there are 2 ways to do so:
 ### Financial Support
 
 To financially support the project, please head over to Holloway's sponorship
-store here: https://www.hollowaykeanho.com/stores/
+store here:
+
+[![Sponsor](.github/images/sponsor_en_100x30.svg)](https://www.hollowaykeanho.com/stores/)
 
 A small token purchase would helps a lot.
 
