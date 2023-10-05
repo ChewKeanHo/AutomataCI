@@ -87,7 +87,7 @@ __previous=""
 while [ "$__pathing" != "" ]; do
         PROJECT_PATH_ROOT="${PROJECT_PATH_ROOT}${__pathing%%/*}/"
         __pathing="${__pathing#*/}"
-        if [ -f "${PROJECT_PATH_ROOT}.git/config" ]; then
+        if [ -f "${PROJECT_PATH_ROOT}automataCI/ci.cmd" ]; then
                 break
         fi
 
@@ -198,6 +198,11 @@ prepare|Prepare|PREPARE)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
         code=$?
         ;;
+materialize|Materialize|MATERIALIZE)
+        export PROJECT_CI_JOB="materialize"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
+        code=$?
+        ;;
 build|Build|BUILD)
         export PROJECT_CI_JOB="build"
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
@@ -246,6 +251,7 @@ purge|Purge|PURGE)
         printf "        To prepare the repo 🠚           $ ./ci.cmd prepare\n"
         printf "        To start a development 🠚        $ ./ci.cmd start\n"
         printf "        To test the repo 🠚              $ ./ci.cmd test\n"
+        printf "        Like build but only for host 🠚  $ ./ci.cmd materialize\n"
         printf "        To build the repo 🠚             $ ./ci.cmd build\n"
         printf "        To package the repo product 🠚   $ ./ci.cmd package\n"
         printf "        To release the repo product 🠚   $ ./ci.cmd release\n"

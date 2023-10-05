@@ -37,7 +37,15 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# validate target before job
+	switch ($__target_arch) {
+	{ $_ -in "avr" } {
+		return 10 # not applicable
+	} default {
+		# accepted
+	}}
+
 	$__keyring = "${env:PROJECT_SKU}"
+	$__package = "${env:PROJECT_SKU}"
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
@@ -58,9 +66,12 @@ function PACKAGE-Assemble-DEB-Content {
 		}
 
 		$__keyring = "lib${env:PROJECT_SKU}"
+		$__package = "lib${env:PROJECT_SKU}"
 	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
 		return 10 # not applicable
 	} else {
 		switch (${__target_os}) {
@@ -91,7 +102,6 @@ function PACKAGE-Assemble-DEB-Content {
 	# OPTIONAL (overrides): copy usr/share/docs/${env:PROJECT_SKU}/copyright.gz
 	# OPTIONAL (overrides): copy usr/share/man/man1/${env:PROJECT_SKU}.1.gz
 	# OPTIONAL (overrides): generate ${__directory}/control/md5sum
-	# OPTIONAL (overrides): generate ${__directory}/control/control
 
 
 	OS-Print-Status info "creating source.list files..."
@@ -107,6 +117,29 @@ function PACKAGE-Assemble-DEB-Content {
 	if ($__process -ne 0) {
 		return 1
 	}
+
+
+	# (overrides): generate ${__directory}/control/control
+	OS-Print-Status info "creating control/control file..."
+	$__process = DEB-Create-Control `
+		"${__directory}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
+		"${__package}" `
+		"${env:PROJECT_VERSION}" `
+		"${__target_arch}" `
+		"${env:PROJECT_CONTACT_NAME}" `
+		"${env:PROJECT_CONTACT_EMAIL}" `
+		"${env:PROJECT_CONTACT_WEBSITE}" `
+		"${env:PROJECT_PITCH}" `
+		"${env:PROJECT_DEBIAN_PRIORITY}" `
+		"${env:PROJECT_DEBIAN_SECTION}"
+	switch ($__process) {
+	{ $_ -in 0, 2 } {
+		# accepted
+	} default {
+		OS-Print-Status error "create failed."
+		return 1
+	}}
 
 
 	# report status

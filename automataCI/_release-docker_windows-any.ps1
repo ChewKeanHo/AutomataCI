@@ -19,9 +19,9 @@
 function RELEASE-Run-DOCKER {
 	param(
 		[string]$_target,
-		[string]$_directory,
-		[string]$_datastore
+		[string]$_directory
 	)
+
 
 	# validate input
 	$__process = DOCKER-Is-Valid "${_target}"
@@ -36,17 +36,14 @@ function RELEASE-Run-DOCKER {
 		return 0
 	}
 
+
 	# execute
 	OS-Print-Status info "releasing docker as the latest version..."
 	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 		OS-Print-Status warning "Simulating multiarch docker manifest release..."
 		OS-Print-Status warning "Simulating remove package artifact..."
 	} else {
-		$__process = DOCKER-Release `
-			"${_target}" `
-			"${_directory}" `
-			"${_datastore}" `
-			"${env:PROJECT_VERSION}"
+		$__process = DOCKER-Release "${_target}" "${env:PROJECT_VERSION}"
 		if ($__process -ne 0) {
 			OS-Print-Status error "release failed."
 			return 1

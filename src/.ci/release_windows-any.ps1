@@ -25,6 +25,17 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
+function RELEASE-Run-Package-Processor {
+	param(
+		[string]$__target
+	)
+
+	return 0
+}
+
+
+
+
 function RELEASE-Run-Post-Processor {
 	param(
 		[string]$__directory

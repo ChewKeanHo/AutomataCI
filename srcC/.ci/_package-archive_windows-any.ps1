@@ -37,7 +37,7 @@ function PACKAGE-Assemble-Archive-Content {
 
 	# copy main program
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
-		$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_GO}\libs"
+		$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}\libs"
 		OS-Print-Status info "copying ${__target} to ${__directory}"
 		$__process = FS-Copy-All "${__target}" "${__directory}"
 		if ($__process -ne 0) {
@@ -69,6 +69,8 @@ function PACKAGE-Assemble-Archive-Content {
 				return 1
 			}
 		}
+	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
+		return 10 # not applicable
 	} else {
 		switch (${__target_os}) {
 		"windows" {

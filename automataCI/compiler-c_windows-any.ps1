@@ -297,7 +297,8 @@ function BUILD-_Exec-Build {
 	OS-Print-Status info "preparing ${_target} parallel build workspace..."
 	$null = FS-Remove-Silently "${_parallel_control}"
 	$null = FS-Remove-Silently "${_linker_control}"
-	$null = FS-Make-Housing-Directory "${_parallel_control}"
+	$null = FS-Remove-Silently `
+		"${_target_directory}\~$(Split-Path -Leaf -Path "${_linker_control}")"
 
 
 	$_parallel_total = BUILD-__Validate-Source-Files `

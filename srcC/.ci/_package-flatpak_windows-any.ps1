@@ -36,6 +36,13 @@ function PACKAGE-Assemble-FLATPAK-Content {
 
 
 	# validate target before job
+	switch ($__target_arch) {
+	{ $_ -in "avr" } {
+		return 10 # not applicable
+	} default {
+		# accepted
+	}}
+
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {

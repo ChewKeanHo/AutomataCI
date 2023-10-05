@@ -56,6 +56,7 @@ Some good business reasons why AutomataCI is made:
 * `PyPi` repo (for `pip install` [Python Packages](https://pypi.org/))
 * Static Sites ([GitHub Pages](https://pages.github.com/),
   [Cloudflare Pages](https://pages.cloudflare.com/))
+* [`Homebrew` ecosystem](https://brew.sh/) (for `brew install` capability)
 * GitHub Security Advisory (for CVE management)
 
 
@@ -222,6 +223,7 @@ Please try any of the following:
         To prepare the repo 🠚           $ ./ci.cmd prepare
         To start a development 🠚        $ ./ci.cmd start
         To test the repo 🠚              $ ./ci.cmd test
+        Like build but only for host 🠚  $ ./ci.cmd materialize
         To build the repo 🠚             $ ./ci.cmd build
         To package the repo product 🠚   $ ./ci.cmd package
         To release the repo product 🠚   $ ./ci.cmd release

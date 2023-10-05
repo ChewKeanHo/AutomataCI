@@ -26,6 +26,15 @@ fi
 
 
 
+RELEASE::run_package_processor() {
+        #__target="$1"
+
+        return 0
+}
+
+
+
+
 RELEASE::run_post_processor() {
         #__directory="$1"
 

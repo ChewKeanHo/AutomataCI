@@ -110,10 +110,12 @@ SignWith: ${__gpg}
 
 
 function REPREPRO-Is-Available {
+	# execute
 	$__process = OS-Is-Command-Available "reprepro"
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0
@@ -137,16 +139,15 @@ function REPREPRO-Publish {
 		[string]::IsNullOrEmpty($__directory) -or
 		[string]::IsNullOrEmpty($__datastore) -or
 		[string]::IsNullOrEmpty($__codename) -or
-		(Test-Path "${__target}" -PathType Container) -or
-		(-not (Test-Path "${__directory}" -PathType Container)) -or
-		(-not (Test-Path "${__datastore}" -PathType Container))) {
+		(-not (Test-Path "${__directory}" -PathType Container))) {
 		return 1
 	}
 
 
 	# execute
-	$null = FS-Remake-Directory "${__datastore}\db"
-	$null = FS-Remake-Directory "${__directory}"
+	$null = FS-Make-Directory "${__db_directory}"
+	$null = FS-Make-Directory "${__directory}"
+	$null = FS-Make-Directory "${__datastore}"
 	$__arguments = "--basedir `"${__datastore}`" " `
 			+ "--dbdir `"${__db_directory}`" " `
 			+ "--outdir `"${__directory}`" " `

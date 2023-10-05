@@ -19,8 +19,7 @@
 
 RELEASE::run_pypi() {
         _target="$1"
-        _directory="$2"
-        _datastore="$3"
+
 
         # validate input
         PYPI::is_valid "$_target"
@@ -41,6 +40,7 @@ RELEASE::run_pypi() {
                 OS::print_status error "check failed.\n"
                 return 1
         fi
+
 
         # execute
         OS::print_status info "releasing pypi package...\n"
@@ -64,6 +64,7 @@ RELEASE::run_pypi() {
                 OS::print_status info "remove package artifact...\n"
                 FS::remove_silently "$_target"
         fi
+
 
         # report status
         return 0

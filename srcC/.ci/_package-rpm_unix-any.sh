@@ -35,6 +35,14 @@ PACKAGE::assemble_rpm_content() {
 
 
         # validate target before job
+        case "$__target_arch" in
+        avr)
+                return 10 # not applicable
+                ;;
+        *)
+                ;;
+        esac
+
         __keyring="$PROJECT_SKU"
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
                 return 10
@@ -81,6 +89,8 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
         elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_homebrew "$__target") -eq 0 ]; then
                 return 10 # not applicable
         else
                 # copy main program

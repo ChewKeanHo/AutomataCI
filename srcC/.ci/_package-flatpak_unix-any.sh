@@ -35,6 +35,14 @@ PACKAGE::assemble_flatpak_content() {
 
 
         # validate target before job
+        case "$__target_arch" in
+        avr)
+                return 10 # not applicable
+                ;;
+        *)
+                ;;
+        esac
+
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then

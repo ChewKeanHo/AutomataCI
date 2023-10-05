@@ -131,6 +131,25 @@ FS::is_file() {
 
 
 
+FS::is_target_a_homebrew() {
+        # __target="$1"
+
+
+        # execute
+        if [ "${1#*-homebrew}" != "$1" ] || [ "${1#*-brew}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
 FS::is_target_a_library() {
         # __target="$1"
 

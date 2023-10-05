@@ -18,10 +18,9 @@
 
 function RELEASE-Run-PYPI {
 	param(
-		[string]$_target,
-		[string]$_directory,
-		[string]$_datastore
+		[string]$_target
 	)
+
 
 	# validate input
 	$__process = PYPI-Is-Valid "${_target}"
@@ -42,6 +41,7 @@ function RELEASE-Run-PYPI {
 		OS-Print-Status error "check failed."
 		return 1
 	}
+
 
 	# execute
 	OS-Print-Status info "releasing pypi package..."
@@ -65,9 +65,10 @@ function RELEASE-Run-PYPI {
 			return 1
 		}
 
-		OS-Print-Status info "processing package artifact for local distribution..."
+		OS-Print-Status info "remove package artifact..."
 		$null = FS-Remove-Silently "${_target}"
 	}
+
 
 	# report status
 	return 0

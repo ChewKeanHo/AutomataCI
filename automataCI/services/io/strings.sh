@@ -14,15 +14,18 @@ STRINGS::has_prefix() {
         #__prefix="$1"
         #__content="$2"
 
+
         # validate input
         if [ -z "$1" ]; then
                 return 1
         fi
 
+
         # execute
         if [ "${2%"${2#"${1}"*}"}" = "$1" ]; then
                 return 0
         fi
+
 
         # report status
         return 1
@@ -35,6 +38,7 @@ STRINGS::has_suffix() {
         #__suffix="$1"
         #__content="$2"
 
+
         # execute
         case "$2" in
         *"$1")
@@ -44,6 +48,44 @@ STRINGS::has_suffix() {
                 return 1
                 ;;
         esac
+}
+
+
+
+
+STRINGS::replace_all() {
+        #__content="$1"
+        #__subject="$2"
+        #__replacement="$3"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+                printf -- ""
+                return 1
+        fi
+
+
+        # execute
+        __right="$1"
+        __register=""
+        while [ -n "$__right" ]; do
+                __left=${__right%%${2}*}
+
+                if [ "$__left" = "$__right" ]; then
+                        printf -- "%b" "${__register}${__right}"
+                        return 0
+                fi
+
+                # replace this occurence
+                __register="${__register}${__left}${3}"
+                __right="${__right#*${2}}"
+        done
+
+
+        # report status
+        printf -- "%b" "${__register}"
+        return 0
 }
 
 

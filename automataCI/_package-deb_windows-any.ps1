@@ -60,6 +60,7 @@ function PACKAGE-Run-DEB {
 		return 1
 	}
 
+
 	# prepare workspace and required values
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}.deb"
@@ -79,6 +80,7 @@ function PACKAGE-Run-DEB {
 		OS-Print-Status error "check failed - output exists!"
 		return 1
 	}
+
 
 	# copy all complimentary files to the workspace
 	OS-Print-Status info "assembling package files..."
@@ -104,6 +106,7 @@ function PACKAGE-Run-DEB {
 		OS-Print-Status error "assembly failed."
 		return 1
 	}}
+
 
 	# generate required files
 	OS-Print-Status info "creating copyright.gz file..."
@@ -165,7 +168,7 @@ function PACKAGE-Run-DEB {
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}" `
-		"${env:PROJECT_ARCH}" `
+		"${_target_arch}" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}" `
 		"${env:PROJECT_CONTACT_WEBSITE}" `
@@ -179,6 +182,7 @@ function PACKAGE-Run-DEB {
 		return 1
 	}
 
+
 	# archive the assembled payload
 	OS-Print-Status info "archiving .deb package..."
 	$__process = DEB-Create-Archive "${_src}" "${_target_path}"
@@ -186,6 +190,7 @@ function PACKAGE-Run-DEB {
 		OS-Print-Status error "package failed."
 		return 1
 	}
+
 
 	# report status
 	return 0

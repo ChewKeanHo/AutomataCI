@@ -129,5 +129,29 @@ if (($__process -ne 0) -and ($__process -ne 10)) {
 
 
 
+# placeholding source code flag
+$__file = "${env:PROJECT_SKU}-src_any-any"
+OS-Print-Status info "building output file: ${__file}"
+$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
+if ($__process -ne 0) {
+	OS-Print-Status error "build failed."
+	return 1
+}
+
+
+
+
+# placeholding homebrew flag
+$__file = "${env:PROJECT_SKU}-homebrew_any-any"
+OS-Print-Status info "building output file: ${__file}"
+$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
+if ($__process -ne 0) {
+	OS-Print-Status error "build failed."
+	return 1
+}
+
+
+
+
 # report status
 return $EXIT_CODE

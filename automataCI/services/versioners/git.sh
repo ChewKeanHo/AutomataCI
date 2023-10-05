@@ -16,12 +16,90 @@
 
 
 
-GIT::is_available() {
-        OS::is_command_available "git"
+GIT::autonomous_commit() {
+        #__tracker="$1"
+        #__repo="$2"
+        #__branch="$3"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+                return 1
+        fi
+
+        GIT::is_available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+        if [ -z "$(git status --porcelain)" ]; then
+                return 0 # nothing to commit
+        fi
+
+
+        # execute
+        git add .
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        git commit -m "automation: publish as of ${1}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        git push "$2" "$3"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+GIT::autonomous_force_commit() {
+        #__tracker="$1"
+        #__repo="$2"
+        #__branch="$3"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+                return 1
+        fi
+
+        GIT::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        if [ -z "$(git status --porcelain)" ]; then
+                return 0 # nothing to commit
+        fi
+
+
+        # execute
+        git add .
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        git commit -m "automation: publish as of ${1}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        git push -f "$2" "$3"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
         return 0
 }
 
@@ -31,6 +109,7 @@ GIT::is_available() {
 GIT::clone() {
         #__url="$1"
         #__name="$2"
+
 
         # validate input
         if [ -z "$1" ]; then
@@ -52,12 +131,14 @@ GIT::clone() {
                 fi
         fi
 
+
         # execute
         if [ ! -z "$2" ]; then
                 git clone "$1" "$2"
         else
                 git clone "$1"
         fi
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -78,8 +159,10 @@ GIT::get_first_commit_id() {
                 return 1
         fi
 
+
         # execute
         printf -- "$(git rev-list --max-parents=0 --abbrev-commit HEAD)"
+
 
         # report status
         return 0
@@ -96,8 +179,10 @@ GIT::get_latest_commit_id() {
                 return 1
         fi
 
+
         # execute
         printf -- "$(git rev-parse HEAD)"
+
 
         # report status
         return 0
@@ -114,8 +199,10 @@ GIT::get_root_directory() {
                 return 1
         fi
 
+
         # execute
         printf -- "$(git rev-parse --show-toplevel)"
+
 
         # report status
         return 0
@@ -127,6 +214,7 @@ GIT::get_root_directory() {
 GIT::hard_reset_to_init() {
         #__root="$1"
 
+
         # validate input
         if [ -z "$1" ]; then
                 return 1
@@ -137,17 +225,19 @@ GIT::hard_reset_to_init() {
                 return 1
         fi
 
-        __first="$(GIT::get_root_directory)"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
 
         # CVE-2023-42798 - Make sure the directory is not the same as the root
         #                  directory. If it does, bail out immediately and DO
         #                  not proceed.
+        __first="$(GIT::get_root_directory)"
+        if [ -z "$__first" ]; then
+                return 1
+        fi
+
         if [ "$__first" = "$1" ]; then
                 return 1
         fi
+
 
         # execute
         __first="$(GIT::get_first_commit_id)"
@@ -165,6 +255,7 @@ GIT::hard_reset_to_init() {
                 return 1
         fi
 
+
         # report status
         return 0
 }
@@ -172,39 +263,36 @@ GIT::hard_reset_to_init() {
 
 
 
-GIT::autonomous_force_commit() {
-        #__tracker="$1"
-        #__repo="$2"
-        #__branch="$3"
+GIT::is_available() {
+        OS::is_command_available "git"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        return 0
+}
+
+
+
+
+GIT::at_root_repo() {
+        #__directory="$1"
+
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+        if [ -z "$1" ] || [ ! -d "$1" ]; then
                 return 1
         fi
 
-        GIT::is_available
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
 
         # execute
-        git add .
-        if [ $? -ne 0 ]; then
-                return 1
+        if [ -f "${1}/.git/config" ]; then
+                return 0
         fi
 
-        git commit -m "Publish as of ${1}"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        git push -f "$2" "$3"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
 
         # report status
-        return 0
+        return 1
 }
 
 
@@ -212,6 +300,7 @@ GIT::autonomous_force_commit() {
 
 GIT::remove_worktree() {
         #__destination="$1"
+
 
         # validate input
         if [ -z "$1" ]; then
@@ -222,6 +311,7 @@ GIT::remove_worktree() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # execute
         git worktree remove "$1"
@@ -234,6 +324,7 @@ GIT::remove_worktree() {
                 return 1
         fi
 
+
         # report status
         return 0
 }
@@ -245,6 +336,7 @@ GIT::setup_worktree() {
         #__branch="$1"
         #__destination="$2"
 
+
         # validate input
         if [ -z "$1" ] || [ -z "$2" ]; then
                 return 1
@@ -255,9 +347,11 @@ GIT::setup_worktree() {
                 return 1
         fi
 
+
         # execute
         FS::make_directory "$2"
         git worktree add "$2" "$1"
+
 
         # report status
         if [ $? -eq 0 ]; then

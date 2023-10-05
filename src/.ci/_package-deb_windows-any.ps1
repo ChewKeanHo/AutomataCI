@@ -62,6 +62,8 @@ function PACKAGE-Assemble-DEB-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
+		return 10 # not applicable
 	} else {
 		switch (${__target_os}) {
 		"windows" {

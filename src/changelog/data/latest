@@ -1,3 +1,9 @@
+root: updated repository metadata
+automataCI: updated spec document to reflect deb & rpm changes
+automataCI: added yum's source.repo data file generative function
+automataCI: finalize deb compilers for release
+automataCI: autogenerate reprepro configurations file
+root: added apt's source.list file generator function
 root: merged resources/ directory into src/ directory
 srcPYTHON: backported all latest CI changes
 srcGO: added wasm support

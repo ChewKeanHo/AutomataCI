@@ -295,9 +295,8 @@ BUILD::_exec_build() {
 
 
         OS::print_status info "preparing ${_target} parallel build workspace...\n"
-        FS::remove_silently "$_parallel_control"
-        FS::remove_silently "$_linker_control"
-        FS::make_housing_directory "$_parallel_control"
+        FS::remove_silently "${_parallel_control}"
+        FS::remove_silently "${_linker_control}"
 
 
         # validating each source files

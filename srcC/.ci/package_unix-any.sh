@@ -24,6 +24,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_C}/${PROJECT_PATH_CI}/_package-deb_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_C}/${PROJECT_PATH_CI}/_package-docker_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_C}/${PROJECT_PATH_CI}/_package-flatpak_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_C}/${PROJECT_PATH_CI}/_package-homebrew_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_C}/${PROJECT_PATH_CI}/_package-rpm_unix-any.sh"
 
 

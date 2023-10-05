@@ -110,10 +110,12 @@ SignWith: ${__gpg}
 
 
 REPREPRO::is_available() {
+        # execute
         OS::is_command_available "reprepro"
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0
@@ -135,15 +137,15 @@ REPREPRO::publish() {
                 [ -z "$__directory" ] ||
                 [ -z "$__datastore" ] ||
                 [ -z "$__codename" ] ||
-                [ ! -d "$__directory" ] ||
-                [ ! -d "$__datastore" ]; then
+                [ ! -d "$__directory" ]; then
                 return 1
         fi
 
 
         # execute
-        FS::remake_directory "${__db_directory}"
-        FS::remake_directory "${__directory}"
+        FS::make_directory "${__db_directory}"
+        FS::make_directory "${__directory}"
+        FS::make_directory "${__datastore}"
         reprepro --basedir "${__datastore}" \
                 --dbdir "${__db_directory}" \
                 --outdir "${__directory}" \

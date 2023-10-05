@@ -20,12 +20,12 @@
 function RELEASE-Run-RPM {
 	param(
 		[string]$__target,
-		[string]$__directory,
-		[string]$__datastore
+		[string]$__directory
 	)
 
+
 	# validate input
-	$__process = DEB-Is-Valid "${__target}"
+	$__process = RPM-Is-Valid "${__target}"
 	if ($__process -ne 0) {
 		return 0
 	}
@@ -36,6 +36,7 @@ function RELEASE-Run-RPM {
 		OS-Print-Status warning "Createrepo is unavailable. Skipping..."
 		return 0
 	}
+
 
 	# execute
 	$__dest = "${__directory}/rpm"
@@ -52,6 +53,7 @@ function RELEASE-Run-RPM {
 		OS-Print-Status error "publish failed."
 		return 1
 	}
+
 
 	# report status
 	return 0

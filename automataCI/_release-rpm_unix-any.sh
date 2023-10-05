@@ -21,7 +21,7 @@
 RELEASE::run_rpm() {
         __target="$1"
         __directory="$2"
-        __datastore="$3"
+
 
         # validate input
         RPM::is_valid "$__target"
@@ -36,8 +36,9 @@ RELEASE::run_rpm() {
                 return 0
         fi
 
+
         # execute
-        __dest="${__directory}/rpm"
+        __dest="${2}/rpm"
         OS::print_status info "creating destination path: ${__dest}\n"
         FS::make_directory "${__dest}"
         if [ $? -ne 0 ]; then
@@ -51,6 +52,7 @@ RELEASE::run_rpm() {
                 OS::print_status error "publish failed.\n"
                 return 1
         fi
+
 
         # report status
         return 0

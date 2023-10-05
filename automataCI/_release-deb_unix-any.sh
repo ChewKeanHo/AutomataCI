@@ -52,8 +52,8 @@ RELEASE::run_deb() {
                 return 1
         fi
 
+        __dest="${2}/deb"
         OS::print_status info "creating destination path: ${__dest}\n"
-        __dest="${__directory}/deb"
         FS::make_directory "${__dest}"
         if [ $? -ne 0 ]; then
                 OS::print_status error "create failed.\n"
@@ -67,8 +67,8 @@ RELEASE::run_deb() {
                 REPREPRO::publish \
                         "$__target" \
                         "$__dest" \
-                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/publishers/reprepro" \
                         "$__conf" \
+                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/publishers/reprepro" \
                         "$PROJECT_REPREPRO_CODENAME"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "publish failed.\n"

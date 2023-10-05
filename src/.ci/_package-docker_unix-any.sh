@@ -43,6 +43,8 @@ PACKAGE::assemble_docker_content() {
                 return 10 # not applicable
         elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
                 return 10 # not applicable
+        elif [ $(FS::is_target_a_homebrew "$__target") -eq 0 ]; then
+                return 10 # not applicable
         fi
 
         case "$__target_os" in

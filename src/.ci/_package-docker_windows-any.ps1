@@ -44,6 +44,8 @@ function PACKAGE-Assemble-DOCKER-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
+		return 10 # not applicable
 	}
 
 	switch ($__target_os) {

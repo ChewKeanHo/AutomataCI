@@ -36,6 +36,21 @@ OS-Print-Status info "nuking ${__target}..."
 FS-Remove-Silently "${__target}"
 
 
+$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}"
+OS-Print-Status info "nuking ${__target}..."
+FS-Remove-Silently "${__target}"
+
+
+$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
+OS-Print-Status info "nuking ${__target}..."
+FS-Remove-Silently "${__target}"
+
+
+$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LIB}"
+OS-Print-Status info "nuking ${__target}..."
+FS-Remove-Silently "${__target}"
+
+
 $__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}"
 OS-Print-Status info "nuking ${__target}..."
 FS-Remove-Silently "${__target}"

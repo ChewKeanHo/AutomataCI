@@ -36,6 +36,13 @@ function PACKAGE-Assemble-DOCKER-Content {
 
 
 	# validate project
+	switch ($__target_arch) {
+	{ $_ -in "avr" } {
+		return 10 # not applicable
+	} default {
+		# accepted
+	}}
+
 	if ($(FS-Is-Target-A-Source "${__target}") -ne 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${__target}") -ne 0) {
@@ -43,6 +50,8 @@ function PACKAGE-Assemble-DOCKER-Content {
 	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
 		return 10 # not applicable
 	}
 

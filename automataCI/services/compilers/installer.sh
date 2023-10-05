@@ -144,8 +144,7 @@ INSTALLER::setup_c() {
                         i686-elf-gcc \
                         mingw-w64 \
                         emscripten \
-                        llvm \
-                        gcc
+                        llvm
         fi
         if [ $? -eq 0 ]; then
                 return 0
@@ -207,6 +206,72 @@ INSTALLER::setup_go() {
         fi
 
         return 1
+}
+
+
+
+
+INSTALLER::setup_homebrew_repo() {
+        __root="$1"
+        __release="$2"
+        __current="$3"
+        __git_repo="$4"
+        __simulate="$5"
+        __label="$6"
+
+
+        # validate input
+        if [ -z "$__root" ] ||
+                [ -z "$__release" ] ||
+                [ -z "$__current" ] ||
+                [ -z "$__git_repo" ] ||
+                [ -z "$__label" ]; then
+                return 1
+        fi
+
+        GIT::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        FS::make_directory "${__root}/${__release}"
+
+        if [ -d "${__root}/${__release}/${__label}" ]; then
+                cd "${__root}/${__release}/${__label}"
+                __directory="$(GIT::get_root_directory)"
+                cd "$__current"
+
+                if [ "$__directory" = "$__root" ]; then
+                        FS::remove_silently "${__root}/${__release}/${__label}"
+                fi
+        fi
+
+
+        if [ ! -z "$__simulate" ]; then
+                FS::make_directory "${__root}/${__release}/${__label}"
+                cd "${__root}/${__release}/${__label}"
+                git init --initial-branch=main
+                git commit --allow-empty -m "Initial Commit"
+                cd "$__current"
+        else
+                cd "${__root}/${__release}"
+                GIT::clone "$__git_repo" "$__label"
+                case $? in
+                0|2)
+                        # Accepted
+                        ;;
+                *)
+                        return 1
+                        ;;
+                esac
+                cd "$__current"
+        fi
+
+
+        # report status
+        return 0
 }
 
 

@@ -11,10 +11,7 @@
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\crypto\gpg.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\installer.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\checksum\shasum.ps1"
 
 
@@ -24,6 +21,7 @@ function RELEASE-Run-Checksum-Seal {
 	param (
 		[string]$__static_repo
 	)
+
 
 	# execute
 	$__sha256_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha256.txt"
@@ -140,7 +138,7 @@ ${__value}  $TARGET
 
 
 
-function RELEASE-Initiate {
+function RELEASE-Initiate-Checksum {
 	# safety check control surfaces
 	OS-Print-Status info "Checking shasum availability..."
 	$__process = SHASUM-Is-Available
@@ -149,117 +147,6 @@ function RELEASE-Initiate {
 		return 1
 	}
 
-
-	# report status
-	return 0
-}
-
-
-
-
-function RELEASE-Run-Changelog-Conclude {
-	# execute
-	OS-Print-Status info "Sealing changelog latest entries..."
-	$__process = CHANGELOG-Seal `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog" `
-		"${env:PROJECT_VERSION}"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	# report status
-	return 0
-}
-
-
-
-
-function RELEASE-Run-Release-Repo-Conclude {
-	# validate input
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
-		OS-Print-Status error "Missing required git dependency."
-		return 1
-	}
-
-	OS-Print-Status info "Sourcing commit id for tagging..."
-	$__tag = GIT-Get-Latest-Commit-ID
-	if ([string]::IsNullOrEmpty(${__tag})) {
-		OS-Print-Status error "Source failed."
-		return 1
-	}
-
-	# execute
-	$__current_path = Get-Location
-	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
-
-	OS-Print-Status info "Generate required notice file..."
-	$null = FS-Write-File "Home.md" @"
-# ${env:PROJECT_NAME} Static Distribution Repository
-
-This is a re-purposed repository for housing various distribution ecosystem
-such as but not limited to ``.deb``, ``.rpm``, ``.flatpak``, and etc for folks
-to ``apt-get install``, ``yum install``, or ``flatpak install``.
-"@
-
-	OS-Print-Status info "Committing release repo..."
-	$__process = Git-Autonomous-Force-Commit `
-		"${__tag}" `
-		"${env:PROJECT_STATIC_REPO_KEY}" `
-		"${env:PROJECT_STATIC_REPO_BRANCH}"
-	if ($__process -ne 0) {
-		$null = Set-Location "${__curent_path}"
-		$null = Remove-Variable __current_path
-		OS-Print-Status error "Commit failed."
-		return 1
-	}
-
-	$null = Set-Location "${__curent_path}"
-	$null = Remove-Variable __current_path
-
-	# return status
-	return 0
-}
-
-
-
-
-function RELEASE-Run-Release-Repo-Setup {
-	# clean up base directory
-	OS-Print-Status info "Safety checking release directory is a file..."
-	if (Test-Path -PathType Leaf `
-		-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}") {
-		OS-Print-Status error "check failed."
-		return 1
-	}
-	$null = FS-Remake-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
-
-	# execute
-	OS-Print-Status info "Setting up release static repo..."
-
-	$__process = INSTALLER-Setup-Release-Repo `
-		"${env:PROJECT_PATH_ROOT}" `
-		"${env:PROJECT_PATH_RELEASE}" `
-		"$(Get-Location)" `
-		"${env:PROJECT_STATIC_REPO}" `
-		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
-		"${env:PROJECT_STATIC_REPO_DIRECTORY}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "setup failed."
-		return 1
-	}
-
-	# execute
-	$__staging = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${env:PROJECT_PATH_RELEASE}"
-	$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
-	if (Test-Path -PathType Container -Path "${__staging}") {
-		OS-Print-Status info "exporting staging contents to static repo..."
-		$__process = FS-Copy-All "${__staging}/" "$__dest"
-		if ($__process -ne 0) {
-			OS-Print-Status error "export failed."
-			return 1
-		}
-	}
 
 	# report status
 	return 0

@@ -20,7 +20,7 @@
 RELEASE::run_docker() {
         _target="$1"
         _directory="$2"
-        _datastore="$3"
+
 
         # validate input
         DOCKER::is_valid "$_target"
@@ -35,17 +35,14 @@ RELEASE::run_docker() {
                 return 0
         fi
 
+
         # execute
         OS::print_status info "releasing docker as the latest version...\n"
         if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
                 OS::print_status warning "Simulating multiarch docker manifest release...\n"
                 OS::print_status warning "Simulating remove package artifact...\n"
         else
-                DOCKER::release \
-                        "$_target" \
-                        "$_directory" \
-                        "$_datastore" \
-                        "$PROJECT_VERSION"
+                DOCKER::release "$_target" "$PROJECT_VERSION"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "release failed.\n"
                         return 1
@@ -54,6 +51,7 @@ RELEASE::run_docker() {
                 OS::print_status info "remove package artifact...\n"
                 FS::remove_silently "$_target"
         fi
+
 
         # report status
         return 0

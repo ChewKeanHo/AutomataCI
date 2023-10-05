@@ -53,8 +53,8 @@ function RELEASE-Run-DEB {
 		return 1
 	}
 
-	OS-Print-Status info "creating destination path..."
 	$__dest = "${__directory}/deb"
+	OS-Print-Status info "creating destination path: ${__dest}"
 	$__process = FS-Make-Directory "${__dest}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "create failed."
@@ -62,15 +62,19 @@ function RELEASE-Run-DEB {
 	}
 
 	OS-Print-Status info "publishing with reprepro..."
-	$__process = REPREPRO-Publish `
-		"${__target}" `
-		"${__dest}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\publishers\reprepro" `
-		"${__conf}" `
-		"${env:PROJECT_REPREPRO_CODENAME}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "publish failed."
-		return 1
+	if ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO})) {
+		OS-Print-Status warning "Simulating reprepro release..."
+	} else {
+		$__process = REPREPRO-Publish `
+			"${__target}" `
+			"${__dest}" `
+			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\publishers\reprepro" `
+			"${__conf}" `
+			"${env:PROJECT_REPREPRO_CODENAME}"
+		if ($__process -ne 0) {
+			OS-Print-Status error "publish failed."
+			return 1
+		}
 	}
 
 

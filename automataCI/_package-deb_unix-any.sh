@@ -62,6 +62,7 @@ PACKAGE::run_deb() {
                 return 0
         fi
 
+
         # prepare workspace and required values
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}.deb"
@@ -81,6 +82,7 @@ PACKAGE::run_deb() {
                 OS::print_status error "check failed - output exists!\n"
                 return 1
         fi
+
 
         # copy all complimentary files to the workspace
         OS::print_status info "assembling package files...\n"
@@ -108,6 +110,7 @@ PACKAGE::run_deb() {
                 return 1
                 ;;
         esac
+
 
         # generate required files
         OS::print_status info "creating copyright.gz file...\n"
@@ -189,7 +192,7 @@ PACKAGE::run_deb() {
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
                 "$PROJECT_SKU" \
                 "$PROJECT_VERSION" \
-                "$PROJECT_ARCH" \
+                "$_target_arch" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE" \
@@ -208,6 +211,7 @@ PACKAGE::run_deb() {
                 ;;
         esac
 
+
         # archive the assembled payload
         OS::print_status info "archiving .deb package...\n"
         DEB::create_archive "$_src" "$_target_path"
@@ -215,6 +219,7 @@ PACKAGE::run_deb() {
                 OS::print_status error "package failed.\n"
                 return 1
         fi
+
 
         # report status
         return 0

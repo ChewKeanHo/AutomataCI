@@ -437,7 +437,7 @@ function RPM-Is-Available {
 
 
 
-function REB-Is-Valid {
+function RPM-Is-Valid {
 	param (
 		[string]$__target
 	)

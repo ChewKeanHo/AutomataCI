@@ -22,17 +22,20 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-functions_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-changelog_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-checksum_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-deb_windows-any.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-rpm_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-docker_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-homebrew_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-pypi_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-rpm_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-staticrepo_windows-any.ps1"
 
 
 
 
 # execute
-$__process = RELEASE-Initiate
+$__process = RELEASE-Initiate-Checksum
 if ($__process -ne 0) {
 	return 1
 }
@@ -51,56 +54,35 @@ if ($__process -eq 0) {
 }
 
 
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\release_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "Python tech detected. Parsing job recipe: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Parse failed."
-			return 1
-		}
-	}
-}
-
-
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_GO}))) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_GO}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\release_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "Go tech detected. Parsing job recipe: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Parse failed."
-			return 1
-		}
-	}
-}
-
-
-$__process = OS-Is-Command-Available "RELEASE-Run-Pre-Processors"
+$__process = OS-Is-Command-Available "RELEASE-Run-Pre-Processor"
 if ($__process -eq 0) {
-	$__process = RELEASE-Run-Pre-Processors
+	$__process = RELEASE-Run-Pre-Processor
 	if ($__process -ne 0) {
 		return 1
 	}
 }
 
 
-$STATIC_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
-
-
-$__process = RELEASE-Run-Release-Repo-Setup
+$__process = RELEASE-Run-Static-Repo-Setup
 if ($__process -ne 0) {
 	return 1
 }
 
 
+$__process = RELEASE-Run-Homebrew-Repo-Setup
+if ($__process -ne 0) {
+	return 1
+}
+
+
+$STATIC_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
+$HOMEBREW_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_HOMEBREW_DIRECTORY}"
 foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
 	$TARGET = $TARGET.FullName
+
+	if ($TARGET -like "*.asc") {
+		continue
+	}
 	OS-Print-Status info "processing ${TARGET}"
 
 	$__process = RELEASE-Run-DEB "$TARGET" "$STATIC_REPO"
@@ -108,28 +90,32 @@ foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT
 		return 1
 	}
 
-	$__process = RELEASE-Run-RPM `
-		"$TARGET" `
-		"$STATIC_REPO" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
+	$__process = RELEASE-Run-RPM "$TARGET" "$STATIC_REPO" `
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = RELEASE-Run-DOCKER `
-		"$TARGET" `
-		"$STATIC_REPO" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
+	$__process = RELEASE-Run-DOCKER "$TARGET"
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = RELEASE-Run-PYPI `
-		"$TARGET" `
-		"$STATIC_REPO" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}"
+	$__process = RELEASE-Run-PYPI "$TARGET"
 	if ($__process -ne 0) {
 		return 1
+	}
+
+	$__process = RELEASE-Run-Homebrew "$TARGET" "$HOMEBREW_REPO"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = OS-Is-Command-Available "RELEASE-Run-Package-Processor"
+	if ($__process -eq 0) {
+		$__process = RELEASE-Run-Package-Processor "$TARGET"
+		if ($__process -ne 0) {
+			return 1
+		}
 	}
 }
 
@@ -140,9 +126,9 @@ if ($__process -ne 0) {
 }
 
 
-$__process = OS-Is-Command-Available "RELEASE-Run-Post-Processors"
+$__process = OS-Is-Command-Available "RELEASE-Run-Post-Processor"
 if ($__process -eq 0) {
-	$__process = RELEASE-Run-Post-Processors
+	$__process = RELEASE-Run-Post-Processor
 	if ($__process -ne 0) {
 		return 1
 	}
@@ -150,14 +136,18 @@ if ($__process -eq 0) {
 
 
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
-	OS-Print-Status warning "Simulating release repo conclusion..."
-	OS-Print-Status warning "Simulating changelog conclusion..."
+	OS-Print-Status warning "simulating release repo conclusion..."
+	OS-Print-Status warning "simulating changelog conclusion..."
 } else {
-	$__process = RELEASE-Run-Release-Repo-Conclude
+	$__process = RELEASE-Run-Static-Repo-Conclude
 	if ($__process -ne 0) {
 		return 1
 	}
 
+	$__process = RELEASE-Run-Homebrew-Repo-Conclude "$HOMEBREW_REPO"
+	if ($__process -ne 0) {
+		return 1
+	}
 
 	$__process = RELEASE-Run-Changelog-Conclude
 	if ($__process -ne 0) {

@@ -139,6 +139,25 @@ function FS-Is-File {
 
 
 
+function FS-Is-Target-A-Homebrew {
+	param (
+		[string]$__subject
+	)
+
+
+	# execute
+	if (($("${__subject}" -replace '^.*-homebrew') -ne "${__subject}") -or
+		($("${__subject}" -replace '^.*-brew') -ne "${__subject}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
 
 function FS-Is-Target-A-Library {
 	param (

@@ -23,17 +23,20 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-functions_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-changelog_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-checksum_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-deb_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-rpm_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-docker_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-homebrew_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-pypi_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-rpm_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-staticrepo_unix-any.sh"
 
 
 
 
 # execute
-RELEASE::initiate
+RELEASE::initiate_checksum
 if [ $? -ne 0 ]; then
         return 1
 fi
@@ -52,55 +55,33 @@ if [ $? -eq 0 ]; then
 fi
 
 
-if [ ! -z "$PROJECT_PYTHON" ]; then
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
-        __recipe="${__recipe}/release_unix-any.sh"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info "Python tech detected. Parsing job recipe: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Parse failed.\n"
-                        return 1
-                fi
-        fi
-fi
-
-
-if [ ! -z "$PROJECT_GO" ]; then
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_GO}/${PROJECT_PATH_CI}"
-        __recipe="${__recipe}/release_unix-any.sh"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info "Go tech detected. Parsing job recipe: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Parse failed.\n"
-                        return 1
-                fi
-        fi
-fi
-
-
-OS::is_command_available "RELEASE::run_pre_processors"
+OS::is_command_available "RELEASE::run_pre_processor"
 if [ $? -eq 0 ]; then
-        RELEASE::run_pre_processors
+        RELEASE::run_pre_processor
         if [ $? -ne 0 ]; then
                 return 1
         fi
 fi
 
 
-STATIC_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_STATIC_REPO_DIRECTORY}"
-
-
-RELEASE::run_release_repo_setup
+RELEASE::run_static_repo_setup
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
+RELEASE::run_homebrew_repo_setup
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+STATIC_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_STATIC_REPO_DIRECTORY}"
+HOMEBREW_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_HOMEBREW_DIRECTORY}"
 for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
+        if [ "${TARGET%.asc*}" != "$TARGET" ]; then
+                continue
+        fi
         OS::print_status info "processing ${TARGET}\n"
 
         RELEASE::run_deb "$TARGET" "$STATIC_REPO"
@@ -108,28 +89,32 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 
-        RELEASE::run_rpm \
-                "$TARGET" \
-                "$STATIC_REPO" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
+        RELEASE::run_rpm "$TARGET" "$STATIC_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        RELEASE::run_docker \
-                "$TARGET" \
-                "$STATIC_REPO" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
+        RELEASE::run_docker "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        RELEASE::run_pypi \
-                "$TARGET" \
-                "$STATIC_REPO" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
+        RELEASE::run_pypi "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
+        fi
+
+        RELEASE::run_homebrew "$TARGET" "$HOMEBREW_REPO"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "RELEASE::run_package_processor"
+        if [ $? -eq 0 ]; then
+                RELEASE::run_package_processor "$TARGET"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 done
 
@@ -140,9 +125,9 @@ if [ $? -ne 0 ]; then
 fi
 
 
-OS::is_command_available "RELEASE::run_post_processors"
+OS::is_command_available "RELEASE::run_post_processor"
 if [ $? -eq 0 ]; then
-        RELEASE::run_post_processors
+        RELEASE::run_post_processor
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -150,14 +135,18 @@ fi
 
 
 if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
-        OS::print_status warning "Simulating release repo conclusion...\n"
-        OS::print_status warning "Simulating changelog conclusion...\n"
+        OS::print_status warning "simulating release repo conclusion...\n"
+        OS::print_status warning "simulating changelog conclusion...\n"
 else
-        RELEASE::run_release_repo_conclude
+        RELEASE::run_static_repo_conclude
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+        RELEASE::run_homebrew_repo_conclude "$HOMEBREW_REPO"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
         RELEASE::run_changelog_conclude
         if [ $? -ne 0 ]; then

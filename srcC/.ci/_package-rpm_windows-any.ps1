@@ -36,6 +36,13 @@ function PACKAGE-Assemble-RPM-Content {
 
 
 	# validate target before job
+	switch ($__target_arch) {
+	{ $_ -in "avr" } {
+		return 10 # not applicable
+	} default {
+		# accepted
+	}}
+
 	$__keyring = "${env:PROJECT_SKU}"
 	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
 		return 10 # not applicable
@@ -82,6 +89,8 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
 		return 10 # not applicable
 	} else {
 		switch (${__target_os}) {

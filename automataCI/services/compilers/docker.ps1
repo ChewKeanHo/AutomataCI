@@ -22,10 +22,12 @@ function DOCKER-Amend-Manifest {
 		[string]$__list
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty(${__tag}) -or [string]::IsNullOrEmpty(${__list})) {
 		return 1
 	}
+
 
 	# execute
 	$env:BUILDX_NO_DEFAULT_ATTESTATIONS = 1
@@ -42,6 +44,7 @@ function DOCKER-Amend-Manifest {
 		return 1
 	}
 
+
 	# report status
 	return 0
 }
@@ -55,6 +58,7 @@ function DOCKER-Check-Login {
 		[string]::IsNullOrEmpty(${env:CONTAINER_PASSWORD})) {
 		return 1
 	}
+
 
 	# report status
 	return 0
@@ -70,8 +74,10 @@ function DOCKER-Clean-Up {
 		return 1
 	}
 
+
 	# execute
 	$__process = OS-Exec "docker" "system prune --force"
+
 
 	# report status
 	if ($__process -eq 0) {
@@ -93,6 +99,7 @@ function DOCKER-Create {
 		[string]$__sku,
 		[string]$__version
 	)
+
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__destination) -or
@@ -116,6 +123,7 @@ function DOCKER-Create {
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# execute
 	$__process = DOCKER-Login "${__repo}"
@@ -148,6 +156,7 @@ function DOCKER-Create {
 
 	$__process = DOCKER-Stage "${__destination}" "${__os}" "${__arch}" "${__tag}"
 
+
 	# report status
 	if ($__process -eq 0) {
 		return 0
@@ -175,12 +184,14 @@ function DOCKER-Get-ID {
 		[string]$__arch
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__repo) -or
 		[string]::IsNullOrEmpty($__sku) -or
 		[string]::IsNullOrEmpty($__version)) {
 		return 1
 	}
+
 
 	# execute
 	if ((-not [string]::IsNullOrEmpty($__os)) -and (-not [string]::IsNullOrEmpty($__arch))) {
@@ -218,6 +229,7 @@ function DOCKER-Is-Available {
 		return 1
 	}
 
+
 	# report status
 	return 0
 }
@@ -230,6 +242,7 @@ function DOCKER-Is-Valid {
 		[string]$__target
 	)
 
+
 	# execute
 	if (-not (Test-Path -PathType Leaf -Path "${__target}")) {
 		return 1
@@ -239,6 +252,7 @@ function DOCKER-Is-Valid {
 	if (${__output} -eq "docker.txt") {
 		return 0
 	}
+
 
 	# report status
 	return 1
@@ -252,6 +266,7 @@ function DOCKER-Login {
 		[string]$__repo
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__repo)) {
 		return 1
@@ -262,12 +277,14 @@ function DOCKER-Login {
 		return 1
 	}
 
+
 	# execute
 	$__process = Write-Output "${env:CONTAINER_PASSWORD}" `
 		| Start-Process -NoNewWindow `
 			-FilePath "docker" `
 			-ArgumentList "login --username `"${env:CONTAINER_USERNAME}`" --password-stdin" `
 			-PassThru
+
 
 	# report status
 	if ($__process.ExitCode -eq 0) {
@@ -290,26 +307,22 @@ function DOCKER-Logout {
 function DOCKER-Release {
 	param (
 		[string]$__target,
-		[string]$__directory,
-		[string]$__datastore,
 		[string]$__version
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or
-		[string]::IsNullOrEmpty($__directory) -or
-		[string]::IsNullOrEmpty($__datastore) -or
-		(-not (Test-Path -Path "${__target}")) -or
-		(-not (Test-Path -Path "${__directory}" -PathType Container)) -or
-		(-not (Test-Path -Path "${__datastore}" -PathType Container))) {
+		[string]::IsNullOrEmpty($__version) -or
+		(-not (Test-Path -Path "${__target}"))) {
 		return 1
 	}
+
 
 	# execute
 	$__list = ""
 	$__repo = ""
 	$__sku = ""
-
 	Get-Content -Path "${__target}" | ForEach-Object {
 		if ([string]::IsNullOrEmpty(${_}) -or (${_} == "`n")) {
 			continue
@@ -360,6 +373,7 @@ function DOCKER-Release {
 		return 1
 	}
 
+
 	# report status
 	return 0
 }
@@ -374,6 +388,7 @@ function DOCKER-Setup-Builder-MultiArch {
 		return 1
 	}
 
+
 	# execute
 	$__name = DOCKER-Get-Builder-ID
 
@@ -386,6 +401,7 @@ function DOCKER-Setup-Builder-MultiArch {
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0
@@ -402,6 +418,7 @@ function DOCKER-Stage {
 		[string]$__tag
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or
 		[string]::IsNullOrEmpty($__os) -or
@@ -410,10 +427,12 @@ function DOCKER-Stage {
 		return 1
 	}
 
+
 	# execute
 	$__process = FS-Append-File "${__target}" @"
 ${__os} ${__arch} ${__tag}`n
 "@
+
 
 	# report status
 	return 0

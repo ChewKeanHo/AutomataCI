@@ -1,5 +1,11 @@
 automataci (1.6.0) stable; urgency=low
 
+  * root: updated repository metadata
+  * automataCI: updated spec document to reflect deb & rpm changes
+  * automataCI: added yum's source.repo data file generative function
+  * automataCI: finalize deb compilers for release
+  * automataCI: autogenerate reprepro configurations file
+  * root: added apt's source.list file generator function
   * root: merged resources/ directory into src/ directory
   * srcPYTHON: backported all latest CI changes
   * srcGO: added wasm support
@@ -7,4 +13,4 @@ automataci (1.6.0) stable; urgency=low
   * root: added C Programming Language support
   * README.md: corrected typo
 
--- Your Legal Full Name Here <contact@youremail.example>  Tue, 03 Oct 2023 17:10:58 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Thu, 05 Oct 2023 13:13:27 +0800

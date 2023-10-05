@@ -36,7 +36,16 @@ PACKAGE::assemble_deb_content() {
 
 
         # validate target before job
+        case "$__target_arch" in
+        avr)
+                return 10 # not applicable
+                ;;
+        *)
+                ;;
+        esac
+
         __keyring="$PROJECT_SKU"
+        __package="$PROJECT_SKU"
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
@@ -57,9 +66,12 @@ PACKAGE::assemble_deb_content() {
                 fi
 
                 __keyring="lib$PROJECT_SKU"
+                __package="lib$PROJECT_SKU"
         elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_homebrew "$__target") -eq 0 ]; then
                 return 10 # not applicable
         else
                 case "$__target_os" in
@@ -92,7 +104,6 @@ PACKAGE::assemble_deb_content() {
         # OPTIONAL (overrides): copy usr/share/docs/${PROJECT_SKU}/copyright.gz
         # OPTIONAL (overrides): copy usr/share/man/man1/${PROJECT_SKU}.1.gz
         # OPTIONAL (overrides): generate ${__directory}/control/md5sum
-        # OPTIONAL (overrides): generate ${__directory}/control/control
 
 
         OS::print_status info "creating source.list files...\n"
@@ -107,6 +118,30 @@ PACKAGE::assemble_deb_content() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
+
+        # (overrides): generate ${__directory}/control/control
+        OS::print_status info "creating control/control file...\n"
+        DEB::create_control \
+                "$__directory" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
+                "$__package" \
+                "$PROJECT_VERSION" \
+                "$_target_arch" \
+                "$PROJECT_CONTACT_NAME" \
+                "$PROJECT_CONTACT_EMAIL" \
+                "$PROJECT_CONTACT_WEBSITE" \
+                "$PROJECT_PITCH" \
+                "$PROJECT_DEBIAN_PRIORITY" \
+                "$PROJECT_DEBIAN_SECTION"
+        case $? in
+        0|2)
+                ;;
+        *)
+                OS::print_status error "create failed.\n"
+                return 1
+                ;;
+        esac
 
 
         # report status

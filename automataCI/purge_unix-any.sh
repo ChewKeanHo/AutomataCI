@@ -35,6 +35,18 @@ __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 OS::print_status info "nuking ${__target}...\n"
 FS::remove_silently "$__target"
 
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}"
+OS::print_status info "nuking ${__target}...\n"
+FS::remove_silently "$__target"
+
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+OS::print_status info "nuking ${__target}...\n"
+FS::remove_silently "$__target"
+
+__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}"
+OS::print_status info "nuking ${__target}...\n"
+FS::remove_silently "$__target"
+
 __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}"
 OS::print_status info "nuking ${__target}...\n"
 FS::remove_silently "$__target"

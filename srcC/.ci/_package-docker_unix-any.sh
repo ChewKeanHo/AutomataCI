@@ -35,6 +35,14 @@ PACKAGE::assemble_docker_content() {
 
 
         # validate project
+        case "$__target_arch" in
+        avr)
+                return 10 # not applicable
+                ;;
+        *)
+                ;;
+        esac
+
         if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
@@ -42,6 +50,8 @@ PACKAGE::assemble_docker_content() {
         elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_homebrew "$__target") -eq 0 ]; then
                 return 10 # not applicable
         fi
 

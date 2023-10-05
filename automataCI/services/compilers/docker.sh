@@ -21,10 +21,12 @@ DOCKER::amend_manifest() {
         #__tag="$1"
         #__list="$2"
 
+
         # validate input
         if [ -z "$1" ] || [ -z "$2" ]; then
                 return 1
         fi
+
 
         # execute
         BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker manifest create "$1" $2
@@ -37,6 +39,7 @@ DOCKER::amend_manifest() {
                 return 1
         fi
 
+
         # report status
         return 0
 }
@@ -48,6 +51,7 @@ DOCKER::check_login() {
         if [ -z "$CONTAINER_USERNAME" ] || [ -z "$CONTAINER_PASSWORD" ]; then
                 return 1
         fi
+
 
         # report status
         return 0
@@ -62,8 +66,10 @@ DOCKER::clean_up() {
                 return 1
         fi
 
+
         # execute
         docker system prune --force
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -83,6 +89,7 @@ DOCKER::create() {
         __repo="$4"
         __sku="$5"
         __version="$6"
+
 
         # validate input
         if [ -z "${__destination}" ] ||
@@ -106,6 +113,7 @@ DOCKER::create() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # execute
         DOCKER::login "$__repo"
@@ -135,6 +143,7 @@ DOCKER::create() {
 
         DOCKER::stage "$__destination" "$__os" "$__arch" "$__tag"
 
+
         # report status
         if [ $? -eq 0 ]; then
                 return 0
@@ -160,10 +169,12 @@ DOCKER::get_id() {
         #__os="$4"
         #__arch="$5"
 
+
         # validate input
         if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
                 return 1
         fi
+
 
         # execute
         if [ ! -z "$4" ] && [ ! -z "$5" ]; then
@@ -175,6 +186,7 @@ DOCKER::get_id() {
         else
                 printf "$(STRINGS::to_lowercase "${1}/${2}:${3}")"
         fi
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -204,6 +216,7 @@ DOCKER::is_available() {
                 return 1
         fi
 
+
         # report status
         return 0
 }
@@ -214,6 +227,7 @@ DOCKER::is_available() {
 DOCKER::is_valid() {
         #__target="$1"
 
+
         # execute
         if [ ! -f "$1" ]; then
                 return 1
@@ -222,6 +236,7 @@ DOCKER::is_valid() {
         if [ "${1##*/}" = "docker.txt" ]; then
                 return 0
         fi
+
 
         # report status
         return 1
@@ -233,6 +248,7 @@ DOCKER::is_valid() {
 DOCKER::login() {
         #__repo="$1"
 
+
         # validate input
         if [ -z "$1" ]; then
                 return 1
@@ -243,11 +259,13 @@ DOCKER::login() {
                 return 1
         fi
 
+
         # execute
         printf "$CONTAINER_PASSWORD" \
                 | docker login "$1" \
                         --username "$CONTAINER_USERNAME" \
                         --password-stdin
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -264,6 +282,7 @@ DOCKER::logout() {
         # execute
         docker logout && rm -f "${HOME}/.docker/config.json" &> /dev/null
 
+
         # report status
         if [ $? -eq 0 ]; then
                 return 0
@@ -277,18 +296,11 @@ DOCKER::logout() {
 
 DOCKER::release() {
         __target="$1"
-        __directory="$2"
-        __datastore="$3"
-        __version="$4"
+        __version="$2"
+
 
         # validate input
-        if [ -z "$__target" ] ||
-                [ -z "$__directory" ] ||
-                [ -z "$__datastore" ] ||
-                [ -z "$__version" ] ||
-                [ ! -f "$__target" ] ||
-                [ ! -d "$__directory" ] ||
-                [ ! -d "$__datastore" ]; then
+        if [ -z "$__target" ] || [ -z "$__version" ] || [ ! -f "$__target" ]; then
                 return 1
         fi
 
@@ -342,6 +354,7 @@ DOCKER::release() {
                 return 1
         fi
 
+
         # report status
         return 0
 }
@@ -356,6 +369,7 @@ DOCKER::setup_builder_multiarch() {
                 return 1
         fi
 
+
         # execute
         __name="$(DOCKER::get_builder_id)"
 
@@ -365,6 +379,7 @@ DOCKER::setup_builder_multiarch() {
         fi
 
         docker buildx create --use --name "${__name}"
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -383,13 +398,16 @@ DOCKER::stage() {
         #__arch="$3"
         #__tag="$4"
 
+
         # validate input
         if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
                 return 1
         fi
 
+
         # execute
         FS::append_file "$1" "${2} ${3} ${4}\n"
+
 
         # report status
         if [ $? -eq 0 ]; then

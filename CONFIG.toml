@@ -18,9 +18,16 @@
 ####################
 # PROJECT_SKU
 # This is the known product ID used as a command, marketing brand, etc.
-# It should not be using dash ('-'), underscore ('_'), and space (' ') for
-# maximum compatibility.
+# It should be in lowercase and should not be using dash ('-'),
+# underscore ('_'), and space (' ') for maximum compatibility.
 PROJECT_SKU = "automataci"
+
+
+# PROJECT_SKU_TITLECASE
+# The titlecase version of PROJECT_SKU. Used in certain packager control scripts
+# like Homebrew. Conditions is the same as PROJECT_SKU except it is in the
+# TitleCase representation.
+PROJECT_SKU_TITLECASE = "AutomataCI"
 
 
 # PROJECT_APP_ID
@@ -356,6 +363,7 @@ PROJECT_STATIC_REPO_DIRECTORY="static"
 # distribution ecosystems.
 PROJECT_STATIC_URL="https://github.com/ChewKeanHo/AutomataCI/wiki/"
 
+
 # PROJECT_CONTAINER_REGISTRY
 # The container registry URI value. DO NOT end with a slash. Example:
 #     1. DockerHub     : registry.hub.docker.com/[ NAMESPACE ]
@@ -368,6 +376,37 @@ PROJECT_CONTAINER_REGISTRY = "ghcr.io/chewkeanho"
 # Enable the Docker's experimental CLI features for using buildx. If disabled,
 # is shall break many of the CI job.
 DOCKER_CLI_EXPERIMENTAL = "enabled"
+
+
+# PROJECT_HOMEBREW_REPO
+# The Homebrew formula publication git repository for updating and publishing
+# Homebrew's formula. This is used in release job.
+PROJECT_HOMEBREW_REPO="git@github.com:ChewKeanHo/Testbed.git"
+
+
+# PROJECT_HOMEBREW_REPO_KEY
+# The git upstream key. Default is 'origin'.
+PROJECT_HOMEBREW_REPO_KEY="origin"
+
+
+# PROJECT_HOMEBREW_REPO_BRANCH
+# The git upstream branch. Default is 'main' or 'master'.
+PROJECT_HOMEBREW_REPO_BRANCH="main"
+
+
+# PROJECT_HOMEBREW_DIRECTORY
+# The directory name housing the Homebrew repo. Value CANNOT be empty.
+# Default is 'homebrew'.
+PROJECT_HOMEBREW_DIRECTORY="homebrew"
+
+
+# PROJECT_HOMEBREW_SOURCE_URL
+# The base URL for Homebrew to source its tar.*z archive file. It is made
+# available for maintaining consistency purposes and is only meant for Homebrew
+# use for constructing the 'url' value.
+#
+# NOTE: Please avoid ending with the URL slash.
+PROJECT_HOMEBREW_SOURCE_URL="https://github.com/ChewKeanHo/AutomataCI/releases/download"
 
 
 
@@ -384,6 +423,9 @@ DOCKER_CLI_EXPERIMENTAL = "enabled"
 # PROJECT_PATH_AUTOMATA
 # This is the reserved pathing to PROJECT_PATH_ROOT where it locates the
 # AutomataCI working directory.
+#
+# WARNING: DO NOT attempt to change/override this naming convention. It will
+# break AutomataCI.
 # PROJECT_PATH_AUTOMATA = "automataCI" # Reserved - determined by ci.cmd automatically.
 
 
@@ -404,6 +446,18 @@ PROJECT_PATH_TOOLS = "tools"
 # This is the relative pathing to PROJECT_PATH_ROOT where it locates the
 # project's build output directory.
 PROJECT_PATH_BUILD = "build"
+
+
+# PROJECT_PATH_BIN
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's shippable executable binraries.
+PROJECT_PATH_BIN = "bin"
+
+
+# PROJECT_PATH_LIB
+# This is the relative pathing to PROJECT_PATH_ROOT where it locates the
+# project's shippable importable libraries.
+PROJECT_PATH_LIB = "lib"
 
 
 # PROJECT_PATH_TEMP

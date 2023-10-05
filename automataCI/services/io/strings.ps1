@@ -15,15 +15,18 @@ function STRINGS-Has-Prefix {
 		[string]$__content
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__prefix)) {
 		return 1
 	}
 
+
 	# execute
 	if ($__content.StartsWith($__prefix)) {
 		return 0
 	}
+
 
 	# report status
 	return 1
@@ -38,18 +41,60 @@ function STRINGS-Has-Suffix {
 		[string]$__content
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__suffix)) {
 		return 1
 	}
+
 
 	# execute
 	if ($__content.EndsWith($__suffix)) {
 		return 0
 	}
 
+
 	# report status
 	return 1
+}
+
+
+
+
+function STRINGS-Replace-All {
+	param(
+		[string]$__content,
+		[string]$__subject,
+		[string]$__replacement
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__content) -or
+		[string]::IsNullOrEmpty($__subject) -or
+		[string]::IsNullOrEmpty($__replacement)) {
+		return $__content
+	}
+
+
+	# execute
+	$__right = $__content
+	$__register = ""
+	while ($__right) {
+		$__left = $__right -replace "$($__subject).*", ""
+
+		if ($__left -eq $__right) {
+			return "${__register}${__right}"
+		}
+
+		# replace this occurence
+		$__register += "${__left}${__replacement}"
+		$__right = $__right -replace "^.*?${__subject}", ""
+	}
+
+
+	# report status
+	return $__register
 }
 
 
