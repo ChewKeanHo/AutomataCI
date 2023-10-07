@@ -58,23 +58,19 @@ INSTALLER::setup() {
                 fi
         done < "${HOME}/.bash_profile"
 
-
-        if [ ! -z "$__location" ]; then
-                printf -- "eval \"\$(${__location} shellenv)\"" >> "${HOME}/.bash_profile"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-
-                eval "$(${__location} shellenv)"
+        printf -- "eval \"\$(${__location} shellenv)\"" >> "${HOME}/.bash_profile"
+        if [ $? -ne 0 ]; then
+                return 1
         fi
+        eval "$(${__location} shellenv)"
 
         OS::is_command_available "brew"
-
-        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 

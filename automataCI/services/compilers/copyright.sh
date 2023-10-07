@@ -24,6 +24,7 @@ COPYRIGHT::create_deb() {
         __email="$6"
         __website="$7"
 
+
         # validate input
         if [ -z "$__directory" ] ||
                 [ ! -d "$__directory" ] ||
@@ -36,18 +37,16 @@ COPYRIGHT::create_deb() {
                 return 1
         fi
 
+
         # checck if is the document already injected
         __location="${__directory}/data/usr/local/share/doc/${__sku}/copyright"
+        if [ "$__is_native" = "true" ]; then
+                __location="${__directory}/data/usr/share/doc/${__sku}/copyright"
+        fi
         if [ -f "$__location" ]; then
                 return 0
         fi
 
-        if [ "$__is_native" = "true" ]; then
-                __location="${__directory}/data/usr/share/doc/${__sku}/copyright"
-                if [ -f "$__location" ]; then
-                        return 0
-                fi
-        fi
 
         # create baseline
         COPYRIGHT::create_baseline_deb \
@@ -57,6 +56,7 @@ COPYRIGHT::create_deb() {
                 "$__name" \
                 "$__email" \
                 "$__website"
+
 
         # report status
         return $?
@@ -73,6 +73,7 @@ COPYRIGHT::create_rpm() {
         __email="$5"
         __website="$6"
 
+
         # validate input
         if [ -z "$__directory" ] ||
                 [ ! -d "$__directory" ] ||
@@ -85,11 +86,13 @@ COPYRIGHT::create_rpm() {
                 return 1
         fi
 
-        # checck if is the document already injected
+
+        # check if is the document already injected
         __location="${__directory}/BUILD/copyright"
         if [ -f "$__location" ]; then
                 return 0
         fi
+
 
         # create baseline
         COPYRIGHT::create_baseline_deb \
@@ -99,6 +102,7 @@ COPYRIGHT::create_rpm() {
                 "$__name" \
                 "$__email" \
                 "$__website"
+
 
         # report status
         return $?
@@ -115,6 +119,7 @@ COPYRIGHT::create_baseline_deb() {
         __email="$5"
         __website="$6"
 
+
         # validate input
         if [ -z "$__location" ] ||
                 [ -d "$__location" ] ||
@@ -127,8 +132,10 @@ COPYRIGHT::create_baseline_deb() {
                 return 1
         fi
 
+
         # create housing directory path
         FS::make_housing_directory "$__location"
+
 
         # create copyright stanza header
         FS::write_file "${__location}" "\
@@ -139,12 +146,14 @@ Source: ${__website}
 
 "
 
+
         # append manually facilitated copyright contents
         __old_IFS="$IFS"
         while IFS="" read -r __line || [ -n "$__line" ]; do
                 FS::append_file "$__location" "$__line\n"
         done < "$__manual_file"
         IFS="$__old_IFS" && unset __old_IFS __line
+
 
         # report status
         return 0

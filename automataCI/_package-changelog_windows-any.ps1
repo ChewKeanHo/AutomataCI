@@ -31,12 +31,14 @@ function PACKAGE-Run-Changelog {
 		[string]$__changelog_deb
 	)
 
+
 	OS-Print-Status info "checking changelog functions availability..."
 	$__process = CHANGELOG-Is-Available
 	if ($__process -ne 0) {
 		OS-Print-Status error "checking failed."
 		return 1
 	}
+
 
 	# validate input
 	OS-Print-Status info "validating ${env:PROJECT_VERSION} data changelog entry..."
@@ -56,6 +58,7 @@ function PACKAGE-Run-Changelog {
 		OS-Print-Status error "validation failed - existing entry."
 		return 1
 	}
+
 
 	# assemble changelog
 	OS-Print-Status info "assembling Markdown changelog..."
@@ -79,6 +82,7 @@ function PACKAGE-Run-Changelog {
 		OS-Print-Status error "assembly failed."
 		return 1
 	}
+
 
 	# report status
 	return 0

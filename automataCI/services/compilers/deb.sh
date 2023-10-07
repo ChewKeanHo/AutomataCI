@@ -12,6 +12,7 @@
 # the License.
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/disk.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/ar.sh"
@@ -42,7 +43,7 @@ DEB::create_archive() {
 
         # package control
         cd "${__directory}/control"
-        TAR::create_xz "../control.tar.xz" "*" "0" "0"
+        TAR::create_xz "../control.tar.xz" "*"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
                 return 1
@@ -51,7 +52,7 @@ DEB::create_archive() {
 
         # package data
         cd "${__directory}/data"
-        TAR::create_xz "../data.tar.xz" "./[a-z]*" "0" "0"
+        TAR::create_xz "../data.tar.xz" "*"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
                 return 1
@@ -113,20 +114,14 @@ DEB::create_changelog() {
 
         # check if the document has already injected
         __location="${__directory}/data/usr/local/share/doc/${__sku}/changelog.gz"
-        if [ -f "$__location" ]; then
-                return 2
-        fi
-
         if [ "$__is_native" = "true" ]; then
                 __location="${__directory}/data/usr/share/doc/${__sku}/changelog.gz"
-                if [ -f "$__location" ]; then
-                        return 2
-                fi
         fi
 
 
         # create housing directory path
         FS::make_housing_directory "$__location"
+        FS::remove_silently "$__location"
 
 
         # copy processed file to target location
@@ -145,31 +140,29 @@ DEB::create_changelog() {
 
 
 DEB::create_checksum() {
-        __directory="$1"
+        #__directory="$1"
 
 
         # validate input
-        if [ -z "$__directory" ] || [ ! -d "$__directory" ]; then
+        if [ -z "$1" ] || [ ! -d "$1" ]; then
                 return 1
         fi
 
 
-        # check if the document has already injected
-        __location="${__directory}/control/md5sums"
-        if [ -f "$__location" ]; then
-                return 2
-        fi
-
-
-        # create housing directory path
+        # prepare workspace
+        __location="${1}/control/md5sums"
+        FS::remove_silently "$__location"
         FS::make_housing_directory "$__location"
 
 
-        # checksum
-        for __line in $(find "${__directory}/data" -type f); do
+        # checksum every items
+        for __line in $(find "${1}/data" -type f); do
                 __checksum="$(MD5::checksum_file "$__line")"
                 FS::append_file "$__location" \
-                        "${__checksum%% *} ${__line##*${__directory}/data/}\n"
+                        "${__checksum%% *} ${__line##*${1}/data/}\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         done
 
 
@@ -186,12 +179,13 @@ DEB::create_control() {
         __sku="$3"
         __version="$4"
         __arch="$5"
-        __name="$6"
-        __email="$7"
-        __website="$8"
-        __pitch="$9"
-        __priority="${10}"
-        __section="${11}"
+        __os="$6"
+        __name="$7"
+        __email="$8"
+        __website="$9"
+        __pitch="${10}"
+        __priority="${11}"
+        __section="${12}"
 
 
         # validate input
@@ -202,6 +196,7 @@ DEB::create_control() {
                 [ -z "$__sku" ] ||
                 [ -z "$__version" ] ||
                 [ -z "$__arch" ] ||
+                [ -z "$__os" ] ||
                 [ -z "$__name" ] ||
                 [ -z "$__email" ] ||
                 [ -z "$__website" ] ||
@@ -220,52 +215,11 @@ DEB::create_control() {
         esac
 
 
-        # check if the document has already injected
+        # prepare workspace
+        __arch="$(DEB::get_architecture "$__os" "$__arch")"
         __location="${__directory}/control/control"
-        if [ -f "$__location" ]; then
-                return 2
-        fi
-
-
-        # ensures architecture is the correct value
-        case "$__arch" in
-        386|486|586|686)
-                __arch="i386"
-                ;;
-        mipsle)
-                __arch="mipsel"
-                ;;
-        mipsr6le)
-                __arch="mipsr6el"
-                ;;
-        mips32le)
-                __arch="mips32el"
-                ;;
-        mipsn32r6le)
-                __arch="mipsn32r6el"
-                ;;
-        mips64le)
-                __arch="mips64el"
-                ;;
-        mips64r6le)
-                __arch="mips64r6el"
-                ;;
-        powerpcle)
-                __arch="powerpcel"
-                ;;
-        ppc64le)
-                __arch="ppc64el"
-                ;;
-        x86_64)
-                __arch="amd64"
-                ;;
-        *)
-                ;;
-        esac
-
-
-        # create housing directory path
         FS::make_housing_directory "${__location}"
+        FS::remove_silently "${__location}"
 
 
         # generate control file
@@ -323,13 +277,9 @@ DEB::create_source_list() {
 
 
         # validate input
-        if [ ! -z "$__is_simulated" ]; then
-                return 0
-        fi
-
         if [ -z "$__directory" ] ||
                 [ ! -d "$__directory" ] ||
-                [ -z "$__gpg_id" ] ||
+                [ -z "$__gpg_id" -a -z "$__is_simulated" ] ||
                 [ -z "$__url" ] ||
                 [ -z "$__codename" ] ||
                 [ -z "$__distribution" ] ||
@@ -365,13 +315,85 @@ deb [signed-by=/${__key}] ${__url} ${__codename} ${__distribution}
         fi
 
         FS::make_housing_directory "${__directory}/data/$__key"
-        GPG::export_public_keyring "${__directory}/data/$__key" "$__gpg_id"
-        if [ $? -ne 0 ]; then
-                return 1
+        if [ ! -z "$__is_simulated" ]; then
+                FS::write_file "${__directory}/data/${__key}" ""
+        else
+                GPG::export_public_keyring "${__directory}/data/${__key}" "$__gpg_id"
         fi
 
 
         # report status
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        return 0
+}
+
+
+
+
+DEB::get_architecture() {
+        #___os="$1"
+        #___arch="$2"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ]; then
+                printf -- ""
+                return 1
+        fi
+
+
+        # process os
+        case "$1" in
+        dragonfly)
+                ___output="dragonflybsd"
+                ;;
+        *)
+                ___output="$1"
+                ;;
+        esac
+
+
+        # process arch
+        case "$2" in
+        386|i386|486|i486|586|i586|686|i686)
+                ___output="${___output}-i386"
+                ;;
+        mipsle)
+                ___output="${___output}-mipsel"
+                ;;
+        mipsr6le)
+                ___output="${___output}-mipsr6el"
+                ;;
+        mips32le)
+                ___output="${___output}-mips32el"
+                ;;
+        mips32r6le)
+                ___output="${___output}-mips32r6el"
+                ;;
+        mips64le)
+                ___output="${___output}-mips64el"
+                ;;
+        mips64r6le)
+                ___output="${___output}-mips64r6el"
+                ;;
+        powerpcle)
+                ___output="${___output}-powerpcel"
+                ;;
+        ppc64le)
+                ___output="${___output}-ppc64el"
+                ;;
+        *)
+                ___output="${___output}-${2}"
+                ;;
+        esac
+
+
+        # report status
+        ___output="$(STRINGS::to_lowercase "${___output}")"
+        printf -- "%b" "$___output"
         return 0
 }
 
@@ -412,16 +434,6 @@ DEB::is_available() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
-
-
-        # check compatible target os
-        case "$__os" in
-        windows|darwin)
-                return 2
-                ;;
-        *)
-                ;;
-        esac
 
 
         # check compatible target cpu architecture

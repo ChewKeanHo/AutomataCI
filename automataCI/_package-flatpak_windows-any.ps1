@@ -70,6 +70,7 @@ function PACKAGE-Run-FLATPAK {
 		return 1
 	}
 
+
 	# copy all complimentary files to the workspace
 	OS-Print-Status info "assembling package files..."
 	$__process = OS-Is-Command-Available "PACKAGE-Assemble-FLATPAK-Content"
@@ -91,6 +92,7 @@ function PACKAGE-Run-FLATPAK {
 		OS-Print-Status error "assembly failed."
 		return 1
 	}
+
 
 	# generate required files
 	OS-Print-Status info "creating manifest file..."
@@ -121,6 +123,7 @@ function PACKAGE-Run-FLATPAK {
 		return 1
 	}
 
+
 	# archive the assembled payload
 	OS-Print-Status info "archiving .flatpak package..."
 	$null = FS-Make-Directory "${_target_path}"
@@ -133,6 +136,7 @@ function PACKAGE-Run-FLATPAK {
 		OS-Print-Status error "package failed."
 		return 1
 	}
+
 
 	# report status
 	return 0

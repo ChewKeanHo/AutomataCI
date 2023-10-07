@@ -53,6 +53,7 @@ PACKAGE::run_flatpak() {
                 ;;
         esac
 
+
         # prepare workspace and required values
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}.flatpak"
@@ -70,6 +71,7 @@ PACKAGE::run_flatpak() {
                 OS::print_status error "check failed - output exists!\n"
                 return 1
         fi
+
 
         # copy all complimentary files to the workspace
         OS::print_status info "assembling package files...\n"
@@ -96,6 +98,7 @@ PACKAGE::run_flatpak() {
                 return 1
                 ;;
         esac
+
 
         # generate required files
         OS::print_status info "creating manifest file...\n"
@@ -136,6 +139,7 @@ PACKAGE::run_flatpak() {
                 ;;
         esac
 
+
         # archive the assembled payload
         OS::print_status info "archiving .flatpak package...\n"
         FLATPAK::create_archive \
@@ -148,6 +152,7 @@ PACKAGE::run_flatpak() {
                 OS::print_status error "package failed.\n"
                 return 1
         fi
+
 
         # report status
         return 0

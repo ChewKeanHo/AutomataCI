@@ -61,6 +61,7 @@ PACKAGE::run_rpm() {
                 return 1
         fi
 
+
         # prepare workspace and required values
         _src="${_target_filename}_${_target_os}-${_target_arch}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rpm_${_src}"
@@ -73,6 +74,7 @@ PACKAGE::run_rpm() {
         fi
         FS::make_directory "${_src}/BUILD"
         FS::make_directory "${_src}/SPECS"
+
 
         # copy all complimentary files to the workspace
         OS::print_status info "assembling package files...\n"
@@ -100,69 +102,6 @@ PACKAGE::run_rpm() {
                 ;;
         esac
 
-        # generate required files
-        OS::print_status info "creating copyright.gz file...\n"
-        COPYRIGHT::create_rpm \
-                "$_src" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
-                "$PROJECT_SKU" \
-                "$PROJECT_CONTACT_NAME" \
-                "$PROJECT_CONTACT_EMAIL" \
-                "$PROJECT_CONTACT_WEBSITE"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
-                return 1
-                ;;
-        esac
-
-        OS::print_status info "creating man pages file...\n"
-        MANUAL::create_rpm_manpage \
-                "$_src" \
-                "$PROJECT_SKU" \
-                "$PROJECT_CONTACT_NAME" \
-                "$PROJECT_CONTACT_EMAIL" \
-                "$PROJECT_CONTACT_WEBSITE"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
-                return 1
-                ;;
-        esac
-
-        OS::print_status info "creating spec file...\n"
-        RPM::create_spec \
-                "$_src" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
-                "$PROJECT_SKU" \
-                "$PROJECT_VERSION" \
-                "$PROJECT_CADENCE" \
-                "$PROJECT_PITCH" \
-                "$PROJECT_CONTACT_NAME" \
-                "$PROJECT_CONTACT_EMAIL" \
-                "$PROJECT_CONTACT_WEBSITE" \
-                "$PROJECT_LICENSE"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
-                return 1
-                ;;
-        esac
 
         # archive the assembled payload
         OS::print_status info "archiving .rpm package...\n"
@@ -171,6 +110,7 @@ PACKAGE::run_rpm() {
                 OS::print_status error "package failed.\n"
                 return 1
         fi
+
 
         # report status
         return 0

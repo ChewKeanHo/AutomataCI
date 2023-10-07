@@ -27,62 +27,10 @@ REPREPRO::create_conf() {
 
         # validate input
         if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
                 [ -z "$__codename" ] ||
                 [ -z "$__suite" ] ||
-                [ -z "$__components" ] ||
-                [ -z "$__gpg" ]; then
+                [ -z "$__components" ]; then
                 return 1
-        fi
-
-        if [ -z "$__architectures" ]; then
-                __architectures="\
-armhf \
-armel \
-mipsn32 \
-mipsn32el \
-mipsn32r6 \
-mipsn32r6el \
-mips64 \
-mips64el \
-mips64r6 \
-mips64r6el \
-powerpcspe \
-x32 \
-arm64ilp32 \
-alpha \
-amd64 \
-arc \
-armeb \
-arm \
-arm64 \
-avr32 \
-hppa \
-loong64 \
-i386 \
-ia64 \
-m32r \
-m68k \
-mips \
-mipsel \
-mipsr6 \
-mipsr6el \
-nios2 \
-or1k \
-powerpc \
-powerpcel \
-ppc64 \
-ppc64el \
-riscv64 \
-s390 \
-s390x \
-sh3 \
-sh3eb \
-sh4 \
-sh4eb \
-sparc \
-sparc64 \
-tilegx"
         fi
 
 
@@ -90,15 +38,100 @@ tilegx"
         __filename="${__directory}/conf/distributions"
         FS::make_housing_directory "$__filename"
         FS::remove_silently "$__filename"
-        FS::write_file "$__filename" "\
+        if [ -z "$__gpg" ]; then
+                FS::write_file "$__filename" "\
 Codename: ${__codename}
 Suite: ${__suite}
-Architectures: ${__architectures}
+Components: ${__components}
+Architectures:"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        else
+                FS::write_file "$__filename" "\
+Codename: ${__codename}
+Suite: ${__suite}
 Components: ${__components}
 SignWith: ${__gpg}
-"
-        if [ $? -ne 0 ]; then
-                return 1
+Architectures:"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+
+        if [ -z "$__architectures" ]; then
+                old_IFS="$IFS"
+                while IFS="" read -r __arch || [ -n "$__arch" ]; do
+                        FS::append_file "$__filename" " ${__arch}"
+                        while IFS="" read -r __os || [ -n "$__os" ]; do
+                                FS::append_file "$__filename" " ${__os}-${__arch}"
+                        done << EOF
+linux
+kfreebsd
+knetbsd
+kopensolaris
+hurd
+darwin
+dragonflybsd
+freebsd
+netbsd
+openbsd
+aix
+solaris
+EOF
+                done << EOF
+armhf
+armel
+mipsn32
+mipsn32el
+mipsn32r6
+mipsn32r6el
+mips64
+mips64el
+mips64r6
+mips64r6el
+powerpcspe
+x32
+arm64ilp32
+alpha
+amd64
+arc
+armeb
+arm
+arm64
+avr32
+hppa
+loong64
+i386
+ia64
+m32r
+m68k
+mips
+mipsel
+mipsr6
+mipsr6el
+nios2
+or1k
+powerpc
+powerpcel
+ppc64
+ppc64el
+riscv64
+s390
+s390x
+sh3
+sh3eb
+sh4
+sh4eb
+sparc
+sparc64
+tilegx
+EOF
+                IFS="$old_IFS" && unset line old_IFS
+                FS::append_file "$__filename" "\n"
+        else
+                FS::append_file "$__filename" " ${__architectures}\n"
         fi
 
 

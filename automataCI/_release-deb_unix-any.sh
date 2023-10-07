@@ -38,18 +38,21 @@ RELEASE::run_deb() {
 
 
         # execute
-        OS::print_status info "create reprepro configuration file...\n"
         __conf="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb"
-        REPREPRO::create_conf \
-                "$__conf" \
-                "$PROJECT_REPREPRO_CODENAME" \
-                "$PROJECT_DEBIAN_DISTRIBUTION" \
-                "$PROJECT_REPREPRO_COMPONENT" \
-                "$PROJECT_REPREPRO_ARCH" \
-                "$PROJECT_GPG_ID"
+        FS::is_file "${__conf}/conf/distributions"
         if [ $? -ne 0 ]; then
-                OS::print_status error "create failed.\n"
-                return 1
+                OS::print_status info "create reprepro configuration file...\n"
+                REPREPRO::create_conf \
+                        "$__conf" \
+                        "$PROJECT_REPREPRO_CODENAME" \
+                        "$PROJECT_DEBIAN_DISTRIBUTION" \
+                        "$PROJECT_REPREPRO_COMPONENT" \
+                        "$PROJECT_REPREPRO_ARCH" \
+                        "$PROJECT_GPG_ID"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "create failed.\n"
+                        return 1
+                fi
         fi
 
         __dest="${2}/deb"
@@ -68,7 +71,7 @@ RELEASE::run_deb() {
                         "$__target" \
                         "$__dest" \
                         "$__conf" \
-                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/publishers/reprepro" \
+                        "${__conf}/db" \
                         "$PROJECT_REPREPRO_CODENAME"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "publish failed.\n"

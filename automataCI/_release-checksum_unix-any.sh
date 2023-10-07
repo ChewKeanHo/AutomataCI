@@ -38,20 +38,6 @@ RELEASE::run_checksum_seal() {
         # gpg sign all packages
         GPG::is_available "$PROJECT_GPG_ID"
         if [ $? -eq 0 ]; then
-                for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
-                        if [ "${TARGET%%.asc*}" != "${TARGET}" ]; then
-                                continue # it's a gpg cert
-                        fi
-
-                        OS::print_status info "gpg signing: ${TARGET}\n"
-                        FS::remove_silently "${TARGET}.asc"
-                        GPG::detach_sign_file "$TARGET" "$PROJECT_GPG_ID"
-                        if [ $? -ne 0 ]; then
-                                OS::print_status error "sign failed\n"
-                                return 1
-                        fi
-                done
-
                 OS::print_status info "exporting GPG public key...\n"
                 __keyfile="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${PROJECT_SKU}.gpg.asc"
                 GPG::export_public_key "$__keyfile" "$PROJECT_GPG_ID"
@@ -66,6 +52,22 @@ RELEASE::run_checksum_seal() {
                         OS::print_status error "export failed\n"
                         return 1
                 fi
+
+                for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
+                        if [ "${TARGET%%.asc*}" != "${TARGET}" ]; then
+                                if [ "${TARGET%.gpg.asc*}" = "${TARGET}" ]; then
+                                        continue # it's a gpg cert
+                                fi
+                        fi
+
+                        OS::print_status info "gpg signing: ${TARGET}\n"
+                        FS::remove_silently "${TARGET}.asc"
+                        GPG::detach_sign_file "$TARGET" "$PROJECT_GPG_ID"
+                        if [ $? -ne 0 ]; then
+                                OS::print_status error "sign failed\n"
+                                return 1
+                        fi
+                done
         fi
 
 

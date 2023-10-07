@@ -27,38 +27,47 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function PACKAGE-Assemble-RPM-Content {
 	param(
-		[string]$__target,
-		[string]$__directory,
-		[string]$__target_name,
-		[string]$__target_os,
-		[string]$__target_arch
+		[string]$_target,
+		[string]$_directory,
+		[string]$_target_name,
+		[string]$_target_os,
+		[string]$_target_arch
 	)
 
 
 	# validate target before job
-	$__keyring = "${env:PROJECT_SKU}"
-	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
+	switch ($_target_arch) {
+	{ $_ -in "avr" } {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
+	} default {
+		# accepted
+	}}
+
+
+	$_gpg_keyring = "${env:PROJECT_SKU}"
+	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
+		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
 		# copy main libary
 		# TIP: (1) usually is: usr/local/lib
 		#      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
-		$__filepath = "${__directory}\BUILD\lib${env:PROJECT_SKU}.a"
-		OS-Print-Status info "copying ${__target} to ${__filepath}"
-		$__process = FS-Make-Housing-Directory "${__filepath}"
+		$_filepath = "${_directory}\BUILD\lib${env:PROJECT_SKU}.a"
+		OS-Print-Status info "copying ${_target} to ${_filepath}"
+		$__process = FS-Make-Housing-Directory "${_filepath}"
 		if ($__process -ne 0) {
 			OS-Print-Status error "copy failed."
 			return 1
 		}
 
-		$__process = FS-Copy-File "${__target}" "${__filepath}"
+		$__process = FS-Copy-File "${_target}" "${_filepath}"
 		if ($__process -ne 0) {
 			OS-Print-Status error "copy failed."
 			return 1
 		}
+
 
 		# generate AutomataCI's required RPM spec instructions (INSTALL)
-		$__process = FS-Write-File "${__directory}\SPEC_INSTALL" @"
+		$__process = FS-Write-File "${_directory}\SPEC_INSTALL" @"
 install --directory %{buildroot}/usr/local/lib/${env:PROJECT_SKU}
 install -m 0644 lib${env:PROJECT_SKU}.a %{buildroot}/usr/local/lib/${env:PROJECT_SKU}
 
@@ -69,8 +78,9 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 			return 1
 		}
 
+
 		# generate AutomataCI's required RPM spec instructions (FILES)
-		$__process = FS-Write-File "${__directory}\SPEC_FILES" @"
+		$__process = FS-Write-File "${_directory}\SPEC_FILES" @"
 /usr/local/lib/${env:PROJECT_SKU}/lib${env:PROJECT_SKU}.a
 /usr/local/share/doc/lib${env:PROJECT_SKU}/copyright
 "@
@@ -79,39 +89,33 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 		}
 
 		$__keyring = "lib${env:PROJECT_SKU}"
-	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
 		return 10 # not applicable
 	} else {
-		switch (${__target_os}) {
-		"windows" {
-			$__dest = "${__directory}\${env:PROJECT_SKU}.exe"
-		} Default {
-			$__dest = "${__directory}\${env:PROJECT_SKU}"
-		}}
-
 		# copy main program
 		# TIP: (1) usually is: usr/local/bin or usr/local/sbin
 		#      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
-		$__filepath = "${__directory}\BUILD\${env:PROJECT_SKU}"
-		OS-Print-Status info "copying ${__target} to ${__filepath}"
-		$__process = FS-Make-Housing-Directory "${__filepath}"
+		$_filepath = "${_directory}\BUILD\${env:PROJECT_SKU}"
+		OS-Print-Status info "copying ${_target} to ${_filepath}"
+		$__process = FS-Make-Housing-Directory "${_filepath}"
 		if ($__process -ne 0) {
 			OS-Print-Status error "copy failed."
 			return 1
 		}
 
-		$__process = FS-Copy-File "${__target}" "${__filepath}"
+		$__process = FS-Copy-File "${_target}" "${_filepath}"
 		if ($__process -ne 0) {
 			OS-Print-Status error "copy failed."
 			return 1
 		}
+
 
 		# generate AutomataCI's required RPM spec instructions (INSTALL)
-		$__process = FS-Write-File "${__directory}\SPEC_INSTALL" @"
+		$__process = FS-Write-File "${_directory}\SPEC_INSTALL" @"
 install --directory %{buildroot}/usr/local/bin
 install -m 0755 ${env:PROJECT_SKU} %{buildroot}/usr/local/bin
 
@@ -125,8 +129,9 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 			return 1
 		}
 
+
 		# generate AutomataCI's required RPM spec instructions (FILES)
-		$__process = FS-Write-File "${__directory}\SPEC_FILES" @"
+		$__process = FS-Write-File "${_directory}\SPEC_FILES" @"
 /usr/local/bin/${env:PROJECT_SKU}
 /usr/local/share/doc/${env:PROJECT_SKU}/copyright
 /usr/local/share/man/man1/${env:PROJECT_SKU}.1.gz
@@ -137,20 +142,61 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 	}
 
 
-	# OPTIONAL (overrides): ${__directory}/BUILD/copyright.gz
-	# OPTIONAL (overrides): ${__directory}/BUILD/man.1.gz
-	# OPTIONAL (overrides): ${__directory}/SPECS/${env:PROJECT_SKU}.spec
+	# NOTE: REQUIRED file
+	OS-Print-Status info "creating copyright.gz file..."
+	$__process = COPYRIGHT-Create-RPM `
+		${_directory} `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
+		${env:PROJECT_SKU} `
+		${env:PROJECT_CONTACT_NAME} `
+		${env:PROJECT_CONTACT_EMAIL} `
+		${env:PROJECT_CONTACT_WEBSITE}
+	if ($__process -ne 0) {
+		return 1
+	}
 
 
+	# NOTE: REQUIRED file
+	OS-Print-Status info "creating man pages file..."
+	MANUAL-Create-RPM_Manpage `
+		${_directory} `
+		${env:PROJECT_SKU} `
+		${env:PROJECT_CONTACT_NAME} `
+		${env:PROJECT_CONTACT_EMAIL} `
+		${env:PROJECT_CONTACT_WEBSITE}
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# NOTE: OPTIONAL (Comment to turn it off)
 	OS-Print-Status info "creating source.repo files..."
 	$__process = RPM-Create-Source-Repo `
 		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
-		"${__directory}" `
+		"${_directory}" `
 		"${env:PROJECT_GPG_ID}" `
 		"${env:PROJECT_STATIC_URL}" `
 		"${env:PROJECT_REPREPRO_CODENAME}" `
 		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
-		"${__keyring}"
+		"${_gpg_keyring}"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
+	OS-Print-Status info "creating spec file..."
+	RPM-Create-Spec `
+		"${_directory}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
+		"${_package}" `
+		"${env:PROJECT_VERSION}" `
+		"${env:PROJECT_CADENCE}" `
+		"${env:PROJECT_PITCH}" `
+		"${env:PROJECT_CONTACT_NAME}" `
+		"${env:PROJECT_CONTACT_EMAIL}" `
+		"${env:PROJECT_CONTACT_WEBSITE}" `
+		"${env:PROJECT_LICENSE}"
 	if ($__process -ne 0) {
 		return 1
 	}

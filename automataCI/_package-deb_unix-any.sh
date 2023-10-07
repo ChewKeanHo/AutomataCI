@@ -77,26 +77,30 @@ PACKAGE::run_deb() {
         FS::make_directory "${_src}/control"
         FS::make_directory "${_src}/data"
 
+
+        # execute
         OS::print_status info "checking output file existence...\n"
-        if [ -f "$_target_path" ]; then
+        FS::is_file "$_target_path"
+        if [ $? -eq 0 ]; then
                 OS::print_status error "check failed - output exists!\n"
                 return 1
         fi
 
-
-        # copy all complimentary files to the workspace
-        OS::print_status info "assembling package files...\n"
+        OS::print_status info "checking PACKAGE::assemble_deb_content function...\n"
         OS::is_command_available "PACKAGE::assemble_deb_content"
         if [ $? -ne 0 ]; then
-                OS::print_status error "missing PACKAGE::assemble_deb_content function.\n"
+                OS::print_status error "check failed.\n"
                 return 1
         fi
+
+        OS::print_status info "assembling package files...\n"
         PACKAGE::assemble_deb_content \
                 "$_target" \
                 "$_src" \
                 "$_target_filename" \
                 "$_target_os" \
-                "$_target_arch"
+                "$_target_arch" \
+                "$_changelog_deb"
         case $? in
         10)
                 FS::remove_silently "$_src"
@@ -111,108 +115,20 @@ PACKAGE::run_deb() {
                 ;;
         esac
 
-
-        # generate required files
-        OS::print_status info "creating copyright.gz file...\n"
-        COPYRIGHT::create_deb \
-                "$_src" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
-                "$PROJECT_DEBIAN_IS_NATIVE" \
-                "$PROJECT_SKU" \
-                "$PROJECT_CONTACT_NAME" \
-                "$PROJECT_CONTACT_EMAIL" \
-                "$PROJECT_CONTACT_WEBSITE"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
+        OS::print_status info "checking control/md5sums file...\n"
+        FS::is_file "${_src}/control/md5sums"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "check failed.\n"
                 return 1
-                ;;
-        esac
+        fi
 
-        OS::print_status info "creating changelog.gz file...\n"
-        DEB::create_changelog \
-                "$_src" \
-                "$_changelog_deb" \
-                "$PROJECT_DEBIAN_IS_NATIVE" \
-                "$PROJECT_SKU"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
+        OS::print_status info "checking control/control file...\n"
+        FS::is_file "${_src}/control/control"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "check failed.\n"
                 return 1
-                ;;
-        esac
+        fi
 
-        OS::print_status info "creating man page files...\n"
-        MANUAL::create_deb_manpage \
-                "$_src" \
-                "$PROJECT_DEBIAN_IS_NATIVE" \
-                "$PROJECT_SKU" \
-                "$PROJECT_CONTACT_NAME" \
-                "$PROJECT_CONTACT_EMAIL" \
-                "$PROJECT_CONTACT_WEBSITE"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
-                return 1
-                ;;
-        esac
-
-        OS::print_status info "creating control/md5sums file...\n"
-        DEB::create_checksum "$_src"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
-                return 1
-                ;;
-        esac
-
-        OS::print_status info "creating control/control file...\n"
-        DEB::create_control \
-                "$_src" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
-                "$PROJECT_SKU" \
-                "$PROJECT_VERSION" \
-                "$_target_arch" \
-                "$PROJECT_CONTACT_NAME" \
-                "$PROJECT_CONTACT_EMAIL" \
-                "$PROJECT_CONTACT_WEBSITE" \
-                "$PROJECT_PITCH" \
-                "$PROJECT_DEBIAN_PRIORITY" \
-                "$PROJECT_DEBIAN_SECTION"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
-                return 1
-                ;;
-        esac
-
-
-        # archive the assembled payload
         OS::print_status info "archiving .deb package...\n"
         DEB::create_archive "$_src" "$_target_path"
         if [ $? -ne 0 ]; then

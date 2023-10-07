@@ -27,21 +27,29 @@ fi
 
 
 PACKAGE::assemble_flatpak_content() {
-        __target="$1"
-        __directory="$2"
-        __target_name="$3"
-        __target_os="$4"
-        __target_arch="$5"
+        _target="$1"
+        _directory="$2"
+        _target_name="$3"
+        _target_os="$4"
+        _target_arch="$5"
 
 
         # validate target before job
-        if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
+        case "$_target_arch" in
+        avr)
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
+                ;;
+        *)
+                ;;
+        esac
+
+        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ ! "$__target_os" = "linux" ]; then
                 return 10 # not applicable
@@ -49,40 +57,40 @@ PACKAGE::assemble_flatpak_content() {
 
 
         # copy main program
-        __target="$1"
-        __filepath="${__directory}/${PROJECT_SKU}"
-        OS::print_status info "copying $__target to ${__filepath}\n"
-        FS::copy_file "$__target" "$__filepath"
+        _target="$1"
+        _filepath="${_directory}/${PROJECT_SKU}"
+        OS::print_status info "copying ${_target} to ${_filepath}\n"
+        FS::copy_file "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # copy icon.svg
-        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon.svg"
-        __filepath="${__directory}/icon.svg"
-        OS::print_status info "copying $__target to ${__filepath}\n"
-        FS::copy_file "$__target" "$__filepath"
+        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon.svg"
+        _filepath="${_directory}/icon.svg"
+        OS::print_status info "copying ${_target} to ${_filepath}\n"
+        FS::copy_file "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # copy icon-48x48.png
-        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon-48x48.png"
-        __filepath="${__directory}/icon-48x48.png"
-        OS::print_status info "copying $__target to ${__filepath}\n"
-        FS::copy_file "$__target" "$__filepath"
+        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon-48x48.png"
+        _filepath="${_directory}/icon-48x48.png"
+        OS::print_status info "copying ${_target} to ${_filepath}\n"
+        FS::copy_file "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # copy icon-128x128.png
-        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon-128x128.png"
-        __filepath="${__directory}/icon-128x128.png"
-        OS::print_status info "copying $__target to ${__filepath}\n"
-        FS::copy_file "$__target" "$__filepath"
+        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/icons/icon-128x128.png"
+        _filepath="${_directory}/icon-128x128.png"
+        OS::print_status info "copying ${_target} to ${_filepath}\n"
+        FS::copy_file "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
         fi

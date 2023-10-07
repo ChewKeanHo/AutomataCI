@@ -9,7 +9,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\disk.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\tar.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\ar.ps1"
@@ -40,53 +42,55 @@ function DEB-Create-Archive {
 
 
 	# package control
-	Set-Location "${__directory}\control"
+	$null = Set-Location "${__directory}\control"
 	$__process = TAR-Create-XZ "..\control.tar.xz" "*"
+	$null = Set-Location $__current_path
 	if ($__process -ne 0) {
-		Set-Location $__current_path
-		Remove-Variable -Name __current_path
+		$null = Remove-Variable -Name __current_path
 		return 1
 	}
 
 
 	# package data
-	Set-Location "${__directory}\data"
-	$__process = TAR-Create-XZ "..\data.tar.xz" ".\[a-z]*"
+	$null = Set-Location "${__directory}\data"
+	$__process = TAR-Create-XZ "..\data.tar.xz" "*"
+	$null = Set-Location $__current_path
 	if ($__process -ne 0) {
-		Set-Location $__current_path
-		Remove-Variable -Name __current_path
+		$null = Remove-Variable -Name __current_path
 		return 1
 	}
 
 
 	# generate debian-binary
-	Set-Location "${__directory}"
-	$__process = FS-Write-File "${__directory}\debian-binary" "2.0`n"
+	$null = Set-Location "${__directory}"
+	$__process = FS-Write-File ".\debian-binary" "2.0`n"
+	$null = Set-Location $__current_path
 	if ($__process -ne 0) {
-		Set-Location $__current_path
-		Remove-Variable -Name __current_path
+		$null = Remove-Variable -Name __current_path
 		return 1
 	}
 
 
 	# archive into deb
+	$null = Set-Location "${__directory}"
 	$__file = "package.deb"
 	$__process = AR-Create "${__file}" "debian-binary control.tar.xz data.tar.xz"
+	$null = Set-Location $__current_path
 	if ($__process -ne 0) {
-		Set-Location $__current_path
-		Remove-Variable -Name __current_path
+		$null = Remove-Variable -Name __current_path
 		return 1
 	}
 
 
 	# move to destination
+	$null = Set-Location "${__directory}"
 	$null = FS-Remove-Silently "${__destination}"
 	$__process = FS-Move "${__file}" "${__destination}"
 
 
 	# return back to current path
-	Set-Location -Path $__current_path
-	Remove-Variable -Name __current_path
+	$null = Set-Location -Path $__current_path
+	$null = Remove-Variable -Name __current_path
 
 
 	# report status
@@ -118,20 +122,14 @@ function DEB-Create-Changelog {
 
 	# check if the document has already injected
 	$__location = "${__directory}\data\usr\local\share\doc\${__sku}\changelog.gz"
-	if (Test-Path -Path "${__location}") {
-		return 2
-	}
-
 	if ($__is_native -eq "true") {
 		$__location = "${__directory}\data\usr\share\doc\${__sku}\changelog.gz"
-		if (Test-Path -Path "${__location}") {
-			return 2
-		}
 	}
 
 
 	# create housing directory path
 	$null = FS-Make-Housing-Directory "${__location}"
+	$null = FS-Remove-Silently "${__location}"
 
 
 	# copy processed file to the target location
@@ -160,20 +158,19 @@ function DEB-Create-Checksum {
 
 	# check if is the document already injected
 	$__location = "${__directory}\control\md5sums"
-	if (Test-Path -Path "${__location}") {
-		return 2
-	}
-
-
-	# create housing directory path
+	$null = FS-Remove-Silently "${__location}"
 	$null = FS-Make-Housing-Directory "${__location}"
 
 
 	# checksum each file
-	foreach ($__file in (Get-ChildItem -Path "${__directory}/data" -File)) {
+	foreach ($__file in (Get-ChildItem -Path "${__directory}\data" -File -Recurse)) {
 		$__checksum = MD5-Checksum-File $__file.FullName
-		$__path = $__file.FullName -replace [regex]::Escape("${__directory}/data/"), ""
-		FS-Append-File "${__location}" "${__checksum} ${__path}"
+		$__path = $__file.FullName -replace [regex]::Escape("${__directory}\data\"), ""
+		$__path = $__path -replace "\\", "/"
+		$__process = FS-Append-File "${__location}" "${__checksum} ${__path}"
+		if ($__process -ne 0) {
+			return 1
+		}
 	}
 
 
@@ -191,6 +188,7 @@ function DEB-Create-Control {
 		[string]$__sku,
 		[string]$__version,
 		[string]$__arch,
+		[string]$__os,
 		[string]$__name,
 		[string]$__email,
 		[string]$__website,
@@ -208,6 +206,7 @@ function DEB-Create-Control {
 		[string]::IsNullOrEmpty($__sku) -or
 		[string]::IsNullOrEmpty($__version) -or
 		[string]::IsNullOrEmpty($__arch) -or
+		[string]::IsNullOrEmpty($__os) -or
 		[string]::IsNullOrEmpty($__name) -or
 		[string]::IsNullOrEmpty($__email) -or
 		[string]::IsNullOrEmpty($__website) -or
@@ -218,15 +217,7 @@ function DEB-Create-Control {
 	}
 
 	switch (${__priority}) {
-	required {
-		break
-	} important {
-		break
-	} standard {
-		break
-	} optional {
-		break
-	} extra {
+	{ $_ -in "required", "important", "standard", "optional", "extra" } {
 		break
 	} Default {
 		return 1
@@ -234,41 +225,10 @@ function DEB-Create-Control {
 
 
 	# check if is the document already injected
+	$__arch = DEB-Get-Architecture "${__os}" "${__arch}"
 	$__location = "${__directory}\control\control"
-	if (Test-Path -Path "${__location}") {
-		return 2
-	}
-
-
-	# ensures architecture is the correct value
-	switch ($__arch) {
-	{ $_ -in "386", "486", "586", "686" } {
-		$__arch = "i386"
-	} mipsle {
-		$__arch = "mipsel"
-	} mipsr6le {
-		$__arch = "mipsr6el"
-	} mips32le {
-		$__arch = "mips32el"
-	} mipsn32r6le {
-		$__arch = "mipsn32r6el"
-	} mips64le {
-		$__arch = "mips64el"
-	} mips64r6le {
-		$__arch = "mips64r6el"
-	} powerpcle {
-		$__arch = "powerpcel"
-	} ppc64le {
-		$__arch = "ppc64el"
-	} x86_64 {
-		$__arch = "amd64"
-	} default {
-		# Accepted - DO NOTHING
-	}}
-
-
-	# create housing directory path
 	$null = FS-Make-Housing-Directory "${__location}"
+	$null = FS-Remove-Silently "${__location}"
 
 
 	# generate control file
@@ -291,8 +251,7 @@ Description: ${__pitch}
 
 
 	# append description data file
-	Get-Content -Path "${__resources}/packages/DESCRIPTION.txt" | ForEach-Object {
-		$__line = $_
+	Foreach ($__line in (Get-Content -Path "${__resources}/packages/DESCRIPTION.txt")) {
 		if (![string]::IsNullOrEmpty($__line) -and
 			($__line -eq $__line -replace "#.*$")) {
 			continue
@@ -328,13 +287,10 @@ function DEB-Create-Source-List {
 
 
 	# validate input
-	if (-not [string]::IsNullOrEmpty($__is_simulated)) {
-		return 0
-	}
-
 	if ([string]::IsNullOrEmpty(${__directory}) -or
 		(-not (Test-Path "${__directory}" -PathType Container)) -or
-		[string]::IsNullOrEmpty(${__gpg_id}) -or
+		([string]::IsNullOrEmpty(${__gpg_id}) -and
+			[string]::IsNullOrEmpty(${__is_simulated})) -or
 		[string]::IsNullOrEmpty(${__url}) -or
 		[string]::IsNullOrEmpty(${__codename}) -or
 		[string]::IsNullOrEmpty(${__distribution}) -or
@@ -369,14 +325,75 @@ deb [signed-by=/${__key}] ${__url} ${__codename} ${__distribution}
 	}
 
 	$null = FS-Make-Housing-Directory "${__directory}\data\${__key}"
-	$__process = GPG-Export-Public-Keyring "${__directory}\data\${__key}" "${__gpg_id}"
-	if ($__process -ne 0) {
-		return 1
+	if (-not [string]::IsNullOrEmpty($__is_simulated)) {
+		$__process = FS-Write-File "${__directory}\data\${__key}" ""
+	} else {
+		$__process = GPG-Export-Public-Keyring `
+			"${__directory}\data\${__key}" `
+			"${__gpg_id}"
 	}
 
 
 	# report status
+	if ($__process -ne 0) {
+		return 1
+	}
+
 	return 0
+}
+
+
+
+
+function DEB-Get-Architecture {
+	param (
+		[string]$___os,
+		[string]$___arch
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($___os) -or [string]::IsNullOrEmpty($___arch)) {
+		return ""
+	}
+
+
+	# process os
+	switch ($___os) {
+	"dragonfly" {
+		$___output="dragonflybsd"
+	} default {
+		$___output="${___os}"
+	}}
+
+
+	# process arch
+	switch ($___arch) {
+	{ $_ -in "386", "i386", "486", "i486", "586", "i586", "686", "i686" } {
+		$___output = "${___output}-i386"
+	} "mipsle" {
+		$___output = "${___output}-mipsel"
+	} "mipsr6le" {
+		$___output = "${___output}-mipsr6el"
+	} "mips32le" {
+		$___output = "${___output}-mips32el"
+	} "mips32r6le" {
+		$___output = "${___output}-mips32r6el"
+	} "mips64le" {
+		$___output = "${___output}-mips64el"
+	} "mips64r6le" {
+		$___output = "${___output}-mips64r6el"
+	} "powerpcle" {
+		$___output = "${___output}-powerpcel"
+	} "ppc64le" {
+		$___output = "${___output}-ppc64el"
+	} default {
+		$___output = "${___output}-${___arch}"
+	}}
+
+
+	# report status
+	return STRINGS-To-Lowercase "${___output}"
 }
 
 

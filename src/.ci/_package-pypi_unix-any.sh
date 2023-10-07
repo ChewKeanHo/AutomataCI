@@ -27,11 +27,11 @@ fi
 
 
 PACKAGE::assemble_pypi_content() {
-        __target="$1"
-        __directory="$2"
-        __target_name="$3"
-        __target_os="$4"
-        __target_arch="$5"
+        _target="$1"
+        _directory="$2"
+        _target_name="$3"
+        _target_os="$4"
+        _target_arch="$5"
 
         return 10 # IMPORTANT: please do it inside python source instead.
 }

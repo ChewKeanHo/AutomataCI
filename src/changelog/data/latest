@@ -1,3 +1,4 @@
+root: added homebrew ecosystem support
 root: updated repository metadata
 automataCI: updated spec document to reflect deb & rpm changes
 automataCI: added yum's source.repo data file generative function

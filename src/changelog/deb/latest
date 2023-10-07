@@ -1,5 +1,6 @@
 automataci (1.6.0) stable; urgency=low
 
+  * root: added homebrew ecosystem support
   * root: updated repository metadata
   * automataCI: updated spec document to reflect deb & rpm changes
   * automataCI: added yum's source.repo data file generative function
@@ -13,4 +14,4 @@ automataci (1.6.0) stable; urgency=low
   * root: added C Programming Language support
   * README.md: corrected typo
 
--- Your Legal Full Name Here <contact@youremail.example>  Thu, 05 Oct 2023 13:13:27 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Fri, 06 Oct 2023 15:16:03 +0800

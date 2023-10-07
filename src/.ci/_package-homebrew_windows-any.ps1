@@ -27,24 +27,24 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function PACKAGE-Assemble-HOMEBREW-Content {
 	param (
-		[string]$__target,
-		[string]$__directory,
-		[string]$__target_name,
-		[string]$__target_os,
-		[string]$__target_arch
+		[string]$_target,
+		[string]$_directory,
+		[string]$_target_name,
+		[string]$_target_os,
+		[string]$_target_arch
 	)
 
 
 	# validate project
-	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
+	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
 		return 1 # not applicable - should be tech-oriented.
 	} else {
 		return 10 # not applicable

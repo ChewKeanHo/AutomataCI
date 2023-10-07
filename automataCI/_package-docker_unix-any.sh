@@ -33,6 +33,7 @@ PACKAGE::run_docker() {
         _target_os="$4"
         _target_arch="$5"
 
+
         OS::print_status info "checking docker functions availability...\n"
         DOCKER::is_available
         case $? in
@@ -59,6 +60,7 @@ PACKAGE::run_docker() {
                 return 0
         fi
 
+
         # prepare workspace and required values
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/docker.txt"
@@ -70,6 +72,7 @@ PACKAGE::run_docker() {
                 OS::print_status error "remake failed.\n"
                 return 1
         fi
+
 
         # copy all complimentary files to the workspace
         OS::print_status info "assembling package files...\n"
@@ -99,6 +102,7 @@ PACKAGE::run_docker() {
                 ;;
         esac
 
+
         # check required files
         OS::print_status info "checking required dockerfile...\n"
         FS::is_file "${_src}/Dockerfile"
@@ -106,6 +110,7 @@ PACKAGE::run_docker() {
                 OS::print_status error "check failed.\n"
                 return 1
         fi
+
 
         # check login credentials
         OS::print_status info "checking docker login credentials...\n"
@@ -115,8 +120,10 @@ PACKAGE::run_docker() {
                 return 1
         fi
 
+
         # change location into the workspace
         __current_path="$PWD" && cd "$_src"
+
 
         # archive the assembled payload
         OS::print_status info "packaging docker image: ${_target_path}\n"
@@ -128,28 +135,35 @@ PACKAGE::run_docker() {
                 "$PROJECT_SKU" \
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
                 OS::print_status error "package failed.\n"
                 return 1
         fi
+
 
         # logout
         OS::print_status info "logging out docker account...\n"
         DOCKER::logout
         if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
                 OS::print_status error "logout failed.\n"
                 return 1
         fi
+
 
         # clean up dangling images
         OS::print_status info "cleaning up dangling images...\n"
         DOCKER::clean_up
         if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
                 OS::print_status error "package failed.\n"
                 return 1
         fi
 
+
         # head back to current directory
         cd "$__current_path" && unset __current_path
+
 
         # report status
         return 0

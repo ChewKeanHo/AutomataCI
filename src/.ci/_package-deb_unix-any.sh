@@ -22,90 +22,169 @@ fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/copyright.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/deb.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/manual.sh"
 
 
 
 
 PACKAGE::assemble_deb_content() {
-        __target="$1"
-        __directory="$2"
-        __target_name="$3"
-        __target_os="$4"
-        __target_arch="$5"
+        _target="$1"
+        _directory="$2"
+        _target_name="$3"
+        _target_os="$4"
+        _target_arch="$5"
+        _changelog="$6"
 
 
         # validate target before job
-        __keyring="$PROJECT_SKU"
-        if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
+        case "$_target_os" in
+        android|ios|js|illumos|plan9|wasip1)
+                return 10 # not supported in apt ecosystem yet
+                ;;
+        windows)
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
+                ;;
+        *)
+                ;;
+        esac
+
+        case "$_target_arch" in
+        avr|wasm)
+                return 10 # not applicable
+                ;;
+        *)
+                ;;
+        esac
+
+        _gpg_keyring="$PROJECT_SKU"
+        _package="$PROJECT_SKU"
+        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
                 # copy main libary
                 # TIP: (1) usually is: usr/local/lib
                 #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
-                __filepath="${__directory}/data/usr/local/lib/${PROJECT_SKU}"
-                __filepath="${__filepath}/${PROJECT_SKU}"
-                OS::print_status info "copying ${__target} to ${__filepath}\n"
-                FS::make_housing_directory "$__filepath"
+                _filepath="${_directory}/data/usr/local/lib/${PROJECT_SKU}"
+                _filepath="${_filepath}/lib${PROJECT_SKU}.a"
+                OS::print_status info "copying ${_target} to ${_filepath}\n"
+                FS::make_housing_directory "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                FS::copy_file "$1" "$__filepath"
+                FS::copy_file "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                __keyring="lib$PROJECT_SKU"
-        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+                _gpg_keyring="lib$PROJECT_SKU"
+                _package="lib$PROJECT_SKU"
+        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_homebrew "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
                 return 10 # not applicable
         else
-                case "$__target_os" in
-                windows)
-                        __dest="${__directory}/${PROJECT_SKU}.exe"
-                        ;;
-                *)
-                        __dest="${__directory}/${PROJECT_SKU}"
-                        ;;
-                esac
-
                 # copy main program
                 # TIP: (1) usually is: usr/local/bin or usr/local/sbin
                 #      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
-                __filepath="${__directory}/data/usr/local/bin/${PROJECT_SKU}"
-                OS::print_status info "copying $__target to ${__filepath}/\n"
-                FS::make_housing_directory "$__filepath"
+                _filepath="${_directory}/data/usr/local/bin/${PROJECT_SKU}"
+
+                OS::print_status info "copying $_target to ${_filepath}/\n"
+                FS::make_housing_directory "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                FS::copy_file "$1" "$__filepath"
+                FS::copy_file "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
         fi
 
 
-        # OPTIONAL (overrides): copy usr/share/docs/${PROJECT_SKU}/changelog.gz
-        # OPTIONAL (overrides): copy usr/share/docs/${PROJECT_SKU}/copyright.gz
-        # OPTIONAL (overrides): copy usr/share/man/man1/${PROJECT_SKU}.1.gz
-        # OPTIONAL (overrides): generate ${__directory}/control/md5sum
-        # OPTIONAL (overrides): generate ${__directory}/control/control
+        # NOTE: REQUIRED file
+        OS::print_status info "creating changelog.gz files...\n"
+        DEB::create_changelog \
+                "$_directory" \
+                "$_changelog" \
+                "$PROJECT_DEBIAN_IS_NATIVE" \
+                "$PROJECT_SKU"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
+        # NOTE: REQUIRED file
+        OS::print_status info "creating copyright.gz file...\n"
+        COPYRIGHT::create_deb \
+                "$_directory" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
+                "$PROJECT_DEBIAN_IS_NATIVE" \
+                "$PROJECT_SKU" \
+                "$PROJECT_CONTACT_NAME" \
+                "$PROJECT_CONTACT_EMAIL" \
+                "$PROJECT_CONTACT_WEBSITE"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # NOTE: REQUIRED file
+        OS::print_status info "creating man(page) files...\n"
+        MANUAL::create_deb \
+                "$_directory" \
+                "$PROJECT_DEBIAN_IS_NATIVE" \
+                "$PROJECT_SKU" \
+                "$PROJECT_CONTACT_NAME" \
+                "$PROJECT_CONTACT_EMAIL" \
+                "$PROJECT_CONTACT_WEBSITE"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # NOTE: REQUIRED file
+        OS::print_status info "creating control/md5sum files...\n"
+        DEB::create_checksum "$_directory"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # NOTE: OPTIONAL (Comment to turn it off)
         OS::print_status info "creating source.list files...\n"
         DEB::create_source_list \
                 "$PROJECT_SIMULATE_RELEASE_REPO" \
-                "$__directory" \
+                "$_directory" \
                 "$PROJECT_GPG_ID" \
                 "$PROJECT_STATIC_URL" \
                 "$PROJECT_REPREPRO_CODENAME" \
                 "$PROJECT_DEBIAN_DISTRIBUTION" \
-                "$__keyring"
+                "$_gpg_keyring"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
+        OS::print_status info "creating control/control file...\n"
+        DEB::create_control \
+                "$_directory" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
+                "$_package" \
+                "$PROJECT_VERSION" \
+                "$_target_arch" \
+                "$_target_os" \
+                "$PROJECT_CONTACT_NAME" \
+                "$PROJECT_CONTACT_EMAIL" \
+                "$PROJECT_CONTACT_WEBSITE" \
+                "$PROJECT_PITCH" \
+                "$PROJECT_DEBIAN_PRIORITY" \
+                "$PROJECT_DEBIAN_SECTION"
         if [ $? -ne 0 ]; then
                 return 1
         fi

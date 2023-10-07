@@ -29,6 +29,7 @@ GO::activate_local_environment() {
                 return 0
         fi
 
+
         # execute
         __location="$(GO::get_activator_path)"
         if [ ! -f "$__location" ]; then
@@ -37,12 +38,13 @@ GO::activate_local_environment() {
 
         . "$__location"
         GO::is_localized
-        if [ $? -ne 0 ]; then
-                return 1
+        if [ $? -eq 0 ]; then
+                return 0
         fi
 
+
         # report status
-        return 0
+        return 1
 }
 
 
@@ -104,6 +106,7 @@ GO::setup_local_environment() {
         if [ $? -eq 0 ] ; then
                 return 0
         fi
+
 
         ## it's a clean repo. Start setting up localized environment...
         __label="($PROJECT_PATH_GO_ENGINE)"

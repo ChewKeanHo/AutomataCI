@@ -28,61 +28,10 @@ function REPREPRO-Create-Conf {
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path "${__directory}" -PathType Container)) -or
 		[string]::IsNullOrEmpty($__codename) -or
 		[string]::IsNullOrEmpty($__suite) -or
-		[string]::IsNullOrEmpty($__components) -or
-		[string]::IsNullOrEmpty($__gpg)) {
+		[string]::IsNullOrEmpty($__components)) {
 		return 1
-	}
-
-	if ([string]::IsNullOrEmpty($__architectures)) {
-		$__architectures = "armhf " `
-			+ "armel " `
-			+ "mipsn32 " `
-			+ "mipsn32el " `
-			+ "mipsn32r6 " `
-			+ "mipsn32r6el " `
-			+ "mips64 " `
-			+ "mips64el " `
-			+ "mips64r6 " `
-			+ "mips64r6el " `
-			+ "powerpcspe " `
-			+ "x32 " `
-			+ "arm64ilp32 " `
-			+ "alpha " `
-			+ "amd64 " `
-			+ "arc " `
-			+ "armeb " `
-			+ "arm " `
-			+ "arm64 " `
-			+ "avr32 " `
-			+ "hppa " `
-			+ "loong64 " `
-			+ "i386 " `
-			+ "ia64 " `
-			+ "m32r " `
-			+ "m68k " `
-			+ "mips " `
-			+ "mipsel " `
-			+ "mipsr6 " `
-			+ "mipsr6el " `
-			+ "nios2 " `
-			+ "or1k " `
-			+ "powerpc " `
-			+ "powerpcel " `
-			+ "ppc64 " `
-			+ "ppc64el " `
-			+ "riscv64 " `
-			+ "s390 " `
-			+ "s390x " `
-			+ "sh3 " `
-			+ "sh3eb " `
-			+ "sh4 " `
-			+ "sh4eb " `
-			+ "sparc " `
-			+ "sparc64 " `
-			+ "tilegx"
 	}
 
 
@@ -90,15 +39,57 @@ function REPREPRO-Create-Conf {
 	$__filename = "${__directory}\conf\distributions"
 	$null = FS-Make-Housing-Directory "${__filename}"
 	$null = FS-Remove-Silently "${__filename}"
-	$__process = FS-Write-File "${__filename}" @"
+	if ([string]::IsNullOrEmpty($__gpg)) {
+		$__process = FS-Write-File "${__filename}" @"
 Codename: ${__codename}
 Suite: ${__suite}
-Architectures: ${__architectures}
+Components: ${__components}
+Architectures:
+"@
+		if ($__process -ne 0) {
+			return 1
+		}
+	} else {
+		$__process = FS-Write-File "${__filename}" @"
+Codename: ${__codename}
+Suite: ${__suite}
 Components: ${__components}
 SignWith: ${__gpg}
+Architectures:
 "@
-	if ($__process -ne 0) {
-		return 1
+		if ($__process -ne 0) {
+			return 1
+		}
+	}
+
+
+	if ([string]::IsNullOrEmpty($__architectures)) {
+		$__architectures = @(
+			"armhf", "armel", "mipsn32", "mipsn32el", "mipsn32r6",
+			"mipsn32r6el", "mips64", "mips64el", "mips64r6", "mips64r6el",
+			"powerpcspe", "x32", "arm64ilp32", "alpha", "amd64",
+			"arc", "armeb", "arm", "arm64", "avr32",
+			"hppa", "loong64", "i386", "ia64", "m32r",
+			"m68k", "mips", "mipsel", "mipsr6", "mipsr6el",
+			"nios2", "or1k", "powerpc", "powerpcel", "ppc64",
+			"ppc64el", "riscv64", "s390", "s390x", "sh3",
+			"sh3eb", "sh4", "sh4eb", "sparc", "sparc64",
+			"tilegx")
+		$__oses = @(
+			"linux", "kfreebsd", "knetbsd", "kopensolaris", "hurd",
+			"darwin", "dragonflybsd", "freebsd", "netbsd", "openbsd",
+			"aix", "solaris")
+
+		foreach ($__arch in $__architectures) {
+			$null = FS-Append-File "${__filename}" " ${__arch}"
+			foreach ($__os in $__oses) {
+				$null = FS-Append-File "${__filename}" " ${__os}-${__arch}"
+			}
+		}
+
+		$null = FS-Append-File "${__filename}" "`n"
+	} else {
+		$null = FS-Append-File "${__filename}" " ${__architectures}`n"
 	}
 
 

@@ -13,10 +13,12 @@
 MD5::checksum_file() {
         # __target="$1"
 
+
         # validate input
         if [ -z "$1" ] || [ ! -f "$1" ]; then
                 return 1
         fi
+
 
         # execute
         if [ ! -z "$(type -t md5sum)" ]; then
@@ -25,10 +27,12 @@ MD5::checksum_file() {
                 md5 "$1"
         fi
 
+
         # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
+
         return 1
 }
 

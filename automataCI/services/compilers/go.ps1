@@ -20,13 +20,14 @@ function GO-Activate-Local-Environment {
 	# validate input
 	$__process = GO-Is-Available
 	if ($__process -ne 0) {
-		return 0
+		return 1
 	}
 
 	$__process = GO-Is-Localized
-	if ($__process -ne 0) {
+	if ($__process -eq 0) {
 		return 0
 	}
+
 
 	# execute
 	$__location = "$(GO-Get-Activator-Path)"
@@ -36,12 +37,13 @@ function GO-Activate-Local-Environment {
 
 	. $__location
 	$__process = GO-Is-Localized
-	if ($__process -ne 0) {
-		return 1
+	if ($__process -eq 0) {
+		return 0
 	}
 
+
 	# report status
-	return 0
+	return 1
 }
 
 
@@ -103,6 +105,7 @@ function GO-Setup-Local-Environment {
 		return 0
 	}
 
+
 	## it's a clean repo. Start setting up localized environment...
 	$__label = "($env:PROJECT_PATH_GO_ENGINE)"
 	$__location = "$(GO-Get-Activator-Path)"
@@ -144,11 +147,13 @@ function global:prompt {
 		return 1
 	}
 
+
 	# testing the activation
 	$null = . "${__location}"
 	if ($LASTEXITCODE -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0

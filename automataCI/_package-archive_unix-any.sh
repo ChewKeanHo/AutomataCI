@@ -34,6 +34,7 @@ PACKAGE::run_archive() {
         _target_os="$4"
         _target_arch="$5"
 
+
         OS::print_status info "checking tar functions availability...\n"
         TAR::is_available
         if [ $? -ne 0 ]; then
@@ -48,6 +49,7 @@ PACKAGE::run_archive() {
                 return 1
         fi
 
+
         # prepare workspace and required values
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}"
@@ -59,6 +61,7 @@ PACKAGE::run_archive() {
                 OS::print_status error "remake failed.\n"
                 return 1
         fi
+
 
         # copy all complimentary files to the workspace
         OS::is_command_available "PACKAGE::assemble_archive_content"
@@ -88,8 +91,10 @@ PACKAGE::run_archive() {
                 ;;
         esac
 
+
         # change location into the workspace
         __current_path="$PWD" && cd "$_src"
+
 
         # archive the assembled payload
         case "$_target_os" in
@@ -107,8 +112,10 @@ PACKAGE::run_archive() {
                 ;;
         esac
 
+
         # head back to current directory
         cd "$__current_path" && unset __current_path
+
 
         # report status
         if [ $__exit -eq 0 ]; then

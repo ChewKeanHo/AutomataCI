@@ -87,30 +87,32 @@ if (($__process -ne 0) -and ($__process -ne 10)) {
 
 
 
-# shipping executable
+# exporting executable
 $__source = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}.exe"
 $__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__source}"
 $__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}\${env:PROJECT_SKU}.exe"
-OS-Print-Status info "shipping ${__source} to ${__dest}"
+OS-Print-Status info "exporting ${__source} to ${__dest}"
 $null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}"
 $null = FS-Remove-Silently "${__dest}"
 $__process = FS-Move "${__source}" "${__dest}"
 if ($__process -ne 0) {
+	OS-Print-Status error "export failed."
 	return 1
 }
 
 
 
 
-# shipping library
+# exporting library
 $__source = "${env:PROJECT_SKU}-lib_${env:PROJECT_OS}-${env:PROJECT_ARCH}.dll"
 $__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__source}"
 $__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LIB}\lib${env:PROJECT_SKU}.dll"
-OS-Print-Status info "shipping ${__source} to ${__dest}"
+OS-Print-Status info "exporting ${__source} to ${__dest}"
 $null = FS-Make-Housing-Directory "${__dest}"
 $null = FS-Remove-Silently "${__dest}"
 $__process = FS-Move "${__source}" "${__dest}"
 if ($__process -ne 0) {
+	OS-Print-Status error "export failed."
 	return 1
 }
 

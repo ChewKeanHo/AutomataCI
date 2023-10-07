@@ -39,21 +39,6 @@ function RELEASE-Run-Checksum-Seal {
 	# gpg sign all packages
 	$__process = GPG-Is-Available "${env:PROJECT_GPG_ID}"
 	if ($__process -eq 0) {
-		foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
-			$TARGET = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${TARGET}"
-			if ($TARGET.EndsWith(".asc")) {
-				continue # it's a gpg cert
-			}
-
-			OS-Print-Status info "gpg signing: ${TARGET}"
-			FS-Remove-Silently "${TARGET}.asc"
-			$__process = GPG-Detach-Sign-File "${TARGET}" "${env:PROJECT_GPG_ID}"
-			if ($__process -ne 0) {
-				OS-Print-Status error "sign failed."
-				return 1
-			}
-		}
-
 		OS-Print-Status info "exporting GPG public key..."
 		$__keyfile = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${env:PROJECT_SKU}.gpg.asc"
 		$__process = GPG-Export-Public-Key "${__keyfile}" "${env:PROJECT_GPG_ID}"
@@ -68,6 +53,23 @@ function RELEASE-Run-Checksum-Seal {
 		if ($__process -ne 0) {
 			OS-Print-Status error "export failed."
 			return 1
+		}
+
+		foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
+			$TARGET = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${TARGET}"
+			if ($TARGET.EndsWith(".asc")) {
+				if (-not $TARGET.EndsWith(".gpg.asc")) {
+					continue # it's a gpg cert
+				}
+			}
+
+			OS-Print-Status info "gpg signing: ${TARGET}"
+			FS-Remove-Silently "${TARGET}.asc"
+			$__process = GPG-Detach-Sign-File "${TARGET}" "${env:PROJECT_GPG_ID}"
+			if ($__process -ne 0) {
+				OS-Print-Status error "sign failed."
+				return 1
+			}
 		}
 	}
 

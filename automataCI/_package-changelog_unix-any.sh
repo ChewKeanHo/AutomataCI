@@ -30,12 +30,14 @@ PACKAGE::run_changelog() {
         __changelog_md="$1"
         __changelog_deb="$2"
 
+
         OS::print_status info "checking changelog functions availability...\n"
         CHANGELOG::is_available
         if [ $? -ne 0 ]; then
                 OS::print_status error "checking failed.\n"
                 return 1
         fi
+
 
         # validate input
         OS::print_status info "validating ${PROJECT_VERSION} data changelog entry...\n"
@@ -55,6 +57,7 @@ PACKAGE::run_changelog() {
                 OS::print_status error "validation failed - there is an existing entry.\n"
                 return 1
         fi
+
 
         # assemble changelog
         OS::print_status info "assembling markdown changelog...\n"
@@ -78,6 +81,7 @@ PACKAGE::run_changelog() {
                 OS::print_status error "assembly failed.\n"
                 return 1
         fi
+
 
         # report status
         return 0

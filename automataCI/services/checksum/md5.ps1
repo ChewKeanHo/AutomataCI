@@ -14,13 +14,22 @@ function MD5-Checksum-File {
 		[string]$__target
 	)
 
+
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or (-not (Test-Path -Path "$__target"))) {
+	if ([string]::IsNullOrEmpty("${__target}") -or (-not (Test-Path -Path "${__target}"))) {
 		return 1
 	}
 
+
 	# execute
-	return (Get-FileHash -Path $__target.FullName -Algorithm MD5).Hash
+	$__hasher = [System.Security.Cryptography.MD5]::Create("MD5")
+	$__stream = [System.IO.File]::OpenRead($__target)
+	$__hash = [System.BitConverter]::ToString($__hasher.ComputeHash($__stream))
+	$null = $__stream.Close()
+
+
+	# report status
+	return $__hash.Replace("-", "").ToLower()
 }
 
 

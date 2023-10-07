@@ -27,11 +27,11 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function PACKAGE-Assemble-PYPI-Content {
 	param (
-		[string]$__target,
-		[string]$__directory,
-		[string]$__target_name,
-		[string]$__target_os,
-		[string]$__target_arch
+		[string]$_target,
+		[string]$_directory,
+		[string]$_target_name,
+		[string]$_target_os,
+		[string]$_target_arch
 	)
 
 	return 10 # IMPORTANT: please do it inside python source instead.

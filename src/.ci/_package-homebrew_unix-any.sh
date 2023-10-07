@@ -27,23 +27,23 @@ fi
 
 
 PACKAGE::assemble_homebrew_content() {
-        __target="$1"
-        __directory="$2"
-        __target_name="$3"
-        __target_os="$4"
-        __target_arch="$5"
+        _target="$1"
+        _directory="$2"
+        _target_name="$3"
+        _target_os="$4"
+        _target_arch="$5"
 
 
         # validate project
-        if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
+        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_homebrew "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
                 return 1 # not applicable - should be tech-oriented.
         else
                 return 10 # not applicable

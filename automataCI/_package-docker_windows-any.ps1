@@ -50,6 +50,7 @@ function PACKAGE-Run-DOCKER {
 		return 0
 	}}
 
+
 	# prepare workspace and required values
 	$_src = "${__target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\docker.txt"
@@ -61,6 +62,7 @@ function PACKAGE-Run-DOCKER {
 		OS-Print-Status error "remake failed."
 		return 1
 	}
+
 
 	# copy all complimentary files to the workspace
 	OS-Print-Status info "assembling package files..."
@@ -87,6 +89,7 @@ function PACKAGE-Run-DOCKER {
 		return 1
 	}}
 
+
 	# check required files
 	OS-Print-Status info "checking required dockerfile..."
 	$__process = FS-Is-File "${_src}/Dockerfile"
@@ -95,9 +98,11 @@ function PACKAGE-Run-DOCKER {
 		return 1
 	}
 
+
 	# change location into the workspace
 	$__current_path = Get-Location
 	$null = Set-Location -Path "${_src}"
+
 
 	# archive the assembled payload
 	OS-Print-Status info "packaging docker image: ${_target_path}"
@@ -109,27 +114,36 @@ function PACKAGE-Run-DOCKER {
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}"
 	if ($__process -ne 0) {
+		$null = Set-Location -Path "${__current_path}"
+		$null = Remove-Variable -Name __current_path
 		OS-Print-Status error "package failed."
 		return 1
 	}
+
 
 	# logout
 	OS-Print-Status info "logging out docker account..."
 	$__process = DOCKER-Logout
 	if ($__process -ne 0) {
+		$null = Set-Location -Path "${__current_path}"
+		$null = Remove-Variable -Name __current_path
 		OS-Print-Status error "logout failed."
 		return 1
 	}
 
 	$__process = DOCKER-Clean-Up
 	if ($__process -ne 0) {
+		$null = Set-Location -Path "${__current_path}"
+		$null = Remove-Variable -Name __current_path
 		OS-Print-Status error "package failed."
 		return 1
 	}
 
+
 	# head back to current directory
 	$null = Set-Location -Path "${__current_path}"
 	$null = Remove-Variable -Name __current_path
+
 
 	# report status
 	return 0

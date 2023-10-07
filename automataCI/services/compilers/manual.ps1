@@ -15,7 +15,7 @@
 
 
 
-function MANUAL-Create-DEB-Manpage {
+function MANUAL-Create-DEB {
 	param(
 		[string]$__directory,
 		[string]$__is_native,
@@ -24,6 +24,7 @@ function MANUAL-Create-DEB-Manpage {
 		[string]$__email,
 		[string]$__website
 	)
+
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
@@ -36,38 +37,21 @@ function MANUAL-Create-DEB-Manpage {
 		return 1
 	}
 
+
 	# check if is the document already injected
 	$__location = "${__directory}\data\usr\local\share\man\man1\${__sku}.1"
-	$__process = FS-Is-File "${__location}"
-	if ($__process -eq 0) {
-		return 2
-	}
-
-	$__process = FS-Is-File "${__location}.gz"
-	if ($__process -eq 0) {
-		return 2
-	}
-
 	if ($__is_native -eq "true") {
 		$__location = "${__directory}\data\usr\share\man\man1\${__sku}.1"
-		$__process = FS-Is-File "${__location}"
-		if ($__process -eq 0) {
-			return 2
-		}
-
-		$__process = FS-Is-File "${__location}.gz"
-		if ($__process -eq 0) {
-			return 2
-		}
 	}
+
 
 	# create manpage
 	return MANUAL-Create-Baseline-Manpage `
-		$__location `
-		$__sku `
-		$__name `
-		$__email `
-		$__website
+		"${__location}" `
+		"${__sku}" `
+		"${__name}" `
+		"${__email}" `
+		"${__website}"
 }
 
 
@@ -82,6 +66,7 @@ function MANUAL-Create-RPM-Manpage {
 		[string]$__website
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
 		(-not (Test-Path $__directory -PathType Container)) -or
@@ -92,26 +77,14 @@ function MANUAL-Create-RPM-Manpage {
 		return 1
 	}
 
-	# check if is the document already injected
-	$__location = "${__directory}\BUILD\${__sku}.1"
-
-	$__process = FS-Is-File "${__location}"
-	if ($__process -eq 0) {
-		return 2
-	}
-
-	$__process = FS-Is-File "${__location}.gz"
-	if ($__process -eq 0) {
-		return 2
-	}
 
 	# create manpage
 	return MANUAL-Create-Baseline-Manpage `
-		$__location `
-		$__sku `
-		$__name `
-		$__email `
-		$__website
+		"${__directory}\BUILD\${__sku}.1" `
+		"${__sku}" `
+		"${__name}" `
+		"${__email}" `
+		"${__website}"
 }
 
 
@@ -126,6 +99,7 @@ function MANUAL-Create-Baseline-Manpage {
 		[string]$__website
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__location) -or
 		[string]::IsNullOrEmpty($__sku) -or
@@ -135,11 +109,14 @@ function MANUAL-Create-Baseline-Manpage {
 		return 1
 	}
 
+
 	# create housing directory path
 	$null = FS-Make-Housing-Directory "${__location}"
+	$null = FS-Remove-Silently "${__location}"
+	$null = FS-Remove-Silently "${__location}.gz"
+
 
 	# create basic level 1 man page that instruct users to seek --help
-	$null = FS-Remove-Silently "${__location}"
 	$__process = FS-Write-File "${__location}" @"
 .`" ${__sku} - Lv1 Manpage
 .TH man 1 `"${__sku} man page`"
@@ -164,6 +141,7 @@ Contact: ${__name} <${__email}>
 	if ($__process -ne 0) {
 		return 0
 	}
+
 
 	# gunzip the manual
 	return GZ-Create "${__location}"

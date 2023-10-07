@@ -16,13 +16,14 @@
 
 
 
-MANUAL::create_deb_manpage() {
+MANUAL::create_deb() {
         __directory="$1"
         __is_native="$2"
         __sku="$3"
         __name="$4"
         __email="$5"
         __website="$6"
+
 
         # validate input
         if [ -z "$__directory" ] ||
@@ -34,34 +35,13 @@ MANUAL::create_deb_manpage() {
                 return 1
         fi
 
-        # check if is the document already injected
-        __location="${__directory}/data/usr/local/share/man/man1/${__sku}.1"
-
-        FS::is_file "${__location}"
-        if [ $? -eq 0 ]; then
-                return 2
-        fi
-
-        FS::is_file "${__location}.gz"
-        if [ $? -eq 0 ]; then
-                return 2
-        fi
-
-        if [ "$__is_native" = "true" ]; then
-                __location="${__directory}/data/usr/share/man/man1/${__sku}.1"
-
-                FS::is_file "${__location}"
-                if [ $? -eq 0 ]; then
-                        return 2
-                fi
-
-                FS::is_file "${__location}.gz"
-                if [ $? -eq 0 ]; then
-                        return 2
-                fi
-        fi
 
         # create manpage
+        __location="${__directory}/data/usr/local/share/man/man1/${__sku}.1"
+        if [ "$__is_native" = "true" ]; then
+                __location="${__directory}/data/usr/share/man/man1/${__sku}.1"
+        fi
+
         MANUAL::create_baseline_manpage \
                 "$__location" \
                 "$__sku" \
@@ -81,6 +61,7 @@ MANUAL::create_rpm_manpage() {
         __email="$4"
         __website="$5"
 
+
         # validate input
         if [ -z "$__directory" ] ||
                 [ ! -d "$__directory" ] ||
@@ -91,22 +72,10 @@ MANUAL::create_rpm_manpage() {
                 return 1
         fi
 
-        # check if is the document already injected
-        __location="${__directory}/BUILD/${__sku}.1"
-
-        FS::is_file "${__location}"
-        if [ $? -eq 0 ]; then
-                return 2
-        fi
-
-        FS::is_file "${__location}.gz"
-        if [ $? -eq 0 ]; then
-                return 2
-        fi
 
         # create manpage
         MANUAL::create_baseline_manpage \
-                "$__location" \
+                "${__directory}/BUILD/${__sku}.1" \
                 "$__sku" \
                 "$__name" \
                 "$__email" \
@@ -124,6 +93,7 @@ MANUAL::create_baseline_manpage() {
         __email="$4"
         __website="$5"
 
+
         # validate input
         if [ -z "$__location" ] ||
                 [ -d "$__location" ] ||
@@ -134,11 +104,14 @@ MANUAL::create_baseline_manpage() {
                 return 1
         fi
 
-        # create housing directory path
+
+        # prepare workspace
         FS::make_housing_directory "$__location"
+        FS::remove_silently "$__location"
+        FS::remove_silently "${__location}.gz"
+
 
         # create basic level 1 man page that instruct users to seek --help
-        FS::remove_silently "$__location"
         FS::write_file "${__location}" "\
 .\" ${__sku} - Lv1 Manpage
 .TH man 1 \"${__sku} man page\"
@@ -164,6 +137,7 @@ Contact: ${__name} <${__email}>
                 return 0
         fi
 
+
         # gunzip the manual
         GZ::create "$__location"
         return $?
@@ -173,10 +147,13 @@ Contact: ${__name} <${__email}>
 
 
 MANUAL::is_available() {
+        # execute
         GZ::is_available
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }

@@ -36,6 +36,7 @@ function PACKAGE-Run-RPM {
 		[string]$_target_arch
 	)
 
+
 	OS-Print-Status info "checking rpm functions availability..."
 	$__process = RPM-Is-Available
 	switch ($__process) {
@@ -59,6 +60,7 @@ function PACKAGE-Run-RPM {
 		return 1
 	}
 
+
 	# prepare workspace and required values
 	$_src = "${_target_filename}_${_target_os}-${_target_arch}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\rpm_${_src}"
@@ -71,6 +73,7 @@ function PACKAGE-Run-RPM {
 	}
 	$null = FS-Make-Directory "${_src}/BUILD"
 	$null = FS-Make-Directory "${_src}/SPECS"
+
 
 	# copy all complimentary files to the workspace
 	OS-Print-Status info "assembling package files..."
@@ -94,54 +97,6 @@ function PACKAGE-Run-RPM {
 		return 1
 	}
 
-	# generate required files
-	OS-Print-Status info "creating copyright.gz file..."
-	$__process = COPYRIGHT-Create-RPM `
-		${_src} `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
-		${env:PROJECT_SKU} `
-		${env:PROJECT_CONTACT_NAME} `
-		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE}
-	if ($__process -eq 2) {
-		OS-Print-Status info "manual injection detected."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "create failed."
-		return 1
-	}
-
-	OS-Print-Status info "creating man pages file..."
-	MANUAL-Create-RPM_Manpage `
-		${_src} `
-		${env:PROJECT_SKU} `
-		${env:PROJECT_CONTACT_NAME} `
-		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE}
-	if ($__process -eq 2) {
-		OS-Print-Status info "manual injection detected."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "create failed."
-		return 1
-	}
-
-	OS-Print-Status info "creating spec file..."
-	RPM-Create-Spec `
-		${_src} `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
-		${env:PROJECT_SKU} `
-		${env:PROJECT_VERSION} `
-		${env:PROJECT_CADENCE} `
-		${env:PROJECT_PITCH} `
-		${env:PROJECT_CONTACT_NAME} `
-		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE} `
-		${env:PROJECT_LICENSE}
-	if ($__process -eq 2) {
-		OS-Print-Status info "manual injection detected."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "create failed."
-		return 1
-	}
 
 	# archive the assembled payload
 	OS-Print-Status info "archiving .rpm package..."
@@ -154,6 +109,7 @@ function PACKAGE-Run-RPM {
 		OS-Print-Status error "package failed."
 		return 1
 	}
+
 
 	# report status
 	return 0

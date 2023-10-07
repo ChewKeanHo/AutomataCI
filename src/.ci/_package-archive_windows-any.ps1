@@ -27,55 +27,55 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function PACKAGE-Assemble-Archive-Content {
 	param(
-		[string]$__target,
-		[string]$__directory,
-		[string]$__target_name,
-		[string]$__target_os,
-		[string]$__target_arch
+		[string]$_target,
+		[string]$_directory,
+		[string]$_target_name,
+		[string]$_target_os,
+		[string]$_target_arch
 	)
 
 
 	# copy main program
-	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
+	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
-		OS-Print-Status info "copying ${__target} to ${__directory}"
-		$__process = Fs-Copy-File "${__target}" "${__directory}"
+	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
+		OS-Print-Status info "copying ${_target} to ${_directory}"
+		$__process = Fs-Copy-File "${_target}" "${_directory}"
 		if ($__process -ne 0) {
 			return 1
 		}
-	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
 		return 10 # handled by wasm instead
-	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
-		OS-Print-Status info "copying ${__target} to ${__directory}"
-		$__process = Fs-Copy-File "${__target}" "${__directory}"
+	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
+		OS-Print-Status info "copying ${_target} to ${_directory}"
+		$__process = Fs-Copy-File "${_target}" "${_directory}"
 		if ($__process -ne 0) {
 			return 1
 		}
 
-		$__process = FS-Is-File "$($__target -replace '\.wasm.*$', '.js')"
+		$__process = FS-Is-File "$($_target -replace '\.wasm.*$', '.js')"
 		if ($__process -eq 0) {
 			OS-Print-Status info `
-				"copying $($__target -replace '\.wasm.*$', '.js') to ${__directory}"
+				"copying $($_target -replace '\.wasm.*$', '.js') to ${_directory}"
 			$__process = Fs-Copy-File `
-					"$($__target -replace '\.wasm.*$', '.js')" `
-					"${__directory}"
+					"$($_target -replace '\.wasm.*$', '.js')" `
+					"${_directory}"
 			if ($__process -ne 0) {
 				return 1
 			}
 		}
-	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
 		return 10 # not applicable
 	} else {
-		switch (${__target_os}) {
+		switch (${_target_os}) {
 		"windows" {
-			$__dest = "${__directory}\${env:PROJECT_SKU}.exe"
+			$_dest = "${_directory}\${env:PROJECT_SKU}.exe"
 		} Default {
-			$__dest = "${__directory}\${env:PROJECT_SKU}"
+			$_dest = "${_directory}\${env:PROJECT_SKU}"
 		}}
 
-		OS-Print-Status info "copying ${__target} to ${__dest}"
-		$__process = Fs-Copy-File "${__target}" "${__dest}"
+		OS-Print-Status info "copying ${_target} to ${_dest}"
+		$__process = Fs-Copy-File "${_target}" "${_dest}"
 		if ($__process -ne 0) {
 			return 1
 		}
@@ -83,9 +83,9 @@ function PACKAGE-Assemble-Archive-Content {
 
 
 	# copy user guide
-	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
-	OS-Print-Status info "copying ${__target} to ${__directory}"
-	$__process = FS-Copy-File "${__target}" "${__directory}"
+	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
+	OS-Print-Status info "copying ${_target} to ${_directory}"
+	$__process = FS-Copy-File "${_target}" "${_directory}"
 	if ($__process -ne 0) {
 		OS-Print-Status info "copy failed."
 		return 1
@@ -93,9 +93,9 @@ function PACKAGE-Assemble-Archive-Content {
 
 
 	# copy license file
-	$__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
-	OS-Print-Status info "copying ${__target} to ${__directory}"
-	$__process = FS-Copy-File "${__target}" "${__directory}"
+	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
+	OS-Print-Status info "copying ${_target} to ${_directory}"
+	$__process = FS-Copy-File "${_target}" "${_directory}"
 	if ($__process -ne 0) {
 		OS-Print-Status info "copy failed."
 		return 1

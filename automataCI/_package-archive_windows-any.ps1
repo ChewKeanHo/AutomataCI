@@ -35,6 +35,7 @@ function PACKAGE-Run-Archive {
 		[string]$_target_arch
 	)
 
+
 	OS-Print-Status info "checking tar functions availability..."
 	$__process = TAR-Is-Available
 	if ($__process -ne 0) {
@@ -49,6 +50,7 @@ function PACKAGE-Run-Archive {
 		return 1
 	}
 
+
 	# prepare workspace and required values
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}"
@@ -60,6 +62,7 @@ function PACKAGE-Run-Archive {
 		OS-Print-Status error "remake failed."
 		return 1
 	}
+
 
 	# copy all complimentary files to the workspace
 	OS-Print-Status info "assembling package files..."
@@ -86,9 +89,11 @@ function PACKAGE-Run-Archive {
 		return 1
 	}}
 
+
 	# change location into the workspace
 	$__current_path = Get-Location
 	$null = Set-Location -Path "${_src}"
+
 
 	# archive the assembled payload
 	switch ($_target_os) {
@@ -102,9 +107,11 @@ function PACKAGE-Run-Archive {
 		$__process = TAR-Create-XZ "${_target_path}" "*"
 	}}
 
+
 	# head back to current directory
 	$null = Set-Location -Path "${__current_path}"
 	$null = Remove-Variable -Name __current_path
+
 
 	# report status
 	if ($__process -eq 0) {

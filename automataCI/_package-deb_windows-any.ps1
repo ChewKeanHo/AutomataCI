@@ -75,26 +75,30 @@ function PACKAGE-Run-DEB {
 	$null = FS-Make-Directory "${_src}\control"
 	$null = FS-Make-Directory "${_src}\data"
 
+
+	# execute
 	OS-Print-Status info "checking output file existence..."
-	if (Test-Path -Path "${_target_path}") {
+	$__process = FS-Is-File "${_target_path}"
+	if ($__process -eq 0) {
 		OS-Print-Status error "check failed - output exists!"
 		return 1
 	}
 
-
-	# copy all complimentary files to the workspace
-	OS-Print-Status info "assembling package files..."
+	OS-Print-Status info "checking PACKAGE-Assemble-DEB-Content function..."
 	$__process = OS-Is-Command-Available "PACKAGE-Assemble-DEB-Content"
 	if ($__process -ne 0) {
-		OS-Print-Status error "missing PACKAGE-Assemble-DEB-Content function."
+		OS-Print-Status error "check failed."
 		return 1
 	}
+
+	OS-Print-Status info "assembling package files..."
 	$__process = PACKAGE-Assemble-DEB-Content `
-		${_target} `
-		${_src} `
-		${_target_filename} `
-		${_target_os} `
-		${_target_arch}
+		"${_target}" `
+		"${_src}" `
+		"${_target_filename}" `
+		"${_target_os}" `
+		"${_target_arch}" `
+		"${_changelog_deb}"
 	switch ($__process) {
 	10 {
 		$null = FS-Remove-Silently "${_src}"
@@ -107,83 +111,20 @@ function PACKAGE-Run-DEB {
 		return 1
 	}}
 
-
-	# generate required files
-	OS-Print-Status info "creating copyright.gz file..."
-	$__process = COPYRIGHT-Create-DEB `
-		${_src} `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
-		${env:PROJECT_DEBIAN_IS_NATIVE} `
-		${env:PROJECT_SKU} `
-		${env:PROJECT_CONTACT_NAME} `
-		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE}
-	if ($__process -eq 2) {
-		OS-Print-Status info "manual injection detected."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "create failed."
+	OS-Print-Status info "checking control\md5sums file..."
+	$__process = FS-Is-File "${_src}\control\md5sums"
+	if ($__process -ne 0) {
+		OS-Print-Status error "check failed."
 		return 1
 	}
 
-	OS-Print-Status info "creating changelog.gz file..."
-	DEB-Create-Changelog `
-		${_src} `
-		"${_changelog_deb}" `
-		${env:PROJECT_DEBIAN_IS_NATIVE} `
-		${env:PROJECT_SKU}
-	if ($__process -eq 2) {
-		OS-Print-Status info "manual injection detected."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "create failed."
+	OS-Print-Status info "checking control\control file..."
+	$__process = FS-Is-File "${_src}\control\control"
+	if ($__process -ne 0) {
+		OS-Print-Status error "check failed."
 		return 1
 	}
 
-	OS-Print-Status info "creating man page files..."
-	MANUAL-Create-DEB-Manpage `
-		${_src} `
-		${env:PROJECT_DEBIAN_IS_NATIVE} `
-		${env:PROJECT_SKU} `
-		${env:PROJECT_CONTACT_NAME} `
-		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE}
-	if ($__process -eq 2) {
-		OS-Print-Status info "manual injection detected."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "create failed."
-		return 1
-	}
-
-	OS-Print-Status info "creating control/md5sums file..."
-	DEB-Create-Checksum "${_src}"
-	if ($__process -eq 2) {
-		OS-Print-Status info "manual injection detected."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "create failed."
-		return 1
-	}
-
-	OS-Print-Status info "creating control/control file..."
-	DEB-Create-Control `
-		"${_src}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
-		"${env:PROJECT_SKU}" `
-		"${env:PROJECT_VERSION}" `
-		"${_target_arch}" `
-		"${env:PROJECT_CONTACT_NAME}" `
-		"${env:PROJECT_CONTACT_EMAIL}" `
-		"${env:PROJECT_CONTACT_WEBSITE}" `
-		"${env:PROJECT_PITCH}" `
-		"${env:PROJECT_DEBIAN_PRIORITY}" `
-		"${env:PROJECT_DEBIAN_SECTION}"
-	if ($__process -eq 2) {
-		OS-Print-Status info "manual injection detected."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "create failed."
-		return 1
-	}
-
-
-	# archive the assembled payload
 	OS-Print-Status info "archiving .deb package..."
 	$__process = DEB-Create-Archive "${_src}" "${_target_path}"
 	if ($__process -ne 0) {

@@ -416,16 +416,6 @@ RPM::is_available() {
         fi
 
 
-        # check compatible target os
-        case "$__os" in
-        windows|darwin)
-                return 2
-                ;;
-        *)
-                ;;
-        esac
-
-
         # check compatible target cpu architecture
         case "$__arch" in
         any)

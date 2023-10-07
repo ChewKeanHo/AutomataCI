@@ -106,30 +106,32 @@ fi
 
 
 
-# shipping executable
+# exporting executable
 __source="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}.elf"
 __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS::print_status info "shipping ${__source} to ${__dest}\n"
+OS::print_status info "exporting ${__source} to ${__dest}\n"
 FS::make_housing_directory "$__dest"
 FS::remove_silently "$__dest"
 FS::move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
+        OS::print_status error "export failed.\n"
         return 1
 fi
 
 
 
 
-# shipping library
+# exporting library
 __source="${PROJECT_SKU}-lib_${PROJECT_OS}-${PROJECT_ARCH}.a"
 __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}/lib${PROJECT_SKU}.a"
-OS::print_status info "shipping ${__source} to ${__dest}\n"
+OS::print_status info "exporting ${__source} to ${__dest}\n"
 FS::make_housing_directory "$__dest"
 FS::remove_silently "$__dest"
 FS::move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
+        OS::print_status error "export failed.\n"
         return 1
 fi
 

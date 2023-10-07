@@ -39,18 +39,21 @@ function RELEASE-Run-DEB {
 
 
 	# execute
-	OS-Print-Status info "create reprepro configuration file..."
 	$__conf = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb"
-	$__process = REPREPRO-Create-Conf `
-		"${__conf}" `
-		"${env:PROJECT_REPREPRO_CODENAME}" `
-		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
-		"${env:PROJECT_REPREPRO_COMPONENT}" `
-		"${env:PROJECT_REPREPRO_ARCH}" `
-		"${env:PROJECT_GPG_ID}"
+	$__process = FS-Is-File "${__conf}\conf\distributions"
 	if ($__process -ne 0) {
-		OS-Print-Status error "create failed."
-		return 1
+		OS-Print-Status info "create reprepro configuration file..."
+		$__process = REPREPRO-Create-Conf `
+			"${__conf}" `
+			"${env:PROJECT_REPREPRO_CODENAME}" `
+			"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
+			"${env:PROJECT_REPREPRO_COMPONENT}" `
+			"${env:PROJECT_REPREPRO_ARCH}" `
+			"${env:PROJECT_GPG_ID}"
+		if ($__process -ne 0) {
+			OS-Print-Status error "create failed."
+			return 1
+		}
 	}
 
 	$__dest = "${__directory}/deb"
@@ -68,8 +71,8 @@ function RELEASE-Run-DEB {
 		$__process = REPREPRO-Publish `
 			"${__target}" `
 			"${__dest}" `
-			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\publishers\reprepro" `
 			"${__conf}" `
+			"${__conf}\db" `
 			"${env:PROJECT_REPREPRO_CODENAME}"
 		if ($__process -ne 0) {
 			OS-Print-Status error "publish failed."
