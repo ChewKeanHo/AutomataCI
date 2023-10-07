@@ -20,7 +20,6 @@ function RPM-Create-Archive {
 	param (
 		[string]$__directory,
 		[string]$__destination,
-		[string]$__sku,
 		[string]$__arch
 	)
 
@@ -28,20 +27,29 @@ function RPM-Create-Archive {
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
 		[string]::IsNullOrEmpty($__destination) -or
-		[string]::IsNullOrEmpty($__sku) -or
+		[string]::IsNullOrEmpty($__arch) -or
 		(-not (Test-Path $__directory -PathType Container)) -or
-		(-not (Test-Path $__destination -PathType Container)) -or
-		(-not (Test-Path "${__directory}\SPECS\${__sku}.spec" -PathType Container))) {
+		(-not (Test-Path $__destination -PathType Container))) {
 		return 1
 	}
 
 
-	# change directory into workspace
-	$__current_path = Get-Location
-	Set-Location -Path $__directory
+	# scan for spec file
+	$__spec = ""
+	foreach($__file in (Get-ChildItem -File -Path "${__directory}\SPECS")) {
+		$__spec = $__file.FullName
+		break
+	}
+
+	$__process = FS-Is-File "${__spec}"
+	if ($__process -ne 0) {
+		return 1
+	}
 
 
 	# archive into rpm
+	$__current_path = Get-Location
+	Set-Location -Path $__directory
 	$null = FS-Make-Directory ".\BUILD"
 	$null = FS-Make-Directory ".\BUILDROOT"
 	$null = FS-Make-Directory ".\RPMS"
@@ -53,11 +61,12 @@ function RPM-Create-Archive {
 			"--define `"debug_package %{nil}`" " +
 			"--define `"__strip /bin/true`" " +
 			"--target `"$__arch`" " +
-			"-ba `"${__directory}\SPECS\${__sku}.spec`""
+			"-ba `"${__spec}`""
 	$__process = OS-Exec "rpmbuild" "$__arguments"
+	Set-Location -Path $__current_path
+	Remove-Variable -Name __current_path
+
 	if ($__process -ne 0) {
-		Set-Location -Path $__current_path
-		Remove-Variable -Name __current_path
 		return 1
 	}
 
@@ -69,8 +78,8 @@ function RPM-Create-Archive {
 
 	# move to destination
 	foreach($__package in (Get-ChildItem -Path "${__directory}/RPMS/${__arch}")) {
-		$null = FS-Remove-Silently "${__destination}\${__package}.Name"
-		$null = FS-Move "$_.FullName" "${__destination}"
+		$null = FS-Remove-Silently "${__destination}\$($__package.Name)"
+		$null = FS-Move $__package.FullName "${__destination}"
 	}
 
 

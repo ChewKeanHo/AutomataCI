@@ -105,7 +105,7 @@ PACKAGE::run_rpm() {
 
         # archive the assembled payload
         OS::print_status info "archiving .rpm package...\n"
-        RPM::create_archive "$_src" "$_dest" "$PROJECT_SKU" "$_target_arch"
+        RPM::create_archive "$_src" "$_dest" "$_target_arch"
         if [ $? -ne 0 ]; then
                 OS::print_status error "package failed.\n"
                 return 1

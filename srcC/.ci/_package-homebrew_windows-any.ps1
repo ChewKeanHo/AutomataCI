@@ -28,24 +28,24 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function PACKAGE-Assemble-HOMEBREW-Content {
 	param (
-		[string]$__target,
-		[string]$__directory,
-		[string]$__target_name,
-		[string]$__target_os,
-		[string]$__target_arch
+		[string]$_target,
+		[string]$_directory,
+		[string]$_target_name,
+		[string]$_target_os,
+		[string]$_target_arch
 	)
 
 
 	# validate project
-	if ($(FS-Is-Target-A-Source "${__target}") -eq 0) {
+	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Library "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM-JS "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Homebrew "${__target}") -eq 0) {
+	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
 		# accepted
 	} else {
 		return 10 # not applicable
@@ -53,29 +53,29 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 
 
 	# assemble the package
-	$null = FS-Make-Directory "${__directory}\Data\${env:PROJECT_PATH_SOURCE}"
+	$null = FS-Make-Directory "${_directory}\Data\${env:PROJECT_PATH_SOURCE}"
 	$__process = FS-Copy-All "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}" `
-		"${__directory}\Data\${env:PROJECT_PATH_SOURCE}"
+		"${_directory}\Data\${env:PROJECT_PATH_SOURCE}"
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Copy-All "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}" "${__directory}"
+	$__process = FS-Copy-All "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}" "${_directory}"
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Copy-All "${env:PROJECT_PATH_ROOT}\automataCI" "${__directory}"
+	$__process = FS-Copy-All "${env:PROJECT_PATH_ROOT}\automataCI" "${_directory}"
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\CONFIG.toml" "${__directory}"
+	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\CONFIG.toml" "${_directory}"
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\ci.cmd" "${__directory}"
+	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\ci.cmd" "${_directory}"
 	if ($__process -ne 0) {
 		return 1
 	}
@@ -83,7 +83,7 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 
 	# script formula.rb
 	OS-Print-Status info "scripting formula.rb..."
-	$__process = FS-Write-File "${__directory}\formula.rb" @"
+	$__process = FS-Write-File "${_directory}\formula.rb" @"
 class ${env:PROJECT_SKU_TITLECASE} < Formula
   desc \"${env:PROJECT_PITCH}\"
   homepage \"${env:PROJECT_CONTACT_WEBSITE}\"

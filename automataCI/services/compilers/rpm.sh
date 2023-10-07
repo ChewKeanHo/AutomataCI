@@ -20,26 +20,39 @@
 RPM::create_archive() {
         __directory="$1"
         __destination="$2"
-        __sku="$3"
-        __arch="$4"
+        __arch="$3"
 
 
         # validate input
         if [ -z "$__directory" ] ||
                 [ -z "$__destination" ] ||
-                [ -z "$__sku" ] ||
+                [ -z "$__arch" ] ||
                 [ ! -d "$__directory" ] ||
-                [ ! -d "$__destination" ] ||
-                [ ! -f "${__directory}/SPECS/${__sku}.spec" ]; then
+                [ ! -d "$__destination" ]; then
                 return 1
         fi
 
 
-        # change directory into workspace
-        __current_path="$PWD" && cd "${__directory}"
+        # scan for spec file
+        __spec=""
+        for __file in "${__directory}/SPECS/"*; do
+                FS::is_file "$__file"
+                if [ $? -ne 0 ]; then
+                        continue
+                fi
+
+                __spec="$__file"
+                break
+        done
+
+        FS::is_file "$__spec"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # archive into rpm
+        __current_path="$PWD" && cd "${__directory}"
         FS::make_directory "./BUILD"
         FS::make_directory "./BUILDROOT"
         FS::make_directory "./RPMS"
@@ -47,26 +60,28 @@ RPM::create_archive() {
         FS::make_directory "./SPECS"
         FS::make_directory "./SRPMCS"
         FS::make_directory "./tmp"
-        rpmbuild \
-                --define "_topdir ${__directory}" \
+        rpmbuild --define "_topdir ${__directory}" \
                 --define "debug_package %{nil}" \
                 --define "__strip /bin/true" \
                 --target "$__arch" \
-                -ba "${__directory}/SPECS/${__sku}.spec"
-        if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                -ba "$__spec"
+        __exit=$?
+        cd "$__current_path" && unset __current_path
+
+        if [ $__exit -ne 0 ]; then
                 return 1
         fi
 
 
-        # return back to current path
-        cd "$__current_path" && unset __current_path
-
-
         # move to destination
-        for package in "${__directory}/RPMS/${__arch}/"*; do
-                FS::remove_silently "${__destination}/${package##*/}"
-                FS::move "$package" "$__destination"
+        for __package in "${__directory}/RPMS/${__arch}/"*; do
+                FS::is_file "$__package"
+                if [ $? -ne 0 ]; then
+                        continue
+                fi
+
+                FS::remove_silently "${__destination}/${__package##*/}"
+                FS::move "$__package" "$__destination"
         done
 
 

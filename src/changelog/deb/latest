@@ -1,5 +1,6 @@
 automataci (1.6.0) stable; urgency=low
 
+  * srcGO: enabled Homebrew for Go programming language
   * root: added homebrew ecosystem support
   * root: updated repository metadata
   * automataCI: updated spec document to reflect deb & rpm changes
@@ -14,4 +15,4 @@ automataci (1.6.0) stable; urgency=low
   * root: added C Programming Language support
   * README.md: corrected typo
 
--- Your Legal Full Name Here <contact@youremail.example>  Fri, 06 Oct 2023 15:16:03 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Sat, 07 Oct 2023 21:44:06 +0800

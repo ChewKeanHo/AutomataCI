@@ -100,11 +100,7 @@ function PACKAGE-Run-RPM {
 
 	# archive the assembled payload
 	OS-Print-Status info "archiving .rpm package..."
-	$__process = RPM-Create-Archive `
-		"${_src}" `
-		"${_dest}" `
-		"${env:PROJECT_SKU}" `
-		"${_target_arch}"
+	$__process = RPM-Create-Archive "${_src}" "${_dest}" "${_target_arch}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "package failed."
 		return 1

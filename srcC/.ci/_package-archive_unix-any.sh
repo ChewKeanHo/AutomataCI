@@ -27,59 +27,59 @@ fi
 
 
 PACKAGE::assemble_archive_content() {
-        __target="$1"
-        __directory="$2"
-        __target_name="$3"
-        __target_os="$4"
-        __target_arch="$5"
+        _target="$1"
+        _directory="$2"
+        _target_name="$3"
+        _target_os="$4"
+        _target_arch="$5"
 
 
         # package based on target's nature
-        if [ $(FS::is_target_a_source "$__target") -eq 0 ]; then
-                __target="${PROJECT_PATH_ROOT}/${PROJECT_C}/libs"
-                OS::print_status info "copying ${__target} to ${__directory}\n"
-                FS::copy_all "$__target" "$__directory"
+        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
+                _target="${PROJECT_PATH_ROOT}/${PROJECT_C}/libs"
+                OS::print_status info "copying ${_target} to ${_directory}\n"
+                FS::copy_all "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
-        elif [ $(FS::is_target_a_library "$__target") -eq 0 ]; then
-                OS::print_status info "copying ${__target} to ${__directory}\n"
-                FS::copy_file "$__target" "${__directory}/lib${PROJECT_SKU}.a"
+        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
+                OS::print_status info "copying ${_target} to ${_directory}\n"
+                FS::copy_file "$_target" "${_directory}/lib${PROJECT_SKU}.a"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
-        elif [ $(FS::is_target_a_wasm_js "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
-        elif [ $(FS::is_target_a_wasm "$__target") -eq 0 ]; then
-                OS::print_status info "copying ${__target} to ${__directory}\n"
-                FS::copy_file "$__target" "$__directory"
+        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
+                OS::print_status info "copying ${_target} to ${_directory}\n"
+                FS::copy_file "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                FS::is_file "${__target%.wasm*}.js"
+                FS::is_file "${_target%.wasm*}.js"
                 if [ $? -eq 0 ]; then
                         OS::print_status info \
-                                "copying ${__target%.wasm*}.js to ${__directory}\n"
-                        FS::copy_file "${__target%.wasm*}.js" "$__directory"
+                                "copying ${_target%.wasm*}.js to ${_directory}\n"
+                        FS::copy_file "${_target%.wasm*}.js" "$_directory"
                         if [ $? -ne 0 ]; then
                                 return 1
                         fi
                 fi
-        elif [ $(FS::is_target_a_homebrew "$__target") -eq 0 ]; then
+        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
                 return 10 # not applicable
         else
-                case "$__target_os" in
+                case "$_target_os" in
                 windows)
-                        __dest="${__directory}/${PROJECT_SKU}.exe"
+                        _dest="${_directory}/${PROJECT_SKU}.exe"
                         ;;
                 *)
-                        __dest="${__directory}/${PROJECT_SKU}"
+                        _dest="${_directory}/${PROJECT_SKU}"
                         ;;
                 esac
 
-                OS::print_status info "copying ${__target} to ${__dest}\n"
-                FS::copy_file "$__target" "$__dest"
+                OS::print_status info "copying ${_target} to ${_dest}\n"
+                FS::copy_file "$_target" "$_dest"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -87,18 +87,18 @@ PACKAGE::assemble_archive_content() {
 
 
         # copy user guide
-        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        OS::print_status info "copying ${__target} to ${__directory}\n"
-        FS::copy_file "$__target" "${__directory}/."
+        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
+        OS::print_status info "copying ${_target} to ${_directory}\n"
+        FS::copy_file "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # copy license file
-        __target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        OS::print_status info "copying ${__target} to ${__directory}\n"
-        FS::copy_file "$__target" "${__directory}/."
+        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
+        OS::print_status info "copying ${_target} to ${_directory}\n"
+        FS::copy_file "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
                 return 1
         fi

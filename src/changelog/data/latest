@@ -1,3 +1,4 @@
+srcGO: enabled Homebrew for Go programming language
 root: added homebrew ecosystem support
 root: updated repository metadata
 automataCI: updated spec document to reflect deb & rpm changes
