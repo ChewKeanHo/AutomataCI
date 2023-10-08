@@ -126,7 +126,7 @@ PROJECT_PATH_GO_ENGINE = "go-engine"
 #
 # To enable it: simply supply the path (e.g. default is 'srcC').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_C = 'srcC'
+PROJECT_C = ''
 
 
 
@@ -143,7 +143,7 @@ PROJECT_C = 'srcC'
 #
 # To enable it: simply supply the path (e.g. default is 'srcPYTHON').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_PYTHON = ''
+PROJECT_PYTHON = 'srcPYTHON'
 
 
 # PROJECT_PATH_PYTHON_ENGINE

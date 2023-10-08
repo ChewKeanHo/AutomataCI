@@ -1,3 +1,4 @@
+srcC: applied development regression from srcGO porting
 srcGO: enabled Homebrew for Go programming language
 root: added homebrew ecosystem support
 root: updated repository metadata

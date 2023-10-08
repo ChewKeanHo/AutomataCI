@@ -27,15 +27,15 @@ fi
 
 
 PACKAGE::assemble_pypi_content() {
-        __target="$1"
-        __directory="$2"
-        __target_name="$3"
-        __target_os="$4"
-        __target_arch="$5"
+        _target="$1"
+        _directory="$2"
+        _target_name="$3"
+        _target_os="$4"
+        _target_arch="$5"
 
 
         # validate project
-        FS::is_target_a_source "$__target"
+        FS::is_target_a_source "$_target"
         if [ $? -ne 0 ]; then
                 return 10
         fi
@@ -47,21 +47,21 @@ PACKAGE::assemble_pypi_content() {
 
         # assemble the python package
         PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/"
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/" "${__directory}"
+        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/" "${_directory}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
         FS::copy_file \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PYPI_README}" \
-                "${__directory}/${PROJECT_PYPI_README}"
+                "${_directory}/${PROJECT_PYPI_README}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # generate the pyproject.toml
-        FS::write_file "${__directory}/pyproject.toml" "\
+        FS::write_file "${_directory}/pyproject.toml" "\
 [build-system]
 requires = [ 'setuptools' ]
 build-backend = 'setuptools.build_meta'

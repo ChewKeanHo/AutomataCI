@@ -21,6 +21,7 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
 
 
@@ -43,30 +44,59 @@ if [ $? -ne 0 ]; then
 fi
 
 
-OS::print_status info "checking pip availability...\n"
-PYTHON::has_pip
-if [ $? -ne 0 ]; then
-        OS::print_status error "missing pip module manager.\n"
+OS::print_status info "checking pyinstaller availability...\n"
+if [ -z "$(type -t "pyinstaller")" ]; then
+        OS::print_status error "missing pyintaller command.\n"
+        return 1
+fi
+
+
+OS::print_status info "checking pdoc availability...\n"
+if [ -z "$(type -t "pdoc")" ]; then
+        OS::print_status error "missing pdoc command.\n"
         return 1
 fi
 
 
 
 
-# execute
-OS::print_status info "updating pip to the latest...\n"
-python -m pip install --upgrade pip
+# build output binary file
+case "$PROJECT_OS" in
+windows)
+        __source="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}.exe"
+        ;;
+*)
+        __source="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
+        ;;
+esac
+
+OS::print_status info "building output file: ${__file}\n"
+pyinstaller --noconfirm \
+        --onefile \
+        --clean \
+        --distpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}" \
+        --workpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}" \
+        --specpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}" \
+        --name "$__source" \
+        --hidden-import=main \
+        "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/main.py"
 if [ $? -ne 0 ]; then
-        OS::print_status error "pip update failed.\n"
+        OS::print_status error "build failed.\n"
         return 1
 fi
 
 
-file="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/requirements.txt"
-OS::print_status info "executing pip install against ${file}\n"
-pip install -r "$file"
+
+
+# shipping executable
+__source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
+__dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
+OS::print_status info "exporting ${__source} to ${__dest}\n"
+FS::make_housing_directory "$__dest"
+FS::remove_silently "$__dest"
+FS::move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
-        OS::print_status error "pip install failed.\n"
+        OS::print_status error "export failed.\n"
         return 1
 fi
 

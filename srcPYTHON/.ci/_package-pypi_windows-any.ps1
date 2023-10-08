@@ -27,16 +27,16 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function PACKAGE-Assemble-PYPI-Content {
 	param (
-		[string]$__target,
-		[string]$__directory,
-		[string]$__target_name,
-		[string]$__target_os,
-		[string]$__target_arch
+		[string]$_target,
+		[string]$_directory,
+		[string]$_target_name,
+		[string]$_target_os,
+		[string]$_target_arch
 	)
 
 
 	# validate project
-	$__process = FS-Is-Target-A-Source "$__target"
+	$__process = FS-Is-Target-A-Source "$_target"
 	if ($__process -ne 0) {
 		return 10
 	}
@@ -48,21 +48,23 @@ function PACKAGE-Assemble-PYPI-Content {
 
 	# assemble the python package
 	PYTHON-Clean-Artifact "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
-	$__process = FS-Copy-All "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs" `
-				"${__directory}"
+	$__process = FS-Copy-All `
+				"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs" `
+				"${_directory}"
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYPI_README}" `
-				"${__directory}\${env:PROJECT_PYPI_README}"
+	$__process = FS-Copy-File `
+				"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYPI_README}" `
+				"${_directory}\${env:PROJECT_PYPI_README}"
 	if ($__process -ne 0) {
 		return 1
 	}
 
 
 	# generate the pyproject.toml
-	$__process = FS-Write-File "${__directory}\pyproject.toml" @"
+	$__process = FS-Write-File "${_directory}\pyproject.toml" @"
 [build-system]
 requires = [ 'setuptools' ]
 build-backend = 'setuptools.build_meta'

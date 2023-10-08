@@ -64,19 +64,19 @@ if ($__process -ne 0) {
 # build output binary file
 switch (${env:PROJECT_OS}) {
 windows {
-	$__file = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}.exe"
+	$__source = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}.exe"
 } default {
-	$__file = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
+	$__source = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 }}
 
-OS-Print-Status info "building output file: ${__file}"
+OS-Print-Status info "building output file: ${__source}"
 $__argument = "--noconfirm " `
 	+ "--onefile " `
 	+ "--clean " `
 	+ "--distpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}`" " `
 	+ "--workpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}`" " `
 	+ "--specpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}`" " `
-	+ "--name `"${__file}`" " `
+	+ "--name `"${__source}`" " `
 	+ "--hidden-import=main " `
 	+ "`"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\main.py`""
 $__process = OS-Exec "pyinstaller" "${__argument}"
@@ -88,40 +88,15 @@ if ($__process -ne 0) {
 
 
 
-# placeholding source code flag
-$__file = "${env:PROJECT_SKU}-src_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
+# exporting executable
+$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__source}"
+$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}\${env:PROJECT_SKU}.exe"
+OS-Print-Status info "exporting ${__source} to ${__dest}"
+$null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}"
+$null = FS-Remove-Silently "${__dest}"
+$__process = FS-Move "${__source}" "${__dest}"
 if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
-}
-
-
-
-
-# placeholding homebrew flag
-$__file = "${env:PROJECT_SKU}-homebrew_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
-}
-
-
-
-
-# compose documentations
-OS-Print-Status info "printing html documentations..."
-$__output = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}\python"
-FS-Remake-Directory "${__output}\${env:PROJECT_OS}-${env:PROJECT_ARCH}"
-$__arguments = "--html " +
-		"--output-dir `"${__output}\${env:PROJECT_OS}-${env:PROJECT_ARCH}`" " +
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs\"
-$__process = OS-Exec "pdoc" "${__arguments}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
+	OS-Print-Status error "export failed."
 	return 1
 }
 

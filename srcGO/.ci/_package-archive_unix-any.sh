@@ -70,8 +70,7 @@ replace ${PROJECT_SKU} => ./
 
                 FS::is_file "${_target%.wasm*}.js"
                 if [ $? -eq 0 ]; then
-                        OS::print_status info \
-                                "copying ${_target%.wasm*}.js to ${_directory}\n"
+                        OS::print_status info "copying ${_target%.wasm*}.js to ${_directory}\n"
                         FS::copy_file "${_target%.wasm*}.js" "$_directory"
                         if [ $? -ne 0 ]; then
                                 return 1

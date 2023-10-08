@@ -61,6 +61,15 @@ fi
 
 
 # build output binary file
+case "$PROJECT_OS" in
+windows)
+        __file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}.exe"
+        ;;
+*)
+        __file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
+        ;;
+esac
+
 __file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
 OS::print_status info "building output file: ${__file}\n"
 pyinstaller --noconfirm \
@@ -82,6 +91,18 @@ fi
 
 # placeholding source code flag
 __file="${PROJECT_SKU}-src_${PROJECT_OS}-${PROJECT_ARCH}"
+OS::print_status info "building output file: ${__file}\n"
+touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
+if [ $? -ne 0 ]; then
+        OS::print_status error "build failed.\n"
+        return 1
+fi
+
+
+
+
+# placeholding homebrew code flag
+__file="${PROJECT_SKU}-homebrew_any-any"
 OS::print_status info "building output file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then

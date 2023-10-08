@@ -81,9 +81,9 @@ replace ${env:PROJECT_SKU} => ./
 	} else {
 		switch (${_target_os}) {
 		"windows" {
-			$__dest = "${_directory}\${env:PROJECT_SKU}.exe"
+			$_dest = "${_directory}\${env:PROJECT_SKU}.exe"
 		} Default {
-			$__dest = "${_directory}\${env:PROJECT_SKU}"
+			$_dest = "${_directory}\${env:PROJECT_SKU}"
 		}}
 
 		OS-Print-Status info "copying ${_target} to ${_dest}"
