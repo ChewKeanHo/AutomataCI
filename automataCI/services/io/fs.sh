@@ -131,6 +131,25 @@ FS::is_file() {
 
 
 
+FS::is_target_a_chocolatey() {
+        # __target="$1"
+
+
+        # execute
+        if [ "${1#*-chocolatey}" != "$1" ] || [ "${1#*-choco}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
 FS::is_target_a_homebrew() {
         # __target="$1"
 
@@ -167,6 +186,25 @@ FS::is_target_a_library() {
         # report status
         printf -- "1"
         return 1
+}
+
+
+
+
+FS::is_target_a_nupkg() {
+        # __target="$1"
+
+
+        # execute
+        if [ "${1#*.nupkg}" == "$1" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+
+        # report status
+        printf -- "0"
+        return 0
 }
 
 

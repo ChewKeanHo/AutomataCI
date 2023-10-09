@@ -63,8 +63,10 @@ function HOMEBREW-Publish {
 
 
 	# execute
-	$null = FS-Make-Housing-Directory "$2"
-	$__process = FS-Copy-File "$1" "$2"
+	$null = FS-Make-Directory "${__destination}"
+	$__process = FS-Copy-File `
+		"${__target}" `
+		"${__destination}\$(Split-Path -Leaf -Path "${__target}")"
 	if ($__process -ne 0) {
 		return 1
 	}

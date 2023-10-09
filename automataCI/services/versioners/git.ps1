@@ -15,6 +15,32 @@
 
 
 
+function GIT-At-Root-Repo {
+	param(
+		[string]$__directory
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__directory) -or
+		(-not (Test-Path -PathType Directory -Path "${__directory}"))) {
+		return 1
+	}
+
+
+	# execute
+	if (Test-Path -Path "${__directory}\.git\config") {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function GIT-Autonomous-Commit {
 	param(
 		[string]$__tracker,
@@ -289,27 +315,23 @@ function GIT-Is-Available {
 
 
 
-function GIT-At-Root-Repo {
-	param(
-		[string]$__directory
-	)
-
-
+function GIT-Pull-To-Latest {
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path -PathType Directory -Path "${__directory}"))) {
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	if (Test-Path -Path "${__directory}\.git\config") {
-		return 0
+	$__process = OS-Exec "git" "pull"
+	if ($__process -ne 0) {
+		return 1
 	}
 
 
 	# report status
-	return 1
+	return 0
 }
 
 

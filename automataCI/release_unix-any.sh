@@ -25,6 +25,7 @@ fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-changelog_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-checksum_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-chocolatey_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-deb_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-docker_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-homebrew_unix-any.sh"
@@ -76,8 +77,15 @@ if [ $? -ne 0 ]; then
 fi
 
 
+RELEASE::run_chocolatey_repo_setup
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
 STATIC_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_STATIC_REPO_DIRECTORY}"
 HOMEBREW_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_HOMEBREW_DIRECTORY}"
+CHOCOLATEY_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_CHOCOLATEY_DIRECTORY}"
 for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         if [ "${TARGET%.asc*}" != "$TARGET" ]; then
                 continue
@@ -105,6 +113,11 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         fi
 
         RELEASE::run_homebrew "$TARGET" "$HOMEBREW_REPO"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE::run_chocolatey "$TARGET" "$CHOCOLATEY_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -144,6 +157,11 @@ else
         fi
 
         RELEASE::run_homebrew_repo_conclude "$HOMEBREW_REPO"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE::run_chocolatey_repo_conclude "$CHOCOLATEY_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi

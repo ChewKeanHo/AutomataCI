@@ -12,9 +12,7 @@
 # the License.
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/checksum/shasum.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/publishers/chocolatey.sh"
 
 
 
@@ -28,7 +26,7 @@ fi
 
 
 
-PACKAGE::run_homebrew() {
+PACKAGE::run_chocolatey() {
         _dest="$1"
         _target="$2"
         _target_filename="$3"
@@ -37,8 +35,8 @@ PACKAGE::run_homebrew() {
 
 
         # validate input
-        OS::print_status info "checking tar functions availability...\n"
-        TAR::is_available
+        OS::print_status info "checking zip functions availability...\n"
+        ZIP::is_available
         if [ $? -ne 0 ]; then
                 OS::print_status error "check failed.\n"
                 return 1
@@ -48,27 +46,26 @@ PACKAGE::run_homebrew() {
         # prepare workspace and required values
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}"
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/homebrew_${_src}"
-        OS::print_status info "creating homebrew source package...\n"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/choco_${_src}"
+        OS::print_status info "creating chocolatey source package...\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
         FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
                 OS::print_status error "remake failed.\n"
                 return 1
         fi
-        FS::make_directory "${_src}/Data"
 
 
         # copy all complimentary files to the workspace
-        OS::print_status info "checking PACKAGE::assemble_homebrew_content function...\n"
-        OS::is_command_available "PACKAGE::assemble_homebrew_content"
+        OS::print_status info "checking PACKAGE::assemble_chocolatey_content function...\n"
+        OS::is_command_available "PACKAGE::assemble_chocolatey_content"
         if [ $? -ne 0 ]; then
-                OS::print_status error "missing PACKAGE::assemble_homebrew_content function.\n"
+                OS::print_status error "missing PACKAGE::assemble_chocolatey_content function.\n"
                 return 1
         fi
 
         OS::print_status info "assembling package files...\n"
-        PACKAGE::assemble_homebrew_content \
+        PACKAGE::assemble_chocolatey_content \
                 "$_target" \
                 "$_src" \
                 "$_target_filename" \
@@ -89,61 +86,51 @@ PACKAGE::run_homebrew() {
         esac
 
 
-        # check formula.rb is available
-        OS::print_status info "checking formula.rb availability...\n"
-        FS::is_file "${_src}/formula.rb"
-        if [ $? -ne 0 ]; then
+        # check nuspec file is available
+        OS::print_status info "checking .nuspec metadata file availability...\n"
+        __name=""
+        for __file in "${_src}/"*.nuspec; do
+                FS::is_file "${__file}"
+                if [ $? -eq 0 ]; then
+                        if [ ! -z "$__name" ]; then
+                                OS-Print-Status error "check failed - multiple files.\n"
+                                return 1
+                        fi
+
+                        __name="${__file##*/}"
+                        __name="${__name%.nuspec*}"
+                fi
+        done
+
+        if [ -z "$__name" ]; then
                 OS-Print-Status error "check failed.\n"
                 return 1
         fi
 
 
         # archive the assembled payload
-        __current_path="$PWD" && cd "${_src}/Data"
-        OS::print_status info "archiving ${_target_path}.tar.xz\n"
-        TAR::create_xz "${_target_path}.tar.xz" "*"
-        __exit=$?
-        cd "$__current_path" && unset __current_path
+        __name="${__name}-chocolatey_${PROJECT_VERSION}_${_target_os}-${_target_arch}.nupkg"
+        __name="${_dest}/${__name}"
+        OS::print_status info "archiving ${__name}\n"
+        CHOCOLATEY::archive "$__name" "$_src"
         if [ $__exit -ne 0 ]; then
                 OS::print_status error "archive failed.\n"
                 return 1
         fi
 
 
-        # sha256 the package
-        OS::print_status info "shasum the package with sha256 algorithm...\n"
-        __shasum="$(SHASUM::create_file "${_target_path}.tar.xz" "256")"
-        if [ -z "$__shasum" ]; then
-                OS::print_status error "shasum failed.\n"
-                return 1
-        fi
-
-
-        # update the formula.rb script
-        OS::print_status info "update given formula.rb file...\n"
-        FS::remove_silently "${_target_path}.rb"
-        old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                __line="$(STRINGS::replace_all \
-                        "$__line" \
-                        "{{ TARGET_PACKAGE }}" \
-                        "${_target_path##*/}.tar.xz" \
-                )"
-
-                __line="$(STRINGS::replace_all \
-                        "$__line" \
-                        "{{ TARGET_SHASUM }}" \
-                        "${__shasum}" \
-                )"
-
-                FS::append_file "${_target_path}.rb" "${__line}\n"
+        # test the package
+        OS::print_status info "testing ${__name}\n"
+        CHOCOLATEY::is_available
+        if [ $? -eq 0 ]; then
+                CHOCOLATEY::test "$__name"
                 if [ $? -ne 0 ]; then
-                        IFS="$old_IFS" && unset __line old_IFS
-                        OS::print_status error "update failed.\n"
+                        OS::print_status error "test failed.\n"
                         return 1
                 fi
-        done < "${_src}/formula.rb"
-        IFS="$old_IFS" && unset line old_IFS
+        else
+                OS::print_status warning "test skipped.\n"
+        fi
 
 
         # report status

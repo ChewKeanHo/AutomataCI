@@ -126,7 +126,7 @@ PROJECT_PATH_GO_ENGINE = "go-engine"
 #
 # To enable it: simply supply the path (e.g. default is 'srcC').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_C = ''
+PROJECT_C = 'srcC'
 
 
 
@@ -143,7 +143,7 @@ PROJECT_C = ''
 #
 # To enable it: simply supply the path (e.g. default is 'srcPYTHON').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_PYTHON = 'srcPYTHON'
+PROJECT_PYTHON = ''
 
 
 # PROJECT_PATH_PYTHON_ENGINE
@@ -407,6 +407,37 @@ PROJECT_HOMEBREW_DIRECTORY="homebrew"
 #
 # NOTE: Please avoid ending with the URL slash.
 PROJECT_HOMEBREW_SOURCE_URL="https://github.com/ChewKeanHo/AutomataCI/releases/download"
+
+
+# PROJECT_CHOCOLATEY_REPO
+# The Chocolatey package publication git repository for updating and publishing
+# Chocolatey's usable nupkg packages. This is used in release job.
+PROJECT_CHOCOLATEY_REPO="git@github.com:ChewKeanHo/Testbed.git"
+
+
+# PROJECT_CHOCOLATEY_REPO_KEY
+# The git upstream key. Default is 'origin'.
+PROJECT_CHOCOLATEY_REPO_KEY="origin"
+
+
+# PROJECT_CHOCOLATEY_REPO_BRANCH
+# The git upstream branch. Default is 'main' or 'master'.
+PROJECT_CHOCOLATEY_REPO_BRANCH="main"
+
+
+# PROJECT_CHOCOLATEY_DIRECTORY
+# The directory name housing the Chocolatey repo. Value CANNOT be empty.
+# Default is 'chocolatey'.
+PROJECT_CHOCOLATEY_DIRECTORY="chocolatey"
+
+
+# PROJECT_CHOCOLATEY_SOURCE_URL
+# The base URL for Chocolatey to source its .nupkg packages. It is made
+# available for maintaining consistency purposes and is only meant for
+# Chocolatey use for constructing the 'url' value.
+#
+# NOTE: Please avoid ending with the URL slash.
+PROJECT_CHOCOLATEY_SOURCE_URL="https://github.com/ChewKeanHo/AutomataCI/releases/download"
 
 
 

@@ -16,6 +16,29 @@
 
 
 
+GIT::at_root_repo() {
+        #__directory="$1"
+
+
+        # validate input
+        if [ -z "$1" ] || [ ! -d "$1" ]; then
+                return 1
+        fi
+
+
+        # execute
+        if [ -f "${1}/.git/config" ]; then
+                return 0
+        fi
+
+
+        # report status
+        return 1
+}
+
+
+
+
 GIT::autonomous_commit() {
         #__tracker="$1"
         #__repo="$2"
@@ -275,24 +298,23 @@ GIT::is_available() {
 
 
 
-GIT::at_root_repo() {
-        #__directory="$1"
-
-
+GIT::pull_to_latest() {
         # validate input
-        if [ -z "$1" ] || [ ! -d "$1" ]; then
+        GIT::is_available
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        if [ -f "${1}/.git/config" ]; then
-                return 0
+        git pull
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
 
         # report status
-        return 1
+        return 0
 }
 
 

@@ -139,6 +139,26 @@ function FS-Is-File {
 
 
 
+function FS-Is-Target-A-Chocolatey {
+	param (
+		[string]$__subject
+	)
+
+
+	# execute
+	if (($("${__subject}" -replace '^.*-chocolatey') -ne "${__subject}") -or
+		($("${__subject}" -replace '^.*-choco') -ne "${__subject}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-Homebrew {
 	param (
 		[string]$__subject
@@ -176,6 +196,25 @@ function FS-Is-Target-A-Library {
 
 	# report status
 	return 1
+}
+
+
+
+
+function FS-Is-Target-A-Nupkg {
+	param (
+		[string]$__subject
+	)
+
+
+	# execute
+	if ($("${__subject}" -replace '^.*.nupkg') -eq "${__subject}") {
+		return 1
+	}
+
+
+	# report status
+	return 0
 }
 
 
@@ -231,7 +270,7 @@ function FS-Is-Target-A-WASM-JS {
 		return 1
 	}
 
-	if ("$("${__subject}" -replace '^.*-wasm').js" -eq "${__subject}") {
+	if ($("${__subject}" -replace '^.*.js') -eq "${__subject}") {
 		return 1
 	}
 

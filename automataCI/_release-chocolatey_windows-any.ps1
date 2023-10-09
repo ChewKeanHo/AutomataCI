@@ -13,12 +13,12 @@
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\installer.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\homebrew.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\chocolatey.ps1"
 
 
 
 
-function RELEASE-Run-Homebrew {
+function RELEASE-Run-Chocolatey {
 	param(
 		[string]$__target,
 		[string]$__repo
@@ -26,21 +26,23 @@ function RELEASE-Run-Homebrew {
 
 
 	# validate input
-	OS-Print-Status info "registering ${__target} into homebrew repo..."
+	OS-Print-Status info "registering ${__target} into chocolatey repo..."
 	if ([string]::IsNullOrEmpty($__target) -or [string]::IsNullOrEmpty($__repo)) {
 		OS-Print-Status error "registration failed."
 		return 1
 	}
 
 
-	$__process = HOMEBREW-Is-Valid-Formula "${__target}"
+	$__process = CHOCOLATEY-Is-Valid-Nupkg "${__target}"
 	if ($__process -ne 0) {
 		return 0
 	}
 
 
 	# execute
-	$__process = HOMEBREW-Publish "${__target}" "${__repo}/Formula/${env:PROJECT_SKU}.rb"
+	$__process = CHOCOLATEY-Publish `
+		"${__target}" `
+		"${__repo}\${env:PROJECT_CHOCOLATEY_DIRECTORY}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "registration failed."
 		return 1
@@ -54,14 +56,14 @@ function RELEASE-Run-Homebrew {
 
 
 
-function RELEASE-Run-Homebrew-Repo-Conclude {
+function RELEASE-Run-Chocolatey-Repo-Conclude {
 	param(
 		[string]$__directory
 	)
 
 
 	# validate input
-	OS-Print-Status info "Committing homebrew release repo..."
+	OS-Print-Status info "Committing chocolatey release repo..."
 	if ([string]::IsNullOrEmpty($__directory) -or
 		(-not (Test-Path -PathType Container -Path "${__directory}"))) {
 		OS-Print-Status error "commit failed."
@@ -80,11 +82,10 @@ function RELEASE-Run-Homebrew-Repo-Conclude {
 		return 1
 	}
 
-
 	$__process = GIT-Autonomous-Commit `
 		"${env:PROJECT_SKU} ${env:PROJECT_VERSION}" `
-		"${env:PROJECT_HOMEBREW_REPO_KEY}" `
-		"${env:PROJECT_HOMEBREW_REPO_BRANCH}"
+		"${env:PROJECT_CHOCOLATEY_REPO_KEY}" `
+		"${env:PROJECT_CHOCOLATEY_REPO_BRANCH}"
 	$null = Set-Location "${__curent_path}"
 	$null = Remove-Variable __current_path
 	if ($__process -ne 0) {
@@ -100,7 +101,7 @@ function RELEASE-Run-Homebrew-Repo-Conclude {
 
 
 
-function RELEASE-Run-Homebrew-Repo-Setup {
+function RELEASE-Run-Chocolatey-Repo-Setup {
 	# clean up base directory
 	OS-Print-Status info "safety checking release directory..."
 	if (Test-Path -PathType Leaf `
@@ -112,14 +113,14 @@ function RELEASE-Run-Homebrew-Repo-Setup {
 
 
 	# execute
-	OS-Print-Status info "Setting up homebrew release repo..."
+	OS-Print-Status info "Setting up chocolatey release repo..."
 	$__process = INSTALLER-Setup-Index-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
 		"$(Get-Location)" `
-		"${env:PROJECT_HOMEBREW_REPO}" `
+		"${env:PROJECT_CHOCOLATEY_REPO}" `
 		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
-		"${env:PROJECT_HOMEBREW_DIRECTORY}"
+		"${env:PROJECT_CHOCOLATEY_DIRECTORY}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "setup failed."
 		return 1

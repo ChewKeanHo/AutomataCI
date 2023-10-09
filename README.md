@@ -49,14 +49,15 @@ Some good business reasons why AutomataCI is made:
 
 ### Deployable Distributions
 
-* `.deb` repo (with `apt-get install` capability)
-* `.rpm` repo (with `yum install` capability)
-* `.flatpak` repo (for `flatpak install`)
-* `OCI` compatible images (for `docker run`, [GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry))
-* `PyPi` repo (for `pip install` [Python Packages](https://pypi.org/))
+* [`.deb` repo](https://wiki.debian.org/DebianRepository/Setup) (with `apt-get install` capability)
+* [`.rpm` repo](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/packaging_and_distributing_software/index) (with `yum install` capability)
+* [`.flatpak` repo](https://docs.flatpak.org/en/latest/first-build.html) (for `flatpak install` capability)
+* [`OCI` compatible containers](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) (for `docker run` or `podman run` capability)
+* [`PyPi` repo](https://pypi.org/) (for `pip install` capability)
 * Static Sites ([GitHub Pages](https://pages.github.com/),
   [Cloudflare Pages](https://pages.cloudflare.com/))
 * [`Homebrew` ecosystem](https://brew.sh/) (for `brew install` capability)
+* [`Chocolatey` ecosystem](https://chocolatey.org/) (for `choco install` capability)
 * GitHub Security Advisory (for CVE management)
 
 

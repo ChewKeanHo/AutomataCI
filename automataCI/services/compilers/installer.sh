@@ -207,7 +207,7 @@ INSTALLER::setup_go() {
 
 
 
-INSTALLER::setup_homebrew_repo() {
+INSTALLER::setup_index_repo() {
         __root="$1"
         __release="$2"
         __current="$3"

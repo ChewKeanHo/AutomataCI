@@ -87,7 +87,7 @@ __previous=""
 while [ "$__pathing" != "" ]; do
         PROJECT_PATH_ROOT="${PROJECT_PATH_ROOT}${__pathing%%/*}/"
         __pathing="${__pathing#*/}"
-        if [ -f "${PROJECT_PATH_ROOT}automataCI/ci.cmd" ]; then
+        if [ -f "${PROJECT_PATH_ROOT}automataCI/ci.sh" ]; then
                 break
         fi
 

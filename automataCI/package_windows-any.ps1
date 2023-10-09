@@ -25,6 +25,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-archive_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-changelog_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-chocolatey_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-deb_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-docker_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-flatpak_windows-any.ps1"
@@ -95,6 +96,16 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 	}
 
 	$__process = PACKAGE-Run-Archive `
+		"$DEST" `
+		"$i" `
+		"$TARGET_FILENAME" `
+		"$TARGET_OS" `
+		"$TARGET_ARCH"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = PACKAGE-Run-Chocolatey `
 		"$DEST" `
 		"$i" `
 		"$TARGET_FILENAME" `

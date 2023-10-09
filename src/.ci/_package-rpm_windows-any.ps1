@@ -93,6 +93,8 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Chocolatey "${_target}") -eq 0) {
+		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
 		return 10 # not applicable
 	} else {

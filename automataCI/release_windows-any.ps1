@@ -24,6 +24,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-changelog_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-checksum_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-chocolatey_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-deb_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-docker_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-homebrew_windows-any.ps1"
@@ -75,8 +76,15 @@ if ($__process -ne 0) {
 }
 
 
+$__process = RELEASE-Run-Chocolatey-Repo-Setup
+if ($__process -ne 0) {
+	return 1
+}
+
+
 $STATIC_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
 $HOMEBREW_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_HOMEBREW_DIRECTORY}"
+$CHOCOLATEY_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_CHOCOLATEY_DIRECTORY}"
 foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
 	$TARGET = $TARGET.FullName
 
@@ -106,6 +114,11 @@ foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT
 	}
 
 	$__process = RELEASE-Run-Homebrew "$TARGET" "$HOMEBREW_REPO"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = RELEASE-Run-Chocolatey "$TARGET" "$CHOCOLATEY_REPO"
 	if ($__process -ne 0) {
 		return 1
 	}
@@ -145,6 +158,11 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 	}
 
 	$__process = RELEASE-Run-Homebrew-Repo-Conclude "$HOMEBREW_REPO"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = RELEASE-Run-Chocolatey-Repo-Conclude "$CHOCOLATEY_REPO"
 	if ($__process -ne 0) {
 		return 1
 	}

@@ -20,6 +20,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}\_package-archive_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}\_package-chocolatey_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}\_package-deb_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}\_package-docker_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}\_package-flatpak_windows-any.ps1"

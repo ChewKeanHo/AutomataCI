@@ -25,7 +25,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-function PACKAGE-Assemble-HOMEBREW-Content {
+function PACKAGE-Assemble-CHOCOLATEY-Content {
 	param (
 		[string]$_target,
 		[string]$_directory,
@@ -45,9 +45,9 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Chocolatey "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
 		return 1 # not applicable - should be tech-oriented.
+	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
+		return 10 # not applicable
 	} else {
 		return 10 # not applicable
 	}

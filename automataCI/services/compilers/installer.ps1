@@ -178,7 +178,7 @@ function INSTALLER-Setup-Go {
 
 
 
-function INSTALLER-Setup-Homebrew-Repo {
+function INSTALLER-Setup-Index-Repo {
 	param(
 		[string]$__root,
 		[string]$__release,
