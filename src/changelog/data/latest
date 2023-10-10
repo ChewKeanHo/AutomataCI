@@ -1,3 +1,5 @@
+srcPYTHON: backported chocolatey packaging function to Python
+srcGO: backported chocolatey packaging function to Go
 root: added and close Chocolatey ecosystem
 srcPYTHON: enabled Homebrew for Python programming language
 srcC: applied development regression from srcGO porting

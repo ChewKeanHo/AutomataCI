@@ -12,7 +12,7 @@
 # the License.
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/deb.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/ipk.sh"
 
 
 
@@ -26,29 +26,29 @@ fi
 
 
 
-PACKAGE::run_deb() {
+PACKAGE::run_ipk() {
         _dest="$1"
         _target="$2"
         _target_filename="$3"
         _target_os="$4"
         _target_arch="$5"
-        _changelog_deb="$6"
 
-        OS::print_status info "checking deb functions availability...\n"
-        DEB::is_available "$_target_os" "$_target_arch"
+
+        OS::print_status info "checking ipk functions availability...\n"
+        IPK::is_available "$_target_os" "$_target_arch"
         case $? in
         2)
-                OS::print_status warning "DEB is incompatible (OS type). Skipping.\n"
+                OS::print_status warning "IPK is incompatible (OS type). Skipping.\n"
                 return 0
                 ;;
         3)
-                OS::print_status warning "DEB is incompatible (CPU type). Skipping.\n"
+                OS::print_status warning "IPK is incompatible (CPU type). Skipping.\n"
                 return 0
                 ;;
         0)
                 ;;
         *)
-                OS::print_status warning "DEB is unavailable. Skipping.\n"
+                OS::print_status warning "IPK is unavailable. Skipping.\n"
                 return 0
                 ;;
         esac
@@ -56,9 +56,9 @@ PACKAGE::run_deb() {
 
         # prepare workspace and required values
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
-        _target_path="${_dest}/${_src}.deb"
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb_${_src}"
-        OS::print_status info "Creating DEB package...\n"
+        _target_path="${_dest}/${_src}.ipk"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/ipk_${_src}"
+        OS::print_status info "Creating IPK package...\n"
         OS::print_status info "remaking workspace directory ${_src}\n"
         FS::remake_directory "${_src}"
         if [ $? -ne 0 ]; then
@@ -77,21 +77,20 @@ PACKAGE::run_deb() {
                 return 1
         fi
 
-        OS::print_status info "checking PACKAGE::assemble_deb_content function...\n"
-        OS::is_command_available "PACKAGE::assemble_deb_content"
+        OS::print_status info "checking PACKAGE::assemble_ipk_content function...\n"
+        OS::is_command_available "PACKAGE::assemble_ipk_content"
         if [ $? -ne 0 ]; then
                 OS::print_status error "check failed.\n"
                 return 1
         fi
 
         OS::print_status info "assembling package files...\n"
-        PACKAGE::assemble_deb_content \
+        PACKAGE::assemble_ipk_content \
                 "$_target" \
                 "$_src" \
                 "$_target_filename" \
                 "$_target_os" \
-                "$_target_arch" \
-                "$_changelog_deb"
+                "$_target_arch"
         case $? in
         10)
                 FS::remove_silently "$_src"
@@ -106,13 +105,6 @@ PACKAGE::run_deb() {
                 ;;
         esac
 
-        OS::print_status info "checking control/md5sums file...\n"
-        FS::is_file "${_src}/control/md5sums"
-        if [ $? -ne 0 ]; then
-                OS::print_status error "check failed.\n"
-                return 1
-        fi
-
         OS::print_status info "checking control/control file...\n"
         FS::is_file "${_src}/control/control"
         if [ $? -ne 0 ]; then
@@ -120,8 +112,8 @@ PACKAGE::run_deb() {
                 return 1
         fi
 
-        OS::print_status info "archiving .deb package...\n"
-        DEB::create_archive "$_src" "$_target_path"
+        OS::print_status info "archiving .ipk package...\n"
+        IPK::create_archive "$_src" "$_target_path"
         if [ $? -ne 0 ]; then
                 OS::print_status error "package failed.\n"
                 return 1

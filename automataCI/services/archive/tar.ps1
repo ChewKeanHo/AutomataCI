@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\gz.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\xz.ps1"
 
 
@@ -55,17 +56,58 @@ function TAR-Create {
 
 
 	# create tar archive
-	$__dest = $__destination -replace '\.xz.*$'
 	if ((-not [string]::IsNullOrEmpty($__owner)) -and [string]::IsNullOrEmpty($__group)) {
-		$__process = OS-Exec "tar" "--numeric-owner --group=`"${4}`" --owner=`"${3}`" -cvf `"${__dest}`" ${__source}"
+		$__arguments = "--numeric-owner --group=`"${__group}`" " `
+				+ "--owner=`"${__owner}`" " `
+				+ "-cvf `"${__destination}`" ${__source}"
+		$__process = OS-Exec "tar" "${__arguments}"
 		if ($__process -ne 0) {
 			return 1
 		}
 	} else {
-		$__process = OS-Exec "tar" "-cvf `"${__dest}`" ${__source}"
+		$__process = OS-Exec "tar" "-cvf `"${__destination}`" ${__source}"
 		if ($__process -ne 0) {
 			return 1
 		}
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function TAR-Create-GZ {
+	param (
+		[string]$__destination,
+		[string]$__source,
+		[string]$__owner,
+		[string]$__group
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__destination) -or [string]::IsNullOrEmpty($__source)) {
+		return 1
+	}
+
+	if (Test-Path -Path $__destination) {
+		return 1
+	}
+
+
+	# create tar archive
+	$__dest = $__destination -replace '\.gz.*$'
+	$__process = TAR-Create "${__dest}" "${__source}" "0" "0"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = GZ-Create "${__dest}"
+	if ($__process -ne 0) {
+		return 1
 	}
 
 
@@ -96,12 +138,13 @@ function TAR-Create-XZ {
 
 
 	# create tar archive
-	$__process = TAR-Create "${__destination}" "${__source}" "0" "0"
+	$__dest = $__destination -replace '\.xz.*$'
+	$__process = TAR-Create "${__dest}" "${__source}" "0" "0"
 	if ($__process -ne 0) {
 		return 1
 	}
 
-	$__process = XZ-Create "${__destination}"
+	$__process = XZ-Create "${__dest}"
 	if ($__process -ne 0) {
 		return 1
 	}

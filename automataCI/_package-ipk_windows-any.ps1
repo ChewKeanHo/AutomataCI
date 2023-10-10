@@ -11,7 +11,7 @@
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\deb.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\ipk.ps1"
 
 
 
@@ -25,38 +25,37 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-function PACKAGE-Run-DEB {
+function PACKAGE-Run-IPK {
 	param (
 		[string]$_dest,
 		[string]$_target,
 		[string]$_target_filename,
 		[string]$_target_os,
-		[string]$_target_arch,
-		[string]$_changelog_deb
+		[string]$_target_arch
 	)
 
-	OS-Print-Status info "checking deb functions availability..."
-	$__process = DEB-Is-Available "${_target_os}" "${_target_arch}"
+	OS-Print-Status info "checking ipk functions availability..."
+	$__process = IPK-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($__process) {
 	2 {
-		OS-Print-Status warning "DEB is incompatible (OS type). Skipping."
+		OS-Print-Status warning "IPK is incompatible (OS type). Skipping."
 		return 0
 	} 3 {
-		OS-Print-Status warning "DEB is incompatible (CPU type). Skipping."
+		OS-Print-Status warning "IPK is incompatible (CPU type). Skipping."
 		return 0
 	} 0 {
 		break
 	} Default {
-		OS-Print-Status warning "DEB is unavailable. Skipping."
+		OS-Print-Status warning "IPK is unavailable. Skipping."
 		return 0
 	}}
 
 
 	# prepare workspace and required values
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
-	$_target_path = "${_dest}\${_src}.deb"
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb_${_src}"
-	OS-Print-Status info "Creating DEB package..."
+	$_target_path = "${_dest}\${_src}.ipk"
+	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\ipk_${_src}"
+	OS-Print-Status info "Creating IPK package..."
 	OS-Print-Status info "remaking workspace directory ${_src}"
 	$__process = FS-Remake-Directory "${_src}"
 	if ($__process -ne 0) {
@@ -75,21 +74,20 @@ function PACKAGE-Run-DEB {
 		return 1
 	}
 
-	OS-Print-Status info "checking PACKAGE-Assemble-DEB-Content function..."
-	$__process = OS-Is-Command-Available "PACKAGE-Assemble-DEB-Content"
+	OS-Print-Status info "checking PACKAGE-Assemble-IPK-Content function..."
+	$__process = OS-Is-Command-Available "PACKAGE-Assemble-IPK-Content"
 	if ($__process -ne 0) {
 		OS-Print-Status error "check failed."
 		return 1
 	}
 
 	OS-Print-Status info "assembling package files..."
-	$__process = PACKAGE-Assemble-DEB-Content `
+	$__process = PACKAGE-Assemble-IPK-Content `
 		"${_target}" `
 		"${_src}" `
 		"${_target_filename}" `
 		"${_target_os}" `
-		"${_target_arch}" `
-		"${_changelog_deb}"
+		"${_target_arch}"
 	switch ($__process) {
 	10 {
 		$null = FS-Remove-Silently "${_src}"
@@ -102,13 +100,6 @@ function PACKAGE-Run-DEB {
 		return 1
 	}}
 
-	OS-Print-Status info "checking control\md5sums file..."
-	$__process = FS-Is-File "${_src}\control\md5sums"
-	if ($__process -ne 0) {
-		OS-Print-Status error "check failed."
-		return 1
-	}
-
 	OS-Print-Status info "checking control\control file..."
 	$__process = FS-Is-File "${_src}\control\control"
 	if ($__process -ne 0) {
@@ -116,8 +107,8 @@ function PACKAGE-Run-DEB {
 		return 1
 	}
 
-	OS-Print-Status info "archiving .deb package..."
-	$__process = DEB-Create-Archive "${_src}" "${_target_path}"
+	OS-Print-Status info "archiving .ipk package..."
+	$__process = IPK-Create-Archive "${_src}" "${_target_path}"
 	if ($__process -ne 0) {
 		OS-Print-Status error "package failed."
 		return 1

@@ -31,6 +31,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-docker_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-flatpak_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-homebrew_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-ipk_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-pypi_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-rpm_unix-any.sh"
 
@@ -127,6 +128,16 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 "$TARGET_OS" \
                 "$TARGET_ARCH" \
                 "$FILE_CHANGELOG_DEB"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        PACKAGE::run_ipk \
+                "$DEST" \
+                "$i" \
+                "$TARGET_FILENAME" \
+                "$TARGET_OS" \
+                "$TARGET_ARCH"
         if [ $? -ne 0 ]; then
                 return 1
         fi

@@ -50,6 +50,7 @@ Some good business reasons why AutomataCI is made:
 ### Deployable Distributions
 
 * [`.deb` repo](https://wiki.debian.org/DebianRepository/Setup) (with `apt-get install` capability)
+* [`.opkg` repo](https://git.yoctoproject.org/opkg/) (with `opkg install` capability - *COMING SOON???*)
 * [`.rpm` repo](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/packaging_and_distributing_software/index) (with `yum install` capability)
 * [`.flatpak` repo](https://docs.flatpak.org/en/latest/first-build.html) (for `flatpak install` capability)
 * [`OCI` compatible containers](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) (for `docker run` or `podman run` capability)

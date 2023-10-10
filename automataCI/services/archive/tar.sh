@@ -10,6 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compress/gz.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compress/xz.sh"
 
 
@@ -53,15 +54,53 @@ TAR::create() {
 
         # create tar archive
         if [ ! -z "$3" -a ! -z "$4" ]; then
-                tar --numeric-owner --group="$4" --owner="$3" -cvf "${1%%.xz*}" $2
+                tar --numeric-owner --group="$4" --owner="$3" -cvf "$1" $2
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
         else
-                tar -cvf "${1%%.xz*}" $2
+                tar -cvf "$1" $2
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+TAR::create_gz() {
+        #__destination="$1"
+        #__source="$2"
+        #__owner="$3"
+        #__group="$4"
+
+
+        # validate input
+        if [ -z "$2" ] || [ -z "$1" ]; then
+                return 1
+        fi
+
+        if [ -e "$1" ]; then
+                return 1
+        fi
+
+
+        # create tar archive
+        TAR::create "${1%.gz*}" "$2" "$3" "$4"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # compress archive
+        GZ::create "${1%.gz*}"
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
 
@@ -90,7 +129,7 @@ TAR::create_xz() {
 
 
         # create tar archive
-        TAR::create "$1" "$2" "$3" "$4"
+        TAR::create "${1%.xz*}" "$2" "$3" "$4"
         if [ $? -ne 0 ]; then
                 return 1
         fi
