@@ -1,3 +1,4 @@
+root: housekeeping for release quality
 root: added ipk packaging function
 srcPYTHON: backported chocolatey packaging function to Python
 srcGO: backported chocolatey packaging function to Go
