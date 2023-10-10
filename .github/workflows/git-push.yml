@@ -10,8 +10,6 @@ on:
       - staging
       - edge
       - experimental
-env:
-  PROJECT_PYTHON: 'srcPYTHON/python_version.txt'
 jobs:
   develop_on:
     runs-on: ${{ matrix.os }}

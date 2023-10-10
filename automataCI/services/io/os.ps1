@@ -14,10 +14,12 @@ function OS-Is-Command-Available {
 		[string] $__command
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__command)) {
 		return 1
 	}
+
 
 	# execute
 	$__program = Get-Command $__command -ErrorAction SilentlyContinue
@@ -36,16 +38,19 @@ function OS-Exec {
 		[string]$__arguments
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__command) -or [string]::IsNullOrEmpty($__arguments)) {
 		return 1
 	}
+
 
 	# get program
 	$__program = Get-Command $__command -ErrorAction SilentlyContinue
 	if (-not ($__program)) {
 		return 1
 	}
+
 
 	# execute command
 	$__process = Start-Process -Wait `

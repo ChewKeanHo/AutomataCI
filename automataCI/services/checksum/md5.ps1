@@ -36,10 +36,13 @@ function MD5-Checksum-File {
 
 
 function MD5-Is-Available {
+	# execute
 	$__md5 = [System.Security.Cryptography.MD5]::Create("MD5")
 	if ($__md5) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }

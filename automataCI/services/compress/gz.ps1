@@ -19,6 +19,7 @@ function GZ-Create {
 		[string]$__source
 	)
 
+
 	# validate input
 	$__process = GZ-Is-Available
 	if ($__process -ne 0) {
@@ -30,6 +31,7 @@ function GZ-Create {
 	}
 	$__source = $__source -replace "\.gz$"
 
+
 	# create .gz compressed target
 	if ((OS-Is-Command-Available "gzip") -eq 0) {
 		$__process = OS-Exec "gzip" "-9 `"${__source}`""
@@ -39,6 +41,7 @@ function GZ-Create {
 		$__process = 1
 	}
 
+
 	# report status
 	return $__process
 }
@@ -47,6 +50,7 @@ function GZ-Create {
 
 
 function GZ-Is-Available {
+	# execute
 	$__process = OS-Is-Command-Available "gzip"
 	if ($__process -eq 0) {
 		return 0
@@ -57,5 +61,7 @@ function GZ-Is-Available {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }

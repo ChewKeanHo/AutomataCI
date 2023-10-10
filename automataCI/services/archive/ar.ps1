@@ -15,11 +15,14 @@
 
 
 function AR-Is-Available {
+	# execute
 	$__process = Get-Command "ar" -ErrorAction SilentlyContinue
 	if (-not ($__process)) {
 		return 1
 	}
 
+
+	# report status
 	return 0
 }
 
@@ -32,6 +35,7 @@ function AR-Create {
 		[string]$__list
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__name) -or [string]::IsNullOrEmpty($__list)) {
 		return 1
@@ -42,8 +46,10 @@ function AR-Create {
 		return 1
 	}
 
+
 	# execute
 	$__process = OS-Exec "ar" "r ${__name} ${__list}"
+
 
 	# report status
 	return $__process

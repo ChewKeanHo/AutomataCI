@@ -43,6 +43,7 @@ PACKAGE::run_pypi() {
                 return 0
         fi
 
+
         # prepare workspace and required values
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/pypi_${_src}"
@@ -60,6 +61,7 @@ PACKAGE::run_pypi() {
                 OS::print_status error "check failed - output exists!\n"
                 return 1
         fi
+
 
         # copy all complimentary files to the workspace
         OS::print_status info "assembling package files...\n"
@@ -87,6 +89,7 @@ PACKAGE::run_pypi() {
                 ;;
         esac
 
+
         # generate required files
         OS::print_status info "creating pyproject.toml file...\n"
         PYPI::create_config \
@@ -112,6 +115,7 @@ PACKAGE::run_pypi() {
                 ;;
         esac
 
+
         # archive the assembled payload
         OS::print_status info "archiving PyPi package...\n"
         FS::make_directory "$_target_path"
@@ -120,6 +124,7 @@ PACKAGE::run_pypi() {
                 OS::print_status error "package failed.\n"
                 return 1
         fi
+
 
         # report status
         return 0

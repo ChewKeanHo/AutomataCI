@@ -87,8 +87,6 @@ function RELEASE-Run-Static-Repo-Setup {
 		return 1
 	}
 
-
-	# execute
 	$__staging = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${env:PROJECT_PATH_RELEASE}"
 	$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
 	if (Test-Path -PathType Container -Path "${__staging}") {

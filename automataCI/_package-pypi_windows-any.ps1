@@ -44,6 +44,7 @@ function PACKAGE-Run-PYPI {
 		return 0
 	}
 
+
 	# prepare workspace and required values
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\pypi_${_src}"
@@ -61,6 +62,7 @@ function PACKAGE-Run-PYPI {
 		OS-Print-Status error "check failed - output exists!"
 		return 1
 	}
+
 
 	# copy all complimentary files to the workspace
 	OS-Print-Status info "assembling package files..."
@@ -84,6 +86,7 @@ function PACKAGE-Run-PYPI {
 		return 1
 	}
 
+
 	# generate required files
 	OS-Print-Status info "creating pyproject.toml file..."
 	$__process = PYPI-Create-Config `
@@ -104,6 +107,7 @@ function PACKAGE-Run-PYPI {
 		return 1
 	}
 
+
 	# archive the assembled payload
 	OS-Print-Status info "archiving PyPi package..."
 	$null = FS-Make-Directory "${_target_path}"
@@ -112,6 +116,7 @@ function PACKAGE-Run-PYPI {
 		OS-Print-Status error "package failed."
 		return 1
 	}
+
 
 	# report status
 	return 0

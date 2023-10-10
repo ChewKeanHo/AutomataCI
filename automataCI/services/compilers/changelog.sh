@@ -21,6 +21,7 @@ CHANGELOG::assemble_deb() {
         __target="$2"
         __version="$3"
 
+
         # validate input
         if [ -z "$__directory" ] || [ -z "$__target" ] || [ -z "$__version" ]; then
                 return 1
@@ -28,6 +29,7 @@ CHANGELOG::assemble_deb() {
 
         __directory="${__directory}/deb"
         __target="${__target%.gz*}"
+
 
         # assemble file
         FS::remove_silently "$__target"
@@ -66,8 +68,10 @@ CHANGELOG::assemble_deb() {
         IFS="$old_IFS"
         unset old_IFS __line __tag
 
+
         # gunzip
         GZ::create "$__target"
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -86,6 +90,7 @@ CHANGELOG::assemble_md() {
         __version="$3"
         __title="$4"
 
+
         # validate input
         if [ -z "$__directory" ] ||
                 [ -z "$__target" ] ||
@@ -95,6 +100,7 @@ CHANGELOG::assemble_md() {
         fi
 
         __directory="${__directory}/data"
+
 
         # assemble file
         FS::remove_silently "$__target"
@@ -125,6 +131,7 @@ CHANGELOG::assemble_md() {
         IFS="$old_IFS"
         unset old_IFS __line __tag
 
+
         # report status
         if [ $? -eq 0 ]; then
                 return 0
@@ -145,6 +152,7 @@ CHANGELOG::assemble_rpm() {
         __version="$6"
         __cadence="$7"
 
+
         # validate input
         if [ -z "$__target" ] ||
                 [ -z "$__resources" ] ||
@@ -158,11 +166,13 @@ CHANGELOG::assemble_rpm() {
                 return 1
         fi
 
+
         # emit stanza
         FS::append_file "$__target" "%%changelog\n"
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # emit latest changelog
         if [ -f "${__resources}/changelog/data/latest" ]; then
@@ -192,11 +202,13 @@ CHANGELOG::assemble_rpm() {
                 fi
         fi
 
+
         # emit tailing newline
         FS::append_file "$__target" "\n"
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0
@@ -208,16 +220,19 @@ CHANGELOG::assemble_rpm() {
 CHANGELOG::build_data_entry() {
         __directory="$1"
 
+
         # validate input
         if [ -z "$__directory" ]; then
                 return 1
         fi
+
 
         # get last tag from git log
         __tag="$(git rev-list --tags --max-count=1)"
         if [ -z "$__tag" ]; then
                 __tag="$(git rev-list --max-parents=0 --abbrev-commit HEAD)"
         fi
+
 
         # generate log file from the latest to the last tag
         __directory="${__directory}/data"
@@ -227,14 +242,17 @@ CHANGELOG::build_data_entry() {
                 return 1
         fi
 
+
         # good file, update the previous
         FS::remove_silently "${__directory}/latest" &> /dev/null
         FS::move "${__directory}/.latest" "${__directory}/latest"
+
 
         # report verdict
         if [ $? -eq 0 ]; then
                 return 0
         fi
+
         return 1
 }
 
@@ -250,6 +268,7 @@ CHANGELOG::build_deb_entry() {
         __name="$6"
         __email="$7"
         __date="$8"
+
 
         # validate input
         if [ -z "$__directory" ] ||
@@ -272,14 +291,17 @@ CHANGELOG::build_deb_entry() {
                 ;;
         esac
 
+
         # all good. Generate the log fragment
         FS::make_directory "${__directory}/deb"
+
 
         # create the entry header
         FS::append_file "${__directory}/deb/.latest" "\
 ${__sku} (${__version}) ${__dist}; urgency=${__urgency}
 
 "
+
 
         # generate body line-by-line
         old_IFS="$IFS"
@@ -291,17 +313,21 @@ ${__sku} (${__version}) ${__dist}; urgency=${__urgency}
         unset line old_IFS
         FS::append_file "${__directory}/deb/.latest" "\n"
 
+
         # create the entry signed-off
         FS::append_file "${__directory}/deb/.latest" \
                 "-- ${__name} <${__email}>  ${__date}\n"
 
+
         # good file, update the previous
         FS::move "${__directory}/deb/.latest" "${__directory}/deb/latest"
+
 
         # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
+
         return 1
 }
 
@@ -312,14 +338,20 @@ CHANGELOG::compatible_data_version() {
         __directory="$1"
         __version="$2"
 
+
+        # validate input
         if [ -z "$__directory" ] || [ -z "$__version" ]; then
                 return 1
         fi
 
+
+        # execute
         if [ ! -f "${__directory}/data/${__version}" ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
@@ -330,14 +362,20 @@ CHANGELOG::compatible_deb_version() {
         __directory="$1"
         __version="$2"
 
+
+        # validate input
         if [ -z "$__directory" ] || [ -z "$__version" ]; then
                 return 1
         fi
 
+
+        # execute
         if [ ! -f "${__directory}/deb/${__version}" ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
@@ -345,6 +383,7 @@ CHANGELOG::compatible_deb_version() {
 
 
 CHANGELOG::is_available() {
+        # execute
         if [ -z "$(type -t git)" ]; then
                 return 1
         fi
@@ -354,6 +393,8 @@ CHANGELOG::is_available() {
                 return 1
         fi
 
+
+        # report status
         return 0
 }
 
@@ -363,6 +404,7 @@ CHANGELOG::is_available() {
 CHANGELOG::seal() {
         __directory="$1"
         __version="$2"
+
 
         # validate input
         if [ -z "$__directory" ] || [ -z "$__version" ] || [ ! -d "$__directory" ]; then
@@ -377,6 +419,7 @@ CHANGELOG::seal() {
                 return 1
         fi
 
+
         # execute
         FS::move "${__directory}/data/latest" "${__directory}/data/${__version}"
         if [ $? -ne 0 ]; then
@@ -387,6 +430,7 @@ CHANGELOG::seal() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0

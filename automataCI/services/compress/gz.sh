@@ -18,6 +18,7 @@
 GZ::create() {
         __source="$1"
 
+
         # validate input
         GZ::is_available
         if [ $? -ne 0 ]; then
@@ -28,6 +29,7 @@ GZ::create() {
                 return 1
         fi
         __source="${__source%.gz}"
+
 
         # create .gz compressed target
         if [ ! -z "$(type -t gzip)" ]; then
@@ -40,10 +42,12 @@ GZ::create() {
                 __exit=1
         fi
 
+
         # report status
         if [ $__exit -ne 0 ]; then
                 return 1
         fi
+
         return 0
 }
 
@@ -51,6 +55,7 @@ GZ::create() {
 
 
 GZ::is_available() {
+        # execute
         OS::is_command_available "gzip"
         if [ $? -eq 0 ]; then
                 return 0
@@ -61,5 +66,7 @@ GZ::is_available() {
                 return 0
         fi
 
+
+        # report status
         return 1
 }

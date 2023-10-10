@@ -23,6 +23,7 @@ function PYTHON-Activate-VENV {
 		return 0
 	}
 
+
 	# execute
 	$__location = "$(PYTHON-Get-Activator-Path)"
 	if (-not (Test-Path "${__location}")) {
@@ -34,6 +35,7 @@ function PYTHON-Activate-VENV {
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0
@@ -47,16 +49,19 @@ function PYTHON-Clean-Artifact {
 		[string]$__target
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or
 		(-not (Test-Path -Path "${__target}" -PathType Container))) {
 		return 1
 	}
 
+
 	# execute
 	$null = Get-ChildItem -Path "${__target}" -Recurse `
 		| Where-Object {$_.Name -match "__pycache__|\.pyc$" } `
 		| Remove-Item -Force -Recurse
+
 
 	# report status
 	return 0
@@ -82,11 +87,14 @@ function PYTHON-Has-PIP {
 
 
 function PYTHON-Is-Available {
+	# execute
 	$__program = Get-Command python -ErrorAction SilentlyContinue
 	if ($__program) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -94,10 +102,13 @@ function PYTHON-Is-Available {
 
 
 function PYTHON-Is-VENV-Activated {
+	# execute
 	if ($env:VIRTUAL_ENV) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -118,16 +129,19 @@ function PYTHON-Setup-VENV {
 		return 1
 	}
 
+
 	# execute
 	$__process = PYTHON-Is-Available
 	if ($__process -ne 0) {
 		return 1
 	}
 
+
 	# check if the repo is already established...
 	if (Test-Path "$(PYTHON-Get-Activator-Path)") {
 		return 0
 	}
+
 
 	# it's a clean repo. Start setting up virtual environment...
 	$__location = "${env:PROJECT_PATH_ROOT}" `
@@ -142,6 +156,7 @@ function PYTHON-Setup-VENV {
 		return 1
 	}
 
+
 	# report status
 	return 0
 }
@@ -150,11 +165,14 @@ function PYTHON-Setup-VENV {
 
 
 function PYPI-Check-Login {
+	# execute
 	if ([string]::IsNullOrEmpty($env:TWINE_USERNAME) -or
 		[string]::IsNullOrEmpty($env:TWINE_PASSWORD)) {
 		return 1
 	}
 
+
+	# report status
 	return 0
 }
 
@@ -167,11 +185,13 @@ function PYPI-Is-Available {
 		return 1
 	}
 
+
 	# execute
 	$__process = PYTHON-Is-VENV-Activated
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0
@@ -185,11 +205,13 @@ function PYPI-Is-Valid {
 		[string]$__target
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty(${__target}) -or
 		(-not (Test-Path -Path "${__target}" -PathType Container))) {
 		return 1
 	}
+
 
 	# execute
 	$__process = STRINGS-Has-Prefix "pypi" (Split-Path -Leaf -Path "${__target}")
@@ -209,6 +231,7 @@ function PYPI-Is-Valid {
 	if ($__hasWHL -and $__hasTAR) {
 		return 0
 	}
+
 
 	# report status
 	return 1
@@ -231,6 +254,7 @@ function PYPI-Create-Config {
 		[string]$__license
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
 		[string]::IsNullOrEmpty($__project_name) -or
@@ -247,10 +271,12 @@ function PYPI-Create-Config {
 		return 1
 	}
 
+
 	# check existing overriding file
 	if (Test-Path -Path "${__directory}\pyproject.toml") {
 		return 2
 	}
+
 
 	# create default file
 	$__process = FS-Write-File "${__directory}\pyproject.toml" @"
@@ -282,6 +308,7 @@ email = '${__email}'
 Homepage = '${__website}'
 "@
 
+
 	# report status
 	return $__process
 }
@@ -294,6 +321,7 @@ function PYPI-Create-Archive {
 		[string]$__directory,
 		[string]$__destination
 	)
+
 
 	# valdiate input
 	if ([string]::IsNullOrEmpty($__directory) -or
@@ -308,6 +336,7 @@ function PYPI-Create-Archive {
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# construct archive
 	$__current_path = Get-Location
@@ -329,6 +358,7 @@ function PYPI-Create-Archive {
 	Set-Location -Path $__current_path
 	Remove-Variable -Name __current_path
 
+
 	# export to destination
 	foreach ($__file in (Get-ChildItem -Path "${__directory}\dist")) {
 		$__process = FS-Move "${__directory}\dist\${__file}" "${__destination}"
@@ -336,6 +366,7 @@ function PYPI-Create-Archive {
 			return 1
 		}
 	}
+
 
 	# report status
 	return 0
@@ -350,6 +381,7 @@ function PYPI-Release {
 		[string]$__gpg,
 		[string]$__url
 	)
+
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or
@@ -369,6 +401,7 @@ function PYPI-Release {
 		return 1
 	}
 
+
 	# execute
 	$__arguments = "upload " `
 			+ "--sign " `
@@ -379,6 +412,7 @@ function PYPI-Release {
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0

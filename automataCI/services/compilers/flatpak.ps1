@@ -22,20 +22,24 @@ function FLATPAK-Create-AppInfo {
 		[string]$__resources
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or [string]::IsNullOrEmpty($__resources)) {
 		return 1
 	}
+
 
 	# check for overriding manifest file
 	if (Test-Path "${__directory}\appdata.xml") {
 		return 2
 	}
 
+
 	# check appinfo is available
 	if (-not (Test-Path "${__resources}\packages\flatpak.xml")) {
 		return 1
 	}
+
 
 	# copy flatpak.xml to workspace
 	return FS-Copy-File "${__resources}\packages\flatpak.xml" "${__directory}\appdata.xml"
@@ -53,6 +57,7 @@ function FLATPAK-Create-Archive {
 		[string]$__gpg_id
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
 		[string]::IsNullOrEmpty($__destination) -or
@@ -69,9 +74,11 @@ function FLATPAK-Create-Archive {
 	$__path_manifest = ".\manifest.yml"
 	$null = FS-Make-Directory "${__repo}"
 
+
 	# change location into the workspace
 	$__current_path = Get-Location
 	Set-Location -Path $__directory
+
 
 	# build archive
 	if (-not (Test-Path $__path_manifest)) {
@@ -125,12 +132,15 @@ function FLATPAK-Create-Archive {
 		return 1
 	}
 
+
 	# export output
 	$__process = FS-Move "${__path_build}" "${__destination}"
+
 
 	# head back to current directory
 	Set-Location -Path ${__current_path}
 	Remove-Variable -Name __current_path
+
 
 	# report status
 	return $__process
@@ -151,6 +161,7 @@ function FLATPAK-Create-Manifest {
 		[string]$__sdk
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__location) -or
 		[string]::IsNullOrEmpty($__resources) -or
@@ -165,11 +176,13 @@ function FLATPAK-Create-Manifest {
 		return 1
 	}
 
+
 	# check for overriding manifest file
 	if ((Test-Path "${__location}\manifest.yml") -or
 		(Test-Path "${__location}\manifest.json")) {
 		return 2
 	}
+
 
 	# generate manifest app metadata fields
 	$__target = "${__location}\manifest.yml"
@@ -198,6 +211,7 @@ modules:
         path: appdata.xml
 "@
 
+
 	# process icon.svg
 	if (Test-Path "${__location}\icon.svg") {
 		$null = FS-Append-File "${__target}" @"
@@ -210,6 +224,7 @@ modules:
         path: icon.svg
 "@
 	}
+
 
 	# process icon-48x48.png
 	if (Test-Path "${__location}\icon-48x48.png") {
@@ -224,6 +239,7 @@ modules:
 "@
 	}
 
+
 	# process icon-128x128.png
 	if (Test-Path "${__location}\icon-128x128.png") {
 		$null = FS-Append-File "${__target}" @"
@@ -236,6 +252,7 @@ modules:
         path: icon-128x128.png
 "@
 	}
+
 
 	# append more setup if available
 	if (Test-Path "${__resources}\packages\flatpak.yml") {
@@ -251,6 +268,7 @@ modules:
 			$null = FS-Append-File $__target "${__line}`n"
 		}
 	}
+
 
 	# report status
 	return 0
@@ -269,6 +287,7 @@ function FLATPAK-Is-Available {
 		return 1
 	}
 
+
 	# check compatible target os
 	switch ($__os) {
 	windows {
@@ -279,6 +298,7 @@ function FLATPAK-Is-Available {
 		Break
 	}}
 
+
 	# check compatible target cpu architecture
 	switch ($__arch) {
 	any {
@@ -287,11 +307,13 @@ function FLATPAK-Is-Available {
 		Break
 	}}
 
+
 	# validate dependencies
 	$__process = OS-Is-Command-Available "flatpak-builder"
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0
@@ -306,16 +328,19 @@ function FLATPAK-Test-Build {
 		[string]$__command
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or [string]::IsNullOrEmpty($__command)) {
 		return 1
 	}
+
 
 	# execute
 	$__arguments = "--run `"${__target}`" " +
 			"`"${__target}\files\manifest.json`" " +
 			"${__command}"
 	$__process = OS-Exec "flatpak-builder" $__arguments
+
 
 	# report status
 	if ($__process -eq 0) {

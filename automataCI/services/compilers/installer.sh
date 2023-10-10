@@ -31,6 +31,7 @@ INSTALLER::setup() {
                 return 0
         fi
 
+
         # execute
         /bin/bash -c \
         "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -89,8 +90,10 @@ INSTALLER::setup_curl() {
                 return 0
         fi
 
+
         # execute
         brew install curl
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -168,11 +171,13 @@ INSTALLER::setup_docker() {
                 return 0
         fi
 
+
         # execute
         DOCKER::setup_builder_multiarch
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0
@@ -193,8 +198,10 @@ INSTALLER::setup_go() {
                 return 0
         fi
 
+
         # execute
         brew install go
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -290,8 +297,10 @@ INSTALLER::setup_python() {
                 return 0
         fi
 
+
         # execute
         brew install python
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -389,8 +398,10 @@ INSTALLER::setup_reprepro() {
                 return 0
         fi
 
+
         # execute
         brew install reprepro
+
 
         # report status
         if [ $? -eq 0 ]; then

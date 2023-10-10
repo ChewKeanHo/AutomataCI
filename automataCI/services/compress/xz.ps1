@@ -19,6 +19,7 @@ function XZ-Create {
 		[string]$__source
 	)
 
+
 	# validate input
 	$__process = XZ-Is-Available
 	if ($__process -ne 0) {
@@ -30,8 +31,10 @@ function XZ-Create {
 	}
 	$__source = $__source -replace "\.xz$"
 
+
 	# create .gz compressed target
 	$__process = OS-Exec "xz" "-9 --compress `"${__source}`""
+
 
 	# report status
 	return $__process
@@ -41,10 +44,13 @@ function XZ-Create {
 
 
 function XZ-Is-Available {
+	# execute
 	$__process = OS-Is-Command-Available "xz"
 	if ($__process -eq 0) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }

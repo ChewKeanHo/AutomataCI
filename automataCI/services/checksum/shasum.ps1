@@ -15,12 +15,14 @@ function SHASUM-Checksum-File {
 		[string]$__algo
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or
 		(-not (Test-Path -Path "$__target")) -or
 		[string]::IsNullOrEmpty($__algo)) {
 		return ""
 	}
+
 
 	# execute
 	switch ($__algo) {
@@ -51,6 +53,7 @@ function SHASUM-Checksum-File {
 
 
 function SHASUM-Is-Available {
+	# execute
 	$__ret = [System.Security.Cryptography.SHA1]::Create("SHA1")
 	if (-not $__ret) {
 		return 1
@@ -71,5 +74,7 @@ function SHASUM-Is-Available {
 		return 1
 	}
 
+
+	# report status
 	return 0
 }

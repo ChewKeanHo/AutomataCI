@@ -14,6 +14,7 @@ function DISK-Calculate-Size {
 		[string]$__location
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__location) -or (-not (Test-Path -Path "$__location"))) {
 		return 1
@@ -23,6 +24,7 @@ function DISK-Calculate-Size {
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# execute
 	$__value  = Get-ChildItem ${__location} -Recurse -Force `

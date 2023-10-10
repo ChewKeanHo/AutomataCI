@@ -2,23 +2,24 @@
 [![AutomataCI](src/icons/icon-1200x400.svg)](#automataci)
 
 This is a template git repository equipped with a native built-in
-semi-autonomous CI tools known as `AutomataCI`. This allows one to run CI with
-or without solely relying on 3rd-party service provider which can becomes a
-supply chain threat at least in the 2021-2023 era.
+semi-autonomous CI tool known as `AutomataCI`. It allows one to run a full-force
+CI jobs with or without solely relying on 3rd-party service providers that
+can potentially be a supply chain threat at leas starting from year 2021-2023
+era.
 
 
 
 
 ## Why It Matters
 
-Some good business reasons why AutomataCI is made:
+Some good business reasons why using AutomataCI:
 
 1. **Start off with a tested and solid foundation** - All the templates and
    CI jobs are tested and have default configured for immediate software
    development.
-2. **Avoid being threatend by your CI provider** - CI it's a life-support system
-   for your project; handle it in-house and natively rather than leaving it
-   vulnerable for 3rd-party vendors to extort it.
+2. **Avoid being threatend by your malicious suppliers** - CI it's a
+   nerve system for your product; handle it in-house and natively rather than
+   leaving it vulnerable for any 3rd-party to extort you.
 3. **Steadily improvable** - AutomataCI itself are designed to be adaptive to
    market changes, self-improvable, and cater to common use cases.
 4. **Simple and scalable** - Only uses `POSIX` shell and `PowerShell` so it
@@ -41,7 +42,7 @@ Some good business reasons why AutomataCI is made:
   8. [Clang](https://clang.llvm.org/)
   9. [MinGW](https://www.mingw-w64.org/)
   10. [Emscripten WASM](https://emscripten.org/)
-* Node Programming Language (*Coming Soon*)
+* Typescript (*Coming Soon*)
 * [Python Programming Language](https://www.python.org/)
 * Some Manual MISC stuffs
 
@@ -60,6 +61,24 @@ Some good business reasons why AutomataCI is made:
 * [`Homebrew` ecosystem](https://brew.sh/) (for `brew install` capability)
 * [`Chocolatey` ecosystem](https://chocolatey.org/) (for `choco install` capability)
 * GitHub Security Advisory (for CVE management)
+
+
+
+### 3rd-Party CI Integrations
+
+AutomataCI works seamlessly out of the box by integration with:
+
+1. [GitHub Actions](https://docs.github.com/en/actions)
+2. [GitLab CI](https://docs.gitlab.com/ee/ci/) (*COMING SOON*)
+
+
+
+### Documentations & Specifications
+
+Check out the PDF file inside
+[`automataCI/docs/AutomataCI-Engineering-Specification.pdf`](automataCI/docs/AutomataCI-Engineering-Specification.pdf).
+
+It's regularly updated from time-to-time before each releases.
 
 
 
@@ -93,35 +112,32 @@ By default, the presented product license (`LICENSE.txt`) is using the
 AutomataCI license. The goal is to change and update it matching to your product
 license.
 
-Files inside `resources/licenses` shall be updated to match your product
-license as well. The `resources/licenses/LICENSE-EN.odt` file is a
-[LibreOffice](https://www.libreoffice.org/) writer file. You're free to use
-other document generator product as long as it can produce
-`resources/licenses/LICENSE-EN.pdf` that will be distributed in various
-ecosystem via packages.
+You should also update all files inside `src/licenses` matching your own
+project. The `src/licenses/LICENSE-EN.odt` file is a
+[LibreOffice](https://www.libreoffice.org/) Writer file. Hence, you're free to
+use other document generator product as long as it can produce
+`src/licenses/LICENSE-EN.pdf` for later packaging distribution use.
 
 
 
 ### Update Logo
 
 By default, the presented icons and banners are of AutomataCI inside
-`resources/icons/` directory generated from the materials in
-`resources/icons/principle-canvas` using [Inkscape](https://inkscape.org/)
+`src/icons/` directory generated from the materials in
+`src/icons/principle-canvas` using [Inkscape](https://inkscape.org/)
 design software. You're free to use other design software as long as it can
 generate the required output artifacts.
 
-Once you're done designing your product brand in
-`resources/icons/principle-canvas` directory, please generate an optimized and
-usable graphic artifacts as follow:
+Once you're done designing your product brand in `src/icons/principle-canvas`
+directory, please generate an optimized and usable graphic artifacts as follow:
 
-1. `resources/icons/icon.svg` - generic and widely-compatible icon file used
+1. `src/icons/icon.svg` - generic and widely-compatible icon file used
    everywhere.
-2. `resources/icons/icon-48x48.png` - PNG 48x48 icon file used in Linux system's
+2. `src/icons/icon-48x48.png` - PNG 48x48 icon file used in Linux system's
    icon and shortcuts.
-3. `resources/icons/icon-128x128.png` - PNG 48x48 icon file used in Linux
-   system's icon and shortcuts.
-4. `resources/icons/icon-1200x400.svg` - used in README.md or marketing
-   promotion.
+3. `src/icons/icon-128x128.png` - PNG 48x48 icon file used in Linux system's
+   icon and shortcuts.
+4. `src/icons/icon-1200x400.svg` - used in README.md or marketing promotion.
 
 
 
@@ -146,7 +162,7 @@ defining the `PROJECT_GO` directory name (default is `srcGO`) at the same time.
 
 Choose wisely as the multiple tech feature consideration was made solely for
 those who wants to use dedicated tech for other purposes (e.g. `SCULLY` for
-static documents).
+static documents generation).
 
 
 
@@ -158,9 +174,9 @@ modify them matching your needs using your POSIX Shell and PowerShell knowledge.
 
 
 
-### Update Distribution Resource files
+### Update All Distribution Resource files
 
-All the data resource files in `resources/{docs,packages,publishers}` shall be
+All the data resource files in `src/{docs,packages,publishers}` shall be
 updated matching to your product needs. Their specifications are made available
 in the `automataCI/AutomataCI-Engineering-Specification.pdf` documentation.
 
@@ -248,18 +264,18 @@ and wish to contribute back, there are 2 ways to do so:
 
 
 
-### Financial Support
+### Financial
 
 To financially support the project, please head over to Holloway's sponorship
 store here:
 
-[![Sponsor](.github/images/sponsor_en_100x30.svg)](https://www.hollowaykeanho.com/stores/)
+[![Sponsor](.github/images/sponsor_en_210x50.svg)](https://github.com/sponsors/hollowaykeanho)
 
 A small token purchase would helps a lot.
 
 
 
-### Craftmanship Support
+### Craftmanship
 
 If you wish to bring in codes contribution, bug report, and ideas, please feel
 free to refer the PDF engineering spec located in the `automataCI/` directory.

@@ -40,9 +40,12 @@ MD5::checksum_file() {
 
 
 MD5::is_available() {
+        # execute
         if [ ! -z "$(type -t md5sum)" ] || [ ! -z "$(type -t md5)" ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }

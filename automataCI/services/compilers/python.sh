@@ -24,6 +24,7 @@ PYTHON::activate_venv() {
                 return 0
         fi
 
+
         # execute
         __location="$(PYTHON::get_activator_path)"
         if [ ! -f "$__location" ]; then
@@ -36,6 +37,7 @@ PYTHON::activate_venv() {
                 return 1
         fi
 
+
         # report status
         return 0
 }
@@ -45,6 +47,7 @@ PYTHON::activate_venv() {
 
 PYTHON::clean_artifact() {
         # __target="$1"
+
 
         # validate input
         if [ -z "$1" ] || [ ! -d "$1" ]; then
@@ -56,8 +59,10 @@ PYTHON::clean_artifact() {
                 return 1
         fi
 
+
         # execute
         find "$1" | grep -E "(__pycache__|\.pyc$)" | xargs rm -rf &> /dev/null
+
 
         # report status
         return 0
@@ -84,12 +89,15 @@ PYTHON::has_pip() {
 
 
 PYTHON::is_available() {
+        # execute
         if [ ! -z "$(type -t python3)" ]; then
                 return 0
         elif [ ! -z "$(type -t python)" ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
@@ -97,10 +105,13 @@ PYTHON::is_available() {
 
 
 PYTHON::is_venv_activated() {
+        # execute
         if [ ! -z "$VIRTUAL_ENV" ] ; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
@@ -121,6 +132,7 @@ PYTHON::setup_venv() {
                 return 1
         fi
 
+
         # execute
         __program=""
         if [ ! -z "$(type -t python3)" ]; then
@@ -137,6 +149,7 @@ PYTHON::setup_venv() {
                 return 0
         fi
 
+
         # it's a clean repo. Start setting up virtual environment...
         __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
         $__program -m venv "$__location"
@@ -148,6 +161,7 @@ PYTHON::setup_venv() {
                 return 1
         fi
 
+
         # report status
         return 0
 }
@@ -156,11 +170,13 @@ PYTHON::setup_venv() {
 
 
 PYPI::check_login() {
-        # validate input
+        # execute
         if [ -z "$TWINE_USERNAME" ] || [ -z "$TWINE_PASSWORD" ]; then
                 return 1
         fi
 
+
+        # report status
         return 0
 }
 
@@ -173,11 +189,13 @@ PYPI::is_available() {
                 return 1
         fi
 
+
         # execute
         PYTHON::is_venv_activated
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0
@@ -189,10 +207,12 @@ PYPI::is_available() {
 PYPI::is_valid() {
         #__target="$1"
 
+
         # validate input
         if [ -z "$1" ] || [ ! -d "$1" ]; then
                 return 1
         fi
+
 
         # execute
         STRINGS::has_prefix "pypi" "${1##*/}"
@@ -216,6 +236,7 @@ PYPI::is_valid() {
                 return 0
         fi
 
+
         # report status
         return 1
 }
@@ -235,6 +256,7 @@ PYPI::create_config() {
         __readme_type="$9"
         __license="${10}"
 
+
         # validate input
         if [ -z "$__directory" ] ||
                 [ -z "$__project_name" ] ||
@@ -251,10 +273,12 @@ PYPI::create_config() {
                 return 1
         fi
 
+
         # check existing overriding file
         if [ -f "${__directory}/pyproject.toml" ]; then
                 return 2
         fi
+
 
         # create default file
         FS::write_file "${__directory}/pyproject.toml" "\
@@ -286,6 +310,7 @@ email = '${__email}'
 Homepage = '${__website}'
 "
 
+
         # report status
         return $?
 }
@@ -296,6 +321,7 @@ Homepage = '${__website}'
 PYPI::create_archive() {
         __directory="$1"
         __destination="$2"
+
 
         # validate input
         if [ -z "$__directory" ] ||
@@ -310,6 +336,7 @@ PYPI::create_archive() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # construct archive
         __current_path="$PWD" && cd "$__directory"
@@ -326,6 +353,7 @@ PYPI::create_archive() {
         fi
         cd "$__current_path" && unset __current_path
 
+
         # export to destination
         for __file in "${__directory}/dist/"*; do
                 FS::move "$__file" "$__destination"
@@ -333,6 +361,7 @@ PYPI::create_archive() {
                         return 1
                 fi
         done
+
 
         # report status
         return 0
@@ -345,6 +374,7 @@ PYPI::release() {
         __target="$1"
         __gpg="$2"
         __url="$3"
+
 
         # validate input
         if [ -z "$__target" ] ||
@@ -364,6 +394,7 @@ PYPI::release() {
                 return 1
         fi
 
+
         # execute
         twine upload "${__target}/"* \
                 --sign \
@@ -373,6 +404,7 @@ PYPI::release() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0

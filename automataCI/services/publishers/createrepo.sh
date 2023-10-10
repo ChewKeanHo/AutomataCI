@@ -17,6 +17,7 @@
 
 
 CREATEREPO::is_available() {
+        # execute
         OS::is_command_available "createrepo"
         if [ $? -eq 0 ]; then
                 return 0
@@ -27,6 +28,8 @@ CREATEREPO::is_available() {
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
@@ -37,6 +40,7 @@ CREATEREPO::publish() {
         __target="$1"
         __directory="$2"
 
+
         # validate input
         if [ -z "$__target" ] ||
                 [ -z "$__directory" ] ||
@@ -44,6 +48,7 @@ CREATEREPO::publish() {
                 [ ! -d "$__directory" ]; then
                 return 1
         fi
+
 
         # execute
         FS::copy_file "$__target" "$__directory"
@@ -66,6 +71,7 @@ CREATEREPO::publish() {
                         return 0
                 fi
         fi
+
 
         # report status
         return 1

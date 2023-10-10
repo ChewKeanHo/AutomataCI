@@ -16,6 +16,7 @@
 
 
 function CREATEREPO-Is-Available {
+	# execute
 	$__process = OS-Is-Command-Available "createrepo"
 	if ($__process -eq 0) {
 		return 0
@@ -25,6 +26,7 @@ function CREATEREPO-Is-Available {
 	if ($__process -eq 0) {
 		return 0
 	}
+
 
 	# report status
 	return 1
@@ -39,6 +41,7 @@ function CREATEREPO-Publish {
 		[string]$__directory
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or
 		[string]::IsNullOrEmpty($__directory) -or
@@ -46,6 +49,7 @@ function CREATEREPO-Publish {
 		(-not (Test-Path "${__directory}" -PathType Container))) {
 		return 1
 	}
+
 
 	# execute
 	$__process = FS-Copy-File "${__target}" "${__directory}"
@@ -68,6 +72,7 @@ function CREATEREPO-Publish {
 			return 0
 		}
 	}
+
 
 	# report status
 	return 1

@@ -94,6 +94,7 @@ function GO-Setup-Local-Environment {
 		return 1
 	}
 
+
 	# execute
 	$__process = GO-Is-Available
 	if ($__process -ne 0) {

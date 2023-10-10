@@ -11,10 +11,12 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 AR::is_available() {
+        # execute
         if [ -z "$(type -t ar)" ]; then
                 return 1
         fi
 
+        # report status
         return 0
 }
 
@@ -25,17 +27,21 @@ AR::create() {
         # __name="$1"
         # __list="$2"
 
+
         # validate input
         if [ -z "$1" ] || [ -z "$2" ]; then
                 return 1
         fi
 
+
         # execute
         ar r "$1" $2
+
 
         # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
+
         return 1
 }

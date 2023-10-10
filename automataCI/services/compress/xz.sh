@@ -18,6 +18,7 @@
 XZ::create() {
         __source="$1"
 
+
         # validate input
         XZ::is_available
         if [ $? -ne 0 ]; then
@@ -30,8 +31,10 @@ XZ::create() {
         fi
         __source="${__source%.xz}"
 
+
         # create .gz compressed target
         xz -9 --compress "$__source"
+
 
         # report status
         if [ $? -eq 0 ]; then
@@ -45,10 +48,13 @@ XZ::create() {
 
 
 XZ::is_available() {
+        # execute
         OS::is_command_available "xz"
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }

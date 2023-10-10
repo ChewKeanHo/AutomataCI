@@ -31,6 +31,7 @@ function CHANGELOG-Assemble-DEB {
 	$__directory = "${__directory}\deb"
 	$__target = $__target -replace '\.gz.*$'
 
+
 	# assemble file
 	$null = FS-Remove-Silently "${__target}"
 	$null = FS-Remove-Silently "${__target}.gz"
@@ -68,8 +69,10 @@ function CHANGELOG-Assemble-DEB {
 		}
 	}
 
+
 	# gunzip
 	$__process = GZ-Create "${__target}"
+
 
 	# report status
 	return $__process
@@ -94,6 +97,7 @@ function CHANGELOG-Assemble-MD {
 	}
 
 	$__directory = "${__directory}\data"
+
 
 	# assemble file
 	$null = FS-Remove-Silently "${__target}"
@@ -121,6 +125,7 @@ function CHANGELOG-Assemble-MD {
 		}
 	}
 
+
 	# report status
 	return $__process
 }
@@ -139,6 +144,7 @@ function CHANGELOG-Assemble-RPM {
 		[string]$__cadence
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__target) -or
 		[string]::IsNullOrEmpty($__resources) -or
@@ -152,11 +158,13 @@ function CHANGELOG-Assemble-RPM {
 		return 1
 	}
 
+
 	# emit stanza
 	$__process = FS-Write-File "${__target}" "%%changelog`n"
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# emit latest changelog
 	if (Test-Path -Path "${__resources}\changelog\data\latest") {
@@ -184,8 +192,10 @@ function CHANGELOG-Assemble-RPM {
 		}
 	}
 
+
 	# emit tailing newline
 	$__process = FS-Append-File "${__target}" "`n"
+
 
 	# report status
 	return $__process
@@ -199,16 +209,19 @@ function CHANGELOG-Build-Data-Entry {
 		[string]$__directory
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory)) {
 		return 1
 	}
+
 
 	# get last tag from git log
 	$__tag = Invoke-Expression "git rev-list --tags --max-count=1"
 	if ([string]::IsNullOrEmpty($__tag)) {
 		$__tag = Invoke-Expression "git rev-list --max-parents=0 --abbrev-commit HEAD"
 	}
+
 
 	# generate log file from the latest to the last tag
 	$__directory = "${__directory}\data"
@@ -219,9 +232,11 @@ function CHANGELOG-Build-Data-Entry {
 		return 1
 	}
 
+
 	# good file, update the previous
 	$null = FS-Remove-Silently "${__directory}\latest"
 	$__process = FS-Move "${__directory}\.latest" "${__directory}\latest"
+
 
 	# report status
 	return $__process
@@ -242,6 +257,7 @@ function CHANGELOG-Build-DEB-Entry {
 		[string]$__date
 	)
 
+
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
 		[string]::IsNullOrEmpty($__version) -or
@@ -254,7 +270,6 @@ function CHANGELOG-Build-DEB-Entry {
 		[string]::IsNullOrEmpty($__date)) {
 		return 1
 	}
-
 
 	switch ($__dist) {
 	stable {
@@ -269,14 +284,17 @@ function CHANGELOG-Build-DEB-Entry {
 		return 1
 	}}
 
+
 	# all good. Generate the log fragment
 	$null = FS-Make-Directory "${__directory}\deb"
+
 
 	# create the entry header
 	$null = FS-Write-File "${__directory}\deb\.latest" @"
 ${__sku} (${__version}) ${__dist}; urgency=${__urgency}
 
 "@
+
 
 	# generate body line-by-line
 	Get-Content -Path "${__directory}\data\latest" | ForEach-Object {
@@ -285,12 +303,15 @@ ${__sku} (${__version}) ${__dist}; urgency=${__urgency}
 	}
 	$null = FS-Append-File "${__directory}\deb\.latest" ""
 
+
 	# create the entry sign-off
 	$null = FS-Append-File "${__directory}\deb\.latest" `
 		"-- ${__name} <${__email}>  ${__date}"
 
+
 	# good file, update the previous
 	$__process = FS-Move "${__directory}\deb\.latest" "${__directory}\deb\latest"
+
 
 	# report status
 	return $__process
@@ -305,15 +326,21 @@ function CHANGELOG-Compatible-Data-Version {
 		[string]$__version
 	)
 
+
+	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or [string]::IsNullOrEmpty($__version)) {
 		return 1
 	}
 
+
+	# execute
 	$__process = FS-Is-File "${__directory}\data\${__version}"
 	if ($__process -ne 0) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -326,15 +353,21 @@ function CHANGELOG-Compatible-DEB-Version {
 		[string]$__version
 	)
 
+
+	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or [string]::IsNullOrEmpty($__version)) {
 		return 1
 	}
 
+
+	# execute
 	$__process = FS-Is-File "${__directory}\deb\${__version}"
 	if ($__process -ne 0) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -342,6 +375,7 @@ function CHANGELOG-Compatible-DEB-Version {
 
 
 function CHANGELOG-Is-Available {
+	# execute
 	$__program = Get-Command git -ErrorAction SilentlyContinue
 	if (-not ($__program)) {
 		return 1
@@ -352,6 +386,8 @@ function CHANGELOG-Is-Available {
 		return 1
 	}
 
+
+	# report status
 	return 0
 }
 
@@ -363,6 +399,7 @@ function CHANGELOG-Seal {
 		[string]$__directory,
 		[string]$__version
 	)
+
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__directory) -or
@@ -379,6 +416,7 @@ function CHANGELOG-Seal {
 		return 1
 	}
 
+
 	# execute
 	$__process = FS-Move "${__directory}\data\latest" "${__directory}\data\${__version}"
 	if ($__process -ne 0) {
@@ -389,6 +427,7 @@ function CHANGELOG-Seal {
 	if ($__process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0

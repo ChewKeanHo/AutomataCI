@@ -105,6 +105,7 @@ function BUILD-__Validate-Source-Files {
 		}
 		$__line = $__line -replace '/', '\'
 
+
 		# check source code existence
 		$__path = "${env:PROJECT_PATH_ROOT}\${_target_source}"
 		$__path = "${__path}\$($__line -replace '^.*\s', '')"
@@ -114,6 +115,7 @@ function BUILD-__Validate-Source-Files {
 			OS-Print-Status error "validation failed.`n"
 			return
 		}
+
 
 		# check source code compatibilities
 		$__os = $__line -replace ' .*$'
@@ -128,6 +130,7 @@ function BUILD-__Validate-Source-Files {
 			continue
 		}
 
+
 		# properly process path
 		$__path = ($__line -split " ")[-1]
 		if ((Split-Path $__path -Parent) -eq $__path) {
@@ -136,6 +139,7 @@ function BUILD-__Validate-Source-Files {
 			$null = FS-Make-Directory `
 				"${_target_directory}\$(Split-Path $__path -Parent)"
 		}
+
 
 		# create command for parallel execution
 		if ($__path -match "\.c$") {
@@ -184,6 +188,7 @@ ${_target_directory}\$($__path -replace '.c.*', '.o')
 
 		$_parallel_total += 1
 	}
+
 
 	# report status
 	return $_parallel_total
@@ -395,6 +400,7 @@ function BUILD-_Exec-Link {
 			OS-Print-Status error "link failed.`n"
 			return 1
 		}
+
 
 		# convert pathing to be GCC friendly
 		$__directory = Split-Path -Parent -Path "${_linker_control}"

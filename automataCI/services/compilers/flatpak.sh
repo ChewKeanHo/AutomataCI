@@ -21,26 +21,31 @@ FLATPAK::create_appinfo() {
         __directory="$1"
         __resources="$2"
 
+
         # validate input
         if [ -z "$__directory" ] || [ -z "$__resources" ]; then
                 return 1
         fi
+
 
         # check for overriding manifest file
         if [ -f "${__directory}/appdata.xml" ]; then
                 return 2
         fi
 
+
         # check appinfo is available
         if [ ! -f "${__resources}/packages/flatpak.xml" ]; then
                 return 1
         fi
+
 
         # copy flatpak.xml to workspace
         FS::copy_file "${__resources}/packages/flatpak.xml" "${__directory}/appdata.xml"
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
         return 0
 }
 
@@ -53,6 +58,7 @@ FLATPAK::create_archive() {
         __repo="$3"
         __app_id="$4"
         __gpg_id="$5"
+
 
         # validate input
         if [ -z "$__directory" ] ||
@@ -70,9 +76,11 @@ FLATPAK::create_archive() {
         __path_manifest="./manifest.yml"
         FS::make_directory "$__repo"
 
+
         # change location into the workspace
         __current_path="$PWD"
         cd "$__directory"
+
 
         # build archive
         if [ ! -f "$__path_manifest" ]; then
@@ -110,17 +118,21 @@ FLATPAK::create_archive() {
                 return 1
         fi
 
+
         # export output
         FS::move "$__path_package" "$__destination"
         __exit=$?
 
+
         # head back to current directory
         cd "${__current_path}" && unset __current_path
+
 
         # report status
         if [ $__exit -ne 0 ]; then
                 return 1
         fi
+
         return 0
 }
 
@@ -137,6 +149,7 @@ FLATPAK::create_manifest() {
         __runtime_version="$7"
         __sdk="$8"
 
+
         # validate input
         if [ -z "$__location" ] ||
                 [ -z "$__resources" ] ||
@@ -151,10 +164,12 @@ FLATPAK::create_manifest() {
                 return 1
         fi
 
+
         # check for overriding manifest file
         if [ -f "${__location}/manifest.yml" ] || [ -f "${__location}/manifest.json" ]; then
                 return 2
         fi
+
 
         # generate manifest app metadata fields
         __target="${__location}/manifest.yml"
@@ -184,6 +199,7 @@ modules:
         path: appdata.xml
 "
 
+
         # process icon.svg
         if [ -f "${__location}/icon.svg" ]; then
                 FS::write_file "$__target" "\
@@ -196,6 +212,7 @@ modules:
         path: icon.svg
 "
         fi
+
 
         # process icon-48x48.png
         if [ -f "${__location}/icon-48x48.png" ]; then
@@ -210,6 +227,7 @@ modules:
 "
         fi
 
+
         # process icon-128x128.png
         if [ -f "${__location}/icon-128x128.png" ]; then
                 FS::write_file "$__target" "\
@@ -222,6 +240,7 @@ modules:
         path: icon-128x128.png
 "
         fi
+
 
         # append more setup if available
         if [ -f "${__resources}/packages/flatpak.yml" ]; then
@@ -240,6 +259,7 @@ modules:
                 IFS="$old_IFS" && unset old_IFS
         fi
 
+
         # report status
         return 0
 }
@@ -255,6 +275,7 @@ FLATPAK::is_available() {
                 return 1
         fi
 
+
         # check compatible target os
         case "$__os" in
         windows|darwin)
@@ -263,6 +284,7 @@ FLATPAK::is_available() {
         *)
                 ;;
         esac
+
 
         # check compatible target cpu architecture
         case "$__arch" in
@@ -273,11 +295,13 @@ FLATPAK::is_available() {
                 ;;
         esac
 
+
         # validate dependencies
         OS::is_command_available "flatpak-builder"
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0
@@ -290,16 +314,19 @@ FLATPAK::test_build() {
         __target="$1"
         __command="$2"
 
+
         # validate input
         if [ -z "$__target" ] || [ -z "$__command" ]; then
                 return 1
         fi
+
 
         # execute
         flatpak-builder \
                 --run "$__target" \
                 "${__target}/files/manifest.json" \
                 "$__command"
+
 
         # report status
         if [ $? -eq 0 ]; then

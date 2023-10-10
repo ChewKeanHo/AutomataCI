@@ -13,10 +13,12 @@
 OS::is_command_available() {
         # __command="$1"
 
+
         # validate input
         if [ -z "$1" ]; then
                 return 1
         fi
+
 
         # execute
         if [ ! -z "$(type -t "$1")" ]; then

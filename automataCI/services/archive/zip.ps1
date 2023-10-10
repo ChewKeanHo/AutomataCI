@@ -15,6 +15,7 @@ function ZIP-Create {
 		[string]$__source
 	)
 
+	# execute
 	try {
 		Compress-Archive -Path $__source -DestinationPath $__destination
 		if (Test-Path $__destination) {
@@ -31,5 +32,6 @@ function ZIP-Create {
 
 
 function ZIP-Is-Available {
+	# report status
 	return 0
 }

@@ -1,5 +1,6 @@
 automataci (1.6.0) stable; urgency=low
 
+  * root: added ipk packaging function
   * srcPYTHON: backported chocolatey packaging function to Python
   * srcGO: backported chocolatey packaging function to Go
   * root: added and close Chocolatey ecosystem
@@ -20,4 +21,4 @@ automataci (1.6.0) stable; urgency=low
   * root: added C Programming Language support
   * README.md: corrected typo
 
--- Your Legal Full Name Here <contact@youremail.example>  Tue, 10 Oct 2023 16:41:31 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Tue, 10 Oct 2023 21:26:29 +0800

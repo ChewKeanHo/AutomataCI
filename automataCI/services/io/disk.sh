@@ -13,6 +13,7 @@
 DISK::calculate_size() {
         # __location="$1"
 
+
         # validate input
         if [ -z "$1" ] || [ ! -d "$1" ]; then
                 return 1
@@ -23,8 +24,10 @@ DISK::calculate_size() {
                 return 1
         fi
 
+
         # execute
         __size="$(du -ks "$1")"
+
 
         # report status
         if [ $? -ne 0 ]; then
@@ -39,9 +42,12 @@ DISK::calculate_size() {
 
 
 DISK::is_available() {
+        # execute
         if [ ! -z "$(type -t du)" ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }

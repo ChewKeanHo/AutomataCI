@@ -11,10 +11,12 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 ZIP::is_available() {
+        # execute
         if [ ! -z "$(type -t zip)" ]; then
                 return 0
         fi
 
+        # report status
         return 1
 }
 
@@ -25,14 +27,17 @@ ZIP::create() {
         # __destination="$1"
         # __source="$2"
 
+
         # validate input
         ZIP::is_available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+
         # execute
         zip -9 -r "$1" $2
+
 
         # report status
         if [ $? -eq 0 ]; then

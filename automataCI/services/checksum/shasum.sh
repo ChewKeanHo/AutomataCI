@@ -14,6 +14,7 @@ SHASUM::create_file() {
         #__target="$1"
         #__algo="$2"
 
+
         # validate input
         if [ -z "$1" ] || [ ! -f "$1" ] || [ -z "$2" ]; then
                 return 1
@@ -27,6 +28,7 @@ SHASUM::create_file() {
                 ;;
         esac
 
+
         # execute
         if [ ! -z "$(type -t shasum)" ]; then
                 __ret="$(shasum -a "$2" "$1")"
@@ -38,6 +40,7 @@ SHASUM::create_file() {
                 unset __ret
         fi
 
+
         # report status
         return 0
 }
@@ -46,9 +49,12 @@ SHASUM::create_file() {
 
 
 SHASUM::is_available() {
+        # execute
         if [ ! -z "$(type -t shasum)" ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
