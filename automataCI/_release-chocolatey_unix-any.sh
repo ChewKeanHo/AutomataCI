@@ -68,6 +68,13 @@ RELEASE::run_chocolatey_repo_conclude() {
         # execute
         __current_path="$PWD"
         cd "$1"
+        GIT::autonomous_commit "${PROJECT_SKU} ${PROJECT_VERSION}"
+        if [ $? -ne 0 ]; then
+                cd "$__current_path" && unset __current_path
+                OS::print_status error "commit failed.\n"
+                return 1
+        fi
+
         GIT::pull_to_latest
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
@@ -75,10 +82,7 @@ RELEASE::run_chocolatey_repo_conclude() {
                 return 1
         fi
 
-        GIT::autonomous_commit \
-                "${PROJECT_SKU} ${PROJECT_VERSION}" \
-                "$PROJECT_CHOCOLATEY_REPO_KEY" \
-                "$PROJECT_CHOCOLATEY_REPO_BRANCH"
+        GIT::push "$PROJECT_CHOCOLATEY_REPO_KEY" "$PROJECT_CHOCOLATEY_REPO_BRANCH"
         __exit=$?
         cd "$__current_path" && unset __current_path
         if [ $__exit -ne 0 ]; then

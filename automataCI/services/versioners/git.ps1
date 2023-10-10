@@ -43,16 +43,12 @@ function GIT-At-Root-Repo {
 
 function GIT-Autonomous-Commit {
 	param(
-		[string]$__tracker,
-		[string]$__repo,
-		[string]$__branch
+		[string]$__tracker
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__tracker) -or
-		[string]::IsNullOrEmpty($__repo) -or
-		[string]::IsNullOrEmpty($__branch)) {
+	if ([string]::IsNullOrEmpty($__tracker)) {
 		return 1
 	}
 
@@ -74,11 +70,6 @@ function GIT-Autonomous-Commit {
 	}
 
 	$__process = OS-Exec "git" "commit -m 'Publish as of ${__tracker}'"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = OS-Exec "git" "push ${__repo} ${__branch}"
 	if ($__process -ne 0) {
 		return 1
 	}
@@ -93,16 +84,12 @@ function GIT-Autonomous-Commit {
 
 function GIT-Autonomous-Force-Commit {
 	param(
-		[string]$__tracker,
-		[string]$__repo,
-		[string]$__branch
+		[string]$__tracker
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__tracker) -or
-		[string]::IsNullOrEmpty($__repo) -or
-		[string]::IsNullOrEmpty($__branch)) {
+	if ([string]::IsNullOrEmpty($__tracker)) {
 		return 1
 	}
 
@@ -124,11 +111,6 @@ function GIT-Autonomous-Force-Commit {
 	}
 
 	$__process = OS-Exec "git" "commit -m 'Publish as of ${__tracker}'"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = OS-Exec "git" "push -f ${__repo} ${__branch}"
 	if ($__process -ne 0) {
 		return 1
 	}
@@ -324,7 +306,39 @@ function GIT-Pull-To-Latest {
 
 
 	# execute
-	$__process = OS-Exec "git" "pull"
+	$__process = OS-Exec "git" "pull --rebase"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function GIT-Push {
+	param(
+		[string]$__repo,
+		[string]$__branch
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__repo) -or [string]::IsNullOrEmpty($__branch)) {
+		return 1
+	}
+
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$__process = OS-Exec "git" "push ${__repo} ${__branch}"
 	if ($__process -ne 0) {
 		return 1
 	}

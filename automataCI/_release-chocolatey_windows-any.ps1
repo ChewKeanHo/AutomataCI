@@ -74,6 +74,15 @@ function RELEASE-Run-Chocolatey-Repo-Conclude {
 	# execute
 	$__current_path = Get-Location
 	$null = Set-Location "${__directory}"
+	$__process = GIT-Autonomous-Commit "${env:PROJECT_SKU} ${env:PROJECT_VERSION}"
+	if ($__process -ne 0) {
+		$null = Set-Location "${__curent_path}"
+		$null = Remove-Variable __current_path
+		OS-Print-Status error "commit failed."
+		return 1
+	}
+
+
 	$__process = GIT-Pull-To-Latest
 	if ($__process -ne 0) {
 		$null = Set-Location "${__curent_path}"
@@ -82,8 +91,8 @@ function RELEASE-Run-Chocolatey-Repo-Conclude {
 		return 1
 	}
 
-	$__process = GIT-Autonomous-Commit `
-		"${env:PROJECT_SKU} ${env:PROJECT_VERSION}" `
+
+	$__process = GIT-Push `
 		"${env:PROJECT_CHOCOLATEY_REPO_KEY}" `
 		"${env:PROJECT_CHOCOLATEY_REPO_BRANCH}"
 	$null = Set-Location "${__curent_path}"

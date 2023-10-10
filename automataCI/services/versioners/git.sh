@@ -41,12 +41,10 @@ GIT::at_root_repo() {
 
 GIT::autonomous_commit() {
         #__tracker="$1"
-        #__repo="$2"
-        #__branch="$3"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+        if [ -z "$1" ]; then
                 return 1
         fi
 
@@ -67,11 +65,6 @@ GIT::autonomous_commit() {
         fi
 
         git commit -m "automation: publish as of ${1}"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        git push "$2" "$3"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -86,12 +79,10 @@ GIT::autonomous_commit() {
 
 GIT::autonomous_force_commit() {
         #__tracker="$1"
-        #__repo="$2"
-        #__branch="$3"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+        if [ -z "$1" ]; then
                 return 1
         fi
 
@@ -112,11 +103,6 @@ GIT::autonomous_force_commit() {
         fi
 
         git commit -m "automation: publish as of ${1}"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        git push -f "$2" "$3"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -307,7 +293,37 @@ GIT::pull_to_latest() {
 
 
         # execute
-        git pull
+        git pull --rebase
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+GIT::push() {
+        #__repo="$1"
+        #__branch="$2"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ]; then
+                return 1
+        fi
+
+        GIT::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        git push "$1" "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi

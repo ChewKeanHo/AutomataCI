@@ -76,6 +76,8 @@ replace ${PROJECT_SKU} => ./
                                 return 1
                         fi
                 fi
+        elif [ $(FS::is_target_a_chocolatey "$_target") -eq 0 ]; then
+                return 10 # not applicable
         elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
                 return 10 # not applicable
         else
