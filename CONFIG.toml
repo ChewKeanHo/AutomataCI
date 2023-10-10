@@ -104,7 +104,7 @@ PROJECT_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI"
 #
 # To enable it: simply supply the path (e.g. default is 'srcGO').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_GO = 'srcGO'
+PROJECT_GO = ''
 
 
 # PROJECT_PATH_GO_ENGINE
@@ -143,7 +143,7 @@ PROJECT_C = ''
 #
 # To enable it: simply supply the path (e.g. default is 'srcPYTHON').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_PYTHON = ''
+PROJECT_PYTHON = 'srcPYTHON'
 
 
 # PROJECT_PATH_PYTHON_ENGINE

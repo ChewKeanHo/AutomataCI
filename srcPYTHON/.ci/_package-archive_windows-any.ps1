@@ -68,6 +68,8 @@ function PACKAGE-Assemble-Archive-Content {
 				return 1
 			}
 		}
+	} elseif ($(FS-Is-Target-A-Chocolatey "${_target}") -eq 0) {
+		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
 		return 10 # not applicable
 	} else {

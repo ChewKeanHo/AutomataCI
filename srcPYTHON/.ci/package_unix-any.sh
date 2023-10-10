@@ -21,6 +21,7 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}/_package-archive_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}/_package-chocolatey_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}/_package-docker_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}/_package-homebrew_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}/_package-pypi_unix-any.sh"
