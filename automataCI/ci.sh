@@ -170,6 +170,24 @@ fi
 
 
 
+# update environment variables
+case "$PROJECT_OS" in
+linux)
+        __location="/home/linuxbrew/.linuxbrew/bin/brew"
+        ;;
+darwin)
+        __location="/usr/local/bin/brew"
+        ;;
+*)
+        ;;
+esac
+if [ -f "$__location" ]; then
+        eval "$("${__location}" shellenv)"
+fi
+
+
+
+
 # execute command
 case "$1" in
 env|Env|ENV)

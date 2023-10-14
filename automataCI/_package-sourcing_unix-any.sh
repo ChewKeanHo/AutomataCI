@@ -92,3 +92,21 @@ if [ ! -z "$PROJECT_C" ]; then
                 fi
         fi
 fi
+
+
+
+
+# source from Nim and overrides existing
+if [ ! -z "$PROJECT_NIM" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_NIM}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/package_unix-any.sh"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "sourcing Nim content assembling functions: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Sourcing failed\n"
+                        return 1
+                fi
+        fi
+fi

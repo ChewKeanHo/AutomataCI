@@ -280,6 +280,34 @@ INSTALLER::setup_index_repo() {
 
 
 
+INSTALLER::setup_nim() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "nim"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        brew install nim
+
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
 INSTALLER::setup_python() {
         # validate input
         OS::is_command_available "brew"

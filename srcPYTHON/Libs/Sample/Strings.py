@@ -1,4 +1,4 @@
-# [ COPYRIGHT CLASE HERE]
+# [ COPYRIGHT CLASE HERE ]
 def Process(name: str, location: str) -> str:
     """
     Generate a printable statement for a name and a location.

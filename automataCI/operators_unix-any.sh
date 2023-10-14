@@ -25,17 +25,14 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/sync.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/c.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/nim.sh"
 
 
 
 
 BUILD::__exec_compile_source_code() {
         # execute
-        __line="$@"
-        __line="${__line#*-c }"
-        __line="${__line%%.c*}"
-
-        OS::print_status info "compiling ${__line}.c\n"
+        OS::print_status info "executing ${@}\n"
         $@
         if [ $? -ne 0 ]; then
                 OS::print_status error "build failed.\n\n"
@@ -129,7 +126,7 @@ BUILD::__validate_source_files() {
 
 
                 # create command for parallel execution
-                if [ ! "${__path%.c*}" = "$__path"  ]; then # it's a .c source file
+                if [ ! "${__path%.c*}" = "$__path"  ]; then
                         OS::print_status info "registering .c file...\n"
                         printf -- "%b -o %b -c %b %b\n" \
                                 "$_target_compiler" \
@@ -149,12 +146,32 @@ ${_target_directory}/${__path%.c*}.o
                                 OS::print_status error "register failed.\n\n"
                                 return 1
                         fi
-                elif [ ! "${__path%.o*}" = "$__path"  ]; then # it's a .o compiled file
+                elif [ ! "${__path%.nim*}" = "$__path"  ]; then
+                        OS::print_status info "registering .nim file...\n"
+                        printf -- "%b %b --out:%b %b\n" \
+                                "$_target_compiler" \
+                                "$_target_args" \
+                                "${_target_directory}/${__path%.nim*}" \
+                                "${PROJECT_PATH_ROOT}/${_target_source}/${__path}" \
+                                >> "$_parallel_control"
+                        if [ $? -ne 0 ]; then
+                                OS::print_status error "register failed.\n\n"
+                                return 1
+                        fi
+
+                        FS::append_file "$_linker_control" "\
+${_target_directory}/${__path%.nim*}
+"
+                        if [ $? -ne 0 ]; then
+                                OS::print_status error "register failed.\n\n"
+                                return 1
+                        fi
+                elif [ ! "${__path%.o*}" = "$__path"  ]; then
                         OS::print_status info "registering .o file...\n"
                         __target_path="${_target_directory}/${__path}"
                         FS::make_housing_directory "$__target_path"
                         FS::copy_file \
-                                "${PROJECT_PATH_ROOT}/${_target_source}/$__path" \
+                                "${PROJECT_PATH_ROOT}/${_target_source}/${__path}" \
                                 "${__target_path%/*}"
                         if [ $? -ne 0 ]; then
                                 OS::print_status error "register failed.\n\n"
@@ -168,7 +185,7 @@ ${_target_directory}/${__path}
                                 OS::print_status error "register failed.\n\n"
                                 return 1
                         fi
-                else # it's an unsupported file
+                else
                         OS::print_status error "unsupported file: ${__path}\n\n"
                         return 1
                 fi
@@ -236,10 +253,24 @@ BUILD::_exec_build() {
         _target_arch="$(STRINGS::to_lowercase "$_target_arch")"
         _target_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}"
         case "$(STRINGS::to_lowercase "$_target_type")" in
-        c_binary)
+        nim-binary)
+                _target_source="$PROJECT_NIM"
+                _target_type="none"
+                _target_directory="${_target_directory}/nim-bin_${_target}"
+                _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${_target}"
+                _target_compiler="nim"
+                ;;
+        nim-test)
+                _target_source="$PROJECT_NIM"
+                _target_type="none"
+                _target_directory="${_target_directory}/nim-test_${_target}"
+                _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${_target}"
+                _target_compiler="nim"
+                ;;
+        c-binary)
                 _target_source="$PROJECT_C"
                 _target_type="bin"
-                _target_directory="${_target_directory}/cbin_${_target}"
+                _target_directory="${_target_directory}/c-bin_${_target}"
                 case "$_target_arch" in
                 wasm)
                         _target="${_target}.wasm"
@@ -249,19 +280,58 @@ BUILD::_exec_build() {
                         ;;
                 esac
                 _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${_target}"
+                _target_compiler="$(C::get_compiler \
+                        "$_target_os" \
+                        "$_target_arch" \
+                        "$PROJECT_OS" \
+                        "$PROJECT_ARCH" \
+                        "$_target_compiler" \
+                )"
+                if [ $? -ne 0 ]; then
+                        OS::print_status warning "No available compiler. Skipping...\n\n"
+                        return 10
+                else
+                        OS::print_status info "selected ${_target_compiler} compiler...\n"
+                fi
                 ;;
-        c_library)
+        c-library)
                 _target_source="$PROJECT_C"
                 _target_type="lib"
                 _target="${PROJECT_SKU}-lib_${_target_os}-${_target_arch}"
-                _target_directory="${_target_directory}/clib_${_target}"
+                _target_directory="${_target_directory}/c-lib_${_target}"
                 _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${_target}.a"
+                _target_compiler="$(C::get_compiler \
+                        "$_target_os" \
+                        "$_target_arch" \
+                        "$PROJECT_OS" \
+                        "$PROJECT_ARCH" \
+                        "$_target_compiler" \
+                )"
+                if [ $? -ne 0 ]; then
+                        OS::print_status warning "No available compiler. Skipping...\n\n"
+                        return 10
+                else
+                        OS::print_status info "selected ${_target_compiler} compiler...\n"
+                fi
                 ;;
-        c_test)
+        c-test)
                 _target_source="$PROJECT_C"
                 _target_type="test-bin"
-                _target_directory="${_target_directory}/ctest_${_target}"
+                _target_directory="${_target_directory}/c-test_${_target}"
                 _target="${_target_directory}"
+                _target_compiler="$(C::get_compiler \
+                        "$_target_os" \
+                        "$_target_arch" \
+                        "$PROJECT_OS" \
+                        "$PROJECT_ARCH" \
+                        "$_target_compiler" \
+                )"
+                if [ $? -ne 0 ]; then
+                        OS::print_status warning "No available compiler. Skipping...\n\n"
+                        return 10
+                else
+                        OS::print_status info "selected ${_target_compiler} compiler...\n"
+                fi
                 ;;
         *)
                 OS::print_status error "validation failed.\n\n"
@@ -271,19 +341,6 @@ BUILD::_exec_build() {
         _parallel_control="${_target_directory}/sync.txt"
         _linker_control="${_target_directory}/o-list.txt"
         _parallel_total=0
-        _target_compiler="$(C::get_compiler \
-                "$_target_os" \
-                "$_target_arch" \
-                "$PROJECT_OS" \
-                "$PROJECT_ARCH" \
-                "$_target_compiler" \
-        )"
-        if [ $? -ne 0 ]; then
-                OS::print_status warning "No available compiler. Skipping...\n\n"
-                return 10
-        else
-                OS::print_status info "selected ${_target_compiler} compiler...\n"
-        fi
 
 
         OS::print_status info "validating config file (${_target_config##*/}) existence...\n"
@@ -327,7 +384,7 @@ BUILD::_exec_build() {
         # link all objects
         BUILD::_exec_link \
                 "$_target_type" \
-                "${_target}" \
+                "$_target" \
                 "$_target_directory" \
                 "$_linker_control" \
                 "$_target_compiler"
@@ -362,11 +419,14 @@ BUILD::_exec_link() {
 
         # link all objects
         case "$_target_type" in
+        none)
+                OS::print_status info "linking object file into executable...\n"
+                ;;
         test-bin)
                 OS::print_status info "linking object file into executable...\n"
                 old_IFS="$IFS"
                 while IFS="" read -r __line || [ -n "$__line" ]; do
-                        _target="${__line%.o*}"
+                        _target="${__line%.*}"
                         FS::remove_silently "$_target"
                         if [ $? -ne 0 ]; then
                                 OS::print_status error "link failed.\n\n"
@@ -474,19 +534,43 @@ BUILD::test() {
 
         # prepare test environment
         _target="${PROJECT_SKU}_${_target_os}-${_target_arch}"
-        _target_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/ctest_${_target}"
-        _target_build_list="${_target_directory}/build-list.txt"
+        _target_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}"
 
 
         # scan for all test source codes
         OS::print_status info "setup test workspace...\n"
-        FS::remake_directory "$_target_directory"
         case "$1" in
+        "$PROJECT_NIM")
+                OS::print_status info "scanning all nim test codes...\n"
+                _target_code="nim-test"
+                _target_directory="${_target_directory}/${_target_code}_${_target}"
+                _target_build_list="${_target_directory}/build-list.txt"
+
+                FS::remake_directory "$_target_directory"
+
+                __old_IFS="$IFS"
+                find "${PROJECT_PATH_ROOT}/${PROJECT_NIM}" -name '*_test.nim' -print0 \
+                | while IFS="" read -r __line || [ -n "$__line" ]; do
+                        __line="${__line#*${PROJECT_PATH_ROOT}/${PROJECT_NIM}/}"
+
+                        OS::print_status info "registering ${__line}\n"
+                        FS::append_file \
+                                "$_target_build_list" \
+                                "${_target_os}-${_target_arch} ${__line}\n"
+                done
+                IFS="$__old_IFS" && unset __old_IFS
+                ;;
         "$PROJECT_C")
                 OS::print_status info "scanning all C test codes...\n"
+                _target_code="c-test"
+                _target_directory="${_target_directory}/${_target_code}_${_target}"
+                _target_build_list="${_target_directory}/build-list.txt"
+
+                FS::remake_directory "$_target_directory"
+
                 __old_IFS="$IFS"
-                find "${PROJECT_PATH_ROOT}/${PROJECT_C}" -name '*_test.c' -print0 |
-                while IFS="" read -r __line || [ -n "$__line" ]; do
+                find "${PROJECT_PATH_ROOT}/${PROJECT_C}" -name '*_test.c' -print0 \
+                | while IFS="" read -r __line || [ -n "$__line" ]; do
                         __line="${__line#*${PROJECT_PATH_ROOT}/${PROJECT_C}/}"
 
                         OS::print_status info "registering ${__line}\n"
@@ -503,8 +587,15 @@ BUILD::test() {
         esac
 
 
+        # check if no test is available, get out early.
+        if [ ! -f "$_target_build_list" ]; then
+                OS::print_status success "\n\n"
+                return 0
+        fi
+
+
         # build all test artifacts
-        BUILD::_exec_build "c_test" "$2" "$3" "$_target_build_list" "$4" "$5"
+        BUILD::_exec_build "$_target_code" "$2" "$3" "$_target_build_list" "$4" "$5"
         case $? in
         0)
                 ;;
@@ -519,7 +610,8 @@ BUILD::test() {
 
         # execute all test artifacts
         _target_config="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
-        _target_config="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/ctest_${_target_config}"
+        _target_config="${_target_code}_${_target_config}"
+        _target_config="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_target_config}"
         _target_config="${_target_config}/o-list.txt"
 
         OS::print_status info "checking test execution workspace...\n"
@@ -531,7 +623,7 @@ BUILD::test() {
         EXIT_CODE=0
         __old_IFS="$IFS"
         while IFS="" read -r __line || [ -n "$__line" ]; do
-                __line="${__line%.o*}"
+                __line="${__line%.*}"
                 OS::print_status info "testing ${__line}\n"
 
                 $__line

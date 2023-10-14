@@ -24,16 +24,14 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\sync.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\c.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\nim.ps1"
 
 
 
 
 function BUILD-__Exec-Compile-Source-Code {
 	# execute
-	$__line = $args -Join " "
-	$__line = $__line -replace '.*(D:\\.*\.c).*', '$1'
-
-	OS-Print-Status info "compiling ${__line}"
+	OS-Print-Status info "executing ${args}"
 	$__process = Invoke-Expression "$args"
 	if ($LASTEXITCODE -ne 0) {
 		OS-Print-Status error "build failed.`n"
@@ -54,6 +52,7 @@ function BUILD-__Init-Sync {
 	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
 	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\sync.ps1"
 	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\c.ps1"
+	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\nim.ps1"
 }
 
 
@@ -162,6 +161,26 @@ ${_target_directory}\$($__path -replace '.c.*', '.o')
 				OS-Print-Status error "register failed.`n"
 				return
 			}
+		} elseif ($__path -match "\.nim$") {
+			OS-Print-Status info "registering .nim file..."
+			$__str = "{0} {1} --out:{2} {3}" -f `
+				"${_target_compiler}", `
+				"${_target_args}", `
+				"${_target_directory}\$($__path -replace '.nim.*', '')", `
+				"${env:PROJECT_PATH_ROOT}\${_target_source}\${__path}"
+			$__process = FS-Append-File "${_parallel_control}" "${__str}"
+			if ($__process -ne 0) {
+				OS-Print-Status error "register failed.`n"
+				return 1
+			}
+
+			$__process = FS-Append-File "${_linker_control}" @"
+${_target_directory}\$($__path -replace '.nim.*', '')
+"@
+			if ($__process -ne 0) {
+				OS-Print-Status error "register failed.`n"
+				return
+			}
 		} elseif ($__path -match "\.o$") {
 			OS-Print-Status info "registering .o file..."
 			$__target_path = "${_target_directory}\${__path}"
@@ -175,7 +194,7 @@ ${_target_directory}\$($__path -replace '.c.*', '.o')
 			}
 
 			$__process = FS-Append-File "${_linker_control}" @"
-${_target_directory}\$($__path -replace '.c.*', '.o')
+${_target_directory}\${__path}
 "@
 			if ($__process -ne 0) {
 				OS-Print-Status error "register failed.`n"
@@ -247,10 +266,22 @@ function BUILD-_Exec-Build {
 	$_target_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}"
 	$_target_type = STRINGS-To-Lowercase "${_target_type}"
 	switch ($_target_type) {
-	c_binary {
+	nim-binary {
+		$_target_source = "${env:PROJECT_NIM}"
+		$_target_type = "none"
+		$_target_directory = "${_target_directory}\nim-bin_${_target}"
+		$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${_target}"
+		$_target_compiler = "nim"
+	} nim-test {
+		$_target_source = "${env:PROJECT_NIM}"
+		$_target_type = "none"
+		$_target_directory = "${_target_directory}\nim-test_${_target}"
+		$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${_target}"
+		$_target_compiler = "nim"
+	} c-binary {
 		$_target_source = "${env:PROJECT_C}"
 		$_target_type = "bin"
-		$_target_directory = "${_target_directory}\cbin_${_target}"
+		$_target_directory = "${_target_directory}\c-bin_${_target}"
 		switch ($_target_arch) {
 		wasm {
 			$_target = "${_target}.wasm"
@@ -258,17 +289,53 @@ function BUILD-_Exec-Build {
 			$_target = "${_target}.exe"
 		}}
 		$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${_target}"
-	} c_library {
+		$_target_compiler = C-Get-Compiler `
+			"${_target_os}" `
+			"${_target_arch}" `
+			"${env:PROJECT_OS}" `
+			"${env:PROJECT_ARCH}" `
+			"${_target_compiler}"
+		if ([string]::IsNullOrEmpty($_target_compiler)) {
+			OS-Print-Status warning "No available compiler. Skipping...`n"
+			return 10
+		} else {
+			OS-Print-Status info "selected ${_target_compiler} compiler..."
+		}
+	} c-library {
 		$_target_source = "${env:PROJECT_C}"
 		$_target_type = "lib"
 		$_target = "${env:PROJECT_SKU}-lib_${_target_os}-${_target_arch}"
-		$_target_directory = "${_target_directory}\clib_${_target}"
+		$_target_directory = "${_target_directory}\c-lib_${_target}"
 		$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${_target}.dll"
-	} c_test {
+		$_target_compiler = C-Get-Compiler `
+			"${_target_os}" `
+			"${_target_arch}" `
+			"${env:PROJECT_OS}" `
+			"${env:PROJECT_ARCH}" `
+			"${_target_compiler}"
+		if ([string]::IsNullOrEmpty($_target_compiler)) {
+			OS-Print-Status warning "No available compiler. Skipping...`n"
+			return 10
+		} else {
+			OS-Print-Status info "selected ${_target_compiler} compiler..."
+		}
+	} c-test {
 		$_target_source = "${env:PROJECT_C}"
 		$_target_type = "test-bin"
-		$_target_directory = "${_target_directory}\ctest_${_target}"
+		$_target_directory = "${_target_directory}\c-test_${_target}"
 		$_target = "${_target_directory}"
+		$_target_compiler = C-Get-Compiler `
+			"${_target_os}" `
+			"${_target_arch}" `
+			"${env:PROJECT_OS}" `
+			"${env:PROJECT_ARCH}" `
+			"${_target_compiler}"
+		if ([string]::IsNullOrEmpty($_target_compiler)) {
+			OS-Print-Status warning "No available compiler. Skipping...`n"
+			return 10
+		} else {
+			OS-Print-Status info "selected ${_target_compiler} compiler..."
+		}
 	} default {
 		OS-Print-Status error "validation failed.`n"
 		return 1
@@ -276,18 +343,6 @@ function BUILD-_Exec-Build {
 	$_parallel_control = "${_target_directory}\sync.txt"
 	$_linker_control = "${_target_directory}\o-list.txt"
 	$_parallel_total = 0
-	$_target_compiler = C-Get-Compiler `
-		"${_target_os}" `
-		"${_target_arch}" `
-		"${env:PROJECT_OS}" `
-		"${env:PROJECT_ARCH}" `
-		"${_target_compiler}"
-	if ([string]::IsNullOrEmpty($_target_compiler)) {
-		OS-Print-Status warning "No available compiler. Skipping...`n"
-		return 10
-	} else {
-		OS-Print-Status info "selected ${_target_compiler} compiler..."
-	}
 
 
 	OS-Print-Status info `
@@ -369,7 +424,9 @@ function BUILD-_Exec-Link {
 
 	# link all objects
 	switch ($_target_type) {
-	test-bin {
+	none {
+		OS-Print-Status info "linking object file into executable..."
+	} test-bin {
 		OS-Print-Status info "linking object file into executable..."
 		foreach ($__line in (Get-Content -Path "${_linker_control}")) {
 			$_target = $__line -replace '\.o$', '.exe'
@@ -401,8 +458,6 @@ function BUILD-_Exec-Link {
 			return 1
 		}
 
-
-		# convert pathing to be GCC friendly
 		$__directory = Split-Path -Parent -Path "${_linker_control}"
 		$__file = Split-Path -Leaf -Path "${_linker_control}"
 		$_linker_control = "${__directory}\~${__file}"
@@ -491,26 +546,49 @@ function BUILD-Test {
 
 	# prepare test environment
 	$_target = "${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
-	$_target_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\ctest_${_target}"
-	$_target_build_list = "${_target_directory}\build-list.txt"
+	$_target_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}"
 
 
 	# scan for all test source codes
 	OS-Print-Status info "setup test workspace..."
 	$null = FS-Remake-Directory "${_target_directory}"
 	switch ($_target_type) {
-	"${env:PROJECT_C}" {
+	"${env:PROJECT_NIM}" {
+		OS-Print-Status info "scanning all nim test codes..."
+		$_target_code = "nim-test"
+		$_target_directory = "${_target_directory}\${_target_code}_${_target}"
+		$_target_build_list = "${_target_directory}\build-list.txt"
+
+		$null = FS-Remake-Directory "${_target_directory}"
+
+		foreach ($__line in (Get-ChildItem `
+			-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}" `
+			-Recurse `
+			-Filter "*_test.nim").FullName) {
+			$__line = $__line.Replace("${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}\", "")
+
+			OS-Print-Status info "registering ${__line}"
+			$null = FS-Append-File `
+				"${_target_build_list}" `
+				"${_target_os}-${_target_arch} ${__line}"
+		}
+	} "${env:PROJECT_C}" {
 		OS-Print-Status info "scanning all C test codes..."
+		$_target_code = "c-test"
+		$_target_directory = "${_target_directory}\${_target_code}_${_target}"
+		$_target_build_list = "${_target_directory}\build-list.txt"
+
+		$null = FS-Remake-Directory "${_target_directory}"
+
 		foreach ($__line in (Get-ChildItem `
 			-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}" `
 			-Recurse `
 			-Filter "*_test.c").FullName) {
-			$__line = $__line.TrimStart("${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}\")
-
+			$__line = $__line.Replace("${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}\", "")
 			OS-Print-Status info "registering ${__line}"
-			FS-Append-File "${_target_build_list}" @"
-${_target_os}-${_target_arch} ${__line}
-"@
+			$null = FS-Append-File `
+				"${_target_build_list}" `
+				"${_target_os}-${_target_arch} ${__line}"
 		}
 
 	} Default {
@@ -519,9 +597,16 @@ ${_target_os}-${_target_arch} ${__line}
 	}}
 
 
+	# check if no test is available, get out early
+	if (-not (Test-Path -Path "${_target_build_list}")) {
+		OS-Print-Status success "`n"
+		return 0
+	}
+
+
 	# build all test artifacts
 	$__process = BUILD-_Exec-Build `
-		"c_test" `
+		"${_target_code}" `
 		"${_target_os}" `
 		"${_target_arch}" `
 		"${_target_build_list}" `
@@ -536,7 +621,8 @@ ${_target_os}-${_target_arch} ${__line}
 
 	# execute all test artifacts
 	$_target_config = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
-	$_target_config = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\ctest_${_target_config}"
+	$_target_config = "${_target_code}_${_target_config}"
+	$_target_config = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${_target_config}"
 	$_target_config = "${_target_config}\o-list.txt"
 
 	OS-Print-Status info "checking test execution workspace..."
@@ -551,7 +637,7 @@ ${_target_os}-${_target_arch} ${__line}
 		OS-Print-Status info "testing ${__line}"
 
 		try {
-			$__process = Invoke-Expression "${__line}"
+			$null = Write-Host "$(Invoke-Expression "${__line}")"
 			if ($LASTEXITCODE -ne 0) {
 				$EXIT_CODE = 1
 			}

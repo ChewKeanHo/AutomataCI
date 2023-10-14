@@ -136,6 +136,14 @@ if (Test-Path -Path "${env:PROJECT_PATH_ROOT}\SECRETS.toml" -PathType leaf) {
 
 
 
+# update critical environment variables
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+	+ ";" `
+	+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+
+
+
 # execute command
 switch ($args[0]) {
 { $_ -in 'env', 'Env', 'ENV' } {

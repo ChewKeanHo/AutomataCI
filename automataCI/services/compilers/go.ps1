@@ -132,6 +132,9 @@ function deactivate {
 }
 
 # activate
+`$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") ``
+	+ ";" ``
+	+ [System.Environment]::GetEnvironmentVariable("Path","User")
 `${env:GOPATH} = "$(Split-Path -Path ${__location})"
 `${env:GOBIN} = "$(Split-Path -Path ${__location})\bin"
 `${env:GOCACHE} = "$(Split-Path -Path ${__location})\cache"
@@ -150,8 +153,8 @@ function global:prompt {
 
 
 	# testing the activation
-	$null = . "${__location}"
-	if ($LASTEXITCODE -ne 0) {
+	$__process = GO-Activate-Local-Environment
+	if ($__process -ne 0) {
 		return 1
 	}
 

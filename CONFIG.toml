@@ -94,6 +94,44 @@ PROJECT_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI"
 
 
 ######################
+# NIM TECHNOLOGY     #
+######################
+# PROJECT_NIM
+# This is a control variable used for enabling Go technology and also defining
+# its source codes directory relative to PROJECT_PATH_ROOT. Depending on the
+# offered service (e.g. GitHub Actions), setting this variable with value shall
+# notify the CI provider to setup Go development environment automatically.
+#
+# To enable it: simply supply the path (e.g. default is 'srcGO').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_NIM = 'srcNIM'
+
+
+# PROJECT_PATH_NIM_ENGINE
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
+# setting up localized environment.
+PROJECT_PATH_NIM_ENGINE = "nim-engine"
+
+
+
+
+######################
+# C TECHNOLOGY       #
+######################
+# PROJECT_C
+# This is a control variable used for enabling C technology and also defining
+# its source codes directory relative to PROJECT_PATH_ROOT. Depending on the
+# offered service (e.g. GitHub Actions), setting this variable with value shall
+# notify the CI provider to setup Go development environment automatically.
+#
+# To enable it: simply supply the path (e.g. default is 'srcC').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_C = ''
+
+
+
+
+######################
 # GO TECHNOLOGY      #
 ######################
 # PROJECT_GO
@@ -111,22 +149,6 @@ PROJECT_GO = ''
 # This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
 # setting up localized environment.
 PROJECT_PATH_GO_ENGINE = "go-engine"
-
-
-
-
-######################
-# C TECHNOLOGY       #
-######################
-# PROJECT_C
-# This is a control variable used for enabling C technology and also defining
-# its source codes directory relative to PROJECT_PATH_ROOT. Depending on the
-# offered service (e.g. GitHub Actions), setting this variable with value shall
-# notify the CI provider to setup Go development environment automatically.
-#
-# To enable it: simply supply the path (e.g. default is 'srcC').
-# To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_C = 'srcC'
 
 
 

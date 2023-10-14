@@ -110,6 +110,11 @@ function INSTALLER-Setup-C {
 	#}
 
 
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+
 	# report status
 	return 0
 }
@@ -164,6 +169,9 @@ function INSTALLER-Setup-Go {
 	if ($__process -ne 0) {
 		return 1
 	}
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
 
 
 	# report status
@@ -237,6 +245,41 @@ function INSTALLER-Setup-Index-Repo {
 
 	# report status
 	return 0
+}
+
+
+
+
+function INSTALLER-Setup-Nim {
+	# validate input
+	$__process =  OS-Is-Command-Available "choco"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process =  OS-Is-Command-Available "nim"
+	if ($__process -eq 0) {
+		return 0
+	}
+
+
+	# execute
+	$__process = OS-Exec "choco" "install nim -y"
+	if ($__process -ne 0) {
+		return 1
+	}
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+
+	# report status
+	$__process = OS-Is-Command-Available "nim"
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	return 1
 }
 
 

@@ -62,6 +62,7 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 	OS-Print-Status info "Installing python..."
 	$__process = INSTALLER-Setup-Python
 	if ($__process -ne 0) {
+		OS-Print-Status error "install failed."
 		return 1
 	}
 }
@@ -71,15 +72,28 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_GO}))) {
 	OS-Print-Status info "Installing go..."
 	$__process = INSTALLER-Setup-Go
 	if ($__process -ne 0) {
+		OS-Print-Status error "install failed."
 		return 1
 	}
 }
 
 
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_C}))) {
+if (-not ([string]::IsNullOrEmpty(${env:PROJECT_C})) -or
+	-not ([string]::IsNullOrEmpty(${env:PROJECT_NIM}))) {
 	OS-Print-Status info "Installing c..."
 	$__process = INSTALLER-Setup-C
 	if ($__process -ne 0) {
+		OS-Print-Status error "install failed."
+		return 1
+	}
+}
+
+
+if (-not ([string]::IsNullOrEmpty(${env:PROJECT_NIM}))) {
+	OS-Print-Status info "Installing nim..."
+	$__process = INSTALLER-Setup-Nim
+	if ($__process -ne 0) {
+		OS-Print-Status error "install failed."
 		return 1
 	}
 }

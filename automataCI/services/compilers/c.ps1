@@ -190,23 +190,23 @@ function C-Get-Compiler-By-Arch {
 		}}
 	} mips {
 		$__compiler = "mips-linux-gnu-gcc"
-	} mipsle {
+	} { $_ -in "mipsle", "mipsel" } {
 		$__compiler = "mipsel-linux-gnu-gcc"
 	} mips64 {
 		$__compiler = "mips64-linux-gnuabi64-gcc"
-	} {$_ -in "mips64le", "mips64el" } {
+	} { $_ -in "mips64le", "mips64el" } {
 		$__compiler = "mips64el-linux-gnuabi64-gcc"
 	} mipsisa32r6 {
 		$__compiler = "mipsisa32r6-linux-gnu-gcc"
-	} {$_ -in "mips64r6", "mipsisa64r6" } {
+	} { $_ -in "mips64r6", "mipsisa64r6" } {
 		$__compiler = "mipsisa64r6-linux-gnuabi64-gcc"
-	} mipsisa32r6el {
+	} { $_ -in "mips32r6le", "mipsisa32r6le", "mipsisa32r6el" } {
 		$__compiler = "mipsisa32r6el-linux-gnu-gcc"
-	} {$_ -in "mips64r6el", "mipsisa64r6el" } {
+	} { $_ -in "mips64r6le", "mips64r6el", "mipsisa64r6el" } {
 		$__compiler = "mipsisa64r6el-linux-gnuabi64-gcc"
 	} powerpc {
 		$__compiler = "powerpc-linux-gnu-gcc"
-	} ppc64el {
+	} { $_ -in "ppc64le", "ppc64el" } {
 		$__compiler = "powerpc64le-linux-gnu-gcc"
 	} riscv64 {
 		$__compiler = "riscv64-elf-gcc"

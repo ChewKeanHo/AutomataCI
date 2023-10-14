@@ -216,22 +216,22 @@ C::get_compiler_by_arch() {
         mips64le|mips64el)
                 __compiler="mips64el-linux-gnuabi64-gcc"
                 ;;
-        mipsisa32r6)
+        mips32r6|mipsisa32r6)
                 __compiler="mipsisa32r6-linux-gnu-gcc"
                 ;;
         mips64r6|mipsisa64r6)
                 __compiler="mipsisa64r6-linux-gnuabi64-gcc"
                 ;;
-        mipsisa32r6el)
+        mips32r6le|mipsisa32r6le|mipsisa32r6el)
                 __compiler="mipsisa32r6el-linux-gnu-gcc"
                 ;;
-        mips64r6el|mipsisa64r6el)
+        mips64r6le|mipsisa64r6le|mipsisa64r6el)
                 __compiler="mipsisa64r6el-linux-gnuabi64-gcc"
                 ;;
         powerpc)
                 __compiler="powerpc-linux-gnu-gcc"
                 ;;
-        ppc64el)
+        ppc64le|ppc64el)
                 __compiler="powerpc64le-linux-gnu-gcc"
                 ;;
         riscv64)

@@ -1,0 +1,12 @@
+# AUTOMATACI SOURCE CODES LIST
+#
+# Step to do:
+# (1) List all the executable source codes for compilation in the following
+#     patterns:
+#           [OS]-[ARCH] relative/path/to/code.[TYPE]
+#     Example:
+#           any-any main.nim
+#           linux-amd64 fx1_linux-amd64.nim
+#           darwin-arm64 fx2_linux-amd64.nim
+#
+any-any automataci.nim

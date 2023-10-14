@@ -79,9 +79,19 @@ if [ ! -z "$PROJECT_GO" ]; then
 fi
 
 
-if [ ! -z "$PROJECT_C" ]; then
+if [ ! -z "$PROJECT_C" ] || [ ! -z "$PROJECT_NIM" ]; then
         OS::print_status info "Installing c...\n"
         INSTALLER::setup_c "$PROJECT_OS" "$PROJECT_ARCH"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "install failed.\n"
+                return 1
+        fi
+fi
+
+
+if [ ! -z "$PROJECT_NIM" ]; then
+        OS::print_status info "Installing nim...\n"
+        INSTALLER::setup_nim "$PROJECT_OS" "$PROJECT_ARCH"
         if [ $? -ne 0 ]; then
                 OS::print_status error "install failed.\n"
                 return 1

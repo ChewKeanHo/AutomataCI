@@ -29,7 +29,7 @@ Some good business reasons why using AutomataCI:
 
 ### Supported Technologies
 
-* Nim Programming Language (*Coming Soon*)
+* [Nim Programming Language](https://nim-lang.org/)
 * [Go Programming Language](https://go.dev/)
 * C Programming Language
   1. [i386 & amd64 GCC Compilers](https://gcc.gnu.org/)

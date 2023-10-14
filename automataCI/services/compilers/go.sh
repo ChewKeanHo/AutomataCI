@@ -112,6 +112,14 @@ GO::setup_local_environment() {
         __label="($PROJECT_PATH_GO_ENGINE)"
         __location="$(GO::get_activator_path)"
 
+        if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+                __brew="eval \$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        elif [ -f "/usr/local/bin/brew" ]; then
+                __brew="eval \$(/usr/local/bin/brew shellenv)"
+        else
+                __brew=""
+        fi
+
         FS::make_housing_directory "$__location"
         FS::make_directory "${__location%/*}/bin"
         FS::make_directory "${__location%/*}/cache"
@@ -134,6 +142,7 @@ deactivate() {
 }
 
 # activate
+${__brew}
 export GOPATH='${__location%/*}'
 export GOBIN='${__location%/*}/bin'
 export GOCACHE='${__location%/*}/cache'
