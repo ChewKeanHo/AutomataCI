@@ -126,7 +126,7 @@ PROJECT_PATH_NIM_ENGINE = "nim-engine"
 #
 # To enable it: simply supply the path (e.g. default is 'srcC').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_C = 'srcC'
+PROJECT_C = ''
 
 
 
@@ -142,7 +142,7 @@ PROJECT_C = 'srcC'
 #
 # To enable it: simply supply the path (e.g. default is 'srcGO').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_GO = ''
+PROJECT_GO = 'srcGO'
 
 
 # PROJECT_PATH_GO_ENGINE
