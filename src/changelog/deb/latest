@@ -1,6 +1,7 @@
 automataci (1.7.0) stable; urgency=low
 
+  * root: applied regressive changes back to Go programming language
   * root: applied regressive changes to C programming language
   * root: added Nim Programming Language support
 
--- Your Legal Full Name Here <contact@youremail.example>  Mon, 16 Oct 2023 14:42:32 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Mon, 16 Oct 2023 15:45:41 +0800
