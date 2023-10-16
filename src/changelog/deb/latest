@@ -1,4 +1,5 @@
 automataci (1.7.0) stable; urgency=low
 
+  * root: added Nim Programming Language support
 
--- Your Legal Full Name Here <contact@youremail.example>  Sun, 15 Oct 2023 07:59:13 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Mon, 16 Oct 2023 13:05:06 +0800

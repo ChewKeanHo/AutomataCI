@@ -21,7 +21,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\operator_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\operators_windows-any.ps1"
 
 
 
@@ -62,7 +62,7 @@ $COMPILER = ""
 
 # execute
 $__process = BUILD-Compile `
-	"c_binary" `
+	"c-binary" `
 	"windows" `
 	"${env:PROJECT_ARCH}" `
 	"automataCI.txt" `
@@ -74,7 +74,7 @@ if (($__process -ne 0) -and ($__process -ne 10)) {
 
 
 $__process = BUILD-Compile `
-	"c_library" `
+	"c-library" `
 	"windows" `
 	"${env:PROJECT_ARCH}" `
 	"libs\sample\automataCI.txt" `

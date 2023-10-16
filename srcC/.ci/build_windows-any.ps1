@@ -21,7 +21,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\operator_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\operators_windows-any.ps1"
 
 
 
@@ -64,7 +64,7 @@ $EXIT_CODE = 0
 
 # compile for windows-amd64 (microprocessor)
 $__process = BUILD-Compile `
-	"c_binary" `
+	"c-binary" `
 	"windows" `
 	"amd64" `
 	"automataCI.txt" `
@@ -76,7 +76,7 @@ if (($__process -ne 0) -and ($__process -ne 10)) {
 
 
 $__process = BUILD-Compile `
-	"c_library" `
+	"c-library" `
 	"windows" `
 	"amd64" `
 	"libs\sample\automataCI.txt" `
@@ -91,7 +91,7 @@ if (($__process -ne 0) -and ($__process -ne 10)) {
 
 # compile for windows-arm64 (microprocessor)
 $__process = BUILD-Compile `
-	"c_binary" `
+	"c-binary" `
 	"windows" `
 	"arm64" `
 	"automataCI.txt" `
@@ -103,7 +103,7 @@ if (($__process -ne 0) -and ($__process -ne 10)) {
 
 
 $__process = BUILD-Compile `
-	"c_library" `
+	"c-library" `
 	"windows" `
 	"arm64" `
 	"libs\sample\automataCI.txt" `
@@ -116,7 +116,7 @@ if (($__process -ne 0) -and ($__process -ne 10)) {
 
 # compile for js-wasm (web)
 $__process = BUILD-Compile `
-	"c_binary" `
+	"c-binary" `
 	"js" `
 	"wasm" `
 	"automataCI.txt" `

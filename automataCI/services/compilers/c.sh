@@ -136,13 +136,6 @@ C::get_compiler_by_arch() {
                         ;;
                 *)
                         __compiler="aarch64-linux-gnu-gcc"
-                        OS::is_command_available "$__compiler"
-                        if [ $? -eq 0 ]; then
-                                printf -- "%b" "$__compiler"
-                                return 0
-                        fi
-
-                        __compiler="aarch64-elf-gcc"
                         ;;
                 esac
                 ;;

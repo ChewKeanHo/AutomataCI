@@ -22,7 +22,7 @@ fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/operator_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/operators_unix-any.sh"
 
 
 
@@ -67,13 +67,13 @@ EXIT_CODE=0
 # execute
 # compile for linux-amd64 (microprocessor)
 if [ ! "$PROJECT_OS" = "darwin" ]; then
-        BUILD::compile "c_binary" "linux" "amd64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
+        BUILD::compile "c-binary" "linux" "amd64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
         if [ $? -ne 0 -a $? -ne 10 ]; then
                 EXIT_CODE=1
         fi
 
         BUILD::compile \
-                "c_library" \
+                "c-library" \
                 "linux" \
                 "amd64" \
                 "libs/sample/automataCI.txt" \
@@ -87,13 +87,13 @@ fi
 
 # compile for linux-arm64 (microprocessor)
 if [ ! "$PROJECT_OS" = "darwin" ]; then
-        BUILD::compile "c_binary" "linux" "arm64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
+        BUILD::compile "c-binary" "linux" "arm64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
         if [ $? -ne 0 -a $? -ne 10 ]; then
                 EXIT_CODE=1
         fi
 
         BUILD::compile \
-                "c_library" \
+                "c-library" \
                 "linux" \
                 "arm64" \
                 "libs/sample/automataCI.txt" \
@@ -106,13 +106,13 @@ fi
 
 
 # compile for windows-amd64 (microprocessor)
-BUILD::compile "c_binary" "windows" "amd64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
+BUILD::compile "c-binary" "windows" "amd64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
 if [ $? -ne 0 -a $? -ne 10 ]; then
         EXIT_CODE=1
 fi
 
 BUILD::compile \
-        "c_library" \
+        "c-library" \
         "windows" \
         "amd64" \
         "libs/sample/automataCI.txt" \
@@ -124,13 +124,13 @@ fi
 
 
 # compile for windows-arm64 (microprocessor)
-BUILD::compile "c_binary" "windows" "arm64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
+BUILD::compile "c-binary" "windows" "arm64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
 if [ $? -ne 0 -a $? -ne 10 ]; then
         EXIT_CODE=1
 fi
 
 BUILD::compile \
-        "c_library" \
+        "c-library" \
         "windows" \
         "arm64" \
         "libs/sample/automataCI.txt" \
@@ -144,7 +144,7 @@ fi
 # compile for darwin-amd64 (microprocessor)
 if [ "$PROJECT_OS" = "darwin" ]; then
         BUILD::compile \
-                "c_binary" \
+                "c-binary" \
                 "darwin" \
                 "amd64" \
                 "automataCI.txt" \
@@ -155,7 +155,7 @@ if [ "$PROJECT_OS" = "darwin" ]; then
         fi
 
         BUILD::compile \
-                "c_library" \
+                "c-library" \
                 "darwin" \
                 "amd64" \
                 "libs/sample/automataCI.txt" \
@@ -170,7 +170,7 @@ fi
 # compile for darwin-arm64 (microprocessor)
 if [ "$PROJECT_OS" = "darwin" ]; then
         BUILD::compile \
-                "c_binary" \
+                "c-binary" \
                 "darwin" \
                 "arm64" \
                 "automataCI.txt" \
@@ -181,7 +181,7 @@ if [ "$PROJECT_OS" = "darwin" ]; then
         fi
 
         BUILD::compile \
-                "c_library" \
+                "c-library" \
                 "darwin" \
                 "arm64" \
                 "libs/sample/automataCI.txt" \
@@ -195,7 +195,7 @@ fi
 
 # compile for linux-armel (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "armel" \
         "automataCI.txt" \
@@ -208,7 +208,7 @@ fi
 
 # compile for linux-armhf (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "armhf" \
         "automataCI.txt" \
@@ -221,7 +221,7 @@ fi
 
 # compile for linux-mips (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "mips" \
         "automataCI.txt" \
@@ -234,7 +234,7 @@ fi
 
 # compile for linux-mips64 (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "mips64" \
         "automataCI.txt" \
@@ -247,7 +247,7 @@ fi
 
 # compile for linux-mips64el (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "mips64el" \
         "automataCI.txt" \
@@ -260,7 +260,7 @@ fi
 
 # compile for linux-mips64r6 (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "mips64r6" \
         "automataCI.txt" \
@@ -273,7 +273,7 @@ fi
 
 # compile for linux-mips64r6el (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "mips64r6el" \
         "automataCI.txt" \
@@ -286,7 +286,7 @@ fi
 
 # compile for linux-powerpc (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "powerpc" \
         "automataCI.txt" \
@@ -299,7 +299,7 @@ fi
 
 # compile for linux-ppc64el (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "ppc64el" \
         "automataCI.txt" \
@@ -312,7 +312,7 @@ fi
 
 # compile for linux-s390x (microprocessor)
 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "linux" \
         "s390x" \
         "automataCI.txt" \
@@ -326,7 +326,7 @@ fi
 # compile for linux-avr (ATMEL microcontroller)
 OS::is_command_available "avr-objcopy"
 if [ $? -eq 0 ]; then
-        BUILD::compile "c_binary" "linux" "avr" "automataCI.txt" "\
+        BUILD::compile "c-binary" "linux" "avr" "automataCI.txt" "\
 -Wall \
 -Wextra \
 -std=gnu89 \
@@ -367,7 +367,7 @@ fi
 
 # compile for js-wasm (web)
 ALLOW_MEMORY_GROWTH=1 BUILD::compile \
-        "c_binary" \
+        "c-binary" \
         "js" \
         "wasm" \
         "automataCI.txt" \

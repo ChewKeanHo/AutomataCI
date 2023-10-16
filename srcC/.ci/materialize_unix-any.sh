@@ -22,7 +22,7 @@ fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/operator_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/operators_unix-any.sh"
 
 
 
@@ -65,7 +65,7 @@ COMPILER=""
 # execute
 if [ "$PROJECT_OS" = "darwin" ]; then
         BUILD::compile \
-                "c_binary" \
+                "c-binary" \
                 "darwin" \
                 "amd64" \
                 "automataCI.txt" \
@@ -76,7 +76,7 @@ if [ "$PROJECT_OS" = "darwin" ]; then
         fi
 
         BUILD::compile \
-                "c_library" \
+                "c-library" \
                 "darwin" \
                 "amd64" \
                 "libs/sample/automataCI.txt" \
@@ -86,13 +86,13 @@ if [ "$PROJECT_OS" = "darwin" ]; then
                 return 1
         fi
 else
-        BUILD::compile "c_binary" "linux" "amd64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
+        BUILD::compile "c-binary" "linux" "amd64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
         if [ $? -ne 0 -a $? -ne 10 ]; then
                 return 1
         fi
 
         BUILD::compile \
-                "c_library" \
+                "c-library" \
                 "linux" \
                 "amd64" \
                 "libs/sample/automataCI.txt" \

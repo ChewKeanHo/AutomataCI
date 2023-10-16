@@ -104,7 +104,7 @@ PROJECT_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI"
 #
 # To enable it: simply supply the path (e.g. default is 'srcGO').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_NIM = 'srcNIM'
+PROJECT_NIM = ''
 
 
 # PROJECT_PATH_NIM_ENGINE
@@ -126,7 +126,7 @@ PROJECT_PATH_NIM_ENGINE = "nim-engine"
 #
 # To enable it: simply supply the path (e.g. default is 'srcC').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_C = ''
+PROJECT_C = 'srcC'
 
 
 
