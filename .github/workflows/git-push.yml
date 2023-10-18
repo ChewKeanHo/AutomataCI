@@ -69,6 +69,10 @@ jobs:
         id: native_ci_build
         run: |
           ./ci.cmd build
+      - name: Execute repo's AutomataCI - NOTARIZE
+        id: native_ci_notarize
+        run: |
+          ./ci.cmd notarize
       - name: Execute repo's AutomataCI - PACKAGE
         id: native_ci_package
         run: |

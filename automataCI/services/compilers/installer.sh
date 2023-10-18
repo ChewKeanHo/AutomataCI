@@ -308,6 +308,34 @@ INSTALLER::setup_nim() {
 
 
 
+INSTALLER::setup_osslsigncode() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "osslsigncode"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        brew install osslsigncode
+
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
 INSTALLER::setup_python() {
         # validate input
         OS::is_command_available "brew"

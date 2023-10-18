@@ -59,6 +59,14 @@ if [ $? -ne 0 ]; then
 fi
 
 
+OS::print_status info "Installing osslsigncode...\n"
+INSTALLER::setup_osslsigncode
+if [ $? -ne 0 ]; then
+        OS::print_status error "install failed.\n"
+        return 1
+fi
+
+
 if [ ! -z "$PROJECT_PYTHON" ]; then
         OS::print_status info "Installing python...\n"
         INSTALLER::setup_python

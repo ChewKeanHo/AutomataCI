@@ -167,6 +167,9 @@ switch ($args[0]) {
 } { $_ -in 'build', 'Build', 'BUILD' } {
 	$env:PROJECT_CI_JOB = "build"
 	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+} { $_ -in 'notarize', 'Notarize', 'NOTARIZE' } {
+	$env:PROJECT_CI_JOB = "notarize"
+	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\notarize_windows-any.ps1"
 } { $_ -in 'package', 'Package', 'PACKAGE' } {
 	$env:PROJECT_CI_JOB = "package"
 	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\package_windows-any.ps1"
@@ -200,6 +203,7 @@ switch ($args[0]) {
 	Write-Host "        To test the repo 🠚              $ ./ci.cmd test"
 	Write-Host "        Like build but only for host 🠚  $ ./ci.cmd materialize"
 	Write-Host "        To build the repo 🠚             $ ./ci.cmd build"
+	Write-Host "        To notarize the builds 🠚        $ ./ci.cmd notarize"
 	Write-Host "        To package the repo product 🠚   $ ./ci.cmd package"
 	Write-Host "        To release the repo product 🠚   $ ./ci.cmd release"
 	Write-Host "        To stop a development 🠚         $ ./ci.cmd stop"

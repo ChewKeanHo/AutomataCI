@@ -70,6 +70,10 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 continue
         fi
 
+        if [ ! -f "$i" ]; then
+                continue
+        fi
+
 
         # parse build candidate
         OS::print_status info "detected ${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${i}\n"

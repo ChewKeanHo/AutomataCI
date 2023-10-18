@@ -71,6 +71,11 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		continue
 	}
 
+	$__process = FS-Is-File "$i"
+	if ($__process -ne 0) {
+		continue
+	}
+
 
 	# parse build candidate
 	OS-Print-Status info "detected $i"

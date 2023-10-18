@@ -225,6 +225,11 @@ build|Build|BUILD)
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
         code=$?
         ;;
+notarize|Notarize|NOTARIZE)
+        export PROJECT_CI_JOB="notarize"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/notarize_unix-any.sh"
+        code=$?
+        ;;
 package|Package|PACKAGE)
         export PROJECT_CI_JOB="package"
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/package_unix-any.sh"
@@ -270,6 +275,7 @@ purge|Purge|PURGE)
         printf "        To test the repo 🠚              $ ./ci.cmd test\n"
         printf "        Like build but only for host 🠚  $ ./ci.cmd materialize\n"
         printf "        To build the repo 🠚             $ ./ci.cmd build\n"
+        printf "        To notarize the builds 🠚        $ ./ci.cmd notarize\n"
         printf "        To package the repo product 🠚   $ ./ci.cmd package\n"
         printf "        To release the repo product 🠚   $ ./ci.cmd release\n"
         printf "        To stop a development 🠚         $ ./ci.cmd stop\n"
