@@ -116,6 +116,24 @@ fi
 
 
 
+# source from Angular and overrides existing
+if [ ! -z "$PROJECT_ANGULAR" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/notarize_unix-any.sh"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "sourcing Angular content assembling functions: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Sourcing failed\n"
+                        return 1
+                fi
+        fi
+fi
+
+
+
+
 # begin notarize
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         if [ -d "$i" ]; then

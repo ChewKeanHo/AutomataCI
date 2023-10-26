@@ -48,6 +48,8 @@ function PACKAGE-Assemble-IPK-Content {
 	$_package = "${env:PROJECT_SKU}"
 	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
+		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
 		# copy main libary
 		# TIP: (1) usually is: usr/local/lib

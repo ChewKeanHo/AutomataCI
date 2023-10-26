@@ -17,9 +17,9 @@ Some good business reasons why using AutomataCI:
 1. **Start off with a tested and solid foundation** - All the templates and
    CI jobs are tested and have default configured for immediate software
    development.
-2. **Avoid being threatend by your malicious suppliers** - CI it's a
-   nerve system for your product; handle it in-house and natively rather than
-   leaving it vulnerable for any 3rd-party to extort you.
+2. **Avoid being threatend by malicious suppliers** - CI it's a nerve system for
+   your product; handle it in-house and natively rather than leaving it nakedly
+   vulnerable for any kind 3rd-party extortions.
 3. **Steadily improvable** - AutomataCI itself are designed to be adaptive to
    market changes, self-improvable, and cater to common use cases.
 4. **Simple and scalable** - Only uses `POSIX` shell and `PowerShell` so it
@@ -42,7 +42,8 @@ Some good business reasons why using AutomataCI:
   8. [Clang](https://clang.llvm.org/)
   9. [MinGW](https://www.mingw-w64.org/)
   10. [Emscripten WASM](https://emscripten.org/)
-* Typescript (*Coming Soon*)
+* Javascript & Typescript
+  1. [Angular](https://angular.io/)
 * [Python Programming Language](https://www.python.org/)
 * Some Manual MISC stuffs
 

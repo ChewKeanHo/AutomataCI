@@ -45,6 +45,8 @@ function PACKAGE-Assemble-DOCKER-Content {
 
 	if ($(FS-Is-Target-A-Source "${_target}") -ne 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
+		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -ne 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {

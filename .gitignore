@@ -18,7 +18,7 @@ output/
 .bin/
 
 #####################
-# Native CI
+# AutomataCI
 #####################
 /SECRETS.toml
 /bin
@@ -29,6 +29,20 @@ output/
 /pkg
 /releases
 /resources/changelog/*/.*
+
+#####################
+# Angular
+#####################
+/out-tsc
+/bazel-out
+cache/
+coverage/
+dist/
+.sass-cache/
+connect.lock
+libpeerconnection.log
+testem.log
+typings
 
 #####################
 # LibreOffice
@@ -84,6 +98,13 @@ certbot.log
 *.bin
 
 #####################
+# Node
+#####################
+node_modules
+npm-debug.log
+yarn-error.log
+
+#####################
 # Databases
 #####################
 *.db
@@ -110,6 +131,7 @@ gh-pages/
 # MacOS specifics
 #####################
 .DS_Store
+Thumbs.db
 
 #####################
 # AWS CLI credential blobs

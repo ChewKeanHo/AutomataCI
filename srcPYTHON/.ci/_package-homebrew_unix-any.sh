@@ -39,6 +39,8 @@ PACKAGE::assemble_homebrew_content() {
         # validate project
         if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
                 return 10 # not applicable
+        elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
+                return 10 # not applicable
         elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then

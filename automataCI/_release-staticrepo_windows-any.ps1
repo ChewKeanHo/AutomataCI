@@ -75,7 +75,7 @@ function RELEASE-Run-Static-Repo-Setup {
 
 	# execute
 	OS-Print-Status info "setting up release static repo..."
-	$__process = INSTALLER-Setup-Release-Repo `
+	$__process = INSTALLER-Setup-Resettable-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
 		"$(Get-Location)" `

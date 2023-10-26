@@ -43,6 +43,15 @@ function PACKAGE-Assemble-Archive-Content {
 		if ($__process -ne 0) {
 			return 1
 		}
+	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
+		$__process = FS-Is-Target-A-Docs "${_target}"
+		if ($__process -ne 0) {
+			return 10 # not applicable
+		}
+
+		$__process = FS-Copy-All `
+			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}" `
+			"${_directory}"
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
 		OS-Print-Status info "copying ${_target} to ${_directory}..."
 		$__process = FS-Copy-File "${_target}" "${_directory}/lib${env:PROJECT_SKU}.a"

@@ -31,6 +31,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-pypi_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-rpm_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-staticrepo_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-docsrepo_windows-any.ps1"
 
 
 
@@ -168,6 +169,11 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 	}
 
 	$__process = RELEASE-Run-Changelog-Conclude
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = RELEASE-Docs-Repo
 	if ($__process -ne 0) {
 		return 1
 	}

@@ -110,6 +110,24 @@ fi
 
 
 
+# execute ANGULAR if set
+if [ ! -z "$PROJECT_ANGULAR" ]; then
+        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/${PROJECT_PATH_CI}/${__recipe}"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "ANGULAR tech detected. Parsing job recipe: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Parse failed.\n"
+                        return 1
+                fi
+        fi
+fi
+
+
+
+
 # execute baseline as last
 __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
 __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/${__recipe}"

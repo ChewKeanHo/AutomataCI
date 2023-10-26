@@ -108,3 +108,21 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_NIM})) {
 		}
 	}
 }
+
+
+
+
+# source from Angular and overrides existing
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_ANGULAR})) {
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\${env:PROJECT_PATH_CI}"
+	$__recipe = "${__recipe}\package_windows-any.ps1"
+	$__process = FS-Is-File "${__recipe}"
+	if ($__process -eq 0) {
+		OS-Print-Status info "sourcing Angular content assembling functions: ${__recipe}"
+		$__process = . "${__recipe}"
+		if ($__process -ne 0) {
+			OS-Print-Status error "Source failed."
+			return
+		}
+	}
+}

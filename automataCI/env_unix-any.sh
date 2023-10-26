@@ -107,6 +107,16 @@ if [ ! -z "$PROJECT_NIM" ]; then
 fi
 
 
+if [ ! -z "$PROJECT_ANGULAR" ]; then
+        OS::print_status info "Installing angular...\n"
+        INSTALLER::setup_angular "$PROJECT_OS" "$PROJECT_ARCH"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "install failed.\n"
+                return 1
+        fi
+fi
+
+
 
 
 # report status

@@ -32,6 +32,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-pypi_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-rpm_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-staticrepo_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-docsrepo_unix-any.sh"
 
 
 
@@ -167,6 +168,11 @@ else
         fi
 
         RELEASE::run_changelog_conclude
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE::docs_repo
         if [ $? -ne 0 ]; then
                 return 1
         fi

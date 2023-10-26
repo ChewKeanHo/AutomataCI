@@ -99,6 +99,16 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_NIM}))) {
 }
 
 
+if (-not ([string]::IsNullOrEmpty(${env:PROJECT_ANGULAR}))) {
+	OS-Print-Status info "Installing angular..."
+	$__process = INSTALLER-Setup-Angular
+	if ($__process -ne 0) {
+		OS-Print-Status error "install failed."
+		return 1
+	}
+}
+
+
 
 
 # report status

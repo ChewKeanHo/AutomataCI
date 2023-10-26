@@ -1,8 +1,9 @@
 automataci (1.7.0) stable; urgency=low
 
+  * root: added notarize CI job
   * root: applied regressive changes to Python programming language
   * root: applied regressive changes back to Go programming language
   * root: applied regressive changes to C programming language
   * root: added Nim Programming Language support
 
--- Your Legal Full Name Here <contact@youremail.example>  Mon, 16 Oct 2023 16:40:51 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Thu, 26 Oct 2023 06:27:39 +0800

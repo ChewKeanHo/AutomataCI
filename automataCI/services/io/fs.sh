@@ -150,6 +150,25 @@ FS::is_target_a_chocolatey() {
 
 
 
+FS::is_target_a_docs() {
+        # __target="$1"
+
+
+        # execute
+        if [ "${1#*-doc}" != "$1" ] || [ "${1#*-docs}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
 FS::is_target_a_homebrew() {
         # __target="$1"
 

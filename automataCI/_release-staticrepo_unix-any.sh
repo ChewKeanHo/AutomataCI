@@ -75,7 +75,7 @@ RELEASE::run_static_repo_setup() {
 
         # execute
         OS::print_status info "setting up release static repo...\n"
-        INSTALLER::setup_release_repo \
+        INSTALLER::setup_resettable_repo \
                 "$PROJECT_PATH_ROOT" \
                 "$PROJECT_PATH_RELEASE" \
                 "$PWD" \

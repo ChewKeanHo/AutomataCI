@@ -51,6 +51,53 @@ function INSTALLER-Setup {
 
 
 
+function INSTALLER-Setup-Angular {
+	# validate input
+	$__process =  OS-Is-Command-Available "choco"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$__process =  OS-Is-Command-Available "ng"
+	if ($__process -eq 0) {
+		return 0
+	}
+
+
+	# execute
+	$__process = INSTALLER-Setup-Node
+	if ($__process -ne 0) {
+		return 1
+	}
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+
+	$__process = OS-Exec "npm" "install -g @angular/cli"
+	if ($__process -ne 0) {
+		return 1
+	}
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+	$__process =  OS-Is-Command-Available "ng"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
 function INSTALLER-Setup-Curl {
 	# validate input
 	$__process =  OS-Is-Command-Available "choco"
@@ -285,6 +332,44 @@ function INSTALLER-Setup-Nim {
 
 
 
+function INSTALLER-Setup-Node {
+	# validate input
+	$__process =  OS-Is-Command-Available "choco"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$__process =  OS-Is-Command-Available "npm"
+	if ($__process -eq 0) {
+		return 0
+	}
+
+
+	# execute
+	$__process = OS-Exec "choco" "install node -y"
+	if ($__process -ne 0) {
+		return 1
+	}
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+	$__process = OS-Is-Command-Available "node"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
 function INSTALLER-Setup-Python {
 	# validate input
 	$__process =  OS-Is-Command-Available "choco"
@@ -317,14 +402,22 @@ function INSTALLER-Setup-Python {
 
 
 
-function INSTALLER-Setup-Release-Repo {
+function INSTALLER-Setup-Reprepro {
+	return 0  # Windows do not have Reprepro
+}
+
+
+
+
+function INSTALLER-Setup-Resettable-Repo {
 	param(
 		[string]$__root,
 		[string]$__release,
 		[string]$__current,
 		[string]$__git_repo,
 		[string]$__simulate,
-		[string]$__label
+		[string]$__label,
+		[string]$__branch
 	)
 
 
@@ -372,6 +465,15 @@ function INSTALLER-Setup-Release-Repo {
 		}
 
 		$null = Set-Location "${__root}\${__release}\${__label}"
+
+		if (-not [string]::IsNullOrEmpty($__branch)) {
+			$__process = GIT-Change-Branch "${__branch}"
+			if ($__process -ne 0) {
+				$null = Set-Location "${__current}"
+				return 1
+			}
+		}
+
 		$__process = GIT-Hard-Reset-To-Init "${__root}"
 		$null = Set-Location "${__current}"
 		if ($__process -ne 0) {
@@ -382,11 +484,4 @@ function INSTALLER-Setup-Release-Repo {
 
 	# report status
 	return 0
-}
-
-
-
-
-function INSTALLER-Setup-Reprepro {
-	return 0  # Windows do not have Reprepro
 }

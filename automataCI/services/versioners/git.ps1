@@ -123,6 +123,38 @@ function GIT-Autonomous-Force-Commit {
 
 
 
+function GIT-Change-Branch {
+	param (
+		[string]$__branch
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__branch)) {
+		return 1
+	}
+
+	$__process = GIT-Is-Available
+	if ($__process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$__process = Os-Exec "git" "checkout ${__branch}"
+
+
+	# report status
+	if ($__process -eq 0) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
 function GIT-Clone {
 	param (
 		[string]$__url,

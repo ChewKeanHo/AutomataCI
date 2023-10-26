@@ -115,6 +115,36 @@ GIT::autonomous_force_commit() {
 
 
 
+GIT::change_branch() {
+        #__branch="$1"
+
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+        GIT::is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        git checkout "$1"
+
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
 GIT::clone() {
         #__url="$1"
         #__name="$2"

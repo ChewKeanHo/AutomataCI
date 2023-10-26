@@ -159,6 +159,26 @@ function FS-Is-Target-A-Chocolatey {
 
 
 
+function FS-Is-Target-A-Docs {
+	param (
+		[string]$__subject
+	)
+
+
+	# execute
+	if (($("${__subject}" -replace '^.*-doc') -ne "${__subject}") -or
+		($("${__subject}" -replace '^.*-docs') -ne "${__subject}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-Homebrew {
 	param (
 		[string]$__subject

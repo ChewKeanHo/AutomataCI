@@ -57,6 +57,16 @@ replace ${PROJECT_SKU} => ./
                                 return 1
                         fi
                 fi
+        elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
+                FS::is_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+                if [ $? -ne 0 ]; then
+                        return 10 # not applicable
+                fi
+
+                FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/" "$_directory"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then

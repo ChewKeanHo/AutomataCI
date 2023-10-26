@@ -108,6 +108,24 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_NIM})) {
 
 
 
+# execute ANGULAR if set
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_ANGULAR})) {
+	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\${env:PROJECT_PATH_CI}\${__recipe}"
+	$__process = FS-Is-File "${__recipe}"
+	if ($__process -eq 0) {
+		OS-Print-Status info "ANGULAR tech detected. Parsing job recipe: ${__recipe}"
+		$__process = . $__recipe
+		if ($__process -ne 0) {
+			OS-Print-Status error "Parse failed."
+			return 1
+		}
+	}
+}
+
+
+
+
 # execute baseline as last
 $__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
 $__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}\${__recipe}"

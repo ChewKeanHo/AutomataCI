@@ -78,6 +78,38 @@ INSTALLER::setup() {
 
 
 
+INSTALLER::setup_angular() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "ng"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        INSTALLER::setup_node
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        npm install -g @angular/cli
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
 INSTALLER::setup_curl() {
         # validate input
         OS::is_command_available "brew"
@@ -308,6 +340,33 @@ INSTALLER::setup_nim() {
 
 
 
+INSTALLER::setup_node() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "npm"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        brew install node
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
 INSTALLER::setup_osslsigncode() {
         # validate input
         OS::is_command_available "brew"
@@ -369,13 +428,42 @@ INSTALLER::setup_python() {
 
 
 
-INSTALLER::setup_release_repo() {
+INSTALLER::setup_reprepro() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "reprepro"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        brew install reprepro
+
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
+INSTALLER::setup_resettable_repo() {
         __root="$1"
         __release="$2"
         __current="$3"
         __git_repo="$4"
         __simulate="$5"
         __label="$6"
+        __branch="$7"
 
 
         # validate input
@@ -426,43 +514,25 @@ INSTALLER::setup_release_repo() {
                 esac
 
                 cd "${__root}/${__release}/${__label}"
+
+                if [ ! -z "$__branch" ]; then
+                        GIT::change_branch "$__branch"
+                        if [ $? -ne 0 ]; then
+                                cd "$__current"
+                                return 1
+                        fi
+                fi
+
                 GIT::hard_reset_to_init "$__root"
                 if [ $? -ne 0 ]; then
                         cd "$__current"
                         return 1
                 fi
+
                 cd "$__current"
         fi
 
 
         # report status
         return 0
-}
-
-
-
-
-INSTALLER::setup_reprepro() {
-        # validate input
-        OS::is_command_available "brew"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        OS::is_command_available "reprepro"
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-
-        # execute
-        brew install reprepro
-
-
-        # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
 }
