@@ -104,5 +104,4 @@ jobs:
             bin/
             lib/
             tmp/
-            tool/
             releases/

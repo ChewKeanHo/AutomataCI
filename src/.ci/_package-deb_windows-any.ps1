@@ -89,6 +89,8 @@ function PACKAGE-Assemble-DEB-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-Cargo "${_target}") -eq 0) {
+		return 10 # not applicable
 	} else {
 		# copy main program
 		# TIP: (1) usually is: usr/local/bin or usr/local/sbin

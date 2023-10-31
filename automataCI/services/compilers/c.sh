@@ -263,7 +263,7 @@ C::get_compiler_common() {
 
 
         # execute
-        if [ "$__arch" != "$__base_arch" ]; then
+        if [ "$__arch" != "$__base_arch" ] || [ "$__os" != "$__base_os" ]; then
                 __compiler=""
                 printf -- ""
                 return 1

@@ -3,9 +3,9 @@
 
 This is a template git repository equipped with a native built-in
 semi-autonomous CI tool known as `AutomataCI`. It allows one to run a full-force
-CI jobs with or without solely relying on 3rd-party service providers that
-can potentially be a supply chain threat at leas starting from year 2021-2023
-era.
+CI jobs without solely relying on any 3rd-party service providers which makes
+the project extremely vulenrable to supply chain threat at least starting from
+year 2021-2023 era.
 
 
 
@@ -14,7 +14,7 @@ era.
 
 Some good business reasons why using AutomataCI:
 
-1. **Start off with a tested and solid foundation** - All the templates and
+1. **Starts off with a solid & tested foundation** - All the templates and
    CI jobs are tested and have default configured for immediate software
    development.
 2. **Avoid being threatend by malicious suppliers** - CI it's a nerve system for
@@ -29,8 +29,6 @@ Some good business reasons why using AutomataCI:
 
 ### Supported Technologies
 
-* [Nim Programming Language](https://nim-lang.org/)
-* [Go Programming Language](https://go.dev/)
 * C Programming Language
   1. [i386 & amd64 GCC Compilers](https://gcc.gnu.org/)
   2. [ARM (-64, -el, -hf) Cross-Compilers](https://wiki.debian.org/CrossToolchains)
@@ -42,17 +40,21 @@ Some good business reasons why using AutomataCI:
   8. [Clang](https://clang.llvm.org/)
   9. [MinGW](https://www.mingw-w64.org/)
   10. [Emscripten WASM](https://emscripten.org/)
-* Javascript & Typescript
+* [Go Programming Language](https://go.dev/)
+* Javascript & Typescript Web Frameworks
   1. [Angular](https://angular.io/)
+* [Nim Programming Language](https://nim-lang.org/)
 * [Python Programming Language](https://www.python.org/)
+* [Rust Programming Language](https://www.rust-lang.org/)
 * Some Manual MISC stuffs
 
 
 
 ### Deployable Distributions
 
+* [`cargo` repo](https://crates.io/) (for `cargo install` capability)
 * [`.deb` repo](https://wiki.debian.org/DebianRepository/Setup) (with `apt-get install` capability)
-* [`.opkg` repo](https://git.yoctoproject.org/opkg/) (with `opkg install` capability - *COMING SOON???*)
+* [`.opkg` repo](https://git.yoctoproject.org/opkg/) (with `opkg install` capability - *COMING SOON?!*)
 * [`.rpm` repo](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/packaging_and_distributing_software/index) (with `yum install` capability)
 * [`.flatpak` repo](https://docs.flatpak.org/en/latest/first-build.html) (for `flatpak install` capability)
 * [`OCI` compatible containers](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) (for `docker run` or `podman run` capability)
@@ -79,7 +81,7 @@ AutomataCI works seamlessly out of the box by integration with:
 Check out the PDF file inside
 [`automataCI/docs/AutomataCI-Engineering-Specification.pdf`](automataCI/docs/AutomataCI-Engineering-Specification.pdf).
 
-It's regularly updated from time-to-time before each releases.
+It's regularly updated from time-to-time between each releases.
 
 
 
@@ -244,6 +246,7 @@ Please try any of the following:
         To test the repo 🠚              $ ./ci.cmd test
         Like build but only for host 🠚  $ ./ci.cmd materialize
         To build the repo 🠚             $ ./ci.cmd build
+        To notarize the builds 🠚        $ ./ci.cmd notarize
         To package the repo product 🠚   $ ./ci.cmd package
         To release the repo product 🠚   $ ./ci.cmd release
         To stop a development 🠚         $ ./ci.cmd stop

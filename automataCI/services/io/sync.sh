@@ -15,18 +15,24 @@
 
 
 # To use:
-#   $ SYNC::parallel_exec "ls -la " "${PWD}/parallel.txt" "/tmp/parallel" "4"
+#   $ SYNC::parallel_exec "function_name" "${PWD}/parallel.txt" "/tmp/parallel" "4"
 #
-#   The receiving parameters to the __parallel_command would be each line of the
-#   "${PWD}/parallel.txt", such that the above command will be similar as the
-#   following with the $__line is being expanded:
-#                            $ [COMMAND] ${__line}
-#                            $ ls -la ${__line}
-#
-#   The __parallel_command can accept function. It is **strongly recommended**
-#   to feed a wrapper function such that each line is a clean command:
+#   The __parallel_command accepts a wrapper function as shown above. Here is an
+#   example to construct a simple parallelism executions:
 #       function_name() {
 #               #__line="$1"
+#
+#
+#               # break line into multiple parameters (delimiter = '|')
+#               __line="${1%|*}"
+#
+#               __last="${__line##*|}"
+#               __line="${__line%|*}"
+#
+#               __2nd_last="${__line##*|}"
+#               __line="${__line%|*}"
+#
+#               ...
 #
 #
 #               # some tasks in your thread
@@ -44,13 +50,15 @@
 #               return 0 # signal a successful execution
 #       }
 #
+#
 #       # call the parallel exec
 #       SYNC::parallel_exec "function_name" "${PWD}/parallel.txt" "/tmp/parallel" "4"
 #
 #
 #   The control file must not have any comment and each line must be the capable
 #   of being executed in a single thread. Likewise, when feeding a function,
-#   each line can be a fully processed and executable command on its own.
+#   each line is a long string with your own separator. You will have to break
+#   it inside your wrapper function.
 #
 #   The __parallel_command **MUST** return the following return code:
 #     0 = signal the task execution is done and completed successfully.

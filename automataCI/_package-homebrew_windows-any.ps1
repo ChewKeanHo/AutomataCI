@@ -57,7 +57,6 @@ function PACKAGE-Run-Homebrew {
 		OS-Print-Status error "remake failed."
 		return 1
 	}
-	$null = FS-Make-Directory "${_src}/Data"
 
 
 	# copy all complimentary files to the workspace
@@ -99,7 +98,7 @@ function PACKAGE-Run-Homebrew {
 
 	# archive the assembled payload
 	$__current_path = Get-Location
-	$null = Set-Location -Path "${_src}/Data"
+	$null = Set-Location -Path "${_src}"
 	OS-Print-Status info "archiving ${_target_path}.tar.xz"
 	$__process = TAR-Create-XZ "${_target_path}.tar.xz" "*"
 	$null = Set-Location -Path "${__current_path}"

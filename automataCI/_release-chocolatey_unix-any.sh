@@ -25,7 +25,6 @@ RELEASE::run_chocolatey() {
 
 
         # validate input
-        OS::print_status info "registering ${1} into chocolatey repo...\n"
         if [ -z "$1" ] || [ -z "$2" ]; then
                 OS::print_status error "registration failed.\n"
                 return 1
@@ -39,6 +38,7 @@ RELEASE::run_chocolatey() {
 
 
         # execute
+        OS::print_status info "registering ${1} into chocolatey repo...\n"
         CHOCOLATEY::publish "$1" "${2}/${PROJECT_CHOCOLATEY_DIRECTORY}/"
         if [ $? -ne 0 ]; then
                 OS::print_status error "registration failed.\n"

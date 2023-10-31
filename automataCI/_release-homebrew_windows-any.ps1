@@ -26,7 +26,6 @@ function RELEASE-Run-Homebrew {
 
 
 	# validate input
-	OS-Print-Status info "registering ${__target} into homebrew repo..."
 	if ([string]::IsNullOrEmpty($__target) -or [string]::IsNullOrEmpty($__repo)) {
 		OS-Print-Status error "registration failed."
 		return 1
@@ -40,6 +39,7 @@ function RELEASE-Run-Homebrew {
 
 
 	# execute
+	OS-Print-Status info "registering ${__target} into homebrew repo..."
 	$__process = HOMEBREW-Publish "${__target}" "${__repo}/Formula/${env:PROJECT_SKU}.rb"
 	if ($__process -ne 0) {
 		OS-Print-Status error "registration failed."

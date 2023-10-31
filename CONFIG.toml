@@ -105,29 +105,7 @@ PROJECT_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI"
 #
 # To enable it: simply supply the path (e.g. default is 'srcANGULAR').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_ANGULAR = 'srcANGULAR'
-
-
-
-
-######################
-# NIM TECHNOLOGY     #
-######################
-# PROJECT_NIM
-# This is a control variable used for enabling Go technology and also defining
-# its source codes directory relative to PROJECT_PATH_ROOT. Depending on the
-# offered service (e.g. GitHub Actions), setting this variable with value shall
-# notify the CI provider to setup Go development environment automatically.
-#
-# To enable it: simply supply the path (e.g. default is 'srcGO').
-# To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_NIM = ''
-
-
-# PROJECT_PATH_NIM_ENGINE
-# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
-# setting up localized environment.
-PROJECT_PATH_NIM_ENGINE = "nim-engine"
+PROJECT_ANGULAR = ''
 
 
 
@@ -171,6 +149,28 @@ PROJECT_PATH_GO_ENGINE = "go-engine"
 
 
 ######################
+# NIM TECHNOLOGY     #
+######################
+# PROJECT_NIM
+# This is a control variable used for enabling Nim technology and also defining
+# its source codes directory relative to PROJECT_PATH_ROOT. Depending on the
+# offered service (e.g. GitHub Actions), setting this variable with value shall
+# notify the CI provider to setup Go development environment automatically.
+#
+# To enable it: simply supply the path (e.g. default is 'srcNIM').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_NIM = ''
+
+
+# PROJECT_PATH_NIM_ENGINE
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
+# setting up localized environment.
+PROJECT_PATH_NIM_ENGINE = "nim-engine"
+
+
+
+
+######################
 # PYTHON TECHNOLOGY  #
 ######################
 # PROJECT_PYTHON
@@ -204,10 +204,47 @@ PROJECT_PYPI_REPO_URL = "https://test.pypi.org/legacy/"
 PROJECT_PYPI_README = "README.md"
 
 
-# PROJECT_PYPI_README_MIME
-# The PyPi README file relative to PROJECT_PATH_ROOT directory. Default is the
-# the common README.md which is a 'text/markdown' MIME type.
-PROJECT_PYPI_README_MIME = "text/markdown"
+
+
+######################
+# RUST TECHNOLOGY    #
+######################
+# PROJECT_RUST
+# This is a control variable used for enabling Rust technology and also
+# defining its source codes directory relative to PROJECT_PATH_ROOT.
+# Depending on the offered service (e.g. GitHub Actions), setting this
+# variable with value shall notify the CI provider to setup Rust development
+# environment automatically.
+#
+# To enable it: simply supply the path (e.g. default is 'srcRUST').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_RUST = 'srcRUST'
+
+
+# PROJECT_RUST_EDITION
+# The Rust's formatter and linting edition (Cargo.toml's edition field).
+#
+# Default is '2021'.
+PROJECT_RUST_EDITION = '2021'
+
+
+# PROJECT_PATH_RUST_ENGINE
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
+# setting up localized environment.
+PROJECT_PATH_RUST_ENGINE = "rust-engine"
+
+
+# PROJECT_CARGO_README
+# The Cargo README file relative to PROJECT_PATH_ROOT directory. Default is the
+# the common README.md. It **MUST** be a file.
+PROJECT_CARGO_README = "README.md"
+
+
+# CARGO_REGISTRY
+# The Cargo registry.
+#
+# Default is: crates-io
+CARGO_REGISTRY = "crates-io"
 
 
 

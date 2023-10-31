@@ -36,34 +36,16 @@ if ([string]::IsNullOrEmpty(${env:PROJECT_CI_JOB})) {
 
 
 
-# execute python if set
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
+# execute ANGULAR if set
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_ANGULAR})) {
 	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}\${__recipe}"
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\${env:PROJECT_PATH_CI}\${__recipe}"
 	$__process = FS-Is-File "${__recipe}"
 	if ($__process -eq 0) {
-		OS-Print-Status info "Python tech detected. Parsing job recipe: ${__recipe}"
+		OS-Print-Status info "ANGULAR tech detected. Running job recipe: ${__recipe}"
 		$__process = . $__recipe
 		if ($__process -ne 0) {
-			OS-Print-Status error "Parse failed."
-			return 1
-		}
-	}
-}
-
-
-
-
-# execute go if set
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_GO})) {
-	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_GO}\${env:PROJECT_PATH_CI}\${__recipe}"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "Go tech detected. Parsing job recipe: ${__recipe}"
-		$__process = . $__recipe
-		if ($__process -ne 0) {
-			OS-Print-Status error "Parse failed."
+			OS-Print-Status error "Run failed."
 			return 1
 		}
 	}
@@ -78,10 +60,28 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_C})) {
 	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}\${env:PROJECT_PATH_CI}\${__recipe}"
 	$__process = FS-Is-File "${__recipe}"
 	if ($__process -eq 0) {
-		OS-Print-Status info "C tech detected. Parsing job recipe: ${__recipe}"
+		OS-Print-Status info "C tech detected. Running job recipe: ${__recipe}"
 		$__process = . $__recipe
 		if ($__process -ne 0) {
-			OS-Print-Status error "Parse failed."
+			OS-Print-Status error "Run failed."
+			return 1
+		}
+	}
+}
+
+
+
+
+# execute GO if set
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_GO})) {
+	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_GO}\${env:PROJECT_PATH_CI}\${__recipe}"
+	$__process = FS-Is-File "${__recipe}"
+	if ($__process -eq 0) {
+		OS-Print-Status info "Go tech detected. Running job recipe: ${__recipe}"
+		$__process = . $__recipe
+		if ($__process -ne 0) {
+			OS-Print-Status error "Run failed."
 			return 1
 		}
 	}
@@ -96,10 +96,10 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_NIM})) {
 	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}\${env:PROJECT_PATH_CI}\${__recipe}"
 	$__process = FS-Is-File "${__recipe}"
 	if ($__process -eq 0) {
-		OS-Print-Status info "NIM tech detected. Parsing job recipe: ${__recipe}"
+		OS-Print-Status info "NIM tech detected. Running job recipe: ${__recipe}"
 		$__process = . $__recipe
 		if ($__process -ne 0) {
-			OS-Print-Status error "Parse failed."
+			OS-Print-Status error "Run failed."
 			return 1
 		}
 	}
@@ -108,16 +108,34 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_NIM})) {
 
 
 
-# execute ANGULAR if set
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_ANGULAR})) {
+# execute PYTHON if set
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
 	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\${env:PROJECT_PATH_CI}\${__recipe}"
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}\${__recipe}"
 	$__process = FS-Is-File "${__recipe}"
 	if ($__process -eq 0) {
-		OS-Print-Status info "ANGULAR tech detected. Parsing job recipe: ${__recipe}"
+		OS-Print-Status info "Python tech detected. Running job recipe: ${__recipe}"
 		$__process = . $__recipe
 		if ($__process -ne 0) {
-			OS-Print-Status error "Parse failed."
+			OS-Print-Status error "Run failed."
+			return 1
+		}
+	}
+}
+
+
+
+
+# execute RUST if set
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_RUST})) {
+	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\${env:PROJECT_PATH_CI}\${__recipe}"
+	$__process = FS-Is-File "${__recipe}"
+	if ($__process -eq 0) {
+		OS-Print-Status info "RUST tech detected. Running job recipe: ${__recipe}"
+		$__process = . $__recipe
+		if ($__process -ne 0) {
+			OS-Print-Status error "Run failed."
 			return 1
 		}
 	}
@@ -131,10 +149,10 @@ $__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
 $__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}\${__recipe}"
 $__process = FS-Is-File "${__recipe}"
 if ($__process -eq 0) {
-	OS-Print-Status info "Baseline source detected. Parsing job recipe: ${__recipe}"
+	OS-Print-Status info "Baseline source detected. Running job recipe: ${__recipe}"
 	$__process = . $__recipe
 	if ($__process -ne 0) {
-		OS-Print-Status error "Parse failed."
+		OS-Print-Status error "Run failed."
 		return 1
 	}
 }

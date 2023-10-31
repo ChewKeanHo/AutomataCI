@@ -50,6 +50,8 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
 		return 1 # not applicable - should be tech-oriented.
+	} elseif ($(FS-Is-Target-A-Cargo "${_target}") -eq 0) {
+		return 10 # not applicable
 	} else {
 		return 10 # not applicable
 	}

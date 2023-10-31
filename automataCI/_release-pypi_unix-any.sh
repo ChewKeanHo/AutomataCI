@@ -46,7 +46,6 @@ RELEASE::run_pypi() {
         OS::print_status info "releasing pypi package...\n"
         if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
                 OS::print_status warning "simulating pypi package push...\n"
-                OS::print_status warning "simulating remove package artifact...\n"
         else
                 OS::print_status info "checking pypi twine login credentials...\n"
                 PYPI::check_login
@@ -60,10 +59,10 @@ RELEASE::run_pypi() {
                         OS::print_status error "release failed.\n"
                         return 1
                 fi
-
-                OS::print_status info "remove package artifact...\n"
-                FS::remove_silently "$_target"
         fi
+
+        OS::print_status info "remove package artifact...\n"
+        FS::remove_silently "$_target"
 
 
         # report status

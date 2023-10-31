@@ -1,0 +1,54 @@
+# See more keys and their definitions at:
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+[package]
+name = "to-be-filled-by-automataci"
+version = "0.1.0"
+edition = "2021"
+description = "To be filled by AutomataCI"
+license = "apache-2.0"
+documentation = "https://to-be-filled-by-automataci.io"
+homepage = "https://to-be-filled-by-automataci.io"
+repository = "https://to-be-filled-by-automataci.io"
+
+
+
+
+# [AUTOMATACI BEGIN] DON'T REMOVE THIS LINE - Anything below shall be appended.
+[lib]
+name = 'libautomataci'
+path = 'lib.rs'
+
+[[bin]]
+name = 'automataci'
+path = 'main.rs'
+
+
+
+
+[profile.dev]
+opt-level = 0
+debug = true
+debug-assertions = true
+overflow-checks = true
+lto = false
+panic = "unwind"
+incremental = true
+codegen-units = 256
+rpath = false
+
+[profile.release]
+opt-level = "s"
+debug = false
+debug-assertions = false
+overflow-checks = false
+lto = "fat"
+panic = "abort"
+incremental = false
+codegen-units = 16
+rpath = false
+strip = "debuginfo"
+
+
+
+
+[dependencies]

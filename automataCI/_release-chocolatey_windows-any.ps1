@@ -26,7 +26,6 @@ function RELEASE-Run-Chocolatey {
 
 
 	# validate input
-	OS-Print-Status info "registering ${__target} into chocolatey repo..."
 	if ([string]::IsNullOrEmpty($__target) -or [string]::IsNullOrEmpty($__repo)) {
 		OS-Print-Status error "registration failed."
 		return 1
@@ -40,6 +39,7 @@ function RELEASE-Run-Chocolatey {
 
 
 	# execute
+	OS-Print-Status info "registering ${__target} into chocolatey repo..."
 	$__process = CHOCOLATEY-Publish `
 		"${__target}" `
 		"${__repo}\${env:PROJECT_CHOCOLATEY_DIRECTORY}"

@@ -14,20 +14,29 @@
 
 
 # To use:
-#   $ SYNC-Parallel-Exec "dir " "$(Get-Location)/parallel.txt" "/tmp/parallel" "4" Init-Fx
+#   $ SYNC-Parallel-Exec ${function:Function-Name}.ToString() `
+#                          "$(Get-Location)\parallel.txt" `
+#                          ".\tmp\parallel" `
+#                          "$([System.Environment]::ProcessorCount)"
 #
-#   The receiving parameters to the __parallel_command would be each line of the
-#   "$(Get-Location)/parallel.txt", such that the above command will be similar
-#   as the following with the $__line is being expanded:
-#                            $ [COMMAND] ${__line}
-#                            $ dir ${__line}
-#
-#   The __parallel_command can accept function. It is **strongly recommended**
-#   to feed a wrapper function such that each line is a clean command:
+#   The __parallel_command accepts a wrapper function as shown above. Here is an
+#   example to construct a simple parallelism executions:
 #       function Function-Name {
 #               param (
 #                       [string]$__line
 #               )
+#
+#
+#               # initialize and import libraries from scratch
+#               ...
+#
+#
+#               # break line into multiple parameters (delimiter = '|')
+#               $__list = $__line -split "\|"
+#               $__arg1 = $__list[1]
+#               $__arg2 = $__list[2]
+#               ...
+#
 #
 #
 #               # some tasks in your thread
@@ -35,35 +44,32 @@
 #
 #
 #               # execute
-#               $__output = Invoke-Expression "${__line}"
+#               $__output = Invoke-Expression "command ${__line}"
 #               if ($LASTEXITCODE -ne 0); then
 #                       return 1 # signal an error has occured
 #               fi
 #
-#               ... process $__output ...
+#               ...
 #
 #
 #               # report status
 #               return 0 # signal a successful execution
 #       }
 #
-#       function Init-Fx {
-#               # some execution to initialize the thread from scratch
-#       }
 #
-#       # call the parallel exec
-#       SYNC-Parallel-Exec "Function-Name" `
-#                          "$(Get-Location)/parallel.txt" `
-#                          "/tmp/parallel" `
-#                          "4" `
-#                          Init-Fx
+#       # calling the parallel exec function
+#       SYNC-Parallel-Exec ${function:Function-Name}.ToString() `
+#                          "$(Get-Location)\parallel.txt" `
+#                          ".\tmp\parallel" `
+#                          "$([System.Environment]::ProcessorCount)"
 #
 #
 #   The control file must not have any comment and each line must be the capable
 #   of being executed in a single thread. Likewise, when feeding a function,
-#   each line can be a fully processed and executable command on its own.
+#   each line is a long string with your own separator. You will have to break
+#   it inside your wrapper function.
 #
-#   The __parallel_command **MUST** return the following return code:
+#   The __parallel_command **MUST** return **ONLY** the following return code:
 #     0 = signal the task execution is done and completed successfully.
 #     1 = signal the task execution has error. This terminates the entire run.
 function SYNC-Parallel-Exec {
@@ -71,22 +77,12 @@ function SYNC-Parallel-Exec {
 		[string]$__parallel_command,
 		[string]$__parallel_control,
 		[string]$__parallel_directory,
-		[string]$__parallel_available,
-		[string]$__parallel_initializer
+		[string]$__parallel_available
 	)
 
 
 	# validate input
 	if ([string]::IsNullOrEmpty($__parallel_command)) {
-		return 1
-	}
-
-	if ([string]::IsNullOrEmpty($__parallel_initializer)) {
-		return 1
-	}
-
-	$__process = [System.Security.Cryptography.SHA256]::Create("SHA256")
-	if (-not $__process) {
 		return 1
 	}
 
@@ -131,37 +127,50 @@ function SYNC-Parallel-Exec {
 
 	# run singularly when parallelism is unavailable or has only 1 task
 	if (($__parallel_available -le 1) -or ($__parallel_total -eq 1)) {
+		# prepare
+		${function:SYNC-Run} = ${__parallel_command}
+
+
+		# execute
 		foreach ($__line in (Get-Content "${__parallel_control}")) {
-			$null = Invoke-Expression "${__parallel_command} ${__line}"
-			if ($LASTEXITCODE -ne 0) {
+			$__process = SYNC-Run "${__line}"
+			if ($__process -ne 0) {
 				return 1
 			}
 		}
+
 
 		# report status
 		return 0
 	}
 
 
-	# run parallely
+	# run in parallel
 	$__jobs = @()
 	foreach ($__line in (Get-Content "${__parallel_control}")) {
-		$__jobs += Start-ThreadJob -InitializationScript {
-			$__parallel_initializer
-		} -ScriptBlock {
-			$null = Invoke-Expression "${using:__line}"
-			if ($LASTEXITCODE -eq 0) {
-				return 0
+		$__jobs += Start-ThreadJob -ScriptBlock {
+			# prepare
+			${function:SYNC-Run} = ${using:__parallel_command}
+
+
+			# execute
+			$__process = SYNC-Run "${using:__line}"
+			if ($__process -ne 0) {
+				return 1
 			}
 
-			return 1
+
+			# report status
+			return 0
 		}
 	}
 
 	$null = Wait-Job -Job $__jobs
-
 	foreach ($__job in $__jobs) {
-		Receive-Job -Job $__job
+		$__process = Receive-Job -Job $__job
+		if ($__process -ne 0) {
+			return 1
+		}
 	}
 
 

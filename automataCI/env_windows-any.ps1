@@ -79,7 +79,8 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_GO}))) {
 
 
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_C})) -or
-	-not ([string]::IsNullOrEmpty(${env:PROJECT_NIM}))) {
+	(-not ([string]::IsNullOrEmpty(${env:PROJECT_NIM}))) -or
+	(-not ([string]::IsNullOrEmpty(${env:PROJECT_RUST})))) {
 	OS-Print-Status info "Installing c..."
 	$__process = INSTALLER-Setup-C
 	if ($__process -ne 0) {

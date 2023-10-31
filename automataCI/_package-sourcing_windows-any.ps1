@@ -40,31 +40,13 @@ if ($__process -eq 0) {
 
 
 
-# source from Python and overrides existing
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
+# source from Angular and overrides existing
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_ANGULAR})) {
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\${env:PROJECT_PATH_CI}"
 	$__recipe = "${__recipe}\package_windows-any.ps1"
 	$__process = FS-Is-File "${__recipe}"
 	if ($__process -eq 0) {
-		OS-Print-Status info "sourcing Python content assembling functions: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Source failed."
-			return
-		}
-	}
-}
-
-
-
-
-# source from Go and overrides existing
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_GO})) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_GO}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\package_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "sourcing Go content assembling functions: ${__recipe}"
+		OS-Print-Status info "sourcing Angular content assembling functions: ${__recipe}"
 		$__process = . "${__recipe}"
 		if ($__process -ne 0) {
 			OS-Print-Status error "Source failed."
@@ -94,6 +76,24 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_C})) {
 
 
 
+# source from Go and overrides existing
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_GO})) {
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_GO}\${env:PROJECT_PATH_CI}"
+	$__recipe = "${__recipe}\package_windows-any.ps1"
+	$__process = FS-Is-File "${__recipe}"
+	if ($__process -eq 0) {
+		OS-Print-Status info "sourcing Go content assembling functions: ${__recipe}"
+		$__process = . "${__recipe}"
+		if ($__process -ne 0) {
+			OS-Print-Status error "Source failed."
+			return
+		}
+	}
+}
+
+
+
+
 # source from Nim and overrides existing
 if (-not [string]::IsNullOrEmpty(${env:PROJECT_NIM})) {
 	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}\${env:PROJECT_PATH_CI}"
@@ -112,13 +112,31 @@ if (-not [string]::IsNullOrEmpty(${env:PROJECT_NIM})) {
 
 
 
-# source from Angular and overrides existing
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_ANGULAR})) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\${env:PROJECT_PATH_CI}"
+# source from Python and overrides existing
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
 	$__recipe = "${__recipe}\package_windows-any.ps1"
 	$__process = FS-Is-File "${__recipe}"
 	if ($__process -eq 0) {
-		OS-Print-Status info "sourcing Angular content assembling functions: ${__recipe}"
+		OS-Print-Status info "sourcing Python content assembling functions: ${__recipe}"
+		$__process = . "${__recipe}"
+		if ($__process -ne 0) {
+			OS-Print-Status error "Source failed."
+			return
+		}
+	}
+}
+
+
+
+
+# source from Rust and overrides existing
+if (-not [string]::IsNullOrEmpty(${env:PROJECT_RUST})) {
+	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\${env:PROJECT_PATH_CI}"
+	$__recipe = "${__recipe}\package_windows-any.ps1"
+	$__process = FS-Is-File "${__recipe}"
+	if ($__process -eq 0) {
+		OS-Print-Status info "sourcing Rust content assembling functions: ${__recipe}"
 		$__process = . "${__recipe}"
 		if ($__process -ne 0) {
 			OS-Print-Status error "Source failed."

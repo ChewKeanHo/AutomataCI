@@ -49,6 +49,8 @@ PACKAGE::assemble_homebrew_content() {
                 return 10 # not applicable
         elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
                 return 1 # not applicable - should be tech-oriented.
+        elif [ $(FS::is_target_a_cargo "$_target") -eq 0 ]; then
+                return 10 # not applicable
         else
                 return 10 # not applicable
         fi

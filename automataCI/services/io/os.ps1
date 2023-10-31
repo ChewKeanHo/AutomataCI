@@ -73,30 +73,37 @@ function OS-Print-Status {
 		[string]$__message
 	)
 
-	$__msg = ""
+	$__tag = ""
 	$__color = ""
+	$__foreground_color = "Gray"
 
 	switch ($__mode) {
 	"error" {
-		$__msg = "[ ERROR   ] "
+		$__tag = "[ ERROR   ] "
 		$__color = "31"
+		$__foreground_color = "Red"
 	} "warning" {
-		$__msg = "[ WARNING ] "
+		$__tag = "[ WARNING ] "
 		$__color = "33"
+		$__foreground_color = "Yellow"
 	} "info" {
-		$__msg = "[ INFO    ] "
+		$__tag = "[ INFO    ] "
 		$__color = "36"
+		$__foreground_color = "Cyan"
 	} "note" {
-		$__msg = "[ NOTE    ] "
+		$__tag = "[ NOTE    ] "
 		$__color = "35"
+		$__foreground_color = "Magenta"
 	} "success" {
-		$__msg = "[ SUCCESS ] "
+		$__tag = "[ SUCCESS ] "
 		$__color = "32"
+		$__foreground_color = "Green"
 	} "ok" {
-		$__msg = "[ INFO    ] == OK == "
+		$__tag = "[ INFO    ] == OK == "
 		$__color = "36"
+		$__foreground_color = "Cyan"
 	} "plain" {
-		$__msg = $__message
+		# do nothing
 	} default {
 		return
 	}}
@@ -104,14 +111,15 @@ function OS-Print-Status {
 	if (($Host.UI.RawUI.ForegroundColor -ge "DarkGray") -or
 		("$env:TERM" -eq "xterm-256color") -or
 		("$env:COLORTERM" -eq "truecolor", "24bit")) {
-		$__msg = "$([char]0x1b)[1;${__color}m${__msg}$([char]0x1b)[0;${__color}m${__message}$([char]0x1b)[0m"
+		Write-Host `
+			-ForegroundColor $__foreground_color `
+			"$([char]0x1b)[1;${__color}m${__tag}$([char]0x1b)[0;${__color}m${__message}$([char]0x1b)[0m"
 	} else {
-		$__msg = "${__msg} ${__message}"
+		Write-Host "${__tag}${__message}"
 	}
 
-	Write-Host $__msg -Foregroundcolor $Host.UI.RawUI.ForegroundColor
 	Remove-Variable -Name __mode -ErrorAction SilentlyContinue
-	Remove-Variable -Name __msg -ErrorAction SilentlyContinue
+	Remove-Variable -Name __tag -ErrorAction SilentlyContinue
 	Remove-Variable -Name __message -ErrorAction SilentlyContinue
 	Remove-Variable -Name __color -ErrorAction SilentlyContinue
 }

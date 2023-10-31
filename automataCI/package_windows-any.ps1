@@ -24,6 +24,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-archive_windows-any.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-cargo_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-changelog_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-chocolatey_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-deb_windows-any.ps1"
@@ -64,6 +65,7 @@ if ($__process -ne 0) {
 
 
 # begin packaging
+OS-Print-Status plain ""
 foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}")) {
 	$i = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${i}"
 	$__process = FS-Is-Directory "$i"
@@ -183,6 +185,16 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		return 1
 	}
 
+	$__process = PACKAGE-Run-Cargo `
+		"$DEST" `
+		"$i" `
+		"$TARGET_FILENAME" `
+		"$TARGET_OS" `
+		"$TARGET_ARCH"
+	if ($__process -ne 0) {
+		return 1
+	}
+
 	$__process = PACKAGE-Run-DOCKER `
 		"$DEST" `
 		"$i" `
@@ -195,7 +207,7 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 
 
 	# report task verdict
-	OS-Print-Status success ""
+	OS-Print-Status success "`n"
 }
 
 

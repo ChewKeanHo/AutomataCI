@@ -1,9 +1,11 @@
 automataci (1.7.0) stable; urgency=low
 
+  * root: added support for Rust programming language
+  * root: added Angular frontend framework technology
   * root: added notarize CI job
   * root: applied regressive changes to Python programming language
   * root: applied regressive changes back to Go programming language
   * root: applied regressive changes to C programming language
   * root: added Nim Programming Language support
 
--- Your Legal Full Name Here <contact@youremail.example>  Thu, 26 Oct 2023 06:27:39 +0800
+-- Your Legal Full Name Here <contact@youremail.example>  Thu, 02 Nov 2023 19:03:47 +0800

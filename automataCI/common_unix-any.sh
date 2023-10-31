@@ -37,35 +37,16 @@ fi
 
 
 
-# execute python if set
-if [ ! -z "$PROJECT_PYTHON" ]; then
+# execute ANGULAR if set
+if [ ! -z "$PROJECT_ANGULAR" ]; then
         __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}/${__recipe}"
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/${PROJECT_PATH_CI}/${__recipe}"
         FS::is_file "$__recipe"
         if [ $? -eq 0 ]; then
-                OS::print_status info \
-                        "Python tech detected. Parsing job recipe: ${__recipe}\n"
+                OS::print_status info "ANGULAR tech detected. Running job recipe: ${__recipe}\n"
                 . "$__recipe"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "Parse failed.\n"
-                        return 1
-                fi
-        fi
-fi
-
-
-
-
-# execute go if set
-if [ ! -z "$PROJECT_GO" ]; then
-        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_GO}/${PROJECT_PATH_CI}/${__recipe}"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info "Go tech detected. Parsing job recipe: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Parse failed.\n"
+                        OS::print_status error "Run failed.\n"
                         return 1
                 fi
         fi
@@ -80,10 +61,28 @@ if [ ! -z "$PROJECT_C" ]; then
         __recipe="${PROJECT_PATH_ROOT}/${PROJECT_C}/${PROJECT_PATH_CI}/${__recipe}"
         FS::is_file "$__recipe"
         if [ $? -eq 0 ]; then
-                OS::print_status info "C tech detected. Parsing job recipe: ${__recipe}\n"
+                OS::print_status info "C tech detected. Running job recipe: ${__recipe}\n"
                 . "$__recipe"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "Parse failed.\n"
+                        OS::print_status error "Run failed.\n"
+                        return 1
+                fi
+        fi
+fi
+
+
+
+
+# execute GO if set
+if [ ! -z "$PROJECT_GO" ]; then
+        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_GO}/${PROJECT_PATH_CI}/${__recipe}"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "Go tech detected. Running job recipe: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Run failed.\n"
                         return 1
                 fi
         fi
@@ -98,10 +97,10 @@ if [ ! -z "$PROJECT_NIM" ]; then
         __recipe="${PROJECT_PATH_ROOT}/${PROJECT_NIM}/${PROJECT_PATH_CI}/${__recipe}"
         FS::is_file "$__recipe"
         if [ $? -eq 0 ]; then
-                OS::print_status info "NIM tech detected. Parsing job recipe: ${__recipe}\n"
+                OS::print_status info "NIM tech detected. Running job recipe: ${__recipe}\n"
                 . "$__recipe"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "Parse failed.\n"
+                        OS::print_status error "Run failed.\n"
                         return 1
                 fi
         fi
@@ -110,16 +109,35 @@ fi
 
 
 
-# execute ANGULAR if set
-if [ ! -z "$PROJECT_ANGULAR" ]; then
+# execute PYTHON if set
+if [ ! -z "$PROJECT_PYTHON" ]; then
         __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/${PROJECT_PATH_CI}/${__recipe}"
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}/${__recipe}"
         FS::is_file "$__recipe"
         if [ $? -eq 0 ]; then
-                OS::print_status info "ANGULAR tech detected. Parsing job recipe: ${__recipe}\n"
+                OS::print_status info \
+                        "Python tech detected. Running job recipe: ${__recipe}\n"
                 . "$__recipe"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "Parse failed.\n"
+                        OS::print_status error "Run failed.\n"
+                        return 1
+                fi
+        fi
+fi
+
+
+
+
+# execute RUST if set
+if [ ! -z "$PROJECT_RUST" ]; then
+        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/${PROJECT_PATH_CI}/${__recipe}"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "RUST tech detected. Running job recipe: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Run failed.\n"
                         return 1
                 fi
         fi
@@ -133,10 +151,10 @@ __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
 __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/${__recipe}"
 FS::is_file "$__recipe"
 if [ $? -eq 0 ]; then
-        OS::print_status info "Baseline source detected. Parsing job recipe: ${__recipe}\n"
+        OS::print_status info "Baseline source detected. Running job recipe: ${__recipe}\n"
         . "$__recipe"
         if [ $? -ne 0 ]; then
-                OS::print_status error "Parse failed.\n"
+                OS::print_status error "Run failed.\n"
                 return 1
         fi
 fi

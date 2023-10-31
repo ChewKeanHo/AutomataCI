@@ -25,7 +25,6 @@ RELEASE::run_homebrew() {
 
 
         # validate input
-        OS::print_status info "registering ${1} into homebrew repo...\n"
         if [ -z "$1" ] || [ -z "$2" ]; then
                 OS::print_status error "registration failed.\n"
                 return 1
@@ -39,6 +38,7 @@ RELEASE::run_homebrew() {
 
 
         # execute
+        OS::print_status info "registering ${1} into homebrew repo...\n"
         HOMEBREW::publish "$1" "${2}/Formula/${PROJECT_SKU}.rb"
         if [ $? -ne 0 ]; then
                 OS::print_status error "registration failed.\n"

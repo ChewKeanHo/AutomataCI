@@ -23,6 +23,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-cargo_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-changelog_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-checksum_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-chocolatey_unix-any.sh"
@@ -109,6 +110,11 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         fi
 
         RELEASE::run_pypi "$TARGET"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE::run_cargo "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi

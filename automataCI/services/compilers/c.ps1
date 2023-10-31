@@ -240,7 +240,7 @@ function C-Get-Compiler-Common {
 
 
 	# execute
-	if ("${__arch}" -ne "${__base_arch}") {
+	if (("${__arch}" -ne "${__base_arch}") -or ("${__os}" -ne "${__base_os}")) {
 		return ""
 	}
 

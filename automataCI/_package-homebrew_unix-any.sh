@@ -56,7 +56,6 @@ PACKAGE::run_homebrew() {
                 OS::print_status error "remake failed.\n"
                 return 1
         fi
-        FS::make_directory "${_src}/Data"
 
 
         # copy all complimentary files to the workspace
@@ -99,7 +98,7 @@ PACKAGE::run_homebrew() {
 
 
         # archive the assembled payload
-        __current_path="$PWD" && cd "${_src}/Data"
+        __current_path="$PWD" && cd "$_src"
         OS::print_status info "archiving ${_target_path}.tar.xz\n"
         TAR::create_xz "${_target_path}.tar.xz" "*"
         __exit=$?

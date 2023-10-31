@@ -25,6 +25,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-archive_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-cargo_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-changelog_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-chocolatey_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-deb_unix-any.sh"
@@ -65,6 +66,7 @@ fi
 
 
 # begin packaging
+OS::print_status plain "\n"
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         if [ -d "$i" ]; then
                 continue
@@ -168,6 +170,16 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         fi
 
         PACKAGE::run_pypi \
+                "$DEST" \
+                "$i" \
+                "$TARGET_FILENAME" \
+                "$TARGET_OS" \
+                "$TARGET_ARCH"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        PACKAGE::run_cargo \
                 "$DEST" \
                 "$i" \
                 "$TARGET_FILENAME" \

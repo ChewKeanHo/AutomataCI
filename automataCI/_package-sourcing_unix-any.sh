@@ -41,32 +41,13 @@ fi
 
 
 
-# source from Python and overrides existing
-if [ ! -z "$PROJECT_PYTHON" ]; then
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
+# source from Angular and overrides existing
+if [ ! -z "$PROJECT_ANGULAR" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/${PROJECT_PATH_CI}"
         __recipe="${__recipe}/package_unix-any.sh"
         FS::is_file "$__recipe"
         if [ $? -eq 0 ]; then
-                OS::print_status info \
-                        "sourcing Python content assembling functions: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Sourcing failed\n"
-                        return 1
-                fi
-        fi
-fi
-
-
-
-
-# source from Go and overrides existing
-if [ ! -z "$PROJECT_GO" ]; then
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_GO}/${PROJECT_PATH_CI}"
-        __recipe="${__recipe}/package_unix-any.sh"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info "sourcing Go content assembling functions: ${__recipe}\n"
+                OS::print_status info "sourcing Angular content assembling functions: ${__recipe}\n"
                 . "$__recipe"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "Sourcing failed\n"
@@ -96,6 +77,24 @@ fi
 
 
 
+# source from Go and overrides existing
+if [ ! -z "$PROJECT_GO" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_GO}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/package_unix-any.sh"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "sourcing Go content assembling functions: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Sourcing failed\n"
+                        return 1
+                fi
+        fi
+fi
+
+
+
+
 # source from Nim and overrides existing
 if [ ! -z "$PROJECT_NIM" ]; then
         __recipe="${PROJECT_PATH_ROOT}/${PROJECT_NIM}/${PROJECT_PATH_CI}"
@@ -114,13 +113,32 @@ fi
 
 
 
-# source from Angular and overrides existing
-if [ ! -z "$PROJECT_ANGULAR" ]; then
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/${PROJECT_PATH_CI}"
+# source from Python and overrides existing
+if [ ! -z "$PROJECT_PYTHON" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}"
         __recipe="${__recipe}/package_unix-any.sh"
         FS::is_file "$__recipe"
         if [ $? -eq 0 ]; then
-                OS::print_status info "sourcing Angular content assembling functions: ${__recipe}\n"
+                OS::print_status info \
+                        "sourcing Python content assembling functions: ${__recipe}\n"
+                . "$__recipe"
+                if [ $? -ne 0 ]; then
+                        OS::print_status error "Sourcing failed\n"
+                        return 1
+                fi
+        fi
+fi
+
+
+
+
+# source from Rust and overrides existing
+if [ ! -z "$PROJECT_RUST" ]; then
+        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/${PROJECT_PATH_CI}"
+        __recipe="${__recipe}/package_unix-any.sh"
+        FS::is_file "$__recipe"
+        if [ $? -eq 0 ]; then
+                OS::print_status info "sourcing Rust content assembling functions: ${__recipe}\n"
                 . "$__recipe"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "Sourcing failed\n"

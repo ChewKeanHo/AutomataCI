@@ -139,6 +139,25 @@ function FS-Is-File {
 
 
 
+function FS-Is-Target-A-Cargo {
+	param (
+		[string]$__subject
+	)
+
+
+	# execute
+	if (($("${__subject}" -replace '^.*-cargo') -ne "${__subject}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-Chocolatey {
 	param (
 		[string]$__subject

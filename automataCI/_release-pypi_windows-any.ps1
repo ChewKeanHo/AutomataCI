@@ -47,7 +47,6 @@ function RELEASE-Run-PYPI {
 	OS-Print-Status info "releasing pypi package..."
 	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 		OS-Print-Status warning "Simulating pypi package push..."
-		OS-Print-Status warning "Simulating remove package artifact..."
 	} else {
 		OS-Print-Status info "checking pypi twine login credentials..."
 		$__process = PYPI-Check-Login
@@ -64,10 +63,10 @@ function RELEASE-Run-PYPI {
 			OS-Print-Status error "release failed."
 			return 1
 		}
-
-		OS-Print-Status info "remove package artifact..."
-		$null = FS-Remove-Silently "${_target}"
 	}
+
+	OS-Print-Status info "remove package artifact..."
+	$null = FS-Remove-Silently "${_target}"
 
 
 	# report status
