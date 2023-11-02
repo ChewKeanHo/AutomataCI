@@ -250,6 +250,7 @@ Please try any of the following:
         To package the repo product 🠚   $ ./ci.cmd package
         To release the repo product 🠚   $ ./ci.cmd release
         To stop a development 🠚         $ ./ci.cmd stop
+        To deploy the new release 🠚     $ ./ci.cmd deploy
         To clean the workspace 🠚        $ ./ci.cmd clean
         To purge everything 🠚           $ ./ci.cmd purge
 ```

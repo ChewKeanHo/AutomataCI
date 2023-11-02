@@ -85,6 +85,10 @@ jobs:
         id: native_ci_stop
         run: |
           ./ci.cmd stop
+      - name: Execute repo's AutomataCI - DEPLOY
+        id: native_ci_deploy
+        run: |
+          ./ci.cmd deploy
       - name: Archive Payloads Artifacts
         if: always()
         uses: actions/upload-artifact@v3

@@ -179,6 +179,9 @@ switch ($args[0]) {
 } { $_ -in 'stop', 'Stop', 'STOP' } {
 	$env:PROJECT_CI_JOB = "stop"
 	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+} { $_ -in 'deploy', 'Deploy', 'DEPLOY' } {
+	$env:PROJECT_CI_JOB = "deploy"
+	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
 } { $_ -in 'clean', 'Clean', 'CLEAN' } {
 	$env:PROJECT_CI_JOB = "clean"
 	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
@@ -207,6 +210,7 @@ switch ($args[0]) {
 	Write-Host "        To package the repo product 🠚   $ ./ci.cmd package"
 	Write-Host "        To release the repo product 🠚   $ ./ci.cmd release"
 	Write-Host "        To stop a development 🠚         $ ./ci.cmd stop"
+	Write-Host "        To deploy the new release 🠚     $ ./ci.cmd deploy"
 	Write-Host "        To clean the workspace 🠚        $ ./ci.cmd clean"
 	Write-Host "        To purge everything 🠚           $ ./ci.cmd purge"
 }}

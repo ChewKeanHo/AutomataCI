@@ -246,6 +246,11 @@ stop|Stop|STOP)
         code=$?
         unset PROJECT_ARCH PROJECT_OS PROJECT_PATH_PWD PROJECT_PATH_ROOT
         ;;
+deploy|Deploy|DEPLOY)
+        export PROJECT_CI_JOB="deploy"
+        . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
+        code=$?
+        ;;
 clean|Clean|CLEAN)
         export PROJECT_CI_JOB="clean"
         . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/common_unix-any.sh"
@@ -279,6 +284,7 @@ purge|Purge|PURGE)
         printf "        To package the repo product 🠚   $ ./ci.cmd package\n"
         printf "        To release the repo product 🠚   $ ./ci.cmd release\n"
         printf "        To stop a development 🠚         $ ./ci.cmd stop\n"
+        printf "        To deploy the new release 🠚     $ ./ci.cmd deploy\n"
         printf "        To clean the workspace 🠚        $ ./ci.cmd clean\n"
         printf "        To purge everything 🠚           $ ./ci.cmd purge\n"
         ;;
