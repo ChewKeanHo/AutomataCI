@@ -190,7 +190,8 @@ PACKAGE::assemble_deb_content() {
                 "$PROJECT_CONTACT_WEBSITE" \
                 "$PROJECT_PITCH" \
                 "$PROJECT_DEBIAN_PRIORITY" \
-                "$PROJECT_DEBIAN_SECTION"
+                "$PROJECT_DEBIAN_SECTION" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/ABSTRACTS.txt"
         if [ $? -ne 0 ]; then
                 return 1
         fi

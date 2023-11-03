@@ -200,7 +200,8 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE" \
-                "$PROJECT_LICENSE"
+                "$PROJECT_LICENSE" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/ABSTRACTS.txt"
         if [ $? -ne 0 ]; then
                 return 1
         fi

@@ -198,6 +198,7 @@ RPM::create_spec() {
         __email="$8"
         __website="$9"
         __license="${10}"
+        __description_filepath="${11}"
 
 
         # validate input
@@ -245,27 +246,25 @@ URL: ${__website}
         if [ -f "${__directory}/SPEC_DESCRIPTION" ]; then
                 __old_IFS="$IFS"
                 while IFS="" read -r __line || [ -n "$__line" ]; do
-                        __line="${__line%%#*}"
-                        if [ -z "$__line" ]; then
+                        if [ ! -z "$__line" -a -z "${__line%%#*}" ]; then
                                 continue
                         fi
 
-                        FS::append_file "$__location" "${__line}\n"
+                        FS::append_file "$__location" "${__line%%#*}\n"
                 done < "${__directory}/SPEC_DESCRIPTION"
                 IFS="$__old_IFS" && unset __old_IFS __line
 
                 FS::remove_silently "${__directory}/SPEC_DESCRIPTION"
-        elif [ -f "${__resources}/packages/DESCRIPTION.txt" ]; then
-                __old_IFS="$IFS"
+        elif [ ! -z "$__description_filepath" ] && [ -f "$__description_filepath" ]; then
+                old_IFS="$IFS"
                 while IFS="" read -r __line || [ -n "$__line" ]; do
-                        __line="${__line%%#*}"
-                        if [ -z "$__line" ]; then
+                        if [ ! -z "$__line" -a -z "${__line%%#*}" ]; then
                                 continue
                         fi
 
-                        FS::append_file "$__location" "${__line}\n"
-                done < "${__resources}/packages/DESCRIPTION.txt"
-                IFS="$__old_IFS" && unset __old_IFS __line
+                        FS::append_file "$__location" "${__line%%#*}\n"
+                done < "${__description_filepath}"
+                IFS="$old_IFS" && unset old_IFS __line
         else
                 FS::append_file "$__location" "\n"
         fi

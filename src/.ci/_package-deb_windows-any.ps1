@@ -188,7 +188,8 @@ function PACKAGE-Assemble-DEB-Content {
 		"${env:PROJECT_CONTACT_WEBSITE}" `
 		"${env:PROJECT_PITCH}" `
 		"${env:PROJECT_DEBIAN_PRIORITY}" `
-		"${env:PROJECT_DEBIAN_SECTION}"
+		"${env:PROJECT_DEBIAN_SECTION}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\ABSTRACTS.txt"
 	if ($__process -ne 0) {
 		return 1
 	}

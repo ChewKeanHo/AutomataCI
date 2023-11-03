@@ -104,6 +104,7 @@ IPK::create_control() {
         __pitch="${10}"
         __priority="${11}"
         __section="${12}"
+        __description_filepath="${13}"
 
 
         # validate input
@@ -160,21 +161,23 @@ Description: $__pitch
 
 
         # append description data file
-        old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                if [ ! -z "$__line" -a -z "${__line%%#*}" ]; then
-                        continue
-                fi
+        if [ ! -z "$__description_filepath" ] && [ -f "$__description_filepath" ]; then
+                old_IFS="$IFS"
+                while IFS="" read -r __line || [ -n "$__line" ]; do
+                        if [ ! -z "$__line" -a -z "${__line%%#*}" ]; then
+                                continue
+                        fi
 
-                if [ -z "$__line" ]; then
-                        __line=" ."
-                else
-                        __line=" ${__line}"
-                fi
+                        if [ -z "$__line" ]; then
+                                __line=" ."
+                        else
+                                __line=" ${__line}"
+                        fi
 
-                FS::append_file "$__location" "${__line}\n"
-        done < "${__resources}/packages/DESCRIPTION.txt"
-        IFS="$old_IFS" && unset old_IFS __line
+                        FS::append_file "$__location" "${__line}\n"
+                done < "${__description_filepath}"
+                IFS="$old_IFS" && unset old_IFS __line
+        fi
 
 
         # report status

@@ -202,7 +202,8 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}" `
 		"${env:PROJECT_CONTACT_WEBSITE}" `
-		"${env:PROJECT_LICENSE}"
+		"${env:PROJECT_LICENSE}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\ABSTRACTS.txt"
 	if ($__process -ne 0) {
 		return 1
 	}

@@ -201,7 +201,8 @@ function RPM-Create-Spec {
 		[string]$__name,
 		[string]$__email,
 		[string]$__website,
-		[string]$__license
+		[string]$__license,
+		[string]$__description_filepath
 	)
 
 
@@ -249,22 +250,25 @@ URL: ${__website}
 	$null = FS-Append-File $__location "%%description`n"
 	if (Test-Path "${__directory}\SPEC_DESCRIPTION") {
 		foreach($__line in Get-Content "${__directory}\SPEC_DESCRIPTION") {
-			$__line = $_ -replace '#.*'
-			if ([string]::IsNullOrEmpty($__line)) {
+			if ((-not [string]::IsNullOrEmpty($__line)) -and
+				[string]::IsNullOrEmpty($__line -replace "#.*$")) {
 				continue
 			}
 
+			$__line = $_ -replace '#.*'
 			$null = FS-Append-File $__location "${__line}`n"
 		}
 
 		$null = FS-Remove-Silently "${__directory}\SPEC_DESCRIPTION"
-	} elseif (Test-Path "${__resources}\packages\DESCRIPTION.txt") {
-		foreach($__line in Get-Content "${__resources}\packages\DESCRIPTION.txt") {
-			$__line = $_ -replace '#.*'
-			if ([string]::IsNullOrEmpty($__line)) {
+	} elseif ((-not [string]::IsNullOrEmpty($__description_filepath)) -and
+		(Test-Path -Path "${__description_filepath}")) {
+		foreach($__line in Get-Content "${__description_filepath}") {
+			if ((-not [string]::IsNullOrEmpty($__line)) -and
+				[string]::IsNullOrEmpty($__line -replace "#.*$")) {
 				continue
 			}
 
+			$__line = $_ -replace '#.*'
 			$null = FS-Append-File $__location "${__line}`n"
 		}
 	} else {

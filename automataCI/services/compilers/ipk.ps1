@@ -111,7 +111,8 @@ function IPK-Create-Control {
 		[string]$__website,
 		[string]$__pitch,
 		[string]$__priority,
-		[string]$__section
+		[string]$__section,
+		[string]$__description_filepath
 	)
 
 
@@ -168,19 +169,22 @@ Description: ${__pitch}
 
 
 	# append description data file
-	Foreach ($__line in (Get-Content -Path "${__resources}/packages/DESCRIPTION.txt")) {
-		if (![string]::IsNullOrEmpty($__line) -and
-			($__line -eq $__line -replace "#.*$")) {
-			continue
-		}
+	if ((-not [string]::IsNullOrEmpty($__description_filepath)) -and
+		(Test-Path -Path "${__description_filepath}")) {
+		foreach ($__line in (Get-Content -Path "${__description_filepath}")) {
+			if ((-not [string]::IsNullOrEmpty($__line)) -and
+				[string]::IsNullOrEmpty($__line -replace "#.*$")) {
+				continue
+			}
 
-		if ([string]::IsNullOrEmpty($__line)) {
-			$__line = " ."
-		} else {
-			$__line = " ${__line}"
-		}
+			if ([string]::IsNullOrEmpty($__line)) {
+				$__line = " ."
+			} else {
+				$__line = " ${__line}"
+			}
 
-		$null = FS-Append-File $__location $__line
+			$null = FS-Append-File $__location $__line
+		}
 	}
 
 
