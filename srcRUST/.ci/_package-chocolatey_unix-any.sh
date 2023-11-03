@@ -202,8 +202,12 @@ if (-not (Test-Path \"\${data_dir}\\\\bin\\\\${PROJECT_SKU}.exe\")) {
 
 # Install
 Write-Host \"assembling workspace for installation...\"
-Move-Item -Path \"\${data_dir}\\\\bin\" -Destination \"\${root_dir}\"
-Move-Item -Path \"\${data_dir}\\\\lib\" -Destination \"\${root_dir}\"
+if (Test-Path -PathType Container -Path \"\${data_dir}\\\\bin\") {
+        Move-Item -Path \"\${data_dir}\\\\bin\" -Destination \"\${root_dir}\"
+}
+if (Test-Path -PathType Container -Path \"\${data_dir}\\\\lib\") {
+        Move-Item -Path \"\${data_dir}\\\\lib\" -Destination \"\${root_dir}\"
+}
 Set-Location \"\$current_dir\"
 Remove-Item \$data_dir -Force -Recurse -ErrorAction SilentlyContinue
 "

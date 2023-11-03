@@ -120,7 +120,7 @@ function PACKAGE-Run-Homebrew {
 
 	# update the formula.rb script
 	OS-Print-Status info "update given formula.rb file..."
-	$null = FS-Remove-Silently "${__target_path}.rb"
+	$null = FS-Remove-Silently "${_target_path}.rb"
 	foreach ($__line in (Get-Content "${_src}\formula.rb")) {
 		$__line = STRINGS-Replace-All `
 			"${__line}" `
@@ -132,7 +132,7 @@ function PACKAGE-Run-Homebrew {
 			"{{ TARGET_SHASUM }}" `
 			"${__shasum}"
 
-		$__process = FS-Append-File "${__target_path}.rb" "${__line}"
+		$__process = FS-Append-File "${_target_path}.rb" "${__line}"
 		if ($__process -ne 0) {
 			return 1
 		}
