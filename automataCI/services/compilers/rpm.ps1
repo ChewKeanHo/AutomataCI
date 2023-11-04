@@ -255,7 +255,7 @@ URL: ${__website}
 				continue
 			}
 
-			$__line = $_ -replace '#.*'
+			$__line = $__line -replace '#.*'
 			$null = FS-Append-File $__location "${__line}`n"
 		}
 
@@ -268,7 +268,7 @@ URL: ${__website}
 				continue
 			}
 
-			$__line = $_ -replace '#.*'
+			$__line = $__line -replace '#.*'
 			$null = FS-Append-File $__location "${__line}`n"
 		}
 	} else {

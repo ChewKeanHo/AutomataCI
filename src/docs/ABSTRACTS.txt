@@ -15,8 +15,22 @@
 ################################################################################
 #                                                                  🠳 Max       #
 ################################################################################
-Your longer description here. New empty line is separated by a
-newline as shown below. The packager shall automatically format it
-to the required line.
+Continuous improvements or integrations (CI) is a nerve system of a
+software product production. Leaving the job blindly by outsourcing
+to any proprietary 3rd-party CI service provider is a guaranteed
+way for being threatened and extorted by any malicious suppliers.
+As of year 2021 to 2023, many evidences show that the suppliers
+vilely alter their pricing charges after the fact to the point of
+legally extorting their customers and destroyed some useful
+software entirely.
 
-This is a new line.
+Therefore, AutomataCI counters such problem by facilitating CI
+functions natively, making it locally available, decentralized,
+and redistributable at git repository level. 3rd-party service
+providers can only call AutomataCI just like how the developer
+performs them locally. This de-risk the software owner by not
+completely depending on the service provider, allowing him/her
+to switch supplier easily. AutomataCI also facilitates
+technology-specific automation customization, capable of
+absorbing new changes easily across time. It only uses the
+basic POSIX compliant Shell and PowerShell scripts.

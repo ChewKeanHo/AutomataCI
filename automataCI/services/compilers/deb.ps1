@@ -260,6 +260,7 @@ Description: ${__pitch}
 				continue
 			}
 
+			$__line = $__line -replace '#.*'
 			if ([string]::IsNullOrEmpty($__line)) {
 				$__line = " ."
 			} else {

@@ -127,6 +127,27 @@ PROJECT_C = ''
 
 
 ######################
+# CITATION           #
+######################
+# PROJECT_CITATION
+# This is the control variable used to generate the CITATION.cff file during the
+# Release CI Job. It is the cff-version field's value.
+#
+# To enable it, simply simply the supported version. Default is '1.2.0'.
+# To dsiable it, simply leave it empty.
+PROJECT_CITATION="1.2.0"
+
+
+# PROJECT_CITATION_TYPE
+# The type's field value of the repository representing the content of it.
+#
+# Can only accept 'software' or 'dataset'. Default is 'software'.
+PROJECT_CITATION_TYPE="software"
+
+
+
+
+######################
 # GO TECHNOLOGY      #
 ######################
 # PROJECT_GO
