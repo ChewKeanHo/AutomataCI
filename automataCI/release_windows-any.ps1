@@ -88,54 +88,57 @@ if ($__process -ne 0) {
 $STATIC_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
 $HOMEBREW_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_HOMEBREW_DIRECTORY}"
 $CHOCOLATEY_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_CHOCOLATEY_DIRECTORY}"
-foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
-	$TARGET = $TARGET.FullName
+$PACKAGE_DIRECTORY = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
+if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
+	foreach ($TARGET in (Get-ChildItem -Path "${PACKAGE_DIRECTORY}")) {
+		$TARGET = $TARGET.FullName
 
-	if ($TARGET -like "*.asc") {
-		continue
-	}
-	OS-Print-Status info "processing ${TARGET}"
+		if ($TARGET -like "*.asc") {
+			continue
+		}
+		OS-Print-Status info "processing ${TARGET}"
 
-	$__process = RELEASE-Run-DEB "$TARGET" "$STATIC_REPO"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = RELEASE-Run-RPM "$TARGET" "$STATIC_REPO" `
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = RELEASE-Run-DOCKER "$TARGET"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = RELEASE-Run-PYPI "$TARGET"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = RELEASE-Run-CARGO "$TARGET"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = RELEASE-Run-Homebrew "$TARGET" "$HOMEBREW_REPO"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = RELEASE-Run-Chocolatey "$TARGET" "$CHOCOLATEY_REPO"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = OS-Is-Command-Available "RELEASE-Run-Package-Processor"
-	if ($__process -eq 0) {
-		$__process = RELEASE-Run-Package-Processor "$TARGET"
+		$__process = RELEASE-Run-DEB "$TARGET" "$STATIC_REPO"
 		if ($__process -ne 0) {
 			return 1
+		}
+
+		$__process = RELEASE-Run-RPM "$TARGET" "$STATIC_REPO" `
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = RELEASE-Run-DOCKER "$TARGET"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = RELEASE-Run-PYPI "$TARGET"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = RELEASE-Run-CARGO "$TARGET"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = RELEASE-Run-Homebrew "$TARGET" "$HOMEBREW_REPO"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = RELEASE-Run-Chocolatey "$TARGET" "$CHOCOLATEY_REPO"
+		if ($__process -ne 0) {
+			return 1
+		}
+
+		$__process = OS-Is-Command-Available "RELEASE-Run-Package-Processor"
+		if ($__process -eq 0) {
+			$__process = RELEASE-Run-Package-Processor "$TARGET"
+			if ($__process -ne 0) {
+				return 1
+			}
 		}
 	}
 }

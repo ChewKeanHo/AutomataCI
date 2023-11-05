@@ -177,3 +177,91 @@ function SYNC-Parallel-Exec {
 	# report status
 	return 0
 }
+
+
+
+
+# To use:
+#   $ SYNC-Series-Exec ${function:Function-Name}.ToString() "$(Get-Location)\parallel.txt"
+#
+#   The __series_command accepts a wrapper function as shown above. Here is an
+#   example to construct a simple parallelism executions:
+#       function Function-Name {
+#               param (
+#                       [string]$__line
+#               )
+#
+#
+#               # initialize and import libraries from scratch
+#               ...
+#
+#
+#               # break line into multiple parameters (delimiter = '|')
+#               $__list = $__line -split "\|"
+#               $__arg1 = $__list[1]
+#               $__arg2 = $__list[2]
+#               ...
+#
+#
+#
+#               # some tasks in your thread
+#               ...
+#
+#
+#               # execute
+#               $__output = Invoke-Expression "command ${__line}"
+#               if ($LASTEXITCODE -ne 0); then
+#                       return 1 # signal an error has occured
+#               fi
+#
+#               ...
+#
+#
+#               # report status
+#               return 0 # signal a successful execution
+#       }
+#
+#
+#       # calling the parallel exec function
+#       SYNC-Series-Exec ${function:Function-Name}.ToString() "$(Get-Location)\parallel.txt"
+#
+#
+#   The control file must not have any comment and each line must be the capable
+#   of being executed in a single thread. Likewise, when feeding a function,
+#   each line is a long string with your own separator. You will have to break
+#   it inside your wrapper function.
+#
+#   The __series_command **MUST** return **ONLY** the following return code:
+#     0 = signal the task execution is done and completed successfully.
+#     1 = signal the task execution has error. This terminates the entire run.
+function SYNC-Series-Exec {
+	param(
+		[string]$__series_command,
+		[string]$__series_control
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__series_command)) {
+		return 1
+	}
+
+	if ([string]::IsNullOrEmpty($__series_control) -or
+		(-not (Test-Path -Path "${__series_control}"))) {
+		return 1
+	}
+
+
+	# execute
+	${function:SYNC-Run} = ${__series_command}
+	foreach ($__line in (Get-Content "${__series_control}")) {
+		$__process = SYNC-Run "${__line}"
+		if ($__process -ne 0) {
+			return 1
+		}
+	}
+
+
+	# report status
+	return 0
+}

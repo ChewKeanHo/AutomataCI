@@ -90,7 +90,8 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 			return 1
 		}
 
-		$__keyring = "lib${env:PROJECT_SKU}"
+		$_gpg_keyring = "lib${env:PROJECT_SKU}"
+		$_package = "lib${env:PROJECT_SKU}"
 	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
@@ -145,6 +146,8 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 		if ($__process -ne 0) {
 			return 1
 		}
+
+		$_package = "${env:PROJECT_SKU}"
 	}
 
 

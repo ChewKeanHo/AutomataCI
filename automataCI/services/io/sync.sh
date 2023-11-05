@@ -60,7 +60,7 @@
 #   each line is a long string with your own separator. You will have to break
 #   it inside your wrapper function.
 #
-#   The __parallel_command **MUST** return the following return code:
+#   The __parallel_command **MUST** return **ONLY** the following return code:
 #     0 = signal the task execution is done and completed successfully.
 #     1 = signal the task execution has error. This terminates the entire run.
 SYNC::parallel_exec() {
@@ -210,6 +210,88 @@ SYNC::parallel_exec() {
                         return 1
                 fi
         done
+
+
+        # report status
+        return 0
+}
+
+
+
+
+# To use:
+#   $ SYNC::series_exec "function_name" "${PWD}/parallel.txt"
+#
+#   The __series_command accepts a wrapper function as shown above. Here is an
+#   example to construct a simple series of executions:
+#       function_name() {
+#               #__line="$1"
+#
+#
+#               # break line into multiple parameters (delimiter = '|')
+#               __line="${1%|*}"
+#
+#               __last="${__line##*|}"
+#               __line="${__line%|*}"
+#
+#               __2nd_last="${__line##*|}"
+#               __line="${__line%|*}"
+#
+#               ...
+#
+#
+#               # some tasks in your thread
+#               ...
+#
+#
+#               # execute
+#               $@
+#               if [ $? -ne 0 ]; then
+#                       return 1 # signal an error has occured
+#               fi
+#
+#
+#               # report status
+#               return 0 # signal a successful execution
+#       }
+#
+#
+#       # call the series exec
+#       SYNC::series_exec "function_name" "${PWD}/parallel.txt"
+#
+#
+#   The control file must not have any comment and each line must be the capable
+#   of being executed in a single thread. Likewise, when feeding a function,
+#   each line is a long string with your own separator. You will have to break
+#   it inside your wrapper function.
+#
+#   The __series_command **MUST** return **ONLY** the following return code:
+#     0 = signal the task execution is done and completed successfully.
+#     1 = signal the task execution has error. This terminates the entire run.
+SYNC::series_exec() {
+        __series_command="$1"
+        __series_control="$2"
+
+
+        # validate input
+        if [ -z "$__series_command" ]; then
+                return 1
+        fi
+
+        if [ -z "$__series_control" ] || [ ! -f "$__series_control" ]; then
+                return 1
+        fi
+
+
+        # execute
+        __old_IFS="$IFS"
+        while IFS="" read -r __line || [ -n "$__line" ]; do
+                "$__series_command" "$__line"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        done < "$__series_control"
+        IFS="$__old_IFS" && unset __old_IFS
 
 
         # report status

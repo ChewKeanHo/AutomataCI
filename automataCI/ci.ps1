@@ -22,49 +22,6 @@ if ($myinvocation.line.StartsWith(". ")) {
 
 
 
-# determine os
-$env:PROJECT_OS = (Get-ComputerInfo).OsName.ToLower()
-if (-not ($env:PROJECT_OS -match "microsoft" -or $env:PROJECT_OS -match "windows")) {
-	Write-Host "[ ERROR ] unsupported OS."
-	exit 1
-}
-$env:PROJECT_OS = "windows"
-
-
-
-
-# determine arch
-switch -regex ((Get-ComputerInfo).CsProcessors.Architecture) {
-"x86" {
-	$env:PROJECT_ARCH = "i386"
-} "MIPS" {
-	$env:PROJECT_ARCH = "mips"
-} "Alpha" {
-	$env:PROJECT_ARCH = "alpha"
-} "PowerPC" {
-	$env:PROJECT_ARCH = "powerpc"
-} "ARM" {
-	$env:PROJECT_ARCH = "arm"
-} "ia64" {
-	$env:PROJECT_ARCH = "ia64"
-} "x64" {
-	$env:PROJECT_ARCH = "amd64"
-} "ARM64" {
-	$env:PROJECT_ARCH = "arm64"
-} Default {
-	Write-Host "[ ERROR ] unsupported architecture."
-	exit 1
-}}
-
-
-
-
-# determine PROJECT_PATH_PWD
-$env:PROJECT_PATH_PWD = Get-Location
-
-
-
-
 # scan for PROJECT_PATH_ROOT
 $__pathing = "${env:PROJECT_PATH_PWD}"
 $__previous = ""
@@ -92,54 +49,16 @@ $env:PROJECT_PATH_AUTOMATA = "automataCI"
 
 
 
-# parse repo CI configurations
-if (-not (Test-Path -Path "${env:PROJECT_PATH_ROOT}\CONFIG.toml")) {
-	Write-Host "[ ERROR ] missing '${env:PROJECT_PATH_ROOT}\CONFIG.toml' config file."
+# detects initializer
+if (-not (Test-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\init.ps1")) {
+	Write-Host "[ ERROR ] unable to find initializer service script."
 	exit 1
 }
-
-
-foreach ($__line in (Get-Content "${env:PROJECT_PATH_ROOT}\CONFIG.toml")) {
-	$__line = $__line -replace '#.*', ''
-
-	if ([string]::IsNullOrEmpty($__line)) {
-		continue
-	}
-
-	$__key, $__value = $__line -split '=', 2
-	$__key = $__key.Trim() -replace '^''|''$|^"|"$'
-	$__value = $__value.Trim() -replace '^''|''$|^"|"$'
-
-	Set-Item -Path "env:$__key" -Value $__value
+$__process = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\init.ps1"
+if ($__process -ne 0) {
+	Write-Host "[ ERROR ] initialization failed.\n"
+	exit 1
 }
-
-
-
-
-# parse repo CI secret configurations
-if (Test-Path -Path "${env:PROJECT_PATH_ROOT}\SECRETS.toml" -PathType leaf) {
-	foreach ($__line in (Get-Content "${env:PROJECT_PATH_ROOT}\SECRETS.toml")) {
-		$__line = $__line -replace '#.*', ''
-
-		if ([string]::IsNullOrEmpty($__line)) {
-			continue
-		}
-
-		$__key, $__value = $__line -split '=', 2
-		$__key = $__key.Trim() -replace '^''|''$|^"|"$'
-		$__value = $__value.Trim() -replace '^''|''$|^"|"$'
-
-		Set-Item -Path "env:$__key" -Value $__value
-	}
-}
-
-
-
-
-# update critical environment variables
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-	+ ";" `
-	+ [System.Environment]::GetEnvironmentVariable("Path","User")
 
 
 

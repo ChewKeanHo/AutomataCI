@@ -22,64 +22,6 @@ fi
 
 
 
-# determine os
-PROJECT_OS="$(uname)"
-export PROJECT_OS="$(echo "$PROJECT_OS" | tr '[:upper:]' '[:lower:]')"
-case "${PROJECT_OS}" in
-windows*|ms-dos*)
-        export PROJECT_OS='windows'
-        ;;
-cygwin*|mingw*|mingw32*|msys*)
-        export PROJECT_OS='windows' # edge cases. Set it to widnows for now
-        ;;
-*freebsd)
-        export PROJECT_OS='freebsd'
-        ;;
-dragonfly*)
-        export PROJECT_OS='dragonfly'
-        ;;
-*)
-        ;;
-esac
-
-
-
-
-# determine arch
-PROJECT_ARCH="$(uname -m)"
-export PROJECT_ARCH="$(echo "$PROJECT_ARCH" | tr '[:upper:]' '[:lower:]')"
-case "${PROJECT_ARCH}" in
-i686-64)
-        export PROJECT_ARCH='ia64' # Intel Itanium.
-        ;;
-i386|i486|i586|i686)
-        export PROJECT_ARCH='i386'
-        ;;
-x86_64)
-        export PROJECT_ARCH="amd64"
-        ;;
-sun4u)
-        export PROJECT_ARCH='sparc'
-        ;;
-"power macintosh")
-        export PROJECT_ARCH='powerpc'
-        ;;
-ip*)
-        export PROJECT_ARCH='mips'
-        ;;
-*)
-        ;;
-esac
-
-
-
-
-# determine PROJECT_PATH_PWD
-export PROJECT_PATH_PWD="$PWD"
-
-
-
-
 # scan for PROJECT_PATH_ROOT
 __pathing="$PROJECT_PATH_PWD"
 __previous=""
@@ -104,85 +46,15 @@ export PROJECT_PATH_AUTOMATA="automataCI"
 
 
 
-# parse repo CI configurations
-if [ ! -f "${PROJECT_PATH_ROOT}/CONFIG.toml" ]; then
-        printf "[ ERROR ] - missing '${PROJECT_PATH_ROOT}/CONFIG.toml' repo config file.\n"
+# detects initializer
+if [ ! -f "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/init.sh" ]; then
+        printf "[ ERROR ] unable to find initializer service script.\n"
         exit 1
 fi
-old_IFS="$IFS"
-while IFS= read -r line; do
-        line="${line%%#*}"
-        if [ "$line" = "" ]; then
-                continue
-        fi
-
-        key="${line%%=*}"
-        key="${key#"${key%%[![:space:]]*}"}"
-        key="${key%"${key##*[![:space:]]}"}"
-        key="${key%\"}"
-        key="${key#\"}"
-        key="${key%\'}"
-        key="${key#\'}"
-
-        value="${line##*=}"
-        value="${value#"${value%%[![:space:]]*}"}"
-        value="${value%"${value##*[![:space:]]}"}"
-        value="${value%\"}"
-        value="${value#\"}"
-        value="${value%\'}"
-        value="${value#\'}"
-
-        export "$key"="$value"
-done < "${PROJECT_PATH_ROOT}/CONFIG.toml"
-
-
-
-
-# parse repo CI secret configurations
-if [ -f "${PROJECT_PATH_ROOT}/SECRETS.toml" ]; then
-        old_IFS="$IFS"
-        while IFS= read -r line; do
-                line="${line%%#*}"
-                if [ "$line" = "" ]; then
-                        continue
-                fi
-
-                key="${line%%=*}"
-                key="${key#"${key%%[![:space:]]*}"}"
-                key="${key%"${key##*[![:space:]]}"}"
-                key="${key%\"}"
-                key="${key#\"}"
-                key="${key%\'}"
-                key="${key#\'}"
-
-                value="${line##*=}"
-                value="${value#"${value%%[![:space:]]*}"}"
-                value="${value%"${value##*[![:space:]]}"}"
-                value="${value%\"}"
-                value="${value#\"}"
-                value="${value%\'}"
-                value="${value#\'}"
-
-                export "$key"="$value"
-        done < "${PROJECT_PATH_ROOT}/SECRETS.toml"
-fi
-
-
-
-
-# update environment variables
-case "$PROJECT_OS" in
-linux)
-        __location="/home/linuxbrew/.linuxbrew/bin/brew"
-        ;;
-darwin)
-        __location="/usr/local/bin/brew"
-        ;;
-*)
-        ;;
-esac
-if [ -f "$__location" ]; then
-        eval "$("${__location}" shellenv)"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/init.sh"
+if [ $? -ne 0 ]; then
+        printf "[ ERROR ] initialization failed.\n"
+        exit 1
 fi
 
 

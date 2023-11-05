@@ -27,14 +27,21 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function PACKAGE-Run-FLATPAK {
 	param (
-		[string]$_dest,
-		[string]$_target,
-		[string]$_target_filename,
-		[string]$_target_os,
-		[string]$_target_arch,
-		[string]$_repo
+		[string]$__line
 	)
 
+
+	# parse input
+	$__list = $__line -split "\|"
+	$_dest = $__list[0]
+	$_target = $__list[1]
+	$_target_filename = $__list[2]
+	$_target_os = $__list[3]
+	$_target_arch = $__list[4]
+	$_repo = $__list[5]
+
+
+	# validate input
 	OS-Print-Status info "checking FLATPAK functions availability..."
 	$__process = FLATPAK-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($__process) {

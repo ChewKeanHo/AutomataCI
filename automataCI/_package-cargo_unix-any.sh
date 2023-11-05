@@ -27,12 +27,28 @@ fi
 
 
 PACKAGE::run_cargo() {
-        _dest="$1"
-        _target="$2"
-        _target_filename="$3"
-        _target_os="$4"
-        _target_arch="$5"
+        #__line="$1"
 
+
+        # parse input
+        __line="${1%|*}"
+
+        _target_arch="${__line##*|}"
+        __line="${__line%|*}"
+
+        _target_os="${__line##*|}"
+        __line="${__line%|*}"
+
+        _target_filename="${__line##*|}"
+        __line="${__line%|*}"
+
+        _target="${__line##*|}"
+        __line="${__line%|*}"
+
+        _dest="${__line##*|}"
+
+
+        # validate input
         if [ ! -z "$PROJECT_RUST" ]; then
                 RUST::activate_local_environment
         fi

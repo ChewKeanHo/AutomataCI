@@ -144,6 +144,8 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
+
+                _package="$PROJECT_SKU"
         fi
 
 
