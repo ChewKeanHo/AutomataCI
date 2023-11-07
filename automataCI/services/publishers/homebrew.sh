@@ -69,3 +69,62 @@ HOMEBREW::publish() {
         # report status
         return 0
 }
+
+
+
+
+HOMEBREW::setup() {
+        # validate input
+        OS::is_command_available "curl"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "brew"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        /bin/bash -c \
+        "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        case "$PROJECT_OS" in
+        linux)
+                __location="/home/linuxbrew/.linuxbrew/bin/brew"
+                ;;
+        darwin)
+                __location="/usr/local/bin/brew"
+                ;;
+        *)
+                return 1
+                ;;
+        esac
+
+        old_IFS="$IFS"
+        while IFS="" read -r __line || [ -n "$__line" ]; do
+                if [ "$__line" = "eval \"\$(${__location} shellenv)\"" ]; then
+                        unset __location
+                        break
+                fi
+        done < "${HOME}/.bash_profile"
+
+        printf -- "eval \"\$(${__location} shellenv)\"" >> "${HOME}/.bash_profile"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+        eval "$(${__location} shellenv)"
+
+        OS::is_command_available "brew"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # report status
+        return 1
+}

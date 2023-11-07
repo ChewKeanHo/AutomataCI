@@ -21,14 +21,18 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/net/http.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/installer.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/msi.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/publishers/dotnet.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/publishers/homebrew.sh"
 
 
 
 
 # begin service
 OS::print_status info "Installing brew...\n"
-INSTALLER::setup
+HOMEBREW::setup
 if [ $? -ne 0 ]; then
         OS::print_status error "install failed.\n"
         return 1
@@ -36,7 +40,15 @@ fi
 
 
 OS::print_status info "Installing curl...\n"
-INSTALLER::setup_curl
+HTTP::setup
+if [ $? -ne 0 ]; then
+        OS::print_status error "install failed.\n"
+        return 1
+fi
+
+
+OS::print_status info "Installing msitools...\n"
+MSI::setup
 if [ $? -ne 0 ]; then
         OS::print_status error "install failed.\n"
         return 1
@@ -90,6 +102,16 @@ fi
 if [ ! -z "$PROJECT_C" ] || [ ! -z "$PROJECT_NIM" ] || [ ! -z "$PROJECT_RUST" ]; then
         OS::print_status info "Installing c...\n"
         INSTALLER::setup_c "$PROJECT_OS" "$PROJECT_ARCH"
+        if [ $? -ne 0 ]; then
+                OS::print_status error "install failed.\n"
+                return 1
+        fi
+fi
+
+
+if [ ! -z "$PROJECT_DOTNET" ]; then
+        OS::print_status info "Installing dotnet...\n"
+        DOTNET::setup
         if [ $? -ne 0 ]; then
                 OS::print_status error "install failed.\n"
                 return 1

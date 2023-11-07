@@ -18,39 +18,6 @@
 
 
 
-function INSTALLER-Setup {
-	# validate input
-	$__process = OS-Is-Command-Available "choco"
-	if ($__process -eq 0) {
-		$null = choco upgrade chocolatey -y
-		return 0
-	}
-
-
-	# execute installation
-	$null = Invoke-RestMethod "https://community.chocolatey.org/install.ps1" `
-			-OutFile "install.ps1"
-
-	$__process = FS-Is-File ".\install.ps1"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$null = Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-	$null = .\install.ps1
-	if ($LASTEXITCODE -ne 0) {
-		return 1
-	}
-	$null = FS-Remove-Silently ".\install.ps1"
-
-
-	# return status
-	return OS-Is-Command-Available "choco"
-}
-
-
-
-
 function INSTALLER-Setup-Angular {
 	# validate input
 	$__process =  OS-Is-Command-Available "choco"
@@ -93,38 +60,6 @@ function INSTALLER-Setup-Angular {
 
 	# report status
 	return 0
-}
-
-
-
-
-function INSTALLER-Setup-Curl {
-	# validate input
-	$__process =  OS-Is-Command-Available "choco"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process =  OS-Is-Command-Available "curl"
-	if ($__process -eq 0) {
-		return 0
-	}
-
-
-	# execute
-	$__process = OS-Exec "choco" "install curl -y"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-
-	# report status
-	$__process = OS-Is-Command-Available "curl"
-	if ($__process -eq 0) {
-		return 0
-	}
-
-	return 1
 }
 
 

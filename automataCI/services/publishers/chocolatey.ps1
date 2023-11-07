@@ -11,6 +11,7 @@
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\net\http.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\zip.ps1"
 
 
@@ -122,6 +123,44 @@ function CHOCOLATEY-Publish {
 
 	# report status
 	return 0
+}
+
+
+
+
+function CHOCOLATEY-Setup {
+	# validate input
+	$__process = OS-Is-Command-Available "choco"
+	if ($__process -eq 0) {
+		$null = choco upgrade chocolatey -y
+		return 0
+	}
+
+
+	# execute
+	$__process = HTTP-Download `
+		"GET" `
+		"https://community.chocolatey.org/install.ps1" `
+		"install.ps1"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__process = FS-Is-File ".\install.ps1"
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$null = Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+	$__process = OS-Exec "powershell" ".\install.ps1"
+	if ($__process -ne 0) {
+		return 1
+	}
+	$null = FS-Remove-Silently ".\install.ps1"
+
+
+	# return status
+	return OS-Is-Command-Available "choco"
 }
 
 

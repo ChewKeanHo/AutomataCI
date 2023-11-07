@@ -79,6 +79,21 @@ PROJECT_CADENCE = "1"
 PROJECT_LICENSE = "Apache-2.0"
 
 
+# PROJECT_CONTACT_NAME
+# Entity's full name for inquiries.
+PROJECT_CONTACT_NAME = "Your Legal Full Name Here"
+
+
+# PROJECT_CONTACT_EMAIL
+# Entity's email channel for email communications.
+PROJECT_CONTACT_EMAIL = "contact@youremail.example"
+
+
+# PROJECT_CONTACT_WEBSITE
+# Entity's website channel for sourcing information.
+PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
+
+
 # PROJECT_SOURCE_URL
 # The Project's source code URL. This URL points to the source code location.
 # The URL can be used for other purposes such as The Docker's OCI Image source
@@ -143,6 +158,32 @@ PROJECT_CITATION="1.2.0"
 #
 # Can only accept 'software' or 'dataset'. Default is 'software'.
 PROJECT_CITATION_TYPE="software"
+
+
+
+
+######################
+# DOTNET TECHNOLOGY  #
+######################
+# PROJECT_DOTNET
+# This is a control variable used for enabling .NET technology in the
+# repository. Unlike other technologies, due to .NET nature, it is basically
+# a passive library located in the following directory:
+#     ${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS/${PROJECT_PATH_DOTNET_ENGINE}
+#
+# IMPORTANT NOTE: .NET is always enabled for Windows OS due to other
+# dependencies like MSI wix toolkits and etc. This variable only affects UNIX
+# side of stuffs.
+#
+# To enable it: simply supply the path (e.g. default is 'true').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_DOTNET = ''
+
+
+# PROJECT_PATH_DOTNET_ENGINE
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
+# setting up .NET localized directory.
+PROJECT_PATH_DOTNET_ENGINE = "dotnet-engine"
 
 
 
@@ -273,21 +314,6 @@ CARGO_REGISTRY = "crates-io"
 ##########################
 # DISTRIBUTION ECOSYSTEM #
 ##########################
-# PROJECT_CONTACT_NAME
-# Entity's full name for inquiries.
-PROJECT_CONTACT_NAME = "Your Legal Full Name Here"
-
-
-# PROJECT_CONTACT_EMAIL
-# Entity's email channel for email communications.
-PROJECT_CONTACT_EMAIL = "contact@youremail.example"
-
-
-# PROJECT_CONTACT_WEBSITE
-# Entity's website channel for sourcing information.
-PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
-
-
 # PROJECT_CHANGELOG_TITLE
 # The title of the changelog file.
 PROJECT_CHANGELOG_TITLE = "Changelog | 更新日志 | Endringslogg | Cacatan Perubahan | Ändringslogg | 変更履歴"

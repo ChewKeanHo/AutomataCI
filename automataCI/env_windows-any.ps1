@@ -21,21 +21,47 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\installer.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\msi.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\chocolatey.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\dotnet.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\microsoft.ps1"
 
 
 
 
 # begin service
-OS-Print-Status info "Installing choco..."
-$__process = INSTALLER-Setup
+OS-Print-Status info "Installing DotNET..."
+$__process = DOTNET-Setup
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
 	return 1
 }
 
 
-OS-Print-Status info "Installing curl..."
-$__process = INSTALLER-Setup-Curl
+OS-Print-Status info "Installing choco..."
+$__process = CHOCOLATEY-Setup
+if ($__process -ne 0) {
+	OS-Print-Status error "install failed."
+	return 1
+}
+
+
+OS-Print-Status info "Installing version 14.00 Microsoft C++ Redistributable..."
+$__process = MICROSOFT-Setup-VCLibs "14.00"
+if ($__process -ne 0) {
+	OS-Print-Status error "install failed."
+	return 1
+}
+
+OS-Print-Status info "Installing version 2.7.3 Microsoft UI Xaml..."
+$__process = MICROSOFT-Setup-UIXAML "2.7.3"
+if ($__process -ne 0) {
+	OS-Print-Status error "install failed."
+	return 1
+}
+
+OS-Print-Status info "Installing winget..."
+$__process = MICROSOFT-Setup-WinGet
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
 	return 1
@@ -44,6 +70,14 @@ if ($__process -ne 0) {
 
 OS-Print-Status info "Installing docker..."
 $__process = INSTALLER-Setup-Docker
+if ($__process -ne 0) {
+	OS-Print-Status error "install failed."
+	return 1
+}
+
+
+OS-Print-Status info "Installing MSI WiX packager..."
+$__process = MSI-Setup
 if ($__process -ne 0) {
 	OS-Print-Status error "install failed."
 	return 1

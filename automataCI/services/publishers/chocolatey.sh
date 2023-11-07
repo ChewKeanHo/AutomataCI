@@ -12,6 +12,7 @@
 # the License.
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/net/http.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/zip.sh"
 
 
@@ -117,6 +118,13 @@ CHOCOLATEY::publish() {
 
         # report status
         return 0
+}
+
+
+
+
+CHOCOLATEY::Setup() {
+        return 1 # not supported
 }
 
 
