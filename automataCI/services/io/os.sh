@@ -37,27 +37,31 @@ OS::print_status() {
 
         case "$__status_mode" in
         error)
-                __msg="[ ERROR   ] "
+                __msg="⦗ ERROR ⦘   "
                 __color="31"
                 ;;
         warning)
-                __msg="[ WARNING ] "
+                __msg="⦗ WARNING ⦘ "
                 __color="33"
                 ;;
         info)
-                __msg="[ INFO    ] "
+                __msg="⦗ INFO ⦘    "
                 __color="36"
                 ;;
         note)
-                __msg="[ NOTE    ] "
+                __msg="⦗ NOTE ⦘    "
                 __color="35"
                 ;;
         success)
-                __msg="[ SUCCESS ] "
+                __msg="⦗ SUCCESS ⦘ "
                 __color="32"
                 ;;
         ok)
-                __msg="[ INFO    ] == OK == "
+                __msg="⦗ OK ⦘      "
+                __color="36"
+                ;;
+        done)
+                __msg="⦗ DONE ⦘    "
                 __color="36"
                 ;;
         plain)
@@ -67,7 +71,6 @@ OS::print_status() {
                 return 0
                 ;;
         esac
-
 
         if [ ! -z "$COLORTERM" ] || [ "$TERM" = "xterm-256color" ]; then
                 __msg="\033[1;${__color}m${__msg}\033[0;${__color}m${@}\033[0m"
