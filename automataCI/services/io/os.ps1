@@ -79,27 +79,52 @@ function OS-Print-Status {
 
 	switch ($__mode) {
 	"error" {
-		$__tag = "[ ERROR   ] "
+		$__tag = [char]::ConvertFromUtf32(0x2997) `
+			+ " ERROR " `
+			+ [char]::ConvertFromUtf32(0x2998) `
+			+ "   "
 		$__color = "31"
 		$__foreground_color = "Red"
 	} "warning" {
-		$__tag = "[ WARNING ] "
+		$__tag = [char]::ConvertFromUtf32(0x2997) `
+			+ " ERROR " `
+			+ [char]::ConvertFromUtf32(0x2998) `
+			+ " "
 		$__color = "33"
 		$__foreground_color = "Yellow"
 	} "info" {
-		$__tag = "[ INFO    ] "
+		$__tag = [char]::ConvertFromUtf32(0x2997) `
+			+ " INFO " `
+			+ [char]::ConvertFromUtf32(0x2998) `
+			+ "    "
 		$__color = "36"
 		$__foreground_color = "Cyan"
 	} "note" {
-		$__tag = "[ NOTE    ] "
+		$__tag = [char]::ConvertFromUtf32(0x2997) `
+			+ " NOTE " `
+			+ [char]::ConvertFromUtf32(0x2998) `
+			+ "    "
 		$__color = "35"
 		$__foreground_color = "Magenta"
 	} "success" {
-		$__tag = "[ SUCCESS ] "
+		$__tag = [char]::ConvertFromUtf32(0x2997) `
+			+ " SUCCESS " `
+			+ [char]::ConvertFromUtf32(0x2998) `
+			+ " "
 		$__color = "32"
 		$__foreground_color = "Green"
 	} "ok" {
-		$__tag = "[ INFO    ] == OK == "
+		$__tag = [char]::ConvertFromUtf32(0x2997) `
+			+ " OK " `
+			+ [char]::ConvertFromUtf32(0x2998) `
+			+ "      "
+		$__color = "36"
+		$__foreground_color = "Cyan"
+	} "done" {
+		$__tag = [char]::ConvertFromUtf32(0x2997) `
+			+ " DONE " `
+			+ [char]::ConvertFromUtf32(0x2998) `
+			+ "    "
 		$__color = "36"
 		$__foreground_color = "Cyan"
 	} "plain" {
