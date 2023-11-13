@@ -11,32 +11,98 @@
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
+
+
+
+
+function MICROSOFT-Arch-Get {
+	param(
+		[string]$___arch
+	)
+
+
+	# execute
+	switch ($___arch) {
+	i386 {
+		return "x86"
+	} mips {
+		return "MIPs"
+	} alpha {
+		return "Alpha"
+	} powerpc {
+		return "PowerPC"
+	} arm {
+		return "ARM"
+	} ia64 {
+		return "ia64"
+	} amd64 {
+		return "x64"
+	} arm64 {
+		return "ARM64"
+	} default {
+		return ""
+	}}
+}
+
+
+
+
+function MICROSOFT-Arch-Interpret {
+	param(
+		[string]$___arch
+	)
+
+
+	# execute
+	switch ($___arch) {
+	"Alpha" {
+		return "alpha"
+	} "ARM" {
+		return "arm"
+	} "ARM64" {
+		return "arm64"
+	} "ia64" {
+		return "ia64"
+	} "MIPs" {
+		return "mips"
+	} "PowerPC" {
+		return "powerpc"
+	} "x86" {
+		return "i386"
+	} "x64" {
+		return "amd64"
+	} Default {
+		return ""
+	}}
+}
 
 
 
 
 function MICROSOFT-Is-Available-Software {
 	param(
-		[string]$__software,
-		[string]$__version
+		[string]$___software,
+		[string]$___version
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__software)) {
+	if ($(STRINGS-Is-Empty "${___software}") -eq 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = Get-AppxPackage -Name $__software
-	if (-not $__process) {
+	$null = Import-Module -UseWindowsPowerShell -Name Appx *>$null
+	$___process = Get-AppxPackage -Name $___software
+	if (-not $___process) {
 		return 1
 	}
 
-	if (-not [string]::IsNullOrEmpty($__version)) {
-		$__process = $__process | Where-Object { $_.Version -eq $__version }
-		if (-not $__process) {
+	if ($(STRINGS-Is-Empty "${___software}") -ne 0) {
+		$___process = $___process | Where-Object { $_.Version -eq $___version }
+		if (-not $___process) {
 			return 1
 		}
 	}
@@ -51,12 +117,12 @@ function MICROSOFT-Is-Available-Software {
 
 function MICROSOFT-Is-Available-UIXAML {
 	param(
-		[string]$__version
+		[string]$___version
 	)
 
 
 	# execute
-	return MICROSOFT-Is-Available-Software "Microsoft.UI.Xaml*" $__version
+	return MICROSOFT-Is-Available-Software "Microsoft.UI.Xaml*" $___version
 }
 
 
@@ -64,12 +130,12 @@ function MICROSOFT-Is-Available-UIXAML {
 
 function MICROSOFT-Is-Available-VCLibs {
 	param (
-		[string]$__version
+		[string]$___version
 	)
 
 
 	# execute
-	return MICROSOFT-Is-Available-Software "Microsoft.VCLibs*" $__version
+	return MICROSOFT-Is-Available-Software "Microsoft.VCLibs*" $___version
 }
 
 
@@ -77,34 +143,36 @@ function MICROSOFT-Is-Available-VCLibs {
 
 function MICROSOFT-Setup-UIXAML {
 	param (
-		[string]$__version
+		[string]$___version
 	)
 
 
 	# validate input
-	$__process = MICROSOFT-Is-Available-UIXAML "${__version}"
-	if ($__process -eq 0) {
+	$___process = MICROSOFT-Is-Available-UIXAML "${___version}"
+	if ($___process -eq 0) {
 		return 0
 	}
 
 
 	# execute
-	$__url_bundle = "https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml"
-	if (-not [string]::IsNullOrEmpty($__version)) {
-		$__url_bundle = "${__url_bundle}/${__version}"
+	$___url_bundle = "https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml"
+	if ($(STRINGS-Is-Empty "${___version}") -ne 0) {
+		$___url_bundle = "${___url_bundle}/${___version}"
 	}
-	$__file_bundle = "msft-ui-xaml"
+	$___file_bundle = "msft-ui-xaml"
 
-	$null = Invoke-RestMethod -Uri $__url_bundle -OutFile "${__file_bundle}.zip"
-	if (-not (Test-Path "${__file_bundle}.zip")) {
+	$null = Invoke-RestMethod -Uri $___url_bundle -OutFile "${___file_bundle}.zip"
+	if (-not (Test-Path "${___file_bundle}.zip")) {
 		return 1
 	}
-	$null = Expand-Archive "${__file_bundle}.zip"
-	$null = Remove-Item "${__file_bundle}.zip" -ErrorAction SilentlyContinue
+	$null = Expand-Archive "${___file_bundle}.zip"
+	$null = Remove-Item "${___file_bundle}.zip" -ErrorAction SilentlyContinue
 
-	$__file_bundle = ".\${__file_bundle}\tools\AppX\x64\Release"
-	foreach ($__file in (Get-ChildItem -Path "${__file_bundle}")) {
-		if (-not $__file.Name.EndsWith(".appx")) {
+	$null = Import-Module -UseWindowsPowerShell -Name Appx *>$null
+
+	$___file_bundle = ".\${___file_bundle}\tools\AppX\x64\Release"
+	foreach ($___file in (Get-ChildItem -Path "${___file_bundle}")) {
+		if (-not $___file.Name.EndsWith(".appx")) {
 			continue
 		}
 
@@ -112,18 +180,18 @@ function MICROSOFT-Setup-UIXAML {
 			$null = Add-AppxProvisionedPackage `
 				-Online `
 				-SkipLicense `
-				-PackagePath "${__file_bundle}\${__file}"
-			$__process = 0
+				-PackagePath $__file.FullName
+			$___process = 0
 		} catch {
-			$__process = 1
+			$___process = 1
 		}
 		break
 	}
-	$null = Remove-Item "${__file_bundle}" -Force -Recurse -ErrorAction SilentlyContinue
+	$null = Remove-Item "${___file_bundle}" -Force -Recurse -ErrorAction SilentlyContinue
 
 
 	# report status
-	return $__process
+	return $___process
 }
 
 
@@ -131,47 +199,50 @@ function MICROSOFT-Setup-UIXAML {
 
 function MICROSOFT-Setup-VCLibs {
 	param (
-		[string]$__version
+		[string]$___version
 	)
 
 
 	# validate input
-	$__process = MICROSOFT-Is-Available-VCLibs "${__version}"
-	if ($__process -eq 0) {
+	$___process = MICROSOFT-Is-Available-VCLibs "${___version}"
+	if ($___process -eq 0) {
 		return 0
 	}
 
-	if ([string]::IsNullOrEmpty($__version)) {
-		$__version = "14.00"
+	if ($(STRINGS-Is-Empty "${___version}") -ne 0) {
+		$___version = "14.00"
 	}
 
 
 	# execute
+	$___url_bundle = "https://aka.ms/Microsoft.VCLibs."
 	switch (${env:PROJECT_ARCH}) {
 	amd64 {
-		$__url_bundle = "https://aka.ms/Microsoft.VCLibs.x64.${__version}.Desktop.appx"
+		$___url_bundle += "x64"
 	} arm64 {
-		$__url_bundle = "https://aka.ms/Microsoft.VCLibs.arm64.${__version}.Desktop.appx"
+		$___url_bundle += "arm64"
 	} i386 {
-		$__url_bundle = "https://aka.ms/Microsoft.VCLibs.x86.${__version}.Desktop.appx"
+		$___url_bundle += "x86"
 	} arm {
-		$__url_bundle = "https://aka.ms/Microsoft.VCLibs.arm.${__version}.Desktop.appx"
+		$___url_bundle += "arm"
 	} default {
 		return 1
 	}}
-	$__file_bundle = "msft-vclibs.appx"
-	$null = Invoke-RestMethod -Uri $__url_bundle -OutFile $__file_bundle
+	$___url_bundle += ".${___version}.Desktop.appx"
+	$___file_bundle = "msft-vclibs.appx"
+	$null = Invoke-RestMethod -Uri $___url_bundle -OutFile $___file_bundle
 	try {
+		$null = Import-Module -UseWindowsPowerShell -Name Appx *>$null
 		$null = Add-AppxProvisionedPackage `
 			-Online `
 			-SkipLicense `
-			-PackagePath "${__file_bundle}"
-		$__process = 0
+			-PackagePath "${___file_bundle}"
+		$___process = 0
 	} catch {
-		$__process = 1
+		$___process = 1
 	}
-	$null = Remove-Item "${__file_bundle}" -Force -Recurse -ErrorAction SilentlyContinue
-	if ($__process -ne 0) {
+	$null = Remove-Item "${___file_bundle}" -Force -Recurse -ErrorAction SilentlyContinue
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -183,65 +254,66 @@ function MICROSOFT-Setup-VCLibs {
 
 
 
-function MICROSOFT-Setup-WinGet {
+function MICROSOFT-Setup-WINGET {
 	# validate input
-	$__process = OS-Is-Command-Available "winget"
-	if ($__process -eq 0) {
+	$___process = OS-Is-Command-Available "winget"
+	if ($___process -eq 0) {
 		return 0
 	}
 
-	$__process = MICROSOFT-Is-Available-VCLibs
-	if ($__process -ne 0) {
+	$___process = MICROSOFT-Is-Available-VCLibs
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = MICROSOFT-Is-Available-UIXAML
-	if ($__process -ne 0) {
+	$___process = MICROSOFT-Is-Available-UIXAML
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__url = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
-	$__url = $(Invoke-RestMethod -Uri $__url).assets.browser_download_url
-	$__url_bundle = $__url | Where-Object { $_.EndsWith(".msixbundle") }
-	$__file_bundle = "winget.msixbundle"
-	$__url_license = $__url | Where-Object { $_.EndsWith("_License1.xml") }
-	$__file_license = "winget-license.xml"
+	$___url = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
+	$___url = $(Invoke-RestMethod -Uri $___url).assets.browser_download_url
+	$___url_bundle = $___url | Where-Object { $_.EndsWith(".msixbundle") }
+	$___file_bundle = "winget.msixbundle"
+	$___url_license = $___url | Where-Object { $_.EndsWith("_License1.xml") }
+	$___file_license = "winget-license.xml"
 
-	$null = Invoke-RestMethod -Uri $__url_bundle -OutFile $__file_bundle
-	if (-not (Test-Path "${__file_bundle}")) {
+	$null = Invoke-RestMethod -Uri $___url_bundle -OutFile $___file_bundle
+	if (-not (Test-Path "${___file_bundle}")) {
 		return 1
 	}
 
-	$null = Invoke-RestMethod -Uri $__url_license -OutFile $__file_license
-	if (-not (Test-Path "${__file_license}")) {
+	$null = Invoke-RestMethod -Uri $___url_license -OutFile $___file_license
+	if (-not (Test-Path "${___file_license}")) {
 		return 1
 	}
 
 	try {
+		$null = Import-Module -UseWindowsPowerShell -Name Appx *>$null
 		$null = Add-AppxProvisionedPackage `
-			-PackagePath $__file_bundle `
-			-LicensePath $__file_license `
+			-PackagePath $___file_bundle `
+			-LicensePath $___file_license `
 			-Online
-		$__process = 0
+		$___process = 0
 	} catch {
-		$__process = 1
+		$___process = 1
 	}
-	$null = Remove-Item $__file_bundle -ErrorAction SilentlyContinue
-	$null = Remove-Item $__file_license -ErrorAction SilentlyContinue
-	if ($__process -ne 0) {
+	$null = Remove-Item $___file_bundle -ErrorAction SilentlyContinue
+	$null = Remove-Item $___file_license -ErrorAction SilentlyContinue
+	if ($___process -ne 0) {
 		return 1
 	}
 
+
 	# Sleep for letting winget get into the path because the installer is a buggy mess
 	Start-Sleep -s 5
-
 	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
 		+ ";" `
 		+ [System.Environment]::GetEnvironmentVariable("Path","User")
-	$__process = OS-Is-Command-Available "winget"
-	if ($__process -eq 0) {
+	$___process = OS-Is-Command-Available "winget"
+	if ($___process -eq 0) {
 		return 0
 	}
 

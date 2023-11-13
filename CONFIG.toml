@@ -39,6 +39,30 @@ PROJECT_SKU_TITLECASE = "AutomataCI"
 PROJECT_APP_ID = "com.github.chewkeanho.automataci"
 
 
+# PRODUCT_APP_UUID
+# This is the 128-bits known application GUID code complying to:
+# (1) Microsoft GUID Format
+#       See: https://learn.microsoft.com/en-us/windows/win32/msi/guid
+# (2) RFC4412 UUID Format
+#       See: https://datatracker.ietf.org/doc/html/rfc4122
+#
+# As such, the UUID **MUST** be:
+#   1. all UPPERCASE; AND
+#   2. only in hexadecimal format (0-9-A-F); AND
+#   3. shall be retained as the first point of origin; AND
+#   4. comply to this format: {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
+#
+# For minimal collision, Binary wire format is preferred such that:
+#    (1) 8 octets         - UTC time in 64-bits hexadecimal format since Epoch.
+#    (2) Remaining octets - Randomized data with own definitions.
+#    (3) Shuffle each octet positions with cryptography random algorithm.
+#
+# This is commonly used in product ID like MSI packaging where it is used as the
+# UPGRADE_CODE designating a possible upgrade installation against the same
+# product line or PRODUCT ID.
+PRODUCT_APP_UUID = "76C7A54E-7360-CB70-1A5E-44D8A00CCB30"
+
+
 # PROJECT_NAME
 # This is the name of the product used in documentation, marketing addresses
 # etc only. For programming purposes, PROJECT_SKU is used instead.
@@ -79,6 +103,20 @@ PROJECT_CADENCE = "1"
 PROJECT_LICENSE = "Apache-2.0"
 
 
+# PROJECT_CONTACT_BRAND
+# Entity's short brand name.
+# It should be in lowercase and should not be using dash ('-'),
+# underscore ('_'), and space (' ') for maximum compatibility.
+PROJECT_CONTACT_BRAND = "mybrand"
+
+
+# PROJECT_CONTACT_BRAND_TITLECASE
+# The titlecase version of PROJECT_CONTACT_BRAND. Used in certain packager
+# control scripts like MSI. Conditions is the same as PROJECT_CONTACT_BRAND
+# except it is in the TitleCase representation.
+PROJECT_CONTACT_BRAND_TITLECASE = "myBRAND"
+
+
 # PROJECT_CONTACT_NAME
 # Entity's full name for inquiries.
 PROJECT_CONTACT_NAME = "Your Legal Full Name Here"
@@ -104,6 +142,18 @@ PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
 # Example:
 #     1. GitHub Packages : https://github.com/OWNER/REPO
 PROJECT_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI"
+
+
+# AUTOMATACI_LANG
+# Configure AutomataCI to operate in a default language. Only accepts language
+# code complying to this format:
+#                        {iso639-1}[-{iso15954}]
+# Examples:
+#    en            – International English. (Default & Fallback)
+#    fr            – International French.
+#    zh-hans       – International Simplified Chinese.
+#    zh-hant       – International Traditional Chinese.
+AUTOMATACI_LANG = "en"
 
 
 
@@ -175,6 +225,9 @@ PROJECT_CITATION_TYPE="software"
 # dependencies like MSI wix toolkits and etc. This variable only affects UNIX
 # side of stuffs.
 #
+# WARNING: installing .NET can increase setup time dramatically (e.g. ~+2mins
+#          in GitHub Actions). Only include when it's absolutely used or needed.
+#
 # To enable it: simply supply the path (e.g. default is 'true').
 # To disable it: simply supply an empty path (e.g. default is '').
 PROJECT_DOTNET = ''
@@ -184,6 +237,37 @@ PROJECT_DOTNET = ''
 # This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
 # setting up .NET localized directory.
 PROJECT_PATH_DOTNET_ENGINE = "dotnet-engine"
+
+
+# PROJECT_DOTNET_CHANNEL
+# This is to configure the .NET version to be installed by AutomataCI. It SHALL
+# NOT be empty.
+#
+# Refer the following doc "channel" section to learn more:
+#   https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-install-script
+#
+# When in doubt, use "LTS"
+PROJECT_DOTNET_CHANNEL = "LTS"
+
+
+# DOTNET_CLI_TELEMETRY_OPTOUT
+# .NET default telemetry setting that will transmit its usage data back to
+# Microsoft.
+#
+# To preserve privacy and considering UNIX environments, it is enabled by
+# default.
+#
+# To enable: "1"
+# To disable: commit it out.
+DOTNET_CLI_TELEMETRY_OPTOUT = "1"
+
+
+# PROJECT_PATH_NUPKG
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS +
+# PROJECT_PATH_DOTNET_ENGINE for for housing .NET nupkg packages. At AutomataCI,
+# .nupkg (a zip file) can be downloaded without depending on downloading the
+# entire .Net framework.
+PROJECT_PATH_NUPKG = "nupkg"
 
 
 
@@ -387,22 +471,22 @@ PROJECT_DEBIAN_URGENCY = "low"
 # Contains restricted values. Refer:
 #      https://www.debian.org/doc/debian-policy/ch-archive.html#sections
 # For maximum compliances
-PROJECT_DEBIAN_SECTION="devel"
+PROJECT_DEBIAN_SECTION = "devel"
 
 
 # PROJECT_FLATPAK_RUNTIME
 # The runtime module where the Flatpak is operating on.
-PROJECT_FLATPAK_RUNTIME="org.freedesktop.Platform"
+PROJECT_FLATPAK_RUNTIME = "org.freedesktop.Platform"
 
 
 # PROJECT_FLATPAK_RUNTIME_VERSION
 # The runtime module where the Flatpak is operating on.
-PROJECT_FLATPAK_RUNTIME_VERSION="22.08"
+PROJECT_FLATPAK_RUNTIME_VERSION = "22.08"
 
 
 # PROJECT_FLATPAK_SDK
 # The runtime module where the Flatpak is operating on.
-PROJECT_FLATPAK_SDK="org.freedesktop.Sdk"
+PROJECT_FLATPAK_SDK = "org.freedesktop.Sdk"
 
 
 # PROJECT_REPREPRO_CODENAME
@@ -411,7 +495,7 @@ PROJECT_FLATPAK_SDK="org.freedesktop.Sdk"
 # understood by the reprepro.
 #
 # When in doubt or unused, set the value to 'main'.
-PROJECT_REPREPRO_CODENAME="main"
+PROJECT_REPREPRO_CODENAME = "main"
 
 
 # PROJECT_REPREPRO_COMPONENT
@@ -423,7 +507,7 @@ PROJECT_REPREPRO_CODENAME="main"
 # 'gui', 'models', etc).
 #
 # When in doubt or unused, set the value matching PROJECT_DEBIAN_DISTRIBUTION.
-PROJECT_REPREPRO_COMPONENT="stable"
+PROJECT_REPREPRO_COMPONENT = "stable"
 
 
 # PROJECT_REPREPRO_ARCH
@@ -436,30 +520,30 @@ PROJECT_REPREPRO_COMPONENT="stable"
 #
 # When left empty, AutomataCI shall generate a full list of arch-only hard-coded
 # arch values.
-PROJECT_REPREPRO_ARCH=""
+PROJECT_REPREPRO_ARCH = ""
 
 
 # PROJECT_STATIC_REPO
 # The git repository for publishing all the packages using static file sharing
 # (e.g. .deb repo, .rpm repo, flatpak repo, etc). This URL shall be git cloned
 # as the PROJECT_PATH_RELEASE directory.
-PROJECT_STATIC_REPO="git@github.com:ChewKeanHo/AutomataCI.wiki.git"
+PROJECT_STATIC_REPO = "git@github.com:ChewKeanHo/AutomataCI.wiki.git"
 
 
 # PROJECT_STATIC_REPO_KEY
 # The git upstream key. Default is 'origin'.
-PROJECT_STATIC_REPO_KEY="origin"
+PROJECT_STATIC_REPO_KEY = "origin"
 
 
 # PROJECT_STATIC_REPO_BRANCH
 # The git upstream branch. Default is 'master' or 'main'.
-PROJECT_STATIC_REPO_BRANCH="master"
+PROJECT_STATIC_REPO_BRANCH = "master"
 
 
 # PROJECT_STATIC_REPO_DIRECTORY
 # The directory name housing the static repo. Value CANNOT be empty.
 # Default is 'static'.
-PROJECT_STATIC_REPO_DIRECTORY="static"
+PROJECT_STATIC_REPO_DIRECTORY = "static"
 
 
 # PROJECT_SIMULATE_RELEASE_REPO
@@ -478,7 +562,7 @@ PROJECT_STATIC_REPO_DIRECTORY="static"
 # The public facing base URL for accessing the published static repo. This URL
 # shall be used to construct the final user instructions across various
 # distribution ecosystems.
-PROJECT_STATIC_URL="https://github.com/ChewKeanHo/AutomataCI/wiki/"
+PROJECT_STATIC_URL = "https://github.com/ChewKeanHo/AutomataCI/wiki/"
 
 
 # PROJECT_CONTAINER_REGISTRY
@@ -498,23 +582,23 @@ DOCKER_CLI_EXPERIMENTAL = "enabled"
 # PROJECT_HOMEBREW_REPO
 # The Homebrew formula publication git repository for updating and publishing
 # Homebrew's formula. This is used in release job.
-PROJECT_HOMEBREW_REPO="git@github.com:ChewKeanHo/Testbed.git"
+PROJECT_HOMEBREW_REPO = "git@github.com:ChewKeanHo/Testbed.git"
 
 
 # PROJECT_HOMEBREW_REPO_KEY
 # The git upstream key. Default is 'origin'.
-PROJECT_HOMEBREW_REPO_KEY="origin"
+PROJECT_HOMEBREW_REPO_KEY = "origin"
 
 
 # PROJECT_HOMEBREW_REPO_BRANCH
 # The git upstream branch. Default is 'main' or 'master'.
-PROJECT_HOMEBREW_REPO_BRANCH="main"
+PROJECT_HOMEBREW_REPO_BRANCH = "main"
 
 
 # PROJECT_HOMEBREW_DIRECTORY
 # The directory name housing the Homebrew repo. Value CANNOT be empty.
 # Default is 'homebrew'.
-PROJECT_HOMEBREW_DIRECTORY="homebrew"
+PROJECT_HOMEBREW_DIRECTORY = "homebrew"
 
 
 # PROJECT_HOMEBREW_SOURCE_URL
@@ -523,29 +607,29 @@ PROJECT_HOMEBREW_DIRECTORY="homebrew"
 # use for constructing the 'url' value.
 #
 # NOTE: Please avoid ending with the URL slash.
-PROJECT_HOMEBREW_SOURCE_URL="https://github.com/ChewKeanHo/AutomataCI/releases/download"
+PROJECT_HOMEBREW_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI/releases/download"
 
 
 # PROJECT_CHOCOLATEY_REPO
 # The Chocolatey package publication git repository for updating and publishing
 # Chocolatey's usable nupkg packages. This is used in release job.
-PROJECT_CHOCOLATEY_REPO="git@github.com:ChewKeanHo/Testbed.git"
+PROJECT_CHOCOLATEY_REPO = "git@github.com:ChewKeanHo/Testbed.git"
 
 
 # PROJECT_CHOCOLATEY_REPO_KEY
 # The git upstream key. Default is 'origin'.
-PROJECT_CHOCOLATEY_REPO_KEY="origin"
+PROJECT_CHOCOLATEY_REPO_KEY = "origin"
 
 
 # PROJECT_CHOCOLATEY_REPO_BRANCH
 # The git upstream branch. Default is 'main' or 'master'.
-PROJECT_CHOCOLATEY_REPO_BRANCH="main"
+PROJECT_CHOCOLATEY_REPO_BRANCH = "main"
 
 
 # PROJECT_CHOCOLATEY_DIRECTORY
 # The directory name housing the Chocolatey repo. Value CANNOT be empty.
 # Default is 'chocolatey'.
-PROJECT_CHOCOLATEY_DIRECTORY="chocolatey"
+PROJECT_CHOCOLATEY_DIRECTORY = "chocolatey"
 
 
 # PROJECT_CHOCOLATEY_SOURCE_URL
@@ -554,29 +638,29 @@ PROJECT_CHOCOLATEY_DIRECTORY="chocolatey"
 # Chocolatey use for constructing the 'url' value.
 #
 # NOTE: Please avoid ending with the URL slash.
-PROJECT_CHOCOLATEY_SOURCE_URL="https://github.com/ChewKeanHo/AutomataCI/releases/download"
+PROJECT_CHOCOLATEY_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI/releases/download"
 
 
 # PROJECT_DOCS_REPO
 # The git repository for publishing all the docs web artifacts. This URL shall
 # be git cloned into the PROJECT_PATH_RELEASE directory.
-PROJECT_DOCS_REPO="git@github.com:ChewKeanHo/AutomataCI.git"
+PROJECT_DOCS_REPO = "git@github.com:ChewKeanHo/AutomataCI.git"
 
 
 # PROJECT_DOCS_REPO_KEY
 # The git upstream key. Default is 'origin'.
-PROJECT_DOCS_REPO_KEY="origin"
+PROJECT_DOCS_REPO_KEY = "origin"
 
 
 # PROJECT_DOCS_REPO_BRANCH
 # The git upstream branch. Default is 'gh-pages'.
-PROJECT_DOCS_REPO_BRANCH="gh-pages"
+PROJECT_DOCS_REPO_BRANCH = "gh-pages"
 
 
 # PROJECT_DOCS_REPO_DIRECTORY
 # The directory name housing the docs repo. Value CANNOT be empty.
 # Default is 'docs'.
-PROJECT_DOCS_REPO_DIRECTORY="docs"
+PROJECT_DOCS_REPO_DIRECTORY = "docs"
 
 
 # PROJECT_DOCS_SOURCE_URL
@@ -584,7 +668,7 @@ PROJECT_DOCS_REPO_DIRECTORY="docs"
 # It is made available in-case of publication needs.
 #
 # NOTE: Please avoid ending with the URL slash.
-PROJECT_DOCS_SOURCE_URL="https://github.io/ChewKeanHo/AutomataCI"
+PROJECT_DOCS_SOURCE_URL = "https://github.io/ChewKeanHo/AutomataCI"
 
 
 
@@ -605,6 +689,14 @@ PROJECT_DOCS_SOURCE_URL="https://github.io/ChewKeanHo/AutomataCI"
 # WARNING: DO NOT attempt to change/override this naming convention. It will
 # break AutomataCI.
 # PROJECT_PATH_AUTOMATA = "automataCI" # Reserved - determined by ci.cmd automatically.
+
+
+# LIBS_AUTOMATACI
+# This is the reserved pathing containing:
+#                 ${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}
+# for easy service libraries import.
+# WARNING: DO NOT attempt to change/override this naming convention. It will
+# break AutomataCI.
 
 
 # PROJECT_PATH_SOURCE

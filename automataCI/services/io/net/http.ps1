@@ -38,12 +38,19 @@ function HTTP-Download {
 	## download payload
 	if (-not [string]::IsNullOrEmpty($__auth_header)) {
 		$null = Invoke-RestMethod `
-			-OutFile $__filepath `
+			-FollowRelLink `
+			-MaximumFollowRelLink 16 `
 			-Headers $__auth_header `
+			-OutFile $__filepath `
 			-Method $__method `
 			-Uri $__url
 	} else {
-		$null = Invoke-RestMethod -OutFile $__filepath -Method $__method -Uri $__url
+		$null = Invoke-RestMethod `
+			-FollowRelLink `
+			-MaximumFollowRelLink 16 `
+			-OutFile $__filepath `
+			-Method $__method `
+			-Uri $__url
 	}
 
 	if (-not (Test-Path -Path $__filepath)) {
@@ -53,20 +60,24 @@ function HTTP-Download {
 	## checksum payload
 	if ([string]::IsNullOrEmpty($__shasum_type) -or
 		[string]::IsNullOrEmpty($__shasum_value)) {
-		return 1
+		return 0
 	}
 
 	switch ($__shasum_type) {
 	'1' {
-		$__hasher = New-Object System.Security.Cryptography.SHA1CryptoServiceProvider
+		$__hasher = New-Object `
+			System.Security.Cryptography.SHA1CryptoServiceProvider
 	} '224' {
 		return 1
 	} '256' {
-		$__hasher = New-Object System.Security.Cryptography.SHA256CryptoServiceProvider
+		$__hasher = New-Object `
+			System.Security.Cryptography.SHA256CryptoServiceProvider
 	} '384' {
-		$__hasher = New-Object System.Security.Cryptography.SHA384CryptoServiceProvider
+		$__hasher = New-Object `
+			System.Security.Cryptography.SHA384CryptoServiceProvider
 	} '512' {
-		$__hasher = New-Object System.Security.Cryptography.SHA512CryptoServiceProvider
+		$__hasher = New-Object `
+			System.Security.Cryptography.SHA512CryptoServiceProvider
 	} '512224' {
 		return 1
 	} '512256' {

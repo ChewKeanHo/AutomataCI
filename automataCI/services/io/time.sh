@@ -10,7 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-TIME::format_iso8601_date() {
+TIME_Format_ISO8601_Date() {
         #__epoch="$1"
 
 
@@ -20,7 +20,7 @@ TIME::format_iso8601_date() {
                 return 1
         fi
 
-        TIME::is_available
+        TIME_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -41,7 +41,7 @@ TIME::format_iso8601_date() {
 
 
 
-TIME::is_available() {
+TIME_Is_Available() {
         # execute
         if [ -z "$(type -t date)" ]; then
                 return 1
@@ -55,20 +55,16 @@ TIME::is_available() {
 
 
 
-TIME::now() {
+TIME_Now() {
         # validate input
-        TIME::is_available
+        TIME_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        if [ "$(echo "$(uname)" | tr '[:upper:]' '[:lower:]')" = "darwin" ]; then
-                printf -- "%b" "$(date -j --utc -f %s 1374432952)"
-        else
-                printf -- "%b" "$(date --utc +%s)"
-        fi
+        printf -- "%b" "$(date -u '+%s')"
 
 
         # report status

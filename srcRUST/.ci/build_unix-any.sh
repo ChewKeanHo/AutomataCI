@@ -297,6 +297,18 @@ fi
 
 
 
+# placeholding msi code flag
+__file="${PROJECT_SKU}-msi_any-any"
+OS::print_status info "building placeholder file: ${__file}\n"
+touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
+if [ $? -ne 0 ]; then
+        OS::print_status error "build failed.\n"
+        return 1
+fi
+
+
+
+
 # compose documentations
 
 

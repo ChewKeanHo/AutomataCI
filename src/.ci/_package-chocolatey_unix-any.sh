@@ -35,27 +35,11 @@ PACKAGE::assemble_chocolatey_content() {
 
 
         # validate project
-        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_chocolatey "$_target") -eq 0 ]; then
-                return 1 # not applicable - should be tech-oriented.
-        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_cargo "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        else
+        if [ $(FS::is_target_a_chocolatey "$_target") -ne 0 ]; then
                 return 10 # not applicable
         fi
 
 
         # report status
-        return 0
+        return 1 # not applicable - should be tech-oriented.
 }

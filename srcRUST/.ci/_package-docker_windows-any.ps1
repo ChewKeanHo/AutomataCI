@@ -52,6 +52,8 @@ function PACKAGE-Assemble-DOCKER-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Cargo "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-MSI "${_target}") -eq 0) {
+		return 10 # not applicable
 	}
 
 	OS-Print-Status info "Running Go specific content assembling function..."

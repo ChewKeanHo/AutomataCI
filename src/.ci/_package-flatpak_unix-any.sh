@@ -59,6 +59,8 @@ PACKAGE::assemble_flatpak_content() {
                 return 10 # not applicable
         elif [ $(FS::is_target_a_cargo "$_target") -eq 0 ]; then
                 return 10 # not applicable
+        elif [ $(FS_Is_Target_A_MSI "$_target") -eq 0 ]; then
+                return 10 # not applicable
         elif [ ! "$__target_os" = "linux" ]; then
                 return 10 # not applicable
         fi

@@ -54,11 +54,29 @@ $null = FS-Make-Directory "${__parallel_directory}"
 
 
 
+# configure build
+$__build_targets = @(
+	"windows|amd64|.exe"
+	"windows|arm64|.exe"
+	"wasip1|wasm|.wasm"
+)
+
+$__placeholders = @(
+	"${env:PROJECT_SKU}-src_any-any"
+	"${env:PROJECT_SKU}-homebrew_any-any"
+	"${env:PROJECT_SKU}-chocolatey_any-any"
+	"${env:PROJECT_SKU}-cargo_any-any"
+	"${env:PROJECT_SKU}-msi_any-any"
+)
+
+
+
+
+## register targets and execute parallel build
 function SUBROUTINE-Build {
 	param(
 		[string]$__line
 	)
-
 
 	# initialize
 	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
@@ -66,7 +84,6 @@ function SUBROUTINE-Build {
 	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\sync.ps1"
 	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\c.ps1"
 	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
-
 
 	# generate input
 	$__list = $__line -split "\|"
@@ -83,10 +100,8 @@ function SUBROUTINE-Build {
 		$__linker = ""
 	}
 
-
 	# prepare workspace
 	$null = FS-Make-Housing-Directory "${__log}"
-
 
 	# building target
 	OS-Print-Status info "building ${__subject} in parallel..."
@@ -118,7 +133,6 @@ function SUBROUTINE-Build {
 		OS-Print-Status error "build failed - ${__subject}"
 		return 1
 	}
-
 
 	# export target
 	$null = FS-Make-Housing-Directory "${__dest}"
@@ -154,25 +168,17 @@ function SUBROUTINE-Build {
 		}
 	}
 
-
 	# report status
 	return 0
 }
 
 
-## register targets and execute parallel build
-$__targets = @(
-	"windows|amd64|.exe"
-	"windows|arm64|.exe"
-	"wasip1|wasm|.wasm"
-)
-foreach ($__line in $__targets) {
+foreach ($__line in $__build_targets) {
 	# parse target data
 	$__list = $__line -split "\|"
 	$__extension = $__list[2]
 	$__arch = $__list[1]
 	$__os = $__list[0]
-
 
 	# generate input
 	$__target = RUST-Get-Build-Target "${__os}" "${__arch}"
@@ -188,14 +194,12 @@ foreach ($__line in $__targets) {
 		"${env:PROJECT_OS}" `
 		"${env:PROJECT_ARCH}"
 
-
 	# validate input
 	OS-Print-Status info "registering ${__subject} build..."
 	if ([string]::IsNullOrEmpty($__target)) {
 		OS-Print-Status warning "register skipped - missing target."
 		continue
 	}
-
 
 	## NOTE: perform any hard-coded host system restrictions or gatekeeping
 	##       customization adjustments here.
@@ -225,7 +229,6 @@ foreach ($__line in $__targets) {
 	} default {
 	}}
 
-
 	# execute
 	OS-Print-Status info "adding rust cross-compiler (${__target})..."
 	$__process = OS-Exec "rustup" "target add `"${__target}`""
@@ -238,7 +241,6 @@ foreach ($__line in $__targets) {
 ${__target}|${__filename}|${__workspace}|${__source}|${__dest}|${__linker}|${__log}
 "@
 }
-
 
 OS-Print-Status info "begin parallel building..."
 $__process = SYNC-Parallel-Exec `
@@ -253,49 +255,15 @@ if ($__process -ne 0) {
 
 
 
-# placeholding source code flag
-$__file = "${env:PROJECT_SKU}-src_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
-}
-
-
-
-
-# placeholding homebrew flag
-$__file = "${env:PROJECT_SKU}-homebrew_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
-}
-
-
-
-
-# placeholding chocolatey flag
-$__file = "${env:PROJECT_SKU}-chocolatey_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
-}
-
-
-
-
-# placeholding cargo flag
-$__file = "${env:PROJECT_SKU}-cargo_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
+# placeholding flag files
+foreach ($__file in $__placeholders) {
+	OS-Print-Status info "building output file: ${__file}"
+	$__process = FS-Touch-File `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
+	if ($__process -ne 0) {
+		OS-Print-Status error "build failed."
+		return 1
+	}
 }
 
 

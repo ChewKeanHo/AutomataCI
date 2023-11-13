@@ -11,7 +11,7 @@
 # under the License.
 function OS-Is-Command-Available {
 	param (
-		[string] $__command
+		[string]$__command
 	)
 
 

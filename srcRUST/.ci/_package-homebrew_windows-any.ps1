@@ -38,23 +38,7 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 
 
 	# validate project
-	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Chocolatey "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
-		# accepted
-	} elseif ($(FS-Is-Target-A-Cargo "${_target}") -eq 0) {
-		return 10 # not applicable
-	} else {
+	if ($(FS-Is-Target-A-Homebrew "${_target}") -ne 0) {
 		return 10 # not applicable
 	}
 
@@ -90,11 +74,6 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 		return 1
 	}
 
-	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\ci.cmd" "${_directory}"
-	if ($__process -ne 0) {
-		return 1
-	}
-
 	$__process = RUST-Create-Cargo-TOML `
 		"${_directory}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
@@ -126,17 +105,17 @@ class ${env:PROJECT_SKU_TITLECASE} < Formula
 
 
   def install
-    system "./ci.cmd setup"
-    system "./ci.cmd prepare"
-    system "./ci.cmd materialize"
+    system "./automataCI/ci.sh.ps1 setup"
+    system "./automataCI/ci.sh.ps1 prepare"
+    system "./automataCI/ci.sh.ps1 materialize"
     chmod 0755, "bin/${env:PROJECT_SKU}"
     bin.install "bin/${env:PROJECT_SKU}"
   end
 
   test do
-    system "./ci.cmd setup"
-    system "./ci.cmd prepare"
-    system "./ci.cmd materialize"
+    system "./automataCI/ci.sh.ps1 setup"
+    system "./automataCI/ci.sh.ps1 prepare"
+    system "./automataCI/ci.sh.ps1 materialize"
     assert_predicate ./bin/${env:PROJECT_SKU}, :exist?
   end
 end

@@ -98,6 +98,8 @@ PACKAGE::assemble_archive_content() {
                 return 10 # not applicable
         elif [ $(FS::is_target_a_cargo "$_target") -eq 0 ]; then
                 return 10 # not applicable
+        elif [ $(FS_Is_Target_A_MSI "$_target") -eq 0 ]; then
+                return 10 # not applicable
         else
                 case "$_target_os" in
                 windows)

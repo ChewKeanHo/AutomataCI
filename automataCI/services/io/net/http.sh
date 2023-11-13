@@ -10,7 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-HTTP::download() {
+HTTP_Download() {
         __method="$1"
         __url="$2"
         __filepath="$3"
@@ -28,10 +28,6 @@ HTTP::download() {
                 return 1
         fi
 
-        if [ ! -z "$(type -t shasum)" ]; then
-                return 1
-        fi
-
         if [ -z "$__method" ]; then
                 __method="GET"
         fi
@@ -45,12 +41,14 @@ HTTP::download() {
         ## download payload
         if [ ! -z "$__auth_header" ]; then
                 if [ ! -z "$(type -t curl)" ]; then
-                        curl --header "$__auth_header" \
+                        curl --location \
+                                --header "$__auth_header" \
                                 --output "$__filepath" \
                                 --request "$__method" \
                                 "$__url"
                 elif [ ! -z "$(type -t wget)" ]; then
-                        wget --header="$__auth_header" \
+                        wget --max-redirect 16 \
+                                --header="$__auth_header" \
                                 --output-file"$__filepath" \
                                 --method="$__method" \
                                 "$__url"
@@ -59,9 +57,15 @@ HTTP::download() {
                 fi
         else
                 if [ ! -z "$(type -t curl)" ]; then
-                        curl --output "$__filepath" --request "$__method" "$__url"
+                        curl --location \
+                                --output "$__filepath" \
+                                --request "$__method" \
+                                "$__url"
                 elif [ ! -z "$(type -t wget)" ]; then
-                        wget --output-file"$__filepath" --method="$__method" "$__url"
+                        wget --max-redirect 16 \
+                                --output-file"$__filepath" \
+                                --method="$__method" \
+                                "$__url"
                 else
                         return 1
                 fi
@@ -76,6 +80,10 @@ HTTP::download() {
                 return 0
         fi
 
+        if [ -z "$(type -t shasum)" ]; then
+                return 1
+        fi
+
         case "$__shasum_type" in
         1|224|256|384|512|512224|512256)
                 ;;
@@ -84,7 +92,9 @@ HTTP::download() {
                 ;;
         esac
 
-        if [ "$(shasum -a "$__shasum_type" "$__filepath")" -ne "$__shasum_value" ]; then
+        __target_shasum="$(shasum -a "$__shasum_type" "$__filepath")"
+        __target_shasum="${__target_shasum%% *}"
+        if [ ! "$__target_shasum" = "$__shasum_value" ]; then
                 return 1
         fi
 
@@ -96,7 +106,7 @@ HTTP::download() {
 
 
 
-HTTP::setup() {
+HTTP_Setup() {
         # validate input
         OS::is_command_available "brew"
         if [ $? -ne 0 ]; then

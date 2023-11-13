@@ -14,51 +14,142 @@
 
 
 # make sure is by run initialization
-if ($myinvocation.line.StartsWith(". ")) {
-	Write-Error "[ ERROR ] - Run me instead -> $ ./ci.cmd [JOB]\n"
-	exit 1
+if (-not (Test-Path -Path "${env:PROJECT_PATH_ROOT}")) {
+	$null = Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
+	return 1
 }
 
 
 
 
-# scan for PROJECT_PATH_ROOT
-$__pathing = "${env:PROJECT_PATH_PWD}"
-$__previous = ""
+# configure charset encoding
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+$OutputEncoding = [console]::InputEncoding `
+		= [console]::OutputEncoding `
+		= New-Object System.Text.UTF8Encoding
 
-while (-not ([string]::IsNullOrEmpty($__pathing))) {
-	$env:PORJECT_PATH_ROOT += ($__pathing -split "/", 2)[0] + "/"
-	$__pathing = ($__pathing -split "/", 2)[1]
 
-	if (Test-Path -Path "${env:PROJECT_PATH_ROOT}automataCI/ci.ps1") {
-		break
+
+
+# determine PROJECT_PATH_PWD
+$env:PROJECT_PATH_PWD = Get-Location
+$env:PROJECT_PATH_AUTOMATA = "automataCI"
+$env:PROJECT_PATH_ROOT = ""
+
+
+
+
+# determine PROJECT_PATH_ROOT
+if (Test-Path ".\ci.ps1") {
+	# currently inside the automataCI directory.
+	${env:PROJECT_PATH_ROOT} = Split-Path -Parent "${env:PROJECT_PATH_PWD}"
+} elseif (Test-Path ".\${env:PROJECT_PATH_AUTOMATA}\ci.ps1") {
+	# current directory is the root directory.
+	${env:PROJECT_PATH_ROOT} = "${env:PROJECT_PATH_PWD}"
+} else {
+	# scan from current directory - bottom to top
+	$__pathing = "${env:PROJECT_PATH_PWD}"
+	${env:PROJECT_PATH_ROOT} = ""
+	foreach ($__pathing in (${env:PROJECT_PATH_PWD}.Split("\"))) {
+		if (-not [string]::IsNullOrEmpty($env:PROJECT_PATH_ROOT)) {
+			${env:PROJECT_PATH_ROOT} += "\"
+		}
+		${env:PROJECT_PATH_ROOT} += "${__pathing}"
+
+		if (Test-Path -Path `
+			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\ci.ps1") {
+			break
+		}
 	}
+	$null = Remove-Variable -Name __pathing
 
-	if ($__previous -eq $__pathing) {
-		Write-Host "[ ERROR ] unable to detect repo root directory from PWD."
+	if (-not (Test-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\ci.ps1")) {
+		Write-Error "[ ERROR ] Missing root directory.`n`n"
 		exit 1
 	}
-
-	$__previous = $__pathing
 }
-Remove-Variable -Name __pathing
-Remove-Variable -Name __previous
-$env:PROJECT_PATH_ROOT = $env:PROJECT_PATH_ROOT.TrimEnd('\')
-$env:PROJECT_PATH_AUTOMATA = "automataCI"
+
+${env:LIBS_AUTOMATACI} = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}"
 
 
+# import fundamental libraries
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-get-help.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-init.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\microsoft.ps1"
 
 
-# detects initializer
-if (-not (Test-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\init.ps1")) {
-	Write-Host "[ ERROR ] unable to find initializer service script."
-	exit 1
+# determine os
+$env:PROJECT_OS = (Get-ComputerInfo).OsName.ToLower()
+if (-not ($env:PROJECT_OS -match "microsoft" -or $env:PROJECT_OS -match "windows")) {
+	$null = I18N-Status-Print-Unsupported-OS
+	return 1
 }
-$__process = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\init.ps1"
-if ($__process -ne 0) {
-	Write-Host "[ ERROR ] initialization failed.\n"
-	exit 1
+$env:PROJECT_OS = "windows"
+
+
+
+
+# determine arch
+${env:PROJECT_ARCH} = MICROSOFT-Arch-Interpret (Get-ComputerInfo).CsProcessors.Architecture
+$__process = STRINGS-Is-Empty "${env:PROJECT_ARCH}"
+if ($__process -eq 0) {
+	$null = I18N-Status-Print-Unsupported-ARCH
+	return 1
 }
+
+
+
+
+# parse repo CI configurations
+if (-not (Test-Path -Path "${env:PROJECT_PATH_ROOT}\CONFIG.toml")) {
+	$null = I18N-Status-Print-Missing-CONFIG-TOML
+	return 1
+}
+
+
+foreach ($__line in (Get-Content "${env:PROJECT_PATH_ROOT}\CONFIG.toml")) {
+	$__line = $__line -replace '#.*', ''
+
+	$__process = STRINGS-Is-Empty "${__line}"
+	if ($__process -eq 0) {
+		continue
+	}
+
+	$__key, $__value = $__line -split '=', 2
+	$__key = $__key.Trim() -replace '^''|''$|^"|"$'
+	$__value = $__value.Trim() -replace '^''|''$|^"|"$'
+
+	$null = Set-Item -Path "env:$__key" -Value $__value
+}
+
+
+
+
+# parse repo CI secret configurations
+if (Test-Path -Path "${env:PROJECT_PATH_ROOT}\SECRETS.toml" -PathType leaf) {
+	foreach ($__line in (Get-Content "${env:PROJECT_PATH_ROOT}\SECRETS.toml")) {
+		$__line = $__line -replace '#.*', ''
+		$__process = STRINGS-Is-Empty "${__line}"
+		if ($__process -eq 0) {
+			continue
+		}
+
+		$__key, $__value = $__line -split '=', 2
+		$__key = $__key.Trim() -replace '^''|''$|^"|"$'
+		$__value = $__value.Trim() -replace '^''|''$|^"|"$'
+
+		$null = Set-Item -Path "env:$__key" -Value $__value
+	}
+}
+
+
+
+
+# update environment variables
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+	+ ";" `
+	+ [System.Environment]::GetEnvironmentVariable("Path","User")
 
 
 
@@ -67,70 +158,55 @@ if ($__process -ne 0) {
 switch ($args[0]) {
 { $_ -in 'env', 'Env', 'ENV' } {
 	$env:PROJECT_CI_JOB = "env"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\env_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\env_windows-any.ps1"
 } { $_ -in 'setup', 'Setup', 'SETUP' } {
 	$env:PROJECT_CI_JOB = "setup"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
 } { $_ -in 'start', 'Start', 'START' } {
 	$env:PROJECT_CI_JOB = "start"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
 } { $_ -in 'test', 'Test', 'TEST' } {
 	$env:PROJECT_CI_JOB = "test"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
 } { $_ -in 'prepare', 'Prepare', 'PREPARE' } {
 	$env:PROJECT_CI_JOB = "prepare"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
 } { $_ -in 'materialize', 'Materialize', 'MATERIALIZE' } {
 	$env:PROJECT_CI_JOB = "materialize"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
 } { $_ -in 'build', 'Build', 'BUILD' } {
 	$env:PROJECT_CI_JOB = "build"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
 } { $_ -in 'notarize', 'Notarize', 'NOTARIZE' } {
 	$env:PROJECT_CI_JOB = "notarize"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\notarize_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\notarize_windows-any.ps1"
 } { $_ -in 'package', 'Package', 'PACKAGE' } {
 	$env:PROJECT_CI_JOB = "package"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\package_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\package_windows-any.ps1"
 } { $_ -in 'release', 'Release', 'RELEASE' } {
 	$env:PROJECT_CI_JOB = "release"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\release_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\release_windows-any.ps1"
 } { $_ -in 'stop', 'Stop', 'STOP' } {
 	$env:PROJECT_CI_JOB = "stop"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
 } { $_ -in 'deploy', 'Deploy', 'DEPLOY' } {
 	$env:PROJECT_CI_JOB = "deploy"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
 } { $_ -in 'clean', 'Clean', 'CLEAN' } {
 	$env:PROJECT_CI_JOB = "clean"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\common_windows-any.ps1"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
 } { $_ -in 'purge', 'Purge', 'PURGE' } {
 	$env:PROJECT_CI_JOB = "purge"
-	$__exit = . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\purge_windows-any.ps1"
-} Default {
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\purge_windows-any.ps1"
+} default {
 	switch ($args[0]) {
 	{ $_ -in '-h', '--help', 'help', '--Help', 'Help', '--HELP', 'HELP' } {
-		$__exit = 0
-	} Default {
-		Write-Host "[ ERROR ] unknown action."
-		$__exit = 1
+		$null = I18N-Status-Print-Help info
+		$__exit_code = 0
+	} default {
+		$null = I18N-Status-Print-Unknown-ACTION
+		$null = I18N-Status-Print-Help note
+		$__exit_code = 1
 	}}
-
-	Write-Host "`nPlease try any of the following:"
-	Write-Host "        To seek commands' help 🠚        $ ./ci.cmd help"
-	Write-Host "        To initialize environment 🠚     $ ./ci.cmd env"
-	Write-Host "        To setup the repo for work 🠚    $ ./ci.cmd setup"
-	Write-Host "        To prepare the repo 🠚           $ ./ci.cmd prepare"
-	Write-Host "        To start a development 🠚        $ ./ci.cmd start"
-	Write-Host "        To test the repo 🠚              $ ./ci.cmd test"
-	Write-Host "        Like build but only for host 🠚  $ ./ci.cmd materialize"
-	Write-Host "        To build the repo 🠚             $ ./ci.cmd build"
-	Write-Host "        To notarize the builds 🠚        $ ./ci.cmd notarize"
-	Write-Host "        To package the repo product 🠚   $ ./ci.cmd package"
-	Write-Host "        To release the repo product 🠚   $ ./ci.cmd release"
-	Write-Host "        To stop a development 🠚         $ ./ci.cmd stop"
-	Write-Host "        To deploy the new release 🠚     $ ./ci.cmd deploy"
-	Write-Host "        To clean the workspace 🠚        $ ./ci.cmd clean"
-	Write-Host "        To purge everything 🠚           $ ./ci.cmd purge"
 }}
-exit $__exit
+return $__exit_code

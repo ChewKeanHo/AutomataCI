@@ -36,59 +36,59 @@ jobs:
       - name: Execute repo's AutomataCI - PURGE
         id: native_ci_purge
         run: |
-          ./ci.cmd purge
+          ./automataCI/ci.sh.ps1 purge
       - name: Execute repo's AutomataCI - CLEAN
         id: native_ci_clean
         run: |
-          ./ci.cmd clean
+          ./automataCI/ci.sh.ps1 clean
       - name: Execute repo's AutomataCI - ENVIRONMENT
         id: native_ci_env
         run: |
-          ./ci.cmd env
+          ./automataCI/ci.sh.ps1 env
       - name: Execute repo's AutomataCI - SETUP
         id: native_ci_setup
         run: |
-          ./ci.cmd setup
+          ./automataCI/ci.sh.ps1 setup
       - name: Execute repo's AutomataCI - START
         id: native_ci_start
         run: |
-          ./ci.cmd start
+          ./automataCI/ci.sh.ps1 start
       - name: Execute repo's AutomataCI - PREPARE
         id: native_ci_prepare
         run: |
-          ./ci.cmd prepare
+          ./automataCI/ci.sh.ps1 prepare
       - name: Execute repo's AutomataCI - TEST
         id: native_ci_test
         run: |
-          ./ci.cmd test
+          ./automataCI/ci.sh.ps1 test
       - name: Execute repo's AutomataCI - MATERIALIZE
         id: native_ci_materialize
         run: |
-          ./ci.cmd materialize
+          ./automataCI/ci.sh.ps1 materialize
       - name: Execute repo's AutomataCI - BUILD
         id: native_ci_build
         run: |
-          ./ci.cmd build
+          ./automataCI/ci.sh.ps1 build
       - name: Execute repo's AutomataCI - NOTARIZE
         id: native_ci_notarize
         run: |
-          ./ci.cmd notarize
+          ./automataCI/ci.sh.ps1 notarize
       - name: Execute repo's AutomataCI - PACKAGE
         id: native_ci_package
         run: |
-          ./ci.cmd package
+          ./automataCI/ci.sh.ps1 package
       - name: Execute repo's AutomataCI - RELEASE
         id: native_ci_release
         run: |
-          ./ci.cmd release
+          ./automataCI/ci.sh.ps1 release
       - name: Execute repo's AutomataCI - STOP
         id: native_ci_stop
         run: |
-          ./ci.cmd stop
+          ./automataCI/ci.sh.ps1 stop
       - name: Execute repo's AutomataCI - DEPLOY
         id: native_ci_deploy
         run: |
-          ./ci.cmd deploy
+          ./automataCI/ci.sh.ps1 deploy
       - name: Archive Payloads Artifacts
         if: always()
         uses: actions/upload-artifact@v3

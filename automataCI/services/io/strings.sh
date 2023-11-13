@@ -16,7 +16,7 @@ STRINGS::has_prefix() {
 
 
         # validate input
-        if [ -z "$1" ]; then
+        if [ "$(STRINGS_Is_Empty "$1")" -eq 0 ]; then
                 return 1
         fi
 
@@ -39,6 +39,12 @@ STRINGS::has_suffix() {
         #__content="$2"
 
 
+        # validate input
+        if [ "$(STRINGS_Is_Empty "$1")" -eq 0 ]; then
+                return 1
+        fi
+
+
         # execute
         case "$2" in
         *"$1")
@@ -53,6 +59,25 @@ STRINGS::has_suffix() {
 
 
 
+STRINGS_Is_Empty() {
+        #__target="$1"
+
+
+        # execute
+        if [ -z "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
 STRINGS::replace_all() {
         #__content="$1"
         #__subject="$2"
@@ -60,7 +85,17 @@ STRINGS::replace_all() {
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+        if [ "$(STRINGS_Is_Empty "$1")" -eq 0 ]; then
+                printf -- ""
+                return 1
+        fi
+
+        if [ "$(STRINGS_Is_Empty "$2")" -eq 0 ]; then
+                printf -- ""
+                return 1
+        fi
+
+        if [ "$(STRINGS_Is_Empty "$3")" -eq 0 ]; then
                 printf -- ""
                 return 1
         fi

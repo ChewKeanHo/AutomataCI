@@ -27,7 +27,7 @@ RELEASE::run_citation() {
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/CITATIONS.yml" \
                 "$PROJECT_CITATION" \
                 "$PROJECT_CITATION_TYPE" \
-                "$(TIME::format_iso8601_date "$(TIME::now)")" \
+                "$(TIME_Format_ISO8601_Date "$(TIME_Now)")" \
                 "$PROJECT_NAME" \
                 "$PROJECT_VERSION" \
                 "$PROJECT_LICENSE" \

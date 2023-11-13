@@ -9,8 +9,135 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\net\http.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\zip.ps1"
+
+
+
+
+function DOTNET-Add {
+	param(
+		[string]$___order,
+		[string]$___version,
+		[string]$___destination,
+		[string]$___extractions
+	)
+
+
+	# validate input
+	if ($(STRINGS-Is-Empty "${___order}") -eq 0) {
+		return 1
+	}
+
+	if ($(STRINGS-Is-Empty "${___version}") -eq 0) {
+		$___version = "latest"
+	}
+	$___version = STRINGS-To-Lowercase "${___version}"
+
+
+	# execute
+	## configure settings
+	$___pkg = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}\${env:PROJECT_PATH_NUPKG}"
+	$___pkg = "${___pkg}\${___order}_${___version}"
+	if ($___version -eq "latest") {
+		$null = FS-Remove-Silently "${___pkg}"
+	}
+
+	## begin sourcing nupkg
+	if (-not (Test-Path "${___pkg}/nupkg.zip")) {
+		$___order = "https://www.nuget.org/api/v2/package/${___order}"
+		if ($___version -ne "latest") {
+			$___order = "${___order}/${___version}"
+		}
+
+		$null = FS-Make-Directory "${___pkg}"
+		$___process = HTTP-Download "GET" "${___order}" "${___pkg}\nupkg.zip"
+		if ($___process -ne 0) {
+			FS-Remove-Silently "${___pkg}"
+			return 1
+		}
+
+		if (-not (Test-Path "${___pkg}/nupkg.zip")) {
+			FS-Remove-Silently "${___pkg}"
+			return 1
+		}
+
+		$__process = ZIP-Extract "${___pkg}" "${___pkg}/nupkg.zip"
+		if ($__process -ne 0) {
+			FS-Remove-Silently "${___pkg}"
+			return 1
+		}
+	}
+
+
+	## begin extraction
+	if ($(STRINGS-Is-Empty "${___extractions}") -eq 0) {
+		return 0
+	}
+
+	if ($(STRINGS-Is-Empty "${___destination}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___destination}"
+	if ($___process -eq 0) {
+		return 1
+	}
+	$null = FS-Make-Directory "${___destination}"
+
+	foreach ($___target in ($___extractions -split "\|")) {
+		$___src = "${___pkg}\${___target}"
+		$___dest = "${___destination}\$(Split-Path -Leaf -Path "${___target}")"
+
+		$___process = FS-Is-File "${___src}"
+		if ($___process -ne 0) {
+			return 1
+		}
+
+		$null = FS-Remove-Silently "${___dest}"
+		$___process = FS-Copy-File "${___src}" "${___dest}"
+		if ($___process -ne 0) {
+			return 1
+		}
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function DOTNET-Activate-Environment {
+	# validate input
+	$___process = DOTNET-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = DOTNET-Is-Activated
+	if ($___process -eq 0) {
+		return 0
+	}
+
+
+	# execute
+	${env:DOTNET_ROOT} = "$(DOTNET-Get-Path-Root)"
+	${env:PATH} += ";${env:DOTNET_ROOT};${env:DOTNET_ROOT}\bin"
+
+
+	# report
+	$___process = DOTNET-Is-Activated
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	return 0
+}
 
 
 
@@ -33,26 +160,48 @@ function DOTNET-Get-Path-Root {
 
 function DOTNET-Install {
 	param(
-		[string]$__order
+		[string]$___order
 	)
 
 
 	# validate input
-	$__process = DOTNET-Is-Available
-	if ($__process -ne 0) {
+	$___process = DOTNET-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$null = DOTNET-Activate-Environment
+	$___process = DOTNET-Is-Activated
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	${env:DOTNET_CLI_TELEMETRY_OPTOUT} = 1
-	${env:DOTNET_ROOT} = "$(DOTNET-Get-Path-Root)"
-
-	$__arguments = "tool install --tool-path `"$(DOTNET-Get-Path-Bin)`" ${__order}"
-	$__process = Start-Process -Wait -NoNewWindow -PassThru `
+	$___arguments = "tool install --tool-path `"$(DOTNET-Get-Path-Bin)`" ${___order}"
+	$___process = Start-Process -Wait -NoNewWindow -PassThru `
 		-FilePath "$(DOTNET-Get-Path-Root)\dotnet.exe" `
-		-ArgumentList "${__arguments}"
-	if ($__process.ExitCode -ne 0) {
+		-ArgumentList "${___arguments}"
+	if ($___process.ExitCode -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function DOTNET-Is-Activated {
+	# execute
+	if ($(STRINGS-Is-Empty "${env:DOTNET_ROOT}") -eq 0) {
+		return 1
+	}
+
+	$___process = OS-Is-Command-Available "dotnet"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -84,15 +233,26 @@ function DOTNET-Is-Available {
 
 function DOTNET-Setup {
 	# validate input
-	$__process = DOTNET-Is-Available
-	if ($__process -eq 0) {
+	$___process = DOTNET-Is-Available
+	if ($___process -eq 0) {
 		return 0
+	}
+
+	if ($(STRINGS-Is-Empty "${env:PROJECT_DOTNET_CHANNEL}") -eq 0) {
+		return 1
 	}
 
 
 	# execute
-	${env:DOTNET_CLI_TELEMETRY_OPTOUT} = 1
-	$null = Invoke-Expression "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\dotnet-install.ps1 -Channel LTS -InstallDir `"$(DOTNET-Get-Path-Root)`""
+	$___arguments = "-ExecutionPolicy RemoteSigned " `
+		+ "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\dotnet-install.ps1 " `
+		+ "-Channel ${env:PROJECT_DOTNET_CHANNEL} " `
+		+ "-InstallDir `"$(DOTNET-Get-Path-Root)`""
+	$___process = OS-Exec "powershell" "${___arguments}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
 	if (-not (Test-Path "$(DOTNET-Get-Path-Root)\dotnet.exe")) {
 		return 1
 	}

@@ -10,15 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-ZIP::is_available() {
-        # execute
-        if [ ! -z "$(type -t zip)" ]; then
-                return 0
-        fi
-
-        # report status
-        return 1
-}
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
 
 
 
@@ -44,5 +36,52 @@ ZIP::create() {
                 return 0
         fi
 
+        return 1
+}
+
+
+
+
+ZIP_Extract() {
+        ___destination="$1"
+        ___source="$2"
+
+
+        # validate input
+        if [ -z "$(type -t unzip)" ]; then
+                return 1
+        fi
+
+        if [ ! -f "$___source" ]; then
+                return 1
+        fi
+
+        if [ -f "$___destination" ]; then
+                return 1
+        fi
+
+
+        # extract
+        FS::make_directory "$___destination"
+        unzip "$___source" -d "$___destination"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+ZIP::is_available() {
+        # execute
+        if [ ! -z "$(type -t zip)" ]; then
+                return 0
+        fi
+
+        # report status
         return 1
 }

@@ -16,41 +16,123 @@
 
 
 
-MICROSOFT::is_available_software() {
+MICROSOFT_Arch_Get() {
+        # execute
+        case "$1" in
+        alpha)
+                __value="Alpha"
+                ;;
+        amd64)
+                __value="x64"
+                ;;
+        arm)
+                __value="ARM"
+                ;;
+        arm64)
+                __value="ARM64"
+                ;;
+        i386)
+                __value="x86"
+                ;;
+        ia64)
+                __value="ia64"
+                ;;
+        mips)
+                __value="MIPs"
+                ;;
+        powerpc)
+                __value="PowerPC"
+                ;;
+        *)
+                __value=""
+                ;;
+        esac
+        printf -- "%s" "$__value"
+
+
+        # report status
+        return 0
+}
+
+
+
+
+MICROSOFT_Arch_Interpret() {
+        # execute
+        case "$1" in
+        Alpha)
+                __value="alpha"
+                ;;
+        ARM)
+                __value="arm"
+                ;;
+        ARM64)
+                __value="arm64"
+                ;;
+        ia64)
+                __value="ia64"
+                ;;
+        MIPs)
+                __value="mips"
+                ;;
+        PowerPC)
+                __value="powerpc"
+                ;;
+        x86)
+                __value="i386"
+                ;;
+        x64)
+                __value="amd64"
+                ;;
+        *)
+                __value=""
+                ;;
+        esac
+        printf -- "%s" "$__value"
+
+
+        # report status
+        return 0
+}
+
+
+
+
+MICROSOFT_Is_Available_Software() {
         return 1 # not applicable
 }
 
 
 
 
-MICROSOFT::is_available_uixaml() {
+MICROSOFT_Is_Available_UIXAML() {
         return 1 # not applicable
 }
 
 
 
 
-MICROSOFT::is_available_vclibs() {
+MICROSOFT_Is_Available_VCLibs() {
         return 1 # not applicable
 }
 
 
 
 
-MICROSOFT::setup_uixaml() {
+MICROSOFT_Setup_UIXAML() {
         return 1 # not applicable
 }
 
 
 
 
-MICROSOFT::setup_vclibs() {
+MICROSOFT_Setup_VCLibs() {
         return 1 # not applicable
 }
 
 
 
 
-MICROSOFT::setup_winget() {
+MICROSOFT_Setup_WINGET() {
         return 1 # not applicable
 }

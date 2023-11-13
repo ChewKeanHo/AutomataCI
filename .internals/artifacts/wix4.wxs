@@ -1,0 +1,483 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+	xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+>
+	<Package Name='AutomataCI'
+		Language='1033'
+		Version='1.7.0'
+		Manufacturer='Your Legal Full Name Here'
+		UpgradeCode='76C7A54E-7360-CB70-1A5E-44D8A00CCB30'
+		InstallerVersion='500'
+	>
+		<SummaryInformation
+			Keywords='Installer'
+			Description='AutomataCI (1.7.0) Installer'
+		/>
+		<Icon Id='Icon.exe' SourceFile='D:\a\AutomataCI\AutomataCI\tmp\msi_automataci-msi_1.7.0_any-any\icon.ico' />
+		<MajorUpgrade AllowSameVersionUpgrades='yes'
+			DowngradeErrorMessage='Your AutomataCI is the same/later version. No further action is required. Thank you.'
+		/>
+
+		<!-- Configure 'Add/Remove Programs' interfaces -->
+		<Property Id='ARPPRODUCTICON' Value='Icon.exe' />
+		<Property Id='ARPHELPLINK' Value='https://your-product.website.here' />
+		<Property Id='ARPNOREPAIR' Value='yes' Secure='yes' /><!-- Remove repair -->
+		<Property Id='ARPNOMODIFY' Value='yes' Secure='yes' /><!-- Remove modify -->
+
+
+		<!-- Configure installer main sequences -->
+		<CustomAction Id='Wix4SetARPINSTALLLOCATION_X86'
+			Property='ARPINSTALLLOCATION'
+			Value='[INSTALLDIR]' />
+		<CustomAction Id='Wix4SetARPINSTALLLOCATION_X64'
+			Property='ARPINSTALLLOCATION'
+			Value='[INSTALLDIR]' />
+		<CustomAction Id='Wix4SetARPINSTALLLOCATION_A64'
+			Property='ARPINSTALLLOCATION'
+			Value='[INSTALLDIR]' />
+		<InstallExecuteSequence>
+			<!-- Determine the install location after validated by the installer -->
+			<Custom Action='Wix4SetARPINSTALLLOCATION_X86'
+				After='InstallValidate'
+			></Custom>
+			<Custom Action='Wix4SetARPINSTALLLOCATION_X64'
+				After='InstallValidate'
+			></Custom>
+			<Custom Action='Wix4SetARPINSTALLLOCATION_A64'
+				After='InstallValidate'
+			></Custom>
+		</InstallExecuteSequence>
+
+		<!-- Configure backward compatible multi-mediums (e.g. Floppy disks, CDs) -->
+		<Media Id='1' Cabinet='media1.cab' EmbedCab='yes' />
+
+		<!-- Configure installer launch condition -->
+		<Launch Condition='VersionNT64'
+			Message='Unfortunately, you can only install this package on a 64-bit Windows.' />
+		<!-- Configure INSTALLDIR from CMD -->
+		<CustomAction Id='Wix4SaveCMDINSTALLDIR_X86'
+			Property='CMDLINE_INSTALLDIR'
+			Value='[INSTALLDIR]'
+			Execute='firstSequence'
+		/>
+		<CustomAction Id='Wix4SetFromCMDINSTALLDIR_X86'
+			Property='INSTALLDIR'
+			Value='[INSTALLDIR]'
+			Execute='firstSequence'
+		/>
+		<CustomAction Id='Wix4SaveCMDINSTALLDIR_X64'
+			Property='CMDLINE_INSTALLDIR'
+			Value='[INSTALLDIR]'
+			Execute='firstSequence'
+		/>
+		<CustomAction Id='Wix4SetFromCMDINSTALLDIR_X64'
+			Property='INSTALLDIR'
+			Value='[INSTALLDIR]'
+			Execute='firstSequence'
+		/>
+		<CustomAction Id='Wix4SaveCMDINSTALLDIR_A64'
+			Property='CMDLINE_INSTALLDIR'
+			Value='[INSTALLDIR]'
+			Execute='firstSequence'
+		/>
+		<CustomAction Id='Wix4SetFromCMDINSTALLDIR_A64'
+			Property='INSTALLDIR'
+			Value='[INSTALLDIR]'
+			Execute='firstSequence'
+		/>
+		<InstallUISequence>
+			<Custom Action='Wix4SaveCMDINSTALLDIR_X86'
+				Before='AppSearch' />
+			<Custom Action='Wix4SetFromCMDINSTALLDIR_X86'
+				After='AppSearch'
+				Condition='CMDLINE_INSTALLDIR'
+			/>
+			<Custom Action='Wix4SaveCMDINSTALLDIR_X64'
+				Before='AppSearch' />
+			<Custom Action='Wix4SetFromCMDINSTALLDIR_X64'
+				After='AppSearch'
+				Condition='CMDLINE_INSTALLDIR'
+			/>
+			<Custom Action='Wix4SaveCMDINSTALLDIR_A64'
+				Before='AppSearch' />
+			<Custom Action='Wix4SetFromCMDINSTALLDIR_A64'
+				After='AppSearch'
+				Condition='CMDLINE_INSTALLDIR'
+			/>
+		</InstallUISequence>
+		<InstallExecuteSequence>
+			<Custom Action='Wix4SaveCMDINSTALLDIR_X86'
+				Before='AppSearch' />
+			<Custom Action='Wix4SetFromCMDINSTALLDIR_X86'
+				After='AppSearch'
+				Condition='CMDLINE_INSTALLDIR'
+			/>
+			<Custom Action='Wix4SaveCMDINSTALLDIR_X64'
+				Before='AppSearch' />
+			<Custom Action='Wix4SetFromCMDINSTALLDIR_X64'
+				After='AppSearch'
+				Condition='CMDLINE_INSTALLDIR'
+			/>
+			<Custom Action='Wix4SaveCMDINSTALLDIR_A64'
+				Before='AppSearch' />
+			<Custom Action='Wix4SetFromCMDINSTALLDIR_A64'
+				After='AppSearch'
+				Condition='CMDLINE_INSTALLDIR'
+			/>
+		</InstallExecuteSequence>
+
+		<Property Id='INSTALLDIR'>
+			<RegistrySearch Id='DetermineInstallLocation'
+				Type='raw'
+				Root='HKLM'
+				Key='Software\\\\Your Legal Full Name Here\\\\InstalledProducts\\\\AutomataCI'
+				Name='InstallLocation'
+			/>
+		</Property>
+
+		<!-- Uninstallation component -->
+		<Component Id='INSTALLDIR_comp'
+			Guid='6F56A993-371D-803E-509D-B3BF2735179F'
+			Directory='INSTALLDIR'
+		>
+			<CreateFolder />
+			<RemoveFile Id='RemoveFilesFromAppDirectory'
+				Name='*.*'
+				On='uninstall' />
+		</Component>
+
+
+		<StandardDirectory Id='ProgramFiles6432Folder'>
+			<Directory Id='INSTALLDIR' Name='AutomataCI'>
+				<Directory Id='INSTALLDIRBin' Name='bin'>
+				</Directory>
+				<Directory Id='INSTALLDIRConfig' Name='config'>
+				</Directory>
+				<Directory Id='INSTALLDIRLib' Name='lib'>
+				</Directory>
+				<Directory Id='INSTALLDIRDocs' Name='docs'>
+				</Directory>
+			</Directory>
+		</StandardDirectory>
+
+
+		<ComponentGroup Id='ProductExecutables' Directory='INSTALLDIRBin'>
+			<!-- Compulsory Executable Here -->
+			<Component Id='ComponentBin' Guid='269156ED-A491-B658-0B34-5372990370FD'>
+				<File Id='EXEMain'
+					Source='D:\a\AutomataCI\AutomataCI\tmp\msi_automataci-msi_1.7.0_any-any\automataci_windows-amd64.exe'
+					KeyPath='yes'
+				/>
+			</Component>
+
+			<!-- Optional Executable Here -->
+			<Component Id='ComponentBinOptional'
+					Guid='6EE50691-399A-9F83-3F7B-D22B9A2F5202'
+			>
+			</Component>
+		</ComponentGroup>
+
+
+		<ComponentGroup Id='ProductConfigs' Directory='INSTALLDIRConfig'>
+			<!-- Compulsory Config Files Here -->
+			<Component Id='ComponentConfig'
+				Guid='4C8656A8-E933-7B9D-79EF-075150D2E3DA'
+			>
+			</Component>
+
+			<!-- Optional Config Files Here -->
+			<Component Id='ComponentConfigOptional'
+					Guid='752B656A-E293-9D34-2A70-2863FCC6A7AE'>
+			</Component>
+		</ComponentGroup>
+
+
+		<ComponentGroup Id='ProductLibs' Directory='INSTALLDIRLib'>
+			<!-- Compulsory Libraries Files Here -->
+			<Component Id='ComponentLib'
+				Guid='68556A59-3B30-D62C-17EE-DA5CCC00D915'>
+			</Component>
+
+			<!-- Optional Libraries Files Here -->
+			<Component Id='ComponentLibOptional'
+				Guid='6526CAAF-93BA-A37B-5854-827D6F1FEB03'
+			>
+			</Component>
+		</ComponentGroup>
+
+
+		<ComponentGroup Id='ProductDocs' Directory='INSTALLDIRDocs'>
+			<!-- Compulsory Docs Files Here -->
+			<Component Id='ComponentDocs'
+				Guid='62576A69-337E-FCA3-14EC-1626979FF17C'
+			>
+				<File Id='DOCSLicense'
+					Source='D:\a\AutomataCI\AutomataCI\tmp\msi_automataci-msi_1.7.0_any-any\LICENSE_en.pdf'
+					KeyPath='yes'
+				/>
+			</Component>
+
+			<!-- Optional Docs Files Here -->
+			<Component Id='ComponentDocsOptional'
+				Guid='66656AA9-D353-7FE0-466D-1C5D6E8ED310'
+			>
+				<File Id='DocsUserGuideEN'
+					Source='D:\a\AutomataCI\AutomataCI\tmp\msi_automataci-msi_1.7.0_any-any\USER-GUIDES_en.pdf'
+					KeyPath='yes'
+				/>
+			</Component>
+		</ComponentGroup>
+
+
+		<Component Id='ComponentRegistries'
+			Guid='76201754-6A9C-3376-4482-C7415BF6A703'
+			Directory='INSTALLDIR'
+		><RegistryKey Root='HKLM' Key='Software\\\\Your Legal Full Name Here\\\\InstalledProducts\\\\AutomataCI'>
+			<!-- DO NOT REMOVE this default entry -->
+			<RegistryValue
+				Name='InstallLocation'
+				Value='[INSTALLDIR]'
+				Type='string'
+				KeyPath='yes'
+			/>
+
+			<!-- DO NOT use the application's variable registries here -->
+			<!-- They will be removed upon uninstall (as in during upgrade run) -->
+			<!-- For those, use %APPDATA% and etc instead. -->
+			<!-- Otherwise, refer the above compulsory entry to add more. -->
+		</RegistryKey></Component>
+
+
+		<Feature Id='FeaturesAll'
+			Title='AutomataCI'
+			Description='The complete package.'
+			Level='1'
+			Display='expand'
+			ConfigurableDirectory='INSTALLDIR'
+		>
+			<Feature Id='FeaturesMain'
+				Title='Main Components'
+				Description='All core and critical components.'
+				Level='1'
+			>
+				<ComponentRef Id='INSTALLDIR_comp' />
+				<ComponentRef Id='ComponentRegistries' />
+				<ComponentRef Id='ComponentBin' />
+				<ComponentRef Id='ComponentConfig' />
+				<ComponentRef Id='ComponentLib' />
+				<ComponentRef Id='ComponentDocs' />
+			</Feature>
+			<Feature Id='FeaturesBin' AllowAbsent='yes'
+				Title='Additional Components'
+				Description='All optional addition components.'
+				Level='1'
+			>
+				<ComponentRef Id='ComponentBinOptional' />
+			</Feature>
+			<Feature Id='FeaturesConfig' AllowAbsent='yes'
+				Title='Additional Configurations Components'
+				Description='All optional configurations components.'
+				Level='1'
+			>
+				<ComponentRef Id='ComponentConfigOptional' />
+			</Feature>
+			<Feature Id='FeaturesLib' AllowAbsent='yes'
+				Title='Additional Libraries Components'
+				Description='All optional libraries components.'
+				Level='1'
+			>
+				<ComponentRef Id='ComponentLibOptional' />
+			</Feature>
+			<Feature Id='FeaturesDocs' AllowAbsent='yes'
+				Title='Documentation Components'
+				Description='All documentations components.'
+				Level='1'
+			>
+				<ComponentRef Id='ComponentDocsOptional' />
+			</Feature>
+		</Feature>
+		<!-- UI Customization -->
+		<ui:WixUI Id='WixUI_FeatureTree'
+			InstallDirectory='INSTALLDIR' />
+		<UI>
+			<!-- Configure UI modules -->
+			<DialogRef Id='BrowseDlg' />
+			<DialogRef Id='DiskCostDlg' />
+			<DialogRef Id='ErrorDlg' />
+			<DialogRef Id='FatalError' />
+			<DialogRef Id='FilesInUse' />
+			<DialogRef Id='MsiRMFilesInUse' />
+			<DialogRef Id='PrepareDlg' />
+			<DialogRef Id='ProgressDlg' />
+			<DialogRef Id='ResumeDlg' />
+			<DialogRef Id='UserExit' />
+
+
+			<!-- Publish UX-flow wireframe -->
+			<!-- 000 - Ad-Hoc Interfaces -->
+			<Publish Dialog='BrowseDlg'
+				Control='OK'
+				Event='DoAction'
+				Value='WixUIValidatePath_X64'
+				Order='3'
+			/>
+			<Publish Dialog='BrowseDlg'
+				Control='OK'
+				Event='DoAction'
+				Value='WixUIValidatePath_A64'
+				Order='3'
+			/>
+			<Publish Dialog='BrowseDlg'
+				Control='OK'
+				Event='DoAction'
+				Value='WixUIValidatePath_X86'
+				Order='3'
+			/>
+			<Publish Dialog='BrowseDlg'
+				Control='OK'
+				Event='SpawnDialog'
+				Value='InvalidDirDlg'
+				Order='4'
+				Condition='NOT UIINSTALLDIR_VALID = "1"'
+			/>
+			<Publish Dialog='ExitDialog'
+				Control='Finish'
+				Event='EndDialog'
+				Value='Return'
+				Order='999'
+			/>
+
+
+			<!-- 001 - Landing Page -->
+			<Publish Dialog='WelcomeDlg'
+				Control='Next'
+				Event='NewDialog'
+				Value='LicenseAgreementDlg'
+				Condition='NOT Installed'
+			/>
+			<Publish Dialog='WelcomeDlg'
+				Control='Next'
+				Event='NewDialog'
+				Value='VerifyReadyDlg'
+				Condition='Installed AND PATCH'
+			/>
+			<Publish Dialog='MaintenanceWelcomeDlg'
+				Control='Next'
+				Event='NewDialog'
+				Value='MaintenanceTypeDlg'
+			/>
+
+
+			<!-- 002-Install - License Agreement  -->
+			<Publish Dialog='LicenseAgreementDlg'
+				Control='Back'
+				Event='NewDialog'
+				Value='WelcomeDlg'
+			/>
+			<Publish Dialog='LicenseAgreementDlg'
+				Control='Next'
+				Event='NewDialog'
+				Value='InstallDirDlg'
+				Condition='LicenseAgreementDlg = "1"'
+			/>
+
+
+			<!-- 002-Maintenance - Select Actions  -->
+			<Publish Dialog='MaintenanceTypeDlg'
+				Control='RepairButton'
+				Event='NewDialog'
+				Value='VerifyReadyDlg'
+			/>
+			<Publish Dialog='MaintenanceTypeDlg'
+				Control='RemoveButton'
+				Event='NewDialog'
+				Value='VerifyReadyDlg'
+			/>
+			<Publish Dialog='MaintenanceTypeDlg'
+				Control='Back'
+				Event='NewDialog'
+				Value='MaintenanceWelcomeDlg'
+			/>
+
+
+			<!-- 003- Configure Installation  -->
+			<Publish Dialog='InstallDirDlg'
+				Control='Back'
+				Event='NewDialog'
+				Value='LicenseAgreementDlg'
+			/>
+			<Publish Dialog='InstallDirDlg'
+				Control='Next'
+				Event='SetTargetPath'
+				Value='[UIINSTALLDIR]'
+				Order='1'
+			/>
+			<Publish Dialog='InstallDirDlg'
+				Control='Next'
+				Event='DoAction'
+				Value='WixUIValidatePath_X64'
+				Order='2'
+				Condition='NOT WIXUI_DONTVALIDATEPATH'
+			/>
+			<Publish Dialog='InstallDirDlg'
+				Control='Next'
+				Event='DoAction'
+				Value='WixUIValidatePath_A64'
+				Order='2'
+				Condition='NOT WIXUI_DONTVALIDATEPATH'
+			/>
+			<Publish Dialog='InstallDirDlg'
+				Control='Next'
+				Event='DoAction'
+				Value='WixUIValidatePath_X86'
+				Order='2'
+				Condition='NOT WIXUI_DONTVALIDATEPATH'
+			/>
+			<Publish Dialog='InstallDirDlg'
+				Control='Next'
+				Event='SpawnDialog'
+				Value='InvalidDirDlg'
+				Order='3'
+				Condition='NOT WIXUI_DONTVALIDATEPATH AND NOT UIINSTALLDIR_VALID = "1"'
+			/>
+			<Publish Dialog='InstallDirDlg'
+				Control='Next'
+				Event='NewDialog'
+				Value='VerifyReadyDlg'
+				Order='4'
+				Condition='WIXUI_DONTVALIDATEPATH OR UIINSTALLDIR_VALID = "1"'
+			/>
+			<Publish Dialog='InstallDirDlg'
+				Control='ChangeFolder'
+				Property='_BrowseProperty'
+				Value='[UIINSTALLDIR]'
+				Order='1'
+			/>
+			<Publish Dialog='InstallDirDlg'
+				Control='ChangeFolder'
+				Event='SpawnDialog'
+				Value='BrowseDlg'
+				Order='2'
+			/>
+
+
+			<!-- 004 - Verify Ready  -->
+			<Publish Dialog='VerifyReadyDlg'
+				Control='Back'
+				Event='NewDialog'
+				Value='InstallDirDlg'
+				Order='1'
+				Condition='NOT Installed'
+			/>
+			<Publish Dialog='VerifyReadyDlg'
+				Control='Back'
+				Event='NewDialog'
+				Value='MaintenanceTypeDlg'
+				Order='2'
+				Condition='Installed'
+			/>
+		</UI>
+		<WixVariable Id='WixUIBannerBmp' Value='D:\a\AutomataCI\AutomataCI\tmp\msi_automataci-msi_1.7.0_any-any\msi-banner_en.jpg' />
+		<WixVariable Id='WixUIDialogBmp' Value='D:\a\AutomataCI\AutomataCI\tmp\msi_automataci-msi_1.7.0_any-any\msi-dialog_en.jpg' />
+		<WixVariable Id="WixUILicenseRtf" Value='D:\a\AutomataCI\AutomataCI\tmp\msi_automataci-msi_1.7.0_any-any\LICENSE_en.rtf' />
+	</Package>
+</Wix>

@@ -9,23 +9,66 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+
+
+
+
 function ZIP-Create {
 	param (
-		[string]$__destination,
-		[string]$__source
+		[string]$___destination,
+		[string]$___source
 	)
+
 
 	# execute
 	try {
-		Compress-Archive -Path $__source -DestinationPath $__destination
-		if (Test-Path $__destination) {
+		Compress-Archive -Path $___source -DestinationPath $___destination
+		if (Test-Path $___destination) {
 			return 0
 		}
-
-		return 1
 	} catch {
 		return 1
 	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
+function ZIP-Extract {
+	param (
+		[string]$___destination,
+		[string]$___source
+	)
+
+
+	# validate input
+	$___process = FS-Is-File "${___source}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___destination}"
+	if ($___process -eq 0) {
+		return 1
+	}
+
+
+	# execute
+	try {
+		$null = FS-Make-Directory "${___destination}"
+		Expand-Archive -Path $___source -DestinationPath $___destination
+	} catch {
+		return 1
+	}
+
+
+	# report status
+	return 0
 }
 
 

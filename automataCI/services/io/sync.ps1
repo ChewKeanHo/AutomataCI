@@ -44,11 +44,6 @@
 #
 #
 #               # execute
-#               $__output = Invoke-Expression "command ${__line}"
-#               if ($LASTEXITCODE -ne 0); then
-#                       return 1 # signal an error has occured
-#               fi
-#
 #               ...
 #
 #
@@ -209,11 +204,6 @@ function SYNC-Parallel-Exec {
 #
 #
 #               # execute
-#               $__output = Invoke-Expression "command ${__line}"
-#               if ($LASTEXITCODE -ne 0); then
-#                       return 1 # signal an error has occured
-#               fi
-#
 #               ...
 #
 #

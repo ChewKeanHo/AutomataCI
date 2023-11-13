@@ -19,94 +19,73 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\installer.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\msi.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\chocolatey.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\dotnet.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\microsoft.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\installer.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-env.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 
 # begin service
-OS-Print-Status info "Installing DotNET..."
+$null = I18N-Status-Print-Env-Install "dotnet"
 $__process = DOTNET-Setup
 if ($__process -ne 0) {
-	OS-Print-Status error "install failed."
+	$null = I18N-Status-Print-Env-Install-Failed
 	return 1
 }
 
 
-OS-Print-Status info "Installing choco..."
+$null = I18N-Status-Print-Env-Install "chocolatey"
 $__process = CHOCOLATEY-Setup
 if ($__process -ne 0) {
-	OS-Print-Status error "install failed."
+	$null = I18N-Status-Print-Env-Install-Failed
 	return 1
 }
 
 
-OS-Print-Status info "Installing version 14.00 Microsoft C++ Redistributable..."
-$__process = MICROSOFT-Setup-VCLibs "14.00"
-if ($__process -ne 0) {
-	OS-Print-Status error "install failed."
-	return 1
-}
-
-OS-Print-Status info "Installing version 2.7.3 Microsoft UI Xaml..."
-$__process = MICROSOFT-Setup-UIXAML "2.7.3"
-if ($__process -ne 0) {
-	OS-Print-Status error "install failed."
-	return 1
-}
-
-OS-Print-Status info "Installing winget..."
-$__process = MICROSOFT-Setup-WinGet
-if ($__process -ne 0) {
-	OS-Print-Status error "install failed."
-	return 1
-}
-
-
-OS-Print-Status info "Installing docker..."
+$null = I18N-Status-Print-Env-Install "docker"
 $__process = INSTALLER-Setup-Docker
 if ($__process -ne 0) {
-	OS-Print-Status error "install failed."
+	$null = I18N-Status-Print-Env-Install-Failed
 	return 1
 }
 
 
-OS-Print-Status info "Installing MSI WiX packager..."
+$null = I18N-Status-Print-Env-Install "MSI WiX packager"
 $__process = MSI-Setup
 if ($__process -ne 0) {
-	OS-Print-Status error "install failed."
+	$null = I18N-Status-Print-Env-Install-Failed
 	return 1
 }
 
 
-OS-Print-Status info "Installing reprepro..."
+$null = I18N-Status-Print-Env-Install "reprepro"
 $__process = INSTALLER-Setup-Reprepro
 if ($__process -ne 0) {
-	OS-Print-Status error "install failed."
+	$null = I18N-Status-Print-Env-Install-Failed
 	return 1
 }
 
 
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
-	OS-Print-Status info "Installing python..."
+	$null = I18N-Status-Print-Env-Install "python"
 	$__process = INSTALLER-Setup-Python
 	if ($__process -ne 0) {
-		OS-Print-Status error "install failed."
+		$null = I18N-Status-Print-Env-Install-Failed
 		return 1
 	}
 }
 
 
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_GO}))) {
-	OS-Print-Status info "Installing go..."
+	$null = I18N-Status-Print-Env-Install "go"
 	$__process = INSTALLER-Setup-Go
 	if ($__process -ne 0) {
-		OS-Print-Status error "install failed."
+		$null = I18N-Status-Print-Env-Install-Failed
 		return 1
 	}
 }
@@ -115,30 +94,30 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_GO}))) {
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_C})) -or
 	(-not ([string]::IsNullOrEmpty(${env:PROJECT_NIM}))) -or
 	(-not ([string]::IsNullOrEmpty(${env:PROJECT_RUST})))) {
-	OS-Print-Status info "Installing c..."
+	$null = I18N-Status-Print-Env-Install "c"
 	$__process = INSTALLER-Setup-C
 	if ($__process -ne 0) {
-		OS-Print-Status error "install failed."
+		$null = I18N-Status-Print-Env-Install-Failed
 		return 1
 	}
 }
 
 
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_NIM}))) {
-	OS-Print-Status info "Installing nim..."
+	$null = I18N-Status-Print-Env-Install "nim"
 	$__process = INSTALLER-Setup-Nim
 	if ($__process -ne 0) {
-		OS-Print-Status error "install failed."
+		$null = I18N-Status-Print-Env-Install-Failed
 		return 1
 	}
 }
 
 
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_ANGULAR}))) {
-	OS-Print-Status info "Installing angular..."
+	$null = I18N-Status-Print-Env-Install "angular"
 	$__process = INSTALLER-Setup-Angular
 	if ($__process -ne 0) {
-		OS-Print-Status error "install failed."
+		$null = I18N-Status-Print-Env-Install-Failed
 		return 1
 	}
 }
@@ -147,5 +126,5 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_ANGULAR}))) {
 
 
 # report status
-OS-Print-Status success "`n"
+$null = I18N-Status-Print-Run-Successful
 return 0

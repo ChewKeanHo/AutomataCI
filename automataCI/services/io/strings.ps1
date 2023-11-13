@@ -17,7 +17,8 @@ function STRINGS-Has-Prefix {
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__prefix)) {
+	$__process = STRINGS-Is-Empty "${__prefix}"
+	if ($__process -eq 0) {
 		return 1
 	}
 
@@ -43,13 +44,33 @@ function STRINGS-Has-Suffix {
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__suffix)) {
+	$__process = STRINGS-Is-Empty "${__suffix}"
+	if ($__process -eq 0) {
 		return 1
 	}
 
 
 	# execute
 	if ($__content.EndsWith($__suffix)) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
+function STRINGS-Is-Empty {
+	param(
+		$__target
+	)
+
+
+	# execute
+	if ([string]::IsNullOrEmpty($__target)) {
 		return 0
 	}
 
@@ -70,9 +91,18 @@ function STRINGS-Replace-All {
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__content) -or
-		[string]::IsNullOrEmpty($__subject) -or
-		[string]::IsNullOrEmpty($__replacement)) {
+	$__process = STRINGS-Is-Empty "${__content}"
+	if ($__process -eq 0) {
+		return ""
+	}
+
+	$__process = STRINGS-Is-Empty "${__subject}"
+	if ($__process -eq 0) {
+		return $__content
+	}
+
+	$__process = STRINGS-Is-Empty "${__replacement}"
+	if ($__process -eq 0) {
 		return $__content
 	}
 

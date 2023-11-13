@@ -20,38 +20,43 @@ if [ "$PROJECT_PATH_ROOT" = "" ]; then
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/sync.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/sync.sh"
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-archive_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-cargo_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-changelog_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-chocolatey_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-deb_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-docker_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-flatpak_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-homebrew_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-ipk_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-pypi_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-rpm_unix-any.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-sync.sh"
+
+. "${LIBS_AUTOMATACI}/_package-archive_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-cargo_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-changelog_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-chocolatey_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-deb_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-docker_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-flatpak_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-homebrew_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-ipk_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-msi_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-pypi_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-rpm_unix-any.sh"
 
 
 
 
 # source locally provided functions
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_package-sourcing_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-sourcing_unix-any.sh"
 
 
 
 
 # 1-time setup job required materials
 DEST="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
-OS::print_status info "remaking package directory: $DEST\n"
+I18N_Status_Print_Package_Directory_Remake "$DEST"
 FS::remake_directory "$DEST"
 if [ $? -ne 0 ]; then
-        OS::print_status error "remake failed.\n"
+        I18N_Status_Print_Package_Remake_Failed
         return 1
 fi
 
@@ -64,25 +69,25 @@ if [ $? -ne 0 ]; then
 fi
 
 
-OS::print_status plain "\n"
+I18N_Status_Print_Newline
 
 
 
 
 # prepare for parallel package
 __log_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/packagers"
-OS::print_status info "remaking packagers' log directory: ${__log_directory}\n"
+I18N_Status_Print_Package_Directory_Log_Remake "$__log_directory"
 FS::remake_directory "$__log_directory"
 if [ ! -d "$__log_directory" ]; then
-        OS::print_status error "remake failed.\n"
+        I18N_Status_Print_Package_Remake_Failed
         return 1
 fi
 
 __control_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-parallel"
-OS::print_status info "remaking packagers' control directory: ${__log_directory}\n"
+I18N_Status_Print_Package_Directory_Control_Remake "${__control_directory}"
 FS::remake_directory "$__control_directory"
 if [ ! -d "$__control_directory" ]; then
-        OS::print_status error "remake failed.\n"
+        I18N_Status_Print_Package_Remake_Failed
         return 1
 fi
 
@@ -109,13 +114,12 @@ SUBROUTINE::package() {
 
 
         # execute
-        OS::print_status info "packaging ${__subject}...\n"
-
+        I18N_Status_Print_Package_Exec "$__subject"
         FS::remove_silently "$__log"
 
         $__command "$__arguments" &> "$__log"
         if [ $? -ne 0 ]; then
-                OS::print_status error "package failed - ${__subject}\n"
+                I18N_Status_Print_Package_Exec_Failed "${__subject}"
                 return 1
         fi
 
@@ -127,19 +131,16 @@ SUBROUTINE::package() {
 
 
 
-# register for parallel packaging
+# begin registering packagers
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
-        if [ -d "$i" ]; then
-                continue
-        fi
-
-        if [ ! -f "$i" ]; then
+        FS::is_file "$i"
+        if [ $? -ne 0 ]; then
                 continue
         fi
 
 
         # parse build candidate
-        OS::print_status info "detected ${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${i}\n"
+        I18N_Status_Print_File_Detected "$i"
         TARGET_FILENAME="${i##*${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/}"
         TARGET_FILENAME="${TARGET_FILENAME%.*}"
         TARGET_OS="${TARGET_FILENAME##*_}"
@@ -147,23 +148,33 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         TARGET_ARCH="${TARGET_OS##*-}"
         TARGET_OS="${TARGET_OS%%-*}"
 
-        if [ -z "$TARGET_OS" ] || [ -z "$TARGET_ARCH" ] || [ -z "$TARGET_FILENAME" ]; then
-                OS::print_status warning "failed to parse file. Skipping.\n"
+        if [ "$(STRINGS_Is_Empty "$TARGET_OS")" -eq 0 ] ||
+                [ "$(STRINGS_Is_Empty "$TARGET_ARCH")" -eq 0 ] ||
+                [ "$(STRINGS_Is_Empty "$TARGET_FILENAME")" -eq 0 ]; then
+                I18N_Status_Print_File_Bad_Stat_Skipped
                 continue
         fi
 
         STRINGS::has_prefix "$PROJECT_SKU" "$TARGET_FILENAME"
         if [ $? -ne 0 ]; then
-                OS::print_status warning "incompatible file. Skipping.\n"
+                I18N_Status_Print_File_Incompatible_Skipped
                 continue
         fi
 
-        OS::print_status info "registering ${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${i}\n"
+        I18N_Status_Print_Sync_Register "$i"
         __common="${DEST}|${i}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
 
         __log="${__log_directory}/archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE::run_archive
+"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        __log="${__log_directory}/cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+        FS::append_file "$__parallel_control" "\
+${__common}|${__log}|PACKAGE::run_cargo
 "
         if [ $? -ne 0 ]; then
                 return 1
@@ -177,14 +188,6 @@ ${__common}|${__log}|PACKAGE::run_chocolatey
                 return 1
         fi
 
-        __log="${__log_directory}/homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
-${__common}|${__log}|PACKAGE::run_homebrew
-"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
         __log="${__log_directory}/deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__parallel_control" "\
 ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE::run_deb
@@ -193,17 +196,9 @@ ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE::run_deb
                 return 1
         fi
 
-        __log="${__log_directory}/ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
-${__common}|${__log}|PACKAGE::run_ipk
-"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        __log="${__log_directory}/rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
-${__common}|${__log}|PACKAGE::run_rpm
+        __log="${__log_directory}/docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+        FS::append_file "$__series_control" "\
+${__common}|${__log}|PACKAGE::run_docker
 "
         if [ $? -ne 0 ]; then
                 return 1
@@ -218,6 +213,30 @@ ${__common}|${__flatpak_path}|${__log}|PACKAGE::run_flatpak
                 return 1
         fi
 
+        __log="${__log_directory}/homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+        FS::append_file "$__parallel_control" "\
+${__common}|${__log}|PACKAGE::run_homebrew
+"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        __log="${__log_directory}/ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+        FS::append_file "$__parallel_control" "\
+${__common}|${__log}|PACKAGE::run_ipk
+"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        __log="${__log_directory}/msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+        FS::append_file "$__series_control" "\
+${__common}|${__log}|PACKAGE_Run_MSI
+"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
         __log="${__log_directory}/pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE::run_pypi
@@ -226,17 +245,9 @@ ${__common}|${__log}|PACKAGE::run_pypi
                 return 1
         fi
 
-        __log="${__log_directory}/cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+        __log="${__log_directory}/rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__parallel_control" "\
-${__common}|${__log}|PACKAGE::run_cargo
-"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        __log="${__log_directory}/docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__series_control" "\
-${__common}|${__log}|PACKAGE::run_docker
+${__common}|${__log}|PACKAGE::run_rpm
 "
         if [ $? -ne 0 ]; then
                 return 1
@@ -244,26 +255,30 @@ ${__common}|${__log}|PACKAGE::run_docker
 done
 
 
-OS::print_status plain "\n"
-OS::print_status info "executing all parallel runs...\n"
-SYNC::parallel_exec "SUBROUTINE::package" "$__parallel_control"
-if [ $? -ne 0 ]; then
-        OS::print_status error "execute failed.\n\n"
-        return 1
+I18N_Status_Print_Sync_Exec_Parallel
+FS::is_file "$__parallel_control"
+if [ $? -eq 0 ]; then
+        SYNC::parallel_exec "SUBROUTINE::package" "$__parallel_control"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_Sync_Exec_Failed
+                return 1
+        fi
 fi
 
 
-OS::print_status plain "\n"
-OS::print_status info "executing all series runs...\n"
-SYNC::series_exec "SUBROUTINE::package" "$__series_control"
-if [ $? -ne 0 ]; then
-        OS::print_status error "execute failed.\n\n"
-        return 1
+I18N_Status_Print_Sync_Exec_Series
+FS::is_file "$__series_control"
+if [ $? -eq 0 ]; then
+        SYNC::series_exec "SUBROUTINE::package" "$__series_control"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_Sync_Exec_Failed
+                return 1
+        fi
 fi
 
 
 
 
 # report status
-OS::print_status success "\n\n"
+I18N_Status_Print_Run_Successful
 return 0

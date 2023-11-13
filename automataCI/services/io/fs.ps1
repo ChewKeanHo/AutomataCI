@@ -92,6 +92,71 @@ function FS-Copy-File {
 
 
 
+function FS-Extension-Remove {
+	param (
+		[string]$__target,
+		[string]$__extension
+	)
+
+
+	# execute
+	return FS-Extension-Replace "${__target}" "${__extension}" ""
+}
+
+
+
+
+function FS-Extension-Replace {
+	param (
+		[string]$__target,
+		[string]$__extension,
+		[string]$__candidate
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($__target)) {
+		return ""
+	}
+
+
+	# execute
+	if ($__extension -eq "*") {
+		$___target = Split-Path -Leaf "${__target}"
+		$___target = $___target -replace '(\.\w+)+$'
+
+		if (-not [string]::IsNullOrEmpty($(Split-Path -Parent "${__target}"))) {
+			$___target = $(Split-Path -Parent "${__target}") + "\" + "${___target}"
+		}
+	} elseif (-not [string]::IsNullOrEmpty($__extension)) {
+		if ($__extension.Substring(0,1) -eq ".") {
+			$__extension = $__extension.Substring(1)
+		}
+
+		$___target = Split-Path -Leaf "${__target}"
+		$___target = $___target -replace "\.${__extension}$"
+
+		if (-not [string]::IsNullOrEmpty($__candidate)) {
+			if ($__candidate.Substring(0,1) -eq ".") {
+				$___target += "." + $__candidate.Substring(1)
+			} else {
+				$___target += "." + $__candidate
+			}
+		}
+
+		if (-not [string]::IsNullOrEmpty($(Split-Path -Parent "${__target}"))) {
+			$___target = $(Split-Path -Parent "${__target}") + "\" + "${___target}"
+		}
+	} else {
+		$___target = $__target
+	}
+
+	return $___target
+}
+
+
+
+
 function FS-Is-Directory {
 	param (
 		[string]$__target
@@ -240,6 +305,26 @@ function FS-Is-Target-A-Library {
 
 
 
+function FS-Is-Target-A-MSI {
+	param (
+		[string]$__subject
+	)
+
+
+	# execute
+	if (($("${__subject}" -replace '^.*-msi') -ne "${__subject}") -or
+		($("${__subject}" -replace '^.*.msi') -ne "${__subject}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-Nupkg {
 	param (
 		[string]$__subject
@@ -247,13 +332,13 @@ function FS-Is-Target-A-Nupkg {
 
 
 	# execute
-	if ($("${__subject}" -replace '^.*.nupkg') -eq "${__subject}") {
-		return 1
+	if ($("${__subject}" -replace '^.*.nupkg') -ne "${__subject}") {
+		return 0
 	}
 
 
 	# report status
-	return 0
+	return 1
 }
 
 

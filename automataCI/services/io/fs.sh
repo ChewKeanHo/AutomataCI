@@ -87,6 +87,80 @@ FS::copy_file() {
 
 
 
+FS_Extension_Remove() {
+        printf -- "%s" "$(FS_Extension_Replace "$1" "$2" "")"
+        return $?
+}
+
+
+
+
+FS_Extension_Replace() {
+        #___target="$1"
+        #___extension="$2"
+        #___candidate="$3"
+
+
+        # validate input
+        if [ -z "$1" ]; then
+                printf -- ""
+                return 0
+        fi
+
+
+        # execute
+        if [ "$2" = "*" ]; then
+                ___target="${1##*/}"
+                ___target="${___target%%.*}"
+
+                if [ ! -z "${1%/*}" ] && [ ! "${1%/*}" = "$1" ]; then
+                        ___target="${1%/*}/${___target}"
+                fi
+        elif [ ! -z "$2" ]; then
+                if [ "$(printf -- "%.1s" "$2")" = "." ]; then
+                        ___extension="${2#*.}"
+                else
+                        ___extension="$2"
+                fi
+
+                ___target="${1##*/}"
+                while true; do
+                        if [ "${___target#*.}" = "${___extension}" ]; then
+                                ___target="${___target%.${___extension}*}"
+                                continue
+                        fi
+
+                        if [ ! "${___target##*.}" = "${___extension}" ]; then
+                                break
+                        fi
+
+                        ___target="${___target%.${___extension}*}"
+                done
+
+                if [ ! "${___target}" = "${1##*/}" ]; then
+                        if [ ! -z "$3" ]; then
+                                if [ "$(printf -- "%.1s" "$3")" = "." ]; then
+                                        ___target="${___target}.${3#*.}"
+                                else
+                                        ___target="${___target}.${3}"
+                                fi
+                        fi
+                fi
+
+                if [ ! -z "${1%/*}" ] && [ ! "${1%/*}" = "$1" ]; then
+                        ___target="${1%/*}/${___target}"
+                fi
+        else
+                ___target="$1"
+        fi
+
+        printf -- "%s" "$___target"
+        return 0
+}
+
+
+
+
 FS::is_directory() {
         # __target="$1"
 
@@ -216,6 +290,25 @@ FS::is_target_a_library() {
                 [ "${1#*-libs}" != "$1" ] ||
                 [ "${1#*-library}" != "$1" ] ||
                 [ "${1#*-libraries}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
+FS_Is_Target_A_MSI() {
+        # __target="$1"
+
+
+        # execute
+        if [ "${1#*-msi}" != "$1" ] || [ "${1#*.msi}" != "$1" ]; then
                 printf -- "0"
                 return 0
         fi

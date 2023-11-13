@@ -20,120 +20,122 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/net/http.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/installer.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/msi.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/publishers/dotnet.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/publishers/homebrew.sh"
+. "${LIBS_AUTOMATACI}/services/io/net/http.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/installer.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
+. "${LIBS_AUTOMATACI}/services/publishers/dotnet.sh"
+. "${LIBS_AUTOMATACI}/services/publishers/homebrew.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-env.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
 
 # begin service
-OS::print_status info "Installing brew...\n"
+I18N_Status_Print_Env_Install "brew"
 HOMEBREW::setup
 if [ $? -ne 0 ]; then
-        OS::print_status error "install failed.\n"
+        I18N_Status_Print_Env_Install_Failed
         return 1
 fi
 
 
-OS::print_status info "Installing curl...\n"
-HTTP::setup
+I18N_Status_Print_Env_Install "curl"
+HTTP_Setup
 if [ $? -ne 0 ]; then
-        OS::print_status error "install failed.\n"
+        I18N_Status_Print_Env_Install_Failed
         return 1
 fi
 
 
-OS::print_status info "Installing msitools...\n"
-MSI::setup
+I18N_Status_Print_Env_Install "msitools"
+MSI_Setup
 if [ $? -ne 0 ]; then
-        OS::print_status error "install failed.\n"
+        I18N_Status_Print_Env_Install_Failed
         return 1
 fi
 
 
-OS::print_status info "Installing docker...\n"
+I18N_Status_Print_Env_Install "docker"
 INSTALLER::setup_docker
 if [ $? -ne 0 ]; then
-        OS::print_status error "install failed.\n"
+        I18N_Status_Print_Env_Install_Failed
         return 1
 fi
 
 
-OS::print_status info "Installing reprepro...\n"
+I18N_Status_Print_Env_Install "reprepro"
 INSTALLER::setup_reprepro
 if [ $? -ne 0 ]; then
-        OS::print_status error "install failed.\n"
+        I18N_Status_Print_Env_Install_Failed
         return 1
 fi
 
 
-OS::print_status info "Installing osslsigncode...\n"
+I18N_Status_Print_Env_Install "osslsigncode"
 INSTALLER::setup_osslsigncode
 if [ $? -ne 0 ]; then
-        OS::print_status error "install failed.\n"
+        I18N_Status_Print_Env_Install_Failed
         return 1
 fi
 
 
 if [ ! -z "$PROJECT_PYTHON" ]; then
-        OS::print_status info "Installing python...\n"
+        I18N_Status_Print_Env_Install "python"
         INSTALLER::setup_python
         if [ $? -ne 0 ]; then
-                OS::print_status error "install failed.\n"
+                I18N_Status_Print_Env_Install_Failed
                 return 1
         fi
 fi
 
 
 if [ ! -z "$PROJECT_GO" ]; then
-        OS::print_status info "Installing go...\n"
+        I18N_Status_Print_Env_Install "go"
         INSTALLER::setup_go
         if [ $? -ne 0 ]; then
-                OS::print_status error "install failed.\n"
+                I18N_Status_Print_Env_Install_Failed
                 return 1
         fi
 fi
 
 
 if [ ! -z "$PROJECT_C" ] || [ ! -z "$PROJECT_NIM" ] || [ ! -z "$PROJECT_RUST" ]; then
-        OS::print_status info "Installing c...\n"
+        I18N_Status_Print_Env_Install "c"
         INSTALLER::setup_c "$PROJECT_OS" "$PROJECT_ARCH"
         if [ $? -ne 0 ]; then
-                OS::print_status error "install failed.\n"
+                I18N_Status_Print_Env_Install_Failed
                 return 1
         fi
 fi
 
 
 if [ ! -z "$PROJECT_DOTNET" ]; then
-        OS::print_status info "Installing dotnet...\n"
-        DOTNET::setup
+        I18N_Status_Print_Env_Install "dotnet"
+        DOTNET_Setup
         if [ $? -ne 0 ]; then
-                OS::print_status error "install failed.\n"
+                I18N_Status_Print_Env_Install_Failed
                 return 1
         fi
 fi
 
 
 if [ ! -z "$PROJECT_NIM" ]; then
-        OS::print_status info "Installing nim...\n"
+        I18N_Status_Print_Env_Install "nim"
         INSTALLER::setup_nim "$PROJECT_OS" "$PROJECT_ARCH"
         if [ $? -ne 0 ]; then
-                OS::print_status error "install failed.\n"
+                I18N_Status_Print_Env_Install_Failed
                 return 1
         fi
 fi
 
 
 if [ ! -z "$PROJECT_ANGULAR" ]; then
-        OS::print_status info "Installing angular...\n"
+        I18N_Status_Print_Env_Install "angular"
         INSTALLER::setup_angular "$PROJECT_OS" "$PROJECT_ARCH"
         if [ $? -ne 0 ]; then
-                OS::print_status error "install failed.\n"
+                I18N_Status_Print_Env_Install_Failed
                 return 1
         fi
 fi
@@ -142,5 +144,5 @@ fi
 
 
 # report status
-OS::print_status success "\n\n"
+I18N_Status_Print_Run_Successful
 return 0

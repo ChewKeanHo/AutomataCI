@@ -37,23 +37,7 @@ PACKAGE::assemble_homebrew_content() {
 
 
         # validate project
-        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_chocolatey "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
-                : # accepted
-        elif [ $(FS::is_target_a_cargo "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        else
+        if [ $(FS::is_target_a_homebrew "$_target") -ne 0 ]; then
                 return 10 # not applicable
         fi
 
@@ -96,11 +80,6 @@ PACKAGE::assemble_homebrew_content() {
                 return 1
         fi
 
-        FS::copy_file "${PROJECT_PATH_ROOT}/ci.cmd" "$_directory"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
         RUST::create_cargo_toml \
                 "${_directory}/${PROJECT_RUST}/Cargo.toml" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
@@ -132,17 +111,17 @@ class ${PROJECT_SKU_TITLECASE} < Formula
 
 
   def install
-    system \"./ci.cmd setup\"
-    system \"./ci.cmd prepare\"
-    system \"./ci.cmd materialize\"
+    system \"./automataCI/ci.sh.ps1 setup\"
+    system \"./automataCI/ci.sh.ps1 prepare\"
+    system \"./automataCI/ci.sh.ps1 materialize\"
     chmod 0755, \"bin/${PROJECT_SKU}\"
     bin.install \"bin/${PROJECT_SKU}\"
   end
 
   test do
-    system \"./ci.cmd setup\"
-    system \"./ci.cmd prepare\"
-    system \"./ci.cmd materialize\"
+    system \"./automataCI/ci.sh.ps1 setup\"
+    system \"./automataCI/ci.sh.ps1 prepare\"
+    system \"./automataCI/ci.sh.ps1 materialize\"
     assert_predicate ./bin/${PROJECT_SKU}, :exist?
   end
 end

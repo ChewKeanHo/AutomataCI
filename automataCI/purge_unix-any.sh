@@ -20,52 +20,43 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-purge.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
 
 # execute tech specific CI jobs if available
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}"
-OS::print_status info "nuking ${__target}...\n"
-FS::remove_silently "$__target"
+old_IFS="$IFS"
+printf -- "%s" "\
+${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}
+${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}
+${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}
+${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}
+${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}
+${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}
+${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}
+${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}
+${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}
+" | while IFS="" read -r __line || [ -n "$__line" ]; do
+        if [ "$__line" = "${PROJECT_PATH_ROOT}" ]; then
+                continue
+        fi
 
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
-OS::print_status info "nuking ${__target}...\n"
-FS::remove_silently "$__target"
+        if [ "$__line" = "${PROJECT_PATH_ROOT}/" ]; then
+                continue
+        fi
 
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}"
-OS::print_status info "nuking ${__target}...\n"
-FS::remove_silently "$__target"
 
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
-OS::print_status info "nuking ${__target}...\n"
-FS::remove_silently "$__target"
-
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}"
-OS::print_status info "nuking ${__target}...\n"
-FS::remove_silently "$__target"
-
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}"
-OS::print_status info "nuking ${__target}...\n"
-FS::remove_silently "$__target"
-
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
-OS::print_status info "nuking ${__target}...\n"
-FS::remove_silently "$__target"
-
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
-OS::print_status info "nuking ${__target}...\n"
-FS::remove_silently "$__target"
-
-__target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}"
-OS::print_status info "nuking ${__target}...\n"
-FS::remove_silently "$__target"
+        I18N_Status_Print_Purge_Nuke "$__line"
+        FS::remove_silently "$__line"
+done
 
 
 
 
 # report status
-OS::print_status success "\n\n"
+I18N_Status_Print_Run_Successful
 return 0

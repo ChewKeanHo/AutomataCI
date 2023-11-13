@@ -36,27 +36,11 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 
 
 	# validate project
-	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Chocolatey "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
-		return 1 # not applicable - should be tech-oriented.
-	} elseif ($(FS-Is-Target-A-Cargo "${_target}") -eq 0) {
-		return 10 # not applicable
-	} else {
+	if ($(FS-Is-Target-A-Homebrew "${_target}") -ne 0) {
 		return 10 # not applicable
 	}
 
 
 	# report status
-	return 0
+	return 1 # not applicable - should be tech-oriented.
 }

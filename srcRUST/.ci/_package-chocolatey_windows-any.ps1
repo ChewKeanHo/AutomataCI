@@ -37,23 +37,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 
 
 	# validate project
-	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Chocolatey "${_target}") -eq 0) {
-		# accepted
-	} elseif ($(FS-Is-Target-A-Homebrew "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-Cargo "${_target}") -eq 0) {
-		return 10 # not applicable
-	} else {
+	if ($(FS-Is-Target-A-Chocolatey "${_target}") -ne 0) {
 		return 10 # not applicable
 	}
 
@@ -84,11 +68,6 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 	}
 
 	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\CONFIG.toml" "${_directory}\Data"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\ci.cmd" "${_directory}\Data"
 	if ($__process -ne 0) {
 		return 1
 	}
@@ -158,21 +137,21 @@ Write-Host "Performing pre-configurations..."
 # Materialize the binary
 Write-Host "Building ${env:PROJECT_SKU} (${env:PROJECT_VERSION})..."
 Set-Location "`$data_dir"
-.\ci.cmd setup
+.\automataCI\ci.sh.ps1 setup
 if (`$LASTEXITCODE -ne 0) {
 	Set-Location "`$current_dir"
 	Set-PowerShellExitCode 1
 	return
 }
 
-.\ci.cmd prepare
+.\automataCI\ci.sh.ps1 prepare
 if (`$LASTEXITCODE -ne 0) {
 	Set-Location "`$current_dir"
 	Set-PowerShellExitCode 1
 	return
 }
 
-.\ci.cmd materialize
+.\automataCI\ci.sh.ps1 materialize
 if (`$LASTEXITCODE -ne 0) {
 	Set-Location "`$current_dir"
 	Set-PowerShellExitCode 1

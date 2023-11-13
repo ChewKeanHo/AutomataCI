@@ -19,22 +19,26 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\sync.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_package-changelog_windows-any.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-sync.ps1"
+
+. "${env:LIBS_AUTOMATACI}\_package-changelog_windows-any.ps1"
 
 
 
 
 # 1-time setup job required materials
 $DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
-OS-Print-Status info "remaking package directory: $DEST"
+$null = I18N-Status-Print-Package-Directory-Remake "$DEST"
 $__process = FS-Remake-Directory $DEST
 if ($__process -ne 0) {
-	OS-Print-Status error "remake failed."
+	$null = I18N-Status-Print-Package-Remake-Failed
 	return 1
 }
 
@@ -47,26 +51,26 @@ if ($__process -ne 0) {
 }
 
 
-OS-Print-Status plain ""
+$null = I18N-Status-Print-Newline
 
 
 
 
 # prepare for parallel package
 $__log_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\packagers"
-OS-Print-Status info "remaking packagers' log directory: ${__log_directory}"
+$null = I18N-Status-Print-Package-Directory-Log-Remake "${__log_directory}"
 $null = FS-Remake-Directory "${__log_directory}"
 if (-not (Test-Path -PathType Container -Path "${__log_directory}")) {
-	OS-Print-Status error "make failed."
+	$null = I18N-Status-Print-Package-Remake-Failed
 	return 1
 }
 
 
 $__control_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-parallel"
-OS-Print-Status info "remaking packagers' control directory: ${__control_directory}"
+$null = I18N-Status-Print-Package-Directory-Control-Remake "${__control_directory}"
 $null = FS-Remake-Directory "${__control_directory}"
 if (-not (Test-Path -PathType Container -Path "${__control_directory}")) {
-	OS-Print-Status error "make failed."
+	$null = I18N-Status-Print-Package-Remake-Failed
 	return 1
 }
 
@@ -85,6 +89,27 @@ function SUBROUTINE-Package {
 	)
 
 
+	# initialize libraries from scratch
+	$null = . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+
+	$null = . "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
+
+	$null = . "${env:LIBS_AUTOMATACI}\_package-archive_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-cargo_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-changelog_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-chocolatey_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-deb_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-docker_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-flatpak_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-homebrew_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-ipk_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-msi_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-pypi_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-rpm_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-sourcing_windows-any.ps1"
+
+
 	# parse input
 	$__command = $__line.Split("|")[-1]
 	$__log = $__line.Split("|")[-2]
@@ -93,43 +118,23 @@ function SUBROUTINE-Package {
 	$__arguments = $__arguments -Join "|"
 
 	$__subject = Split-Path -Leaf -Path "${__log}"
-	$__subject = [IO.Path]::ChangeExtension("${__subject}", '').TrimEnd('.')
-
-
-	# initialize libraries from scratch
-	$libs = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}"
-	$null = . "${libs}\services\io\os.ps1"
-	$null = . "${libs}\services\io\fs.ps1"
-	$null = . "${libs}\services\io\strings.ps1"
-	$null = . "${libs}\_package-archive_windows-any.ps1"
-	$null = . "${libs}\_package-cargo_windows-any.ps1"
-	$null = . "${libs}\_package-changelog_windows-any.ps1"
-	$null = . "${libs}\_package-chocolatey_windows-any.ps1"
-	$null = . "${libs}\_package-deb_windows-any.ps1"
-	$null = . "${libs}\_package-docker_windows-any.ps1"
-	$null = . "${libs}\_package-flatpak_windows-any.ps1"
-	$null = . "${libs}\_package-homebrew_windows-any.ps1"
-	$null = . "${libs}\_package-ipk_windows-any.ps1"
-	$null = . "${libs}\_package-pypi_windows-any.ps1"
-	$null = . "${libs}\_package-rpm_windows-any.ps1"
-	$null = . "${libs}\_package-sourcing_windows-any.ps1"
+	$__subject = FS-Extension-Remove "${__subject}" "*"
 
 
 	# execute
-	OS-Print-Status info "packaging ${__subject}..."
-
+	$null = I18N-Status-Print-Package-Exec "${__subject}"
 	$null = FS-Remove-Silently "${__log}"
 
 	try {
-		${function:SUBROUTINE-Exec} = Get-Command "${__command}" `
+		${function:SUBROUTINE-Exec} = Get-Command `
+			"${__command}" `
 			-ErrorAction SilentlyContinue
-		SUBROUTINE-Exec "${__arguments}" -OutVariable __process *>${__log}
+		$($__process = SUBROUTINE-Exec "${__arguments}") *> "${__log}"
 	} catch {
 		$__process = 1
 	}
-
 	if ($__process -ne 0) {
-		OS-Print-Status error "package failed - ${__subject}"
+		$null = I18N-Status-Print-Package-Exec-Failed "${__subject}"
 		return 1
 	}
 
@@ -142,49 +147,50 @@ function SUBROUTINE-Package {
 
 
 # begin registering packagers
-foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}")) {
-	$i = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${i}"
-	$__process = FS-Is-Directory "$i"
-	if ($__process -eq 0) {
-		continue
-	}
-
-	$__process = FS-Is-File "$i"
+foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}" `
+			| Select-Object -ExpandProperty FullName)) {
+	$__process = FS-Is-File "$file"
 	if ($__process -ne 0) {
 		continue
 	}
 
 
 	# parse build candidate
-	OS-Print-Status info "detected $i"
-	$TARGET_FILENAME = Split-Path -Leaf $i
-	$TARGET_FILENAME = $TARGET_FILENAME -replace `
-		(Join-Path $env:PROJECT_PATH_ROOT $env:PROJECT_PATH_BUILD), ""
+	$null = I18N-Status-Print-File-Detected "$file"
+	$TARGET_FILENAME = Split-Path -Leaf $file
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "\..*$"
 	$TARGET_OS = $TARGET_FILENAME -replace ".*_"
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "_.*"
 	$TARGET_ARCH = $TARGET_OS -replace ".*-"
 	$TARGET_OS = $TARGET_OS -replace "-.*"
 
-	if ([string]::IsNullOrEmpty($TARGET_OS) -or
-		[string]::IsNullOrEmpty($TARGET_ARCH) -or
-		[string]::IsNullOrEmpty($TARGET_FILENAME)) {
-		OS-Print-Status warning "failed to parse file. Skipping."
+	if (($(STRINGS-Is-Empty "${TARGET_OS}") -eq 0) -or
+		($(STRINGS-Is-Empty "${TARGET_ARCH}") -eq 0) -or
+		($(STRINGS-Is-Empty "${TARGET_FILENAME}") -eq 0)) {
+		$null = I18N-Status-Print-File-Bad-Stat-Skipped
 		continue
 	}
 
-	$__process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "$TARGET_FILENAME"
+	$__process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "${TARGET_FILENAME}"
 	if ($__process -ne 0) {
-		OS-Print-Status warning "incompatible file. Skipping."
+		$null = I18N-Status-Print-File-Incompatible-Skipped
 		continue
 	}
 
-	OS-Print-Status info "registering $i"
-	$__common = "${DEST}|${i}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
+	$null = I18N-Status-Print-Sync-Register "$file"
+	$__common = "${DEST}|${file}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
 
 	$__log = "${__log_directory}\archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$__process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-Archive
+"@
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__log = "${__log_directory}\cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+	$__process = FS-Append-File "${__parallel_control}" @"
+${__common}|${__log}|PACKAGE-Run-Cargo
 "@
 	if ($__process -ne 0) {
 		return 1
@@ -198,14 +204,6 @@ ${__common}|${__log}|PACKAGE-Run-Chocolatey
 		return 1
 	}
 
-	$__log = "${__log_directory}\homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-Homebrew
-"@
-	if ($__process -ne 0) {
-		return 1
-	}
-
 	$__log = "${__log_directory}\deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$__process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE-Run-DEB
@@ -214,17 +212,9 @@ ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE-Run-DEB
 		return 1
 	}
 
-	$__log = "${__log_directory}\ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-IPK
-"@
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__log = "${__log_directory}\rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-RPM
+	$__log = "${__log_directory}\docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+	$__process = FS-Append-File "${__series_control}" @"
+${__common}|${__log}|PACKAGE-Run-DOCKER
 "@
 	if ($__process -ne 0) {
 		return 1
@@ -239,6 +229,30 @@ ${__common}|${__flatpak_path}|${__log}|PACKAGE-Run-FLATPAK
 		return 1
 	}
 
+	$__log = "${__log_directory}\homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+	$__process = FS-Append-File "${__parallel_control}" @"
+${__common}|${__log}|PACKAGE-Run-Homebrew
+"@
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__log = "${__log_directory}\ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+	$__process = FS-Append-File "${__parallel_control}" @"
+${__common}|${__log}|PACKAGE-Run-IPK
+"@
+	if ($__process -ne 0) {
+		return 1
+	}
+
+	$__log = "${__log_directory}\msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+	$__process = FS-Append-File "${__series_control}" @"
+${__common}|${__log}|PACKAGE-Run-MSI
+"@
+	if ($__process -ne 0) {
+		return 1
+	}
+
 	$__log = "${__log_directory}\pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$__process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-PYPI
@@ -247,17 +261,9 @@ ${__common}|${__log}|PACKAGE-Run-PYPI
 		return 1
 	}
 
-	$__log = "${__log_directory}\cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+	$__log = "${__log_directory}\rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$__process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-Cargo
-"@
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__log = "${__log_directory}\docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__series_control}" @"
-${__common}|${__log}|PACKAGE-Run-DOCKER
+${__common}|${__log}|PACKAGE-Run-RPM
 "@
 	if ($__process -ne 0) {
 		return 1
@@ -265,28 +271,34 @@ ${__common}|${__log}|PACKAGE-Run-DOCKER
 }
 
 
-OS-Print-Status plain ""
-OS-Print-Status info "executing all parallel runs..."
-$__process = SYNC-Parallel-Exec `
-	${function:SUBROUTINE-Package}.ToString() `
-	"${__parallel_control}" `
-	"${__control_directory}" `
-	"$([System.Environment]::ProcessorCount)"
-if ($__process -ne 0) {
-	return 1
+$null = I18N-Status-Print-Sync-Exec-Parallel
+if (Test-Path "${__parallel_control}") {
+	$__process = SYNC-Parallel-Exec `
+		${function:SUBROUTINE-Package}.ToString() `
+		"${__parallel_control}" `
+		"${__control_directory}" `
+		"$([System.Environment]::ProcessorCount)"
+	if ($__process -ne 0) {
+		$null = I18N-Status-Print-Sync-Exec-Failed
+		return 1
+	}
 }
 
 
-OS-Print-Status plain ""
-OS-Print-Status info "executing all series runs..."
-$__process = SYNC-Series-Exec ${function:SUBROUTINE-Package}.ToString() "${__series_control}"
-if ($__process -ne 0) {
-	return 1
+$null = I18N-Status-Print-Sync-Exec-Series
+if (Test-Path "${__series_control}") {
+	$__process = SYNC-Series-Exec `
+		${function:SUBROUTINE-Package}.ToString() `
+		"${__series_control}"
+	if ($__process -ne 0) {
+		$null = I18N-Status-Print-Sync-Exec-Failed
+		return 1
+	}
 }
 
 
 
 
 # report status
-OS-Print-Status success "`n"
+$null = I18N-Status-Print-Run-Successful
 return 0

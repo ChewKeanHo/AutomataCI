@@ -36,23 +36,7 @@ PACKAGE::assemble_chocolatey_content() {
 
 
         # validate project
-        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_chocolatey "$_target") -eq 0 ]; then
-                : # accepted
-        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS::is_target_a_cargo "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        else
+        if [ $(FS::is_target_a_chocolatey "$_target") -ne 0 ]; then
                 return 10 # not applicable
         fi
 
@@ -97,11 +81,6 @@ PACKAGE::assemble_chocolatey_content() {
         fi
 
         FS::copy_file "${PROJECT_PATH_ROOT}/CONFIG.toml" "${_directory}/Data"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        FS::copy_file "${PROJECT_PATH_ROOT}/ci.cmd" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -171,21 +150,21 @@ Write-Host \"Performing pre-configurations...\"
 # Materialize the binary
 Write-Host \"Building ${PROJECT_SKU} (${PROJECT_VERSION})...\"
 Set-Location \"\$data_dir\"
-.\\\\ci.cmd setup
+.\\\\automataCI\\\\ci.sh.ps1 setup
 if (\$LASTEXITCODE -ne 0) {
         Set-Location \"\$current_dir\"
         Set-PowerShellExitCode 1
         return
 }
 
-.\\\\ci.cmd prepare
+.\\\\automataCI\\\\ci.sh.ps1 prepare
 if (\$LASTEXITCODE -ne 0) {
         Set-Location \"\$current_dir\"
         Set-PowerShellExitCode 1
         return
 }
 
-.\\\\ci.cmd materialize
+.\\\\automataCI\\\\ci.sh.ps1 materialize
 if (\$LASTEXITCODE -ne 0) {
         Set-Location \"\$current_dir\"
         Set-PowerShellExitCode 1
