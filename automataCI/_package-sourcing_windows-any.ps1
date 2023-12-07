@@ -9,8 +9,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-source.ps1"
 
 
 
@@ -24,123 +26,104 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# source from baseline
-$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
-$__recipe = "${__recipe}\package_windows-any.ps1"
-$__process = FS-Is-File "${__recipe}"
-if ($__process -eq 0) {
-	OS-Print-Status info "sourcing content assembling functions: ${__recipe}"
-	$__process = . "${__recipe}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "Source failed."
-		return
-	}
-}
+# execute
+## IMPORTANT NOTE:
+##   (1) Appearently, PowerShell disallowed globally scoped dot import inside
+##       a function. Hence, we don't have a choice but to do repetition.
+if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_SOURCE}") -ne 0) {
+	$package_fx = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
+	$package_fx = "${package_fx}\${env:PROJECT_PATH_CI}\package_windows-any.ps1"
+	if ($(FS-Is-File "$package_fx") -eq 0) {
+		$null = I18N-Status-Print-Package-Source "${package_fx}"
 
-
-
-
-# source from Angular and overrides existing
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_ANGULAR})) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\package_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "sourcing Angular content assembling functions: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Source failed."
-			return
+		$___process = . $package_fx
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Package-Source-Failed
+			return 1
 		}
 	}
 }
 
+if ($(STRINGS-Is-Empty "${env:PROJECT_ANGULAR}") -ne 0) {
+	$package_fx = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}"
+	$package_fx = "${package_fx}\${env:PROJECT_PATH_CI}\package_windows-any.ps1"
+	if ($(FS-Is-File "$package_fx") -eq 0) {
+		$null = I18N-Status-Print-Package-Source "${package_fx}"
 
-
-
-# source from C and overrides existing
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_C})) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\package_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "sourcing C content assembling functions: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Source failed."
-			return
+		$___process = . $package_fx
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Package-Source-Failed
+			return 1
 		}
 	}
 }
 
+if ($(STRINGS-Is-Empty "${env:PROJECT_C}") -ne 0) {
+	$package_fx = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}"
+	$package_fx = "${package_fx}\${env:PROJECT_PATH_CI}\package_windows-any.ps1"
+	if ($(FS-Is-File "$package_fx") -eq 0) {
+		$null = I18N-Status-Print-Package-Source "${package_fx}"
 
-
-
-# source from Go and overrides existing
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_GO})) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_GO}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\package_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "sourcing Go content assembling functions: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Source failed."
-			return
+		$___process = . $package_fx
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Package-Source-Failed
+			return 1
 		}
 	}
 }
 
+if ($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) {
+	$package_fx = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_GO}"
+	$package_fx = "${package_fx}\${env:PROJECT_PATH_CI}\package_windows-any.ps1"
+	if ($(FS-Is-File "$package_fx") -eq 0) {
+		$null = I18N-Status-Print-Package-Source "${package_fx}"
 
-
-
-# source from Nim and overrides existing
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_NIM})) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\package_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "sourcing Nim content assembling functions: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Source failed."
-			return
+		$___process = . $package_fx
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Package-Source-Failed
+			return 1
 		}
 	}
 }
 
+if ($(STRINGS-Is-Empty "${env:PROJECT_NIM}") -ne 0) {
+	$package_fx = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}"
+	$package_fx = "${package_fx}\${env:PROJECT_PATH_CI}\package_windows-any.ps1"
+	if ($(FS-Is-File "$package_fx") -eq 0) {
+		$null = I18N-Status-Print-Package-Source "${package_fx}"
 
-
-
-# source from Python and overrides existing
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\package_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "sourcing Python content assembling functions: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Source failed."
-			return
+		$___process = . $package_fx
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Package-Source-Failed
+			return 1
 		}
 	}
 }
 
+if ($(STRINGS-Is-Empty "${env:PROJECT_PYTHON}") -ne 0) {
+	$package_fx = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
+	$package_fx = "${package_fx}\${env:PROJECT_PATH_CI}\package_windows-any.ps1"
+	if ($(FS-Is-File "$package_fx") -eq 0) {
+		$null = I18N-Status-Print-Package-Source "${package_fx}"
 
+		$___process = . $package_fx
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Package-Source-Failed
+			return 1
+		}
+	}
+}
 
+if ($(STRINGS-Is-Empty "${env:PROJECT_RUST}") -ne 0) {
+	$package_fx = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
+	$package_fx = "${package_fx}\${env:PROJECT_PATH_CI}\package_windows-any.ps1"
+	if ($(FS-Is-File "$package_fx") -eq 0) {
+		$null = I18N-Status-Print-Package-Source "${package_fx}"
 
-# source from Rust and overrides existing
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_RUST})) {
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\${env:PROJECT_PATH_CI}"
-	$__recipe = "${__recipe}\package_windows-any.ps1"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "sourcing Rust content assembling functions: ${__recipe}"
-		$__process = . "${__recipe}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "Source failed."
-			return
+		$___process = . $package_fx
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Package-Source-Failed
+			return 1
 		}
 	}
 }

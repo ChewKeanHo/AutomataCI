@@ -68,7 +68,7 @@ function RUN-Subroutine-Exec {
 		$null = I18N-Status-Print-Run-CI-Job "${__name}"
 		$___process = . $ci_job
 		if ($___process -ne 0) {
-			$null = I18N_Status_Print_Run_Failed
+			$null = I18N-Status-Print-Run-Failed
 			return 1
 		}
 	}

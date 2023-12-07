@@ -39,22 +39,27 @@ fi
 
 
 # execute
-RUN_Subroutine_Exec() {
-        #__job="$1"
-        #__directory="$2"
-        #__name="$3"
+technologies="\
+ANGULAR|${PROJECT_ANGULAR:-none}
+C|${PROJECT_C:-none}
+GO|${PROJECT_GO:-none}
+NIM|${PROJECT_NIM:-none}
+PYTHON|${PROJECT_PYTHON:-none}
+RUST|${PROJECT_RUST:-none}
+BASELINE|${PROJECT_PATH_SOURCE:-none}
+"
 
-
-        # validate input
-        if [ $(STRINGS_Is_Empty "$2") -eq 0 ] ||
-                [ "$(STRINGS::to_uppercase "$2")" = "NONE" ]; then
-                return 0
+old_IFS="$IFS"
+while IFS= read -r tech || [ -n "$tech" ]; do
+        if [ $(STRINGS_Is_Empty "${tech#*|}") -eq 0 ] ||
+                [ "$(STRINGS::to_uppercase "${tech#*|}")" = "NONE" ]; then
+                continue
         fi
 
-        if [ ! "$(STRINGS::to_uppercase "$3")" = "BASELINE" ]; then
+        if [ ! "$(STRINGS::to_uppercase "${tech%|*}")" = "BASELINE" ]; then
                 case "$1" in
                 deploy)
-                        return 0 # skipped
+                        continue # skipped
                         ;;
                 *)
                         ;;
@@ -63,44 +68,21 @@ RUN_Subroutine_Exec() {
 
 
         # execute
-        ci_job="$(STRINGS::to_lowercase "$1")_unix-any.sh"
-        ci_job="${PROJECT_PATH_ROOT}/${2}/${PROJECT_PATH_CI}/${ci_job}"
+        ci_job="$(STRINGS::to_lowercase "${PROJECT_CI_JOB}")_unix-any.sh"
+        ci_job="${PROJECT_PATH_ROOT}/${tech#*|}/${PROJECT_PATH_CI}/${ci_job}"
         FS::is_file "$ci_job"
         if [ $? -eq 0 ]; then
-                I18N_Status_Print_Run_CI_Job "$3"
+                I18N_Status_Print_Run_CI_Job "${tech%|*}"
                 . "$ci_job"
                 if [ $? -ne 0 ]; then
                         I18N_Status_Print_Run_Failed
-                        return 1
+                        continue
                 fi
         fi
-
-
-        # report status
-        return 0
-}
-
-
-old_IFS="$IFS" printf -- "%s" "\
-ANGULAR|${PROJECT_ANGULAR:-none}
-C|${PROJECT_C:-none}
-GO|${PROJECT_GO:-none}
-NIM|${PROJECT_NIM:-none}
-PYTHON|${PROJECT_PYTHON:-none}
-RUST|${PROJECT_RUST:-none}
-BASELINE|${PROJECT_PATH_SOURCE:-none}
-" |  while IFS="" read -r __line || [ -n "$__line" ]; do
-        RUN_Subroutine_Exec "$PROJECT_CI_JOB" "${__line#*|}" "${__line%|*}"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-done
-___process=$?
+done <<EOF
+$technologies
+EOF
 IFS="$old_IFS" && unset old_IFS
-
-if [ $___process -ne 0 ]; then
-        return 1
-fi
 
 
 
