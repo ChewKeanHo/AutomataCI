@@ -42,3 +42,57 @@ function I18N-Status-Print-Run-Successful {
 	# report status
 	return 0
 }
+
+
+
+
+function I18N-Status-Print-Run-CI-Job {
+	param(
+		[string]$___subject
+	)
+
+
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$___subject = I18N-Status-Param-Process "${___subject}"
+		$null = I18N-Status-Print info "${___subject} job recipe detected. Running...`n"
+	}}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function I18N-Status-Print-Run-CI-Job-Validate {
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$null = I18N-Status-Print info "validating CI job...`n"
+	}}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function I18N-Status-Print-Run-CI-Job-Validate-Failed {
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$null = I18N-Status-Print error "validating failed.`n`n"
+	}}
+
+
+	# report status
+	return 0
+}

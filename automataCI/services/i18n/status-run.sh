@@ -44,3 +44,58 @@ I18N_Status_Print_Run_Successful() {
         # report status
         return 0
 }
+
+
+
+
+I18N_Status_Print_Run_CI_Job() {
+        ___subject="$1"
+
+
+        # execute
+        case "$AUTOMATACI_LANG" in
+        *)
+                # fallback to default english
+                ___subject="$(I18N_Status_Param_Process "${___subject}")"
+                I18N_Status_Print info "${___subject} job recipe detected. Running...\n"
+                ;;
+        esac
+
+
+        # report status
+        return 0
+}
+
+
+
+
+I18N_Status_Print_Run_CI_Job_Validate() {
+        # execute
+        case "$AUTOMATACI_LANG" in
+        *)
+                # fallback to default english
+                I18N_Status_Print info "validating CI job...\n"
+                ;;
+        esac
+
+
+        # report status
+        return 0
+}
+
+
+
+
+I18N_Status_Print_Run_CI_Job_Validate_Failed() {
+        # execute
+        case "$AUTOMATACI_LANG" in
+        *)
+                # fallback to default english
+                I18N_Status_Print error "validation failed.\n\n"
+                ;;
+        esac
+
+
+        # report status
+        return 0
+}

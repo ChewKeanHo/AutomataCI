@@ -20,148 +20,91 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
 
 # validate input
-OS::print_status info "Validating CI job...\n"
+I18N_Status_Print_Run_CI_Job_Validate
 if [ -z "$PROJECT_CI_JOB" ]; then
-        OS::print_status info "Validation failed.\n"
+        I18N_Status_Print_Run_CI_Job_Validate_Failed
         return 1
 fi
 
 
 
 
-# execute ANGULAR if set
-if [ ! -z "$PROJECT_ANGULAR" ]; then
-        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/${PROJECT_PATH_CI}/${__recipe}"
-        FS::is_file "$__recipe"
+# execute
+RUN_Subroutine_Exec() {
+        #__job="$1"
+        #__directory="$2"
+        #__name="$3"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$2") -eq 0 ] ||
+                [ "$(STRINGS::to_uppercase "$2")" = "NONE" ]; then
+                return 0
+        fi
+
+        if [ ! "$(STRINGS::to_uppercase "$3")" = "BASELINE" ]; then
+                case "$1" in
+                deploy)
+                        return 0 # skipped
+                        ;;
+                *)
+                        ;;
+                esac
+        fi
+
+
+        # execute
+        ci_job="$(STRINGS::to_lowercase "$1")_unix-any.sh"
+        ci_job="${PROJECT_PATH_ROOT}/${2}/${PROJECT_PATH_CI}/${ci_job}"
+        FS::is_file "$ci_job"
         if [ $? -eq 0 ]; then
-                OS::print_status info "ANGULAR tech detected. Running job recipe: ${__recipe}\n"
-                . "$__recipe"
+                I18N_Status_Print_Run_CI_Job "$3"
+                . "$ci_job"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "Run failed.\n"
+                        I18N_Status_Print_Run_Failed
                         return 1
                 fi
         fi
-fi
 
 
+        # report status
+        return 0
+}
 
 
-# execute C if set
-if [ ! -z "$PROJECT_C" ]; then
-        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_C}/${PROJECT_PATH_CI}/${__recipe}"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info "C tech detected. Running job recipe: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Run failed.\n"
-                        return 1
-                fi
-        fi
-fi
-
-
-
-
-# execute GO if set
-if [ ! -z "$PROJECT_GO" ]; then
-        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_GO}/${PROJECT_PATH_CI}/${__recipe}"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info "Go tech detected. Running job recipe: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Run failed.\n"
-                        return 1
-                fi
-        fi
-fi
-
-
-
-
-# execute NIM if set
-if [ ! -z "$PROJECT_NIM" ]; then
-        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_NIM}/${PROJECT_PATH_CI}/${__recipe}"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info "NIM tech detected. Running job recipe: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Run failed.\n"
-                        return 1
-                fi
-        fi
-fi
-
-
-
-
-# execute PYTHON if set
-if [ ! -z "$PROJECT_PYTHON" ]; then
-        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/${PROJECT_PATH_CI}/${__recipe}"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info \
-                        "Python tech detected. Running job recipe: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Run failed.\n"
-                        return 1
-                fi
-        fi
-fi
-
-
-
-
-# execute RUST if set
-if [ ! -z "$PROJECT_RUST" ]; then
-        __recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-        __recipe="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/${PROJECT_PATH_CI}/${__recipe}"
-        FS::is_file "$__recipe"
-        if [ $? -eq 0 ]; then
-                OS::print_status info "RUST tech detected. Running job recipe: ${__recipe}\n"
-                . "$__recipe"
-                if [ $? -ne 0 ]; then
-                        OS::print_status error "Run failed.\n"
-                        return 1
-                fi
-        fi
-fi
-
-
-
-
-# execute baseline as last
-__recipe="$(STRINGS::to_lowercase "$PROJECT_CI_JOB")_unix-any.sh"
-__recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/${__recipe}"
-FS::is_file "$__recipe"
-if [ $? -eq 0 ]; then
-        OS::print_status info "Baseline source detected. Running job recipe: ${__recipe}\n"
-        . "$__recipe"
+old_IFS="$IFS" printf -- "%s" "\
+ANGULAR|${PROJECT_ANGULAR:-none}
+C|${PROJECT_C:-none}
+GO|${PROJECT_GO:-none}
+NIM|${PROJECT_NIM:-none}
+PYTHON|${PROJECT_PYTHON:-none}
+RUST|${PROJECT_RUST:-none}
+BASELINE|${PROJECT_PATH_SOURCE:-none}
+" |  while IFS="" read -r __line || [ -n "$__line" ]; do
+        RUN_Subroutine_Exec "$PROJECT_CI_JOB" "${__line#*|}" "${__line%|*}"
         if [ $? -ne 0 ]; then
-                OS::print_status error "Run failed.\n"
                 return 1
         fi
+done
+___process=$?
+IFS="$old_IFS" && unset old_IFS
+
+if [ $___process -ne 0 ]; then
+        return 1
 fi
 
 
 
 
 # report status
-OS::print_status success "\n\n"
+I18N_Status_Print_Run_Successful
 return 0

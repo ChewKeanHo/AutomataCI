@@ -19,147 +19,104 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 # validate input
-OS-Print-Status info "Validating CI job..."
+$null = I18N-Status-Print-Run-CI-Job-Validate
 if ([string]::IsNullOrEmpty(${env:PROJECT_CI_JOB})) {
-	OS-Print-Status info "Validation failed."
+	$null = I18N-Status-Print-Run-CI-Job-Validate-Failed
 	return 1
 }
 
 
 
 
-# execute ANGULAR if set
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_ANGULAR})) {
-	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\${env:PROJECT_PATH_CI}\${__recipe}"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "ANGULAR tech detected. Running job recipe: ${__recipe}"
-		$__process = . $__recipe
-		if ($__process -ne 0) {
-			OS-Print-Status error "Run failed."
+# execute
+function RUN-Subroutine-Exec {
+	param(
+		[string]$__job,
+		[string]$__directory,
+		[string]$__name
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${__directory}") -eq 0) -or
+		($(STRINGS-To-Uppercase "${__directory}") -eq "NONE")) {
+		return 0
+	}
+
+	if ($(STRINGS-To-Uppercase "${__name}") -ne "BASELINE") {
+		switch ($__job) {
+		{ $_ -in "deploy" } {
+			return 0 # skipped
+		} default {
+			# accepted
+		}}
+	}
+
+
+	# execute
+	$ci_job = STRINGS-To-Lowercase "${__job}_windows-any.ps1"
+	$ci_job = "${env:PROJECT_PATH_ROOT}\${__directory}\${env:PROJECT_PATH_CI}\${ci_job}"
+	if ($(FS-Is-File "$ci_job") -eq 0) {
+		$null = I18N-Status-Print-Run-CI-Job "${__name}"
+		$___process = . $ci_job
+		if ($___process -ne 0) {
+			$null = I18N_Status_Print_Run_Failed
 			return 1
 		}
 	}
+
+
+	# report status
+	return 0
 }
 
 
-
-
-# execute C if set
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_C})) {
-	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}\${env:PROJECT_PATH_CI}\${__recipe}"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "C tech detected. Running job recipe: ${__recipe}"
-		$__process = . $__recipe
-		if ($__process -ne 0) {
-			OS-Print-Status error "Run failed."
-			return 1
-		}
-	}
+$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_ANGULAR}" "ANGULAR"
+if ($___process -ne 0) {
+	return 1
 }
 
-
-
-
-# execute GO if set
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_GO})) {
-	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_GO}\${env:PROJECT_PATH_CI}\${__recipe}"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "Go tech detected. Running job recipe: ${__recipe}"
-		$__process = . $__recipe
-		if ($__process -ne 0) {
-			OS-Print-Status error "Run failed."
-			return 1
-		}
-	}
+$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_C}" "C"
+if ($___process -ne 0) {
+	return 1
 }
 
-
-
-
-# execute NIM if set
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_NIM})) {
-	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}\${env:PROJECT_PATH_CI}\${__recipe}"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "NIM tech detected. Running job recipe: ${__recipe}"
-		$__process = . $__recipe
-		if ($__process -ne 0) {
-			OS-Print-Status error "Run failed."
-			return 1
-		}
-	}
+$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_GO}" "GO"
+if ($___process -ne 0) {
+	return 1
 }
 
-
-
-
-# execute PYTHON if set
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_PYTHON})) {
-	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\${env:PROJECT_PATH_CI}\${__recipe}"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "Python tech detected. Running job recipe: ${__recipe}"
-		$__process = . $__recipe
-		if ($__process -ne 0) {
-			OS-Print-Status error "Run failed."
-			return 1
-		}
-	}
+$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_NIM}" "NIM"
+if ($___process -ne 0) {
+	return 1
 }
 
-
-
-
-# execute RUST if set
-if (-not [string]::IsNullOrEmpty(${env:PROJECT_RUST})) {
-	$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-	$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\${env:PROJECT_PATH_CI}\${__recipe}"
-	$__process = FS-Is-File "${__recipe}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "RUST tech detected. Running job recipe: ${__recipe}"
-		$__process = . $__recipe
-		if ($__process -ne 0) {
-			OS-Print-Status error "Run failed."
-			return 1
-		}
-	}
+$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_PYTHON}" "PYTHON"
+if ($___process -ne 0) {
+	return 1
 }
 
+$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_RUST}" "RUST"
+if ($___process -ne 0) {
+	return 1
+}
 
-
-
-# execute baseline as last
-$__recipe = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
-$__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}\${__recipe}"
-$__process = FS-Is-File "${__recipe}"
-if ($__process -eq 0) {
-	OS-Print-Status info "Baseline source detected. Running job recipe: ${__recipe}"
-	$__process = . $__recipe
-	if ($__process -ne 0) {
-		OS-Print-Status error "Run failed."
-		return 1
-	}
+$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_PATH_SOURCE}" "BASELINE"
+if ($___process -ne 0) {
+	return 1
 }
 
 
 
 
 # report status
-OS-Print-Status success "`n"
+I18N-Status-Print-Run-Successful
 return 0
