@@ -20,9 +20,13 @@ if [ "$PROJECT_PATH_ROOT" = "" ]; then
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-notarize.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -32,10 +36,10 @@ __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
 __recipe="${__recipe}/notarize_unix-any.sh"
 FS::is_file "$__recipe"
 if [ $? -eq 0 ]; then
-        OS::print_status info "sourcing content assembling functions: ${__recipe}\n"
+        I18N_Status_Print_Run_CI_Job "$__recipe"
         . "$__recipe"
         if [ $? -ne 0 ]; then
-                OS::print_status error "Sourcing failed\n"
+                I18N_Status_Print_Run_Failed
                 return 1
         fi
 fi
@@ -45,17 +49,14 @@ fi
 
 # begin notarize
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
-        if [ -d "$i" ]; then
-                continue
-        fi
-
-        if [ ! -f "$i" ]; then
+        FS::is_file "$i"
+        if [ $? -ne 0 ]; then
                 continue
         fi
 
 
         # parse build candidate
-        OS::print_status info "detected ${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${i}\n"
+        I18N_Status_Print_File_Detected "$i"
         TARGET_FILENAME="${i##*${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/}"
         TARGET_FILENAME="${TARGET_FILENAME%.*}"
         TARGET_OS="${TARGET_FILENAME##*_}"
@@ -63,48 +64,52 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         TARGET_ARCH="${TARGET_OS##*-}"
         TARGET_OS="${TARGET_OS%%-*}"
 
-        if [ -z "$TARGET_OS" ] || [ -z "$TARGET_ARCH" ] || [ -z "$TARGET_FILENAME" ]; then
-                OS::print_status warning "failed to parse file. Skipping.\n"
+        if [ "$(STRINGS_Is_Empty "$TARGET_OS")" -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$TARGET_ARCH") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$TARGET_FILENAME") -eq 0 ]; then
+                I18N_Status_Print_File_Bad_Stat_Skipped
                 continue
         fi
 
         STRINGS::has_prefix "$PROJECT_SKU" "$TARGET_FILENAME"
         if [ $? -ne 0 ]; then
-                OS::print_status warning "incompatible file. Skipping.\n"
+                I18N_Status_Print_File_Incompatible_Skipped
                 continue
         fi
 
 
         # execute
-        OS::is_command_available "NOTARY::certify"
-        if [ $? -eq 0 ]; then
-                NOTARY::certify \
-                        "$i" \
-                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}" \
-                        "$TARGET_FILENAME" \
-                        "$TARGET_OS" \
-                        "$TARGET_ARCH"
-                case $? in
-                12)
-                        OS::print_status warning "simulating successful notarization...\n"
-                        ;;
-                11)
-                        OS::print_status warning "notarization unavailable. Skipping...\n"
-                        ;;
-                10)
-                        OS::print_status warning "notarization is not applicable. Skipping...\n"
-                        ;;
-                0)
-                        OS::print_status success "\n\n"
-                        ;;
-                *)
-                        OS::print_status error "notarization failed.\n"
-                        return 1
-                        ;;
-                esac
-        else
-                OS::print_status warning "NOTARY::certify is unavailable. Skipping...\n"
+        cmd="NOTARY::certify"
+        OS::is_command_available "$cmd"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_Notarize_Function_Unavailable "$cmd"
+                continue
         fi
+
+        "$cmd" \
+                "$i" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}" \
+                "$TARGET_FILENAME" \
+                "$TARGET_OS" \
+                "$TARGET_ARCH"
+        case $? in
+        12)
+                I18N_Status_Print_Notarize_Simulate
+                ;;
+        11)
+                I18N_Status_Print_Notarize_Unavailable
+                ;;
+        10)
+                I18N_Status_Print_Notarize_Not_Applicable
+                ;;
+        0)
+                I18N_Status_Print_Run_Successful
+                ;;
+        *)
+                I18N_Status_Print_Notarize_Failed
+                return 1
+                ;;
+        esac
 done
 
 

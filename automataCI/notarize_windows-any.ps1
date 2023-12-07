@@ -19,9 +19,13 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-notarize.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -31,10 +35,10 @@ $__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_P
 $__recipe = "${__recipe}\notarize_windows-any.ps1"
 $__process = FS-Is-File "${__recipe}"
 if ($__process -eq 0) {
-	OS-Print-Status info "sourcing content assembling functions: ${__recipe}"
+	$null = I18N-Status-Print-Run-CI-Job "${__recipe}"
 	$__process = . "${__recipe}"
 	if ($__process -ne 0) {
-		OS-Print-Status error "Source failed."
+		$null = I18N-Status-Print-Run-Failed
 		return 1
 	}
 }
@@ -44,12 +48,6 @@ if ($__process -eq 0) {
 
 # begin notarize
 foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}")) {
-	$i = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${i}"
-	$__process = FS-Is-Directory "$i"
-	if ($__process -eq 0) {
-		continue
-	}
-
 	$__process = FS-Is-File "$i"
 	if ($__process -ne 0) {
 		continue
@@ -57,7 +55,7 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 
 
 	# parse build candidate
-	OS-Print-Status info "detected $i"
+	$null = I18N-Status-Print-File-Detected "$i"
 	$TARGET_FILENAME = Split-Path -Leaf $i
 	$TARGET_FILENAME = $TARGET_FILENAME -replace `
 		(Join-Path $env:PROJECT_PATH_ROOT $env:PROJECT_PATH_BUILD), ""
@@ -67,43 +65,45 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 	$TARGET_ARCH = $TARGET_OS -replace ".*-"
 	$TARGET_OS = $TARGET_OS -replace "-.*"
 
-	if ([string]::IsNullOrEmpty($TARGET_OS) -or
-		[string]::IsNullOrEmpty($TARGET_ARCH) -or
-		[string]::IsNullOrEmpty($TARGET_FILENAME)) {
-		OS-Print-Status warning "failed to parse file. Skipping."
+	if (($(STRINGS-Is-Empty "$TARGET_OS") -eq 0) -or
+		($(STRINGS-Is-Empty "$TARGET_ARCH") -eq 0) -or
+		($(STRINGS-Is-Empty "$TARGET_FILENAME") -eq 0)) {
+		$null = I18N-Status-Print-File-Bad-Stat-Skipped
 		continue
 	}
 
 	$__process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "$TARGET_FILENAME"
 	if ($__process -ne 0) {
-		OS-Print-Status warning "incompatible file. Skipping."
+		$null = I18N-Status-Print-File-Incompatible-Skipped
 		continue
 	}
 
-	$__process = OS-Is-Command-Available "NOTARY-Certify"
-	if ($__process -eq 0) {
-		$__process = NOTARY-Certify `
-			"$i" `
-			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}" `
-			"$TARGET_FILENAME" `
-			"$TARGET_OS" `
-			"$TARGET_ARCH"
-		switch ($__process) {
-		12 {
-			OS-Print-Status warning "simulating successful notarization..."
-		} 11 {
-			OS-Print-Status warning "notarization unavailable. Skipping..."
-		} 10 {
-			OS-Print-Status warning "notarization is not applicable. Skipping..."
-		} 0 {
-			OS-Print-Status success "`n"
-		} default {
-			OS-Print-Status error "notarization failed."
-			return 1
-		}}
-	} else {
-		OS-Print-Status warning "NOTARY-Certify is unavailable. Skipping..."
+	$cmd = "NOTARY-Certify"
+	$__process = OS-Is-Command-Available "$cmd"
+	if ($__process -ne 0) {
+		$null = I18N-Status-Print-Notarize-Function-Unavailable "$cmd"
+		continue
 	}
+
+	$___process = NOTARY-Certify `
+		"$i" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}" `
+		"$TARGET_FILENAME" `
+		"$TARGET_OS" `
+		"$TARGET_ARCH"
+	switch ($___process) {
+	12 {
+		$null = I18N-Status-Print-Notarize-Simulate
+	} 11 {
+		$null = I18N-Status-Print-Notarize-Unavailable
+	} 10 {
+		$null = I18N-Status-Print-Notarize-Not-Applicable
+	} 0 {
+		$null = I18N-Status-Print-Run-Successful
+	} default {
+		$null = I18N-Status-Print-Notarize-Failed
+		return 1
+	}}
 }
 
 

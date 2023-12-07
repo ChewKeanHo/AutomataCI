@@ -14,7 +14,28 @@
 
 
 
-function I18N-Status-Print-Run-CI-Job {
+function I18N-Status-Print-Notarize-Failed {
+	param(
+		[string]$___subject
+	)
+
+
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$null = I18N-Status-Print error "notarization failed.`n`n"
+	}}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function I18N-Status-Print-Notarize-Function-Unavailable {
 	param(
 		[string]$___subject
 	)
@@ -25,7 +46,9 @@ function I18N-Status-Print-Run-CI-Job {
 	default {
 		# fallback to default english
 		$___subject = I18N-Status-Param-Process "${___subject}"
-		$null = I18N-Status-Print info "${___subject} job recipe detected. Running...`n"
+		$null = I18N-Status-Print `
+			warning `
+			"${___subject} is unavailable. Skipping...`n`n"
 	}}
 
 
@@ -36,12 +59,12 @@ function I18N-Status-Print-Run-CI-Job {
 
 
 
-function I18N-Status-Print-Run-CI-Job-Validate {
+function I18N-Status-Print-Notarize-Not-Applicable {
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print info "validating CI job...`n"
+		$null = I18N-Status-Print warning "notarization not applicable. Skipping...`n`n"
 	}}
 
 
@@ -52,12 +75,12 @@ function I18N-Status-Print-Run-CI-Job-Validate {
 
 
 
-function I18N-Status-Print-Run-CI-Job-Validate-Failed {
+function I18N-Status-Print-Notarize-Simulate {
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print error "validating failed.`n`n"
+		$null = I18N-Status-Print warning "simulating successful notarization...`n`n"
 	}}
 
 
@@ -68,28 +91,12 @@ function I18N-Status-Print-Run-CI-Job-Validate-Failed {
 
 
 
-function I18N-Status-Print-Run-Failed {
+function I18N-Status-Print-Notarize-Unavailable {
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print error "CI job - run failed.`n`n"
-	}}
-
-
-	# report status
-	return 0
-}
-
-
-
-
-function I18N-Status-Print-Run-Successful {
-	# execute
-	switch (${env:AUTOMATACI_LANG}) {
-	default {
-		# fallback to default english
-		$null = I18N-Status-Print success "`n`n"
+		$null = I18N-Status-Print warning "notarization is unavailable. Skipping...`n`n"
 	}}
 
 
