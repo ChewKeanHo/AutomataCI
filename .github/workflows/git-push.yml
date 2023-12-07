@@ -49,14 +49,14 @@ jobs:
         id: native_ci_setup
         run: |
           ./automataCI/ci.sh.ps1 setup
-      - name: Execute repo's AutomataCI - START
-        id: native_ci_start
-        run: |
-          ./automataCI/ci.sh.ps1 start
       - name: Execute repo's AutomataCI - PREPARE
         id: native_ci_prepare
         run: |
           ./automataCI/ci.sh.ps1 prepare
+      - name: Execute repo's AutomataCI - START
+        id: native_ci_start
+        run: |
+          ./automataCI/ci.sh.ps1 start
       - name: Execute repo's AutomataCI - TEST
         id: native_ci_test
         run: |

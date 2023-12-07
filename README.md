@@ -86,11 +86,10 @@ AutomataCI works seamlessly out of the box by integration with:
 
 
 ## How-tos, Documentations & Specifications
+Well, the instructions are available as a PDF Handbooks in case of offline
+needs. Please take your time and download a copy:
 
-Check out the PDF file inside
-[`automataCI/docs/AutomataCI-Engineering-Specification.pdf`](automataCI/docs/AutomataCI-Engineering-Specification.pdf).
-
-It's regularly updated from time-to-time between each releases.
+* [International English](.internals/docs/automataci-user-guide_en.pdf)
 
 
 
