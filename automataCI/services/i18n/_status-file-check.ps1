@@ -11,38 +11,10 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\i18n\printer.ps1"
 
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-check.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-create.ps1"
 
 
 
-
-function I18N-Status-Print-File-Assemble {
-	param(
-		[string]$___subject,
-		[string]$___target
-	)
-
-
-	# execute
-	switch (${env:AUTOMATACI_LANG}) {
-	default {
-		# fallback to default english
-		$___subject = I18N-Status-Param-Process "${___subject}"
-		$___target = I18N-Status-Param-Process "${___target}"
-		$null = I18N-Status-Print info `
-			"assembling file: ${___subject} as ${___target}`n"
-	}}
-
-
-	# report status
-	return 0
-}
-
-
-
-
-function I18N-Status-Print-File-Detected {
+function I18N-Status-Print-File-Check-Exists {
 	param(
 		[string]$___subject
 	)
@@ -53,7 +25,7 @@ function I18N-Status-Print-File-Detected {
 	default {
 		# fallback to default english
 		$___subject = I18N-Status-Param-Process "${___subject}"
-		$null = I18N-Status-Print info "detected file: ${___subject}`n"
+		$null = I18N-Status-Print info "checking file existence: ${___subject}`n"
 	}}
 
 
@@ -64,27 +36,12 @@ function I18N-Status-Print-File-Detected {
 
 
 
-function I18N-Status-Print-File-Incompatible-Skipped {
+function I18N-Status-Print-File-Check-Failed {
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print warning "incompatible file. Skipping...`n"
-	}}
-
-
-	# report status
-	return 0
-}
-
-
-
-function I18N-Status-Print-File-Bad-Stat-Skipped {
-	# execute
-	switch (${env:AUTOMATACI_LANG}) {
-	default {
-		# fallback to default english
-		$null = I18N-Status-Print warning "failed to parse file. Skipping...`n"
+		$null = I18N-Status-Print error "check failed.`n`n"
 	}}
 
 
@@ -95,12 +52,12 @@ function I18N-Status-Print-File-Bad-Stat-Skipped {
 
 
 
-function I18N-Status-Print-File-Write-Failed {
+function I18N-Status-Print-File-Check-Failed-Skipped {
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print error "write failed.`n`n"
+		$null = I18N-Status-Print warning "check failed. Skipping...`n`n"
 	}}
 
 

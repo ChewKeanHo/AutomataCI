@@ -10,9 +10,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/python.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -31,21 +35,25 @@ PACKAGE::run_pypi() {
 
 
         # parse input
-        __line="${1%|*}"
+        __line="$1"
+
+        _dest="${__line%%|*}"
+        __line="${__line#*|}"
+
+        _target="${__line%%|*}"
+        __line="${__line#*|}"
+
+        _target_filename="${__line%%|*}"
+        __line="${__line#*|}"
+
+        _target_os="${__line%%|*}"
+        __line="${__line#*|}"
+
+        _target_arch="${__line%%|*}"
+        __line="${__line#*|}"
 
         _target_arch="${__line##*|}"
         __line="${__line%|*}"
-
-        _target_os="${__line##*|}"
-        __line="${__line%|*}"
-
-        _target_filename="${__line##*|}"
-        __line="${__line%|*}"
-
-        _target="${__line##*|}"
-        __line="${__line%|*}"
-
-        _dest="${__line##*|}"
 
 
         # validate input
@@ -53,61 +61,62 @@ PACKAGE::run_pypi() {
                 PYTHON::activate_venv
         fi
 
+        I18N_Status_Print_Check_Availability "PYPI"
         PYPI::is_available
         if [ $? -ne 0 ]; then
-                OS::print_status warning "PyPi is incompatible or not available. Skipping.\n"
+                I18N_Status_Print_Check_Availability_Failed "PYPI"
                 return 0
         fi
 
 
         # prepare workspace and required values
+        I18N_Status_Print_Package_Create "PYPI"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/pypi_${_src}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/pypi_${_src}"
-        OS::print_status info "Creating PyPi source code package...\n"
-        OS::print_status info "remaking workspace directory ${_src}\n"
+        I18N_Status_Print_Package_Workspace_Remake "$_src"
         FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
-                OS::print_status error "remake failed.\n"
+                I18N_Status_Print_Package_Remake_Failed
                 return 1
         fi
 
-        OS::print_status info "checking output file existence...\n"
-        if [ -d "$_target_path" ]; then
-                OS::print_status error "check failed - output exists!\n"
+        I18N_Status_Print_File_Check_Exists "$_target_path"
+        FS::is_directory "$_target_path"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_File_Check_Failed
                 return 1
         fi
 
 
         # copy all complimentary files to the workspace
-        OS::print_status info "assembling package files...\n"
-        if [ -z "$(type -t PACKAGE::assemble_pypi_content)" ]; then
-                OS::print_status error "missing PACKAGE::assemble_pypi_content function.\n"
+        cmd="PACKAGE::assemble_rpm_content"
+        I18N_Status_Print_Package_Assembler_Check "$cmd"
+        OS::is_command_available "$cmd"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_Package_Check_Failed
                 return 1
         fi
-        PACKAGE::assemble_pypi_content \
-                "$_target" \
-                "$_src" \
-                "$_target_filename" \
-                "$_target_os" \
-                "$_target_arch"
+
+        "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)
+                I18N_Status_Print_Package_Assembler_Exec_Skipped
                 FS::remove_silently "$_src"
-                OS::print_status warning "packaging is not required. Skipping process.\n"
                 return 0
                 ;;
         0)
+                # accepted
                 ;;
         *)
-                OS::print_status error "assembly failed.\n"
+                I18N_Status_Print_Package_Assembler_Exec_Failed
                 return 1
                 ;;
         esac
 
 
         # generate required files
-        OS::print_status info "creating pyproject.toml file...\n"
+        I18N_Status_Print_File_Create "pyproject.toml"
         PYPI::create_config \
                 "$_src" \
                 "$PROJECT_NAME" \
@@ -121,23 +130,23 @@ PACKAGE::run_pypi() {
                 "$PROJECT_LICENSE"
         case $? in
         2)
-                OS::print_status info "manual injection detected.\n"
+                I18N_Status_Print_File_Injected
                 ;;
         0)
                 ;;
         *)
-                OS::print_status error "create failed.\n"
+                I18N_Status_Print_File_Create_Failed
                 return 1
                 ;;
         esac
 
 
         # archive the assembled payload
-        OS::print_status info "archiving PyPi package...\n"
+        I18N_Status_Print_Package_Exec "$_target_path"
         FS::make_directory "$_target_path"
         PYPI::create_archive "$_src" "$_target_path"
         if [ $? -ne 0 ]; then
-                OS::print_status error "package failed.\n"
+                I18N_Status_Print_Package_Exec_Failed "$_target_path"
                 return 1
         fi
 

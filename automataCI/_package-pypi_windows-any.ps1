@@ -9,16 +9,20 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
 	return
 }
 
@@ -45,58 +49,65 @@ function PACKAGE-Run-PYPI {
 		$null = PYTHON-Activate-VENV
 	}
 
+	$null = I18N-Status-Print-Check-Availability "PYPI"
 	$__process = PYPI-Is-Available
 	if ($__process -ne 0) {
-		OS-Print-Status warning "PyPi is incompatible or not available. Skipping."
+		$null = I18N-Status-Print-Check-Availability-Failed "PYPI"
 		return 0
 	}
 
 
 	# prepare workspace and required values
+	$null = I18N-Status-Print-Package-Create "PYPI"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\pypi_${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\pypi_${_src}"
-	OS-Print-Status info "Creating PyPi source code package..."
-	OS-Print-Status info "remaking workspace directory ${_src}"
+	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
 	$__process = FS-Remake-Directory "${_src}"
 	if ($__process -ne 0) {
-		OS-Print-Status error "remake failed."
+		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
 
-	OS-Print-Status info "checking output file existence..."
-	if (Test-Path -Path "${_target_path}" -PathType Container) {
-		OS-Print-Status error "check failed - output exists!"
+	$null = I18N-Status-Print-File-Check-Exists "${_target_path}"
+	$___process = FS-Is-Directory "${_target_path}"
+	if ($___process -eq 0) {
+		$null = I18N-Status-Print-File-Check-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
-	OS-Print-Status info "assembling package files..."
-	$__process = OS-Is-Command-Available "PACKAGE-Assemble-PYPI-Content"
-	if ($__process -ne 0) {
-		OS-Print-Status error "missing PACKAGE-Assemble-PYPI-Content function."
+	$cmd = "PACKAGE-Assemble-PYPI-Content"
+	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$___process = OS-Is-Command-Available "$cmd"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Package-Check-Failed
 		return 1
 	}
-	$__process = PACKAGE-Assemble-PYPI-Content `
+
+	$___process = PACKAGE-Assemble-PYPI-Content `
 			${_target} `
 			${_src} `
 			${_target_filename} `
 			${_target_os} `
 			${_target_arch}
-	if ($__process -eq 10) {
+	switch ($___process) {
+	10 {
+		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
 		$null = FS-Remove-Silently ${_src}
-		OS-Print-Status warning "packaging is not required. Skipping process."
 		return 0
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "assembly failed."
+	} 0 {
+		# accepted
+	} default {
+		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
 		return 1
-	}
+	}}
 
 
 	# generate required files
-	OS-Print-Status info "creating pyproject.toml file..."
-	$__process = PYPI-Create-Config `
+	$null = I18N-Status-Print-File-Create "pyproject.toml"
+	$___process = PYPI-Create-Config `
 		"${_src}" `
 		"${env:PROJECT_NAME}" `
 		"${env:PROJECT_VERSION}" `
@@ -107,20 +118,23 @@ function PACKAGE-Run-PYPI {
 		"${env:PROJECT_PYPI_README}" `
 		"${env:PROJECT_PYPI_README_MIME}" `
 		"${env:PROJECT_LICENSE}"
-	if ($__process -eq 2) {
-		OS-Print-Status info "manual injection detected."
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "create failed."
+	switch ($___process) {
+	2 {
+		$null = I18N-Status-Print-File-Injected
+	} 0 {
+		# accepted
+	} default {
+		$null = I18N-Status-Print-File-Create-Failed
 		return 1
-	}
+	}}
 
 
 	# archive the assembled payload
-	OS-Print-Status info "archiving PyPi package..."
+	$null = I18N-Status-Print-Package-Exec "${_target_path}"
 	$null = FS-Make-Directory "${_target_path}"
-	$__process = PYPI-Create-Archive "${_src}" "${_target_path}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "package failed."
+	$___process = PYPI-Create-Archive "${_src}" "${_target_path}"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Package-Exec-Failed "${_target_path}"
 		return 1
 	}
 
