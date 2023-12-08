@@ -52,9 +52,6 @@ PACKAGE::run_pypi() {
         _target_arch="${__line%%|*}"
         __line="${__line#*|}"
 
-        _target_arch="${__line##*|}"
-        __line="${__line%|*}"
-
 
         # validate input
         if [ ! -z "$PROJECT_PYTHON" ]; then
@@ -98,6 +95,7 @@ PACKAGE::run_pypi() {
                 return 1
         fi
 
+        I18N_Status_Print_Package_Assembler_Exec
         "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)

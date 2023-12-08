@@ -53,7 +53,7 @@ function I18N-Status-Print-Package-Exec {
 	default {
 		# fallback to default english
 		$___subject = I18N-Status-Param-Process "${___subject}"
-		$null = I18N-Status-Print info "packaging ${___subject}...`n"
+		$null = I18N-Status-Print info "packaging ${___subject}`n"
 	}}
 
 

@@ -99,9 +99,6 @@ PACKAGE_Run_MSI() {
         _target_arch="${__line%%|*}"
         __line="${__line#*|}"
 
-        _target_arch="${__line##*|}"
-        __line="${__line%|*}"
-
 
         # validate input
         I18N_Status_Print_Check_Availability "MSI"

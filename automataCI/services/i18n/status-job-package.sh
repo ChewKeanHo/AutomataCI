@@ -67,7 +67,7 @@ I18N_Status_Print_Package_Exec() {
         *)
                 # fallback to default english
                 ___subject="$(I18N_Status_Param_Process "${___subject}")"
-                I18N_Status_Print info "packaging ${___subject} ...\n"
+                I18N_Status_Print info "packaging ${___subject}\n"
                 ;;
         esac
 

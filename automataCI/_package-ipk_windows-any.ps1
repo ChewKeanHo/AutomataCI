@@ -9,16 +9,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\ipk.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\ipk.ps1"
 
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
 	return
 }
 
@@ -41,32 +44,29 @@ function PACKAGE-Run-IPK {
 
 
 	# validate input
-	OS-Print-Status info "checking ipk functions availability..."
+	$null = I18N-Status-Print-Check-Availability "IPK"
 	$__process = IPK-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($__process) {
-	2 {
-		OS-Print-Status warning "IPK is incompatible (OS type). Skipping."
-		return 0
-	} 3 {
-		OS-Print-Status warning "IPK is incompatible (CPU type). Skipping."
+	{ $_ -in 2, 3 } {
+		$null = I18N-Status-Print-Check-Availability-Incompatible "IPK"
 		return 0
 	} 0 {
-		break
+		# accepted
 	} Default {
-		OS-Print-Status warning "IPK is unavailable. Skipping."
+		$null = I18N-Status-Print-Check-Availability-Failed "IPK"
 		return 0
 	}}
 
 
 	# prepare workspace and required values
+	$null = I18N-Status-Print-Package-Create "IPK"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}.ipk"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\ipk_${_src}"
-	OS-Print-Status info "Creating IPK package..."
-	OS-Print-Status info "remaking workspace directory ${_src}"
+	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
 	$__process = FS-Remake-Directory "${_src}"
 	if ($__process -ne 0) {
-		OS-Print-Status error "remake failed."
+		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
 	$null = FS-Make-Directory "${_src}\control"
@@ -74,21 +74,22 @@ function PACKAGE-Run-IPK {
 
 
 	# execute
-	OS-Print-Status info "checking output file existence..."
+	$null = I18N-Status-Print-File-Check-Exists "${_target_path}"
 	$__process = FS-Is-File "${_target_path}"
 	if ($__process -eq 0) {
-		OS-Print-Status error "check failed - output exists!"
+		$null = I18N-Status-Print-File-Check-Failed
 		return 1
 	}
 
-	OS-Print-Status info "checking PACKAGE-Assemble-IPK-Content function..."
-	$__process = OS-Is-Command-Available "PACKAGE-Assemble-IPK-Content"
+	$cmd = "PACKAGE-Assemble-IPK-Content"
+	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$__process = OS-Is-Command-Available "$cmd"
 	if ($__process -ne 0) {
-		OS-Print-Status error "check failed."
+		$null = I18N-Status-Print-Package-Check-Failed
 		return 1
 	}
 
-	OS-Print-Status info "assembling package files..."
+	$null = I18N-Status-Print-Package-Assembler-Exec
 	$__process = PACKAGE-Assemble-IPK-Content `
 		"${_target}" `
 		"${_src}" `
@@ -97,27 +98,27 @@ function PACKAGE-Run-IPK {
 		"${_target_arch}"
 	switch ($__process) {
 	10 {
+		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
 		$null = FS-Remove-Silently "${_src}"
-		OS-Print-Status warning "packaging is not required. Skipping process."
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		OS-Print-Status error "assembly failed."
+		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
 		return 1
 	}}
 
-	OS-Print-Status info "checking control\control file..."
+	$null = I18N-Status-Print-File-Check-Exists "control\control"
 	$__process = FS-Is-File "${_src}\control\control"
 	if ($__process -ne 0) {
-		OS-Print-Status error "check failed."
+		$null = I18N-Status-Print-File-Check-Failed
 		return 1
 	}
 
-	OS-Print-Status info "archiving .ipk package..."
+	$null = I18N-Status-Print-Package-Exec "${_target_path}"
 	$__process = IPK-Create-Archive "${_src}" "${_target_path}"
 	if ($__process -ne 0) {
-		OS-Print-Status error "package failed."
+		$null = I18N-Status-Print-Package-Exec-Failed "${_target_path}"
 		return 1
 	}
 
