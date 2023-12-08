@@ -15,6 +15,7 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-export.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-parallelism.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-remake.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-source.sh"
 
 
 

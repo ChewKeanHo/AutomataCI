@@ -14,8 +14,8 @@
 . "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
 
 . "${LIBS_AUTOMATACI}/services/i18n/printer.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-msi.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -104,10 +104,10 @@ PACKAGE_Run_MSI() {
 
 
         # validate input
-        I18N_Status_Print_MSI_Check_Availability
+        I18N_Status_Print_Check_Availability "MSI"
         MSI_Is_Available
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_MSI_Check_Availability_Failed
+                I18N_Status_Print_Check_Availability_Failed "MSI"
                 return 0
         fi
 

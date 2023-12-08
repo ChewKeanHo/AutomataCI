@@ -14,12 +14,18 @@
 
 
 
-function I18N-Status-Print-MSI-Check-Availability {
+function I18N-Status-Print-Check-Availability {
+	param(
+		[string]$___subject
+	)
+
+
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print info "checking MSI functions availability...`n"
+		$null = I18N-Status-Print info `
+			"checking ${___subject} functions availability...`n"
 	}}
 
 
@@ -30,12 +36,38 @@ function I18N-Status-Print-MSI-Check-Availability {
 
 
 
-function I18N-Status-Print-MSI-Check-Availability-Failed {
+function I18N-Status-Print-Check-Availability-Failed {
+	param(
+		[string]$___subject
+	)
+
+
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print warning "MSI is unavailable. Skipping...`n"
+		$null = I18N-Status-Print info "${___subject} is unavailable. Skipping...`n"
+	}}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function I18N-Status-Print-Check-Availability-Incompatible {
+	param(
+		[string]$___subject
+	)
+
+
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$null = I18N-Status-Print info "${___subject} is incompatible. Skipping...`n"
 	}}
 
 

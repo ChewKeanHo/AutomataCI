@@ -16,7 +16,7 @@
 
 . "${env:LIBS_AUTOMATACI}\services\i18n\printer.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-msi.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 

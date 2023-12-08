@@ -15,6 +15,7 @@
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-export.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-parallelism.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-remake.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-source.ps1"
 
 
 

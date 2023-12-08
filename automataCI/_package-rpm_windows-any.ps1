@@ -9,18 +9,21 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\copyright.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\manual.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rpm.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\copyright.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\manual.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rpm.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
 	return
 }
 
@@ -43,38 +46,35 @@ function PACKAGE-Run-RPM {
 
 
 	# validate input
-	OS-Print-Status info "checking rpm functions availability..."
-	$__process = RPM-Is-Available
+	$null = I18N-Status-Print-Check-Availability "RPM"
+	$__process = RPM-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($__process) {
-	2 {
-		OS-Print-Status warning "RPM is incompatible (OS type). Skipping."
-		return 0
-	} 3 {
-		OS-Print-Status warning "RPM is incompatible (CPU type). Skipping."
+	{ $_ -in 2, 3 } {
+		$null = I18N-Status-Print-Check-Availability-Incompatible "RPM"
 		return 0
 	} 0 {
-		break
+		# accepted
 	} Default {
-		OS-Print-Status warning "RPM is unavailable. Skipping."
+		$null = I18N-Status-Print-Check-Availability-Failed "RPM"
 		return 0
 	}}
 
-	OS-Print-Status info "checking manual docs functions availability..."
+	$null = I18N-Status-Print-Check-Availability "MANUAL DOCS"
 	$__process = MANUAL-Is-Available
 	if ($__process -ne 0) {
-		OS-Print-Status error "checking failed."
+		$null = I18N-Status-Print-Check-Availability-Failed "MANUAL DOCS"
 		return 1
 	}
 
 
 	# prepare workspace and required values
+	$null = I18N-Status-Print-Package-Create "RPM"
 	$_src = "${_target_filename}_${_target_os}-${_target_arch}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\rpm_${_src}"
-	OS-Print-Status info "Creating RPM package..."
-	OS-Print-Status info "remaking workspace directory ${_src}"
+	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
 	$__process = FS-Remake-Directory "${_src}"
 	if ($__process -ne 0) {
-		OS-Print-Status error "remake failed."
+		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
 	$null = FS-Make-Directory "${_src}/BUILD"
@@ -82,33 +82,38 @@ function PACKAGE-Run-RPM {
 
 
 	# copy all complimentary files to the workspace
-	OS-Print-Status info "assembling package files..."
-	$__process = OS-Is-Command-Available "PACKAGE-Assemble-RPM-Content"
+	$cmd = "PACKAGE-Assemble-RPM-Content"
+	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$__process = OS-Is-Command-Available "$cmd"
 	if ($__process -ne 0) {
-		OS-Print-Status error "missing PACKAGE-Assemble-RPM-Content function."
+		$null = I18N-Status-Print-Package-Check-Failed
 		return 1
 	}
-	$__process = PACKAGE-Assemble-RPM-Content `
+
+	$___process = PACKAGE-Assemble-RPM-Content `
 		${_target} `
 		${_src} `
 		${_target_filename} `
 		${_target_os} `
 		${_target_arch}
-	if ($__process -eq 10) {
+	switch ($___process) {
+	10 {
+		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
 		$null = FS-Remove-Silently ${_src}
-		OS-Print-Status warning "packaging is not required. Skipping process."
 		return 0
-	} elseif ($__process -ne 0) {
-		OS-Print-Status error "assembly failed."
+	} 0 {
+		# accepted
+	} default {
+		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
 		return 1
-	}
+	}}
 
 
 	# archive the assembled payload
-	OS-Print-Status info "archiving .rpm package..."
+	$null = I18N-Status-Print-Package-Exec "${_dest}"
 	$__process = RPM-Create-Archive "${_src}" "${_dest}" "${_target_arch}"
 	if ($__process -ne 0) {
-		OS-Print-Status error "package failed."
+		$null = I18N-Status-Print-Package-Exec-Failed "${_dest}"
 		return 1
 	}
 

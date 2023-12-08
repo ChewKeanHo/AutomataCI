@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\i18n\printer.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_status-run-check-availability.ps1"
 
 
 

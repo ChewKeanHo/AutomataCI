@@ -14,12 +14,16 @@
 
 
 
-I18N_Status_Print_MSI_Check_Availability() {
+I18N_Status_Print_Check_Availability() {
+        ___subject="$1"
+
+
         # execute
         case "$AUTOMATACI_LANG" in
         *)
                 # fallback to default english
-                I18N_Status_Print info "checking MSI functions availability...\n"
+                ___subject="$(I18N_Status_Param_Process "${___subject}")"
+                I18N_Status_Print info "checking ${___subject} functions availability...\n"
                 ;;
         esac
 
@@ -31,12 +35,37 @@ I18N_Status_Print_MSI_Check_Availability() {
 
 
 
-I18N_Status_Print_MSI_Check_Availability_Failed() {
+I18N_Status_Print_Check_Availability_Failed() {
+        ___subject="$1"
+
+
         # execute
         case "$AUTOMATACI_LANG" in
         *)
                 # fallback to default english
-                I18N_Status_Print warning "MSI is unavailable. Skipping...\n"
+                ___subject="$(I18N_Status_Param_Process "${___subject}")"
+                I18N_Status_Print warning "${___subject} is unavailable. Skipping...\n\n"
+                ;;
+        esac
+
+
+        # report status
+        return 0
+}
+
+
+
+
+I18N_Status_Print_Check_Availability_Incompatible() {
+        ___subject="$1"
+
+
+        # execute
+        case "$AUTOMATACI_LANG" in
+        *)
+                # fallback to default english
+                ___subject="$(I18N_Status_Param_Process "${___subject}")"
+                I18N_Status_Print warning "${___subject} is incompatible. Skipping...\n\n"
                 ;;
         esac
 

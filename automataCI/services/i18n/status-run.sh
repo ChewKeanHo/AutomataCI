@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${LIBS_AUTOMATACI}/services/i18n/printer.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_status-run-check-availability.sh"
 
 
 
