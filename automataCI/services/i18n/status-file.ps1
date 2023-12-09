@@ -11,8 +11,10 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\i18n\printer.ps1"
 
+. "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-archive.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-check.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-create.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-update.ps1"
 
 
 
@@ -76,6 +78,23 @@ function I18N-Status-Print-File-Incompatible-Skipped {
 	# report status
 	return 0
 }
+
+
+
+
+function I18N-Status-Print-File-Injected {
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$null = I18N-Status-Print warning "manual injection detected.`n"
+	}}
+
+
+	# report status
+	return 0
+}
+
 
 
 

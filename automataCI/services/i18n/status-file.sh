@@ -11,8 +11,10 @@
 # under the License.
 . "${LIBS_AUTOMATACI}/services/i18n/printer.sh"
 
+. "${LIBS_AUTOMATACI}/services/i18n/_status-file-archive.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-check.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-create.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_status-file-update.sh"
 
 
 
