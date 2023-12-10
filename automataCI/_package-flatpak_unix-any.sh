@@ -10,9 +10,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/flatpak.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/flatpak.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -26,148 +30,121 @@ fi
 
 
 
-PACKAGE::run_flatpak() {
+PACKAGE_Run_Flatpak() {
         #__line="$1"
 
 
         # parse input
-        __line="${1%|*}"
+        __line="$1"
 
-        _repo="${__line##*|}"
-        __line="${__line%|*}"
+        _dest="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target_arch="${__line##*|}"
-        __line="${__line%|*}"
+        _target="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target_os="${__line##*|}"
-        __line="${__line%|*}"
+        _target_filename="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target_filename="${__line##*|}"
-        __line="${__line%|*}"
+        _target_os="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target="${__line##*|}"
-        __line="${__line%|*}"
+        _target_arch="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _dest="${__line##*|}"
+        _repo="${__line%%|*}"
 
 
         # validate input
-        OS::print_status info "checking FLATPAK functions availability...\n"
-        FLATPAK::is_available "$_target_os" "$_target_arch"
+        I18N_Status_Print_Check_Availability "FLATPAK"
+        FLATPAK_Is_Available "$_target_os" "$_target_arch"
         case $? in
-        2)
-                OS::print_status warning "FLATPAK is incompatible (OS type). Skipping.\n"
-                return 0
-                ;;
-        3)
-                OS::print_status warning "FLATPAK is incompatible (CPU type). Skipping.\n"
+        2|3)
+                I18N_Status_Print_Check_Availability_Incompatible "FLATPAK"
                 return 0
                 ;;
         0)
                 ;;
         *)
-                OS::print_status warning "FLATPAK is unavailable. Skipping.\n"
+                I18N_Status_Print_Check_Availability_Failed "FLATPAK"
                 return 0
                 ;;
         esac
 
 
         # prepare workspace and required values
+        I18N_Status_Print_Package_Create "FLATPAK"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}.flatpak"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/flatpak_${_src}"
-        OS::print_status info "Creating FLATPAK package...\n"
-        OS::print_status info "remaking workspace directory ${_src}\n"
+        I18N_Status_Print_Package_Workspace_Remake "$_src"
         FS::remake_directory "${_src}"
         if [ $? -ne 0 ]; then
-                OS::print_status error "remake failed.\n"
+                I18N_Status_Print_Package_Remake_Failed
                 return 1
         fi
 
-        OS::print_status info "checking output file existence...\n"
-        if [ -f "$_target_path" ]; then
-                OS::print_status error "check failed - output exists!\n"
+        I18N_Status_Print_File_Check_Exists "$_target_path"
+        FS::is_file "$_target_path"
+        if [ $? -eq 0 ]; then
+                I18N_Status_Print_File_Check_Failed
                 return 1
         fi
 
 
         # copy all complimentary files to the workspace
-        OS::print_status info "assembling package files...\n"
-        if [ -z "$(type -t PACKAGE::assemble_flatpak_content)" ]; then
-                OS::print_status error "missing PACKAGE::assemble_flatpak_content function.\n"
+        cmd="PACKAGE_Assemble_Flatpak_Content"
+        I18N_Status_Print_Package_Assembler_Check "$cmd"
+        OS::is_command_available "$cmd"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_Package_Check_Failed
                 return 1
         fi
-        PACKAGE::assemble_flatpak_content \
-                "$_target" \
-                "$_src" \
-                "$_target_filename" \
-                "$_target_os" \
-                "$_target_arch"
+
+        I18N_Status_Print_Package_Assembler_Exec
+        "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)
+                I18N_Status_Print_Package_Assembler_Exec_Skipped
                 FS::remove_silently "$_src"
-                OS::print_status warning "packaging is not required. Skipping process.\n"
                 return 0
                 ;;
         0)
+                # accepted
                 ;;
         *)
-                OS::print_status error "assembly failed.\n"
+                I18N_Status_Print_Package_Assembler_Exec_Failed
                 return 1
                 ;;
         esac
 
 
         # generate required files
-        OS::print_status info "creating manifest file...\n"
-        FLATPAK::create_manifest \
-                "$_src" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
-                "$PROJECT_APP_ID" \
-                "$PROJECT_SKU" \
-                "$_target_arch" \
-                "$PROJECT_FLATPAK_RUNTIME" \
-                "$PROJECT_FLATPAK_RUNTIME_VERSION" \
-                "$PROJECT_FLATPAK_SDK"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
+        I18N_Status_Print_File_Check_Exists "${_src}/manifest.yml"
+        FS::is_file "${_src}/manifest.yml"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_File_Check_Failed
                 return 1
-                ;;
-        esac
+        fi
 
-        OS::print_status info "creating AppInfo XML file...\n"
-        FLATPAK::create_appinfo \
-                "$_src" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}"
-        case $? in
-        2)
-                OS::print_status info "manual injection detected.\n"
-                ;;
-        0)
-                ;;
-        *)
-                OS::print_status error "create failed.\n"
+        I18N_Status_Print_File_Check_Exists "${_src}/appdata.xml"
+        FS::is_file "${_src}/appdata.xml"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_File_Check_Failed
                 return 1
-                ;;
-        esac
+        fi
 
 
         # archive the assembled payload
-        OS::print_status info "archiving .flatpak package...\n"
-        FLATPAK::create_archive \
+        I18N_Status_Print_Package_Exec "$_target_path"
+        FLATPAK_Create_Archive \
                 "$_src" \
                 "$_target_path" \
                 "$_repo" \
                 "$PROJECT_APP_ID" \
                 "$PROJECT_GPG_ID"
         if [ $? -ne 0 ]; then
-                OS::print_status error "package failed.\n"
+                I18N_Status_Print_Package_Exec_Failed "$_target_path"
                 return 1
         fi
 
