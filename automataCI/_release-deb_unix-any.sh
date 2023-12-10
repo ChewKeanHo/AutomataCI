@@ -24,7 +24,7 @@ RELEASE::run_deb() {
 
 
         # validate input
-        DEB::is_valid "$__target"
+        DEB_Is_Valid "$__target"
         if [ $? -ne 0 ]; then
                 return 0
         fi

@@ -10,126 +10,101 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/disk.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/ar.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/gpg.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/checksum/md5.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/disk.sh"
+. "${LIBS_AUTOMATACI}/services/archive/tar.sh"
+. "${LIBS_AUTOMATACI}/services/archive/ar.sh"
+. "${LIBS_AUTOMATACI}/services/crypto/gpg.sh"
+. "${LIBS_AUTOMATACI}/services/checksum/md5.sh"
 
 
 
 
-DEB::create_archive() {
-        __directory="$1"
-        __destination="$2"
+DEB_Create_Archive() {
+        ___directory="$1"
+        ___destination="$2"
 
 
         # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ ! -d "${__directory}/control" ] ||
-                [ ! -d "${__directory}/data" ] ||
-                [ ! -f "${__directory}/control/control" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___directory"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "${___directory}/control"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "${___directory}/data"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "${___directory}/control/control"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # capture current directory
-        __current_path="$PWD"
+        ___current_path="$PWD"
 
 
         # package control
-        cd "${__directory}/control"
+        cd "${___directory}/control"
         TAR::create_xz "../control.tar.xz" "*"
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
 
         # package data
-        cd "${__directory}/data"
+        cd "${___directory}/data"
         TAR::create_xz "../data.tar.xz" "*"
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
 
         # generate debian-binary
-        cd "${__directory}"
-        FS::write_file "${__directory}/debian-binary" "2.0\n"
+        cd "${___directory}"
+        FS::write_file "${___directory}/debian-binary" "2.0\n"
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
 
         # archive into deb
-        __file="package.deb"
-        AR::create "$__file" "debian-binary control.tar.xz data.tar.xz"
+        ___file="package.deb"
+        AR::create "$___file" "debian-binary control.tar.xz data.tar.xz"
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
 
         # move to destination
-        FS::remove_silently "$__destination"
-        FS::move "$__file" "$__destination"
-        __exit=$?
+        FS::remove_silently "$___destination"
+        FS::move "$___file" "$___destination"
+        ___process=$?
 
 
         # return to current directory
-        cd "$__current_path" && unset __current_path
+        cd "$___current_path" && unset ___current_path
 
 
         # report status
-        return $__exit
-}
-
-
-
-
-DEB::create_changelog() {
-        __directory="$1"
-        __filepath="$2"
-        __is_native="$3"
-        __sku="$4"
-
-
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ -z "$__filepath" ] ||
-                [ ! -f "$__filepath" ] ||
-                [ -z "$__is_native" ] ||
-                [ -z "$__sku" ]; then
-                return 1
-        fi
-
-
-        # check if the document has already injected
-        __location="${__directory}/data/usr/local/share/doc/${__sku}/changelog.gz"
-        if [ "$__is_native" = "true" ]; then
-                __location="${__directory}/data/usr/share/doc/${__sku}/changelog.gz"
-        fi
-
-
-        # create housing directory path
-        FS::make_housing_directory "$__location"
-        FS::remove_silently "$__location"
-
-
-        # copy processed file to target location
-        FS::copy_file "$__filepath" "$__location"
-
-
-        # report status
-        if [ $? -ne 0 ]; then
+        if [ $___process -ne 0 ]; then
                 return 1
         fi
 
@@ -139,27 +114,84 @@ DEB::create_changelog() {
 
 
 
-DEB::create_checksum() {
-        #__directory="$1"
+DEB_Create_Changelog() {
+        ___directory="$1"
+        ___filepath="$2"
+        ___is_native="$3"
+        ___sku="$4"
 
 
         # validate input
-        if [ -z "$1" ] || [ ! -d "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___filepath") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___is_native") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___sku") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___directory"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "$___filepath"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # check if the document has already injected
+        ___location="${___directory}/data/usr/local/share/doc/${___sku}/changelog.gz"
+        if [ "$___is_native" = "true" ]; then
+                ___location="${___directory}/data/usr/share/doc/${___sku}/changelog.gz"
+        fi
+
+
+        # create housing directory path
+        FS::make_housing_directory "$___location"
+        FS::remove_silently "$___location"
+
+
+        # copy processed file to target location
+        FS::copy_file "$___filepath" "$___location"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+DEB_Create_Checksum() {
+        #___directory="$1"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # prepare workspace
-        __location="${1}/control/md5sums"
-        FS::remove_silently "$__location"
-        FS::make_housing_directory "$__location"
+        ___location="${1}/control/md5sums"
+        FS::remove_silently "$___location"
+        FS::make_housing_directory "$___location"
 
 
         # checksum every items
-        for __line in $(find "${1}/data" -type f); do
-                __checksum="$(MD5::checksum_file "$__line")"
-                FS::append_file "$__location" \
-                        "${__checksum%% *} ${__line##*${1}/data/}\n"
+        for ___line in $(find "${1}/data" -type f); do
+                ___checksum="$(MD5::checksum_file "$___line")"
+                FS::append_file "$___location" \
+                        "${___checksum%% *} ${___line##*${1}/data/}\n"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -173,41 +205,49 @@ DEB::create_checksum() {
 
 
 
-DEB::create_control() {
-        __directory="$1"
-        __resources="$2"
-        __sku="$3"
-        __version="$4"
-        __arch="$5"
-        __os="$6"
-        __name="$7"
-        __email="$8"
-        __website="$9"
-        __pitch="${10}"
-        __priority="${11}"
-        __section="${12}"
-        __description_filepath="${13}"
+DEB_Create_Control() {
+        ___directory="$1"
+        ___resources="$2"
+        ___sku="$3"
+        ___version="$4"
+        ___arch="$5"
+        ___os="$6"
+        ___name="$7"
+        ___email="$8"
+        ___website="$9"
+        ___pitch="${10}"
+        ___priority="${11}"
+        ___section="${12}"
+        ___description_filepath="${13}"
 
 
         # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ -z "$__resources" ] ||
-                [ ! -d "$__resources" ] ||
-                [ -z "$__sku" ] ||
-                [ -z "$__version" ] ||
-                [ -z "$__arch" ] ||
-                [ -z "$__os" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__website" ] ||
-                [ -z "$__pitch" ] ||
-                [ -z "$__priority" ] ||
-                [ -z "$__section" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___resources") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___sku") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___arch") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___os") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___name") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___email") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___website") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___pitch") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___priority") -eq 0 ] ||
+                [ $(STRINGS_IS_Empty "$___section") -eq 0 ]; then
                 return 1
         fi
 
-        case "$__priority" in
+        FS::is_directory "$___directory"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___resources"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        case "$___priority" in
         required|important|standard|optional|extra)
                 ;;
         *)
@@ -217,48 +257,50 @@ DEB::create_control() {
 
 
         # prepare workspace
-        __arch="$(DEB::get_architecture "$__os" "$__arch")"
-        __location="${__directory}/control/control"
-        FS::make_housing_directory "${__location}"
-        FS::remove_silently "${__location}"
+        ___arch="$(DEB_Get_Architecture "$___os" "$___arch")"
+        ___location="${___directory}/control/control"
+        FS::make_housing_directory "${___location}"
+        FS::remove_silently "${___location}"
 
 
         # generate control file
-        __size="$(DISK::calculate_size "${__directory}/data")"
-        if [ $? -ne 0 ]; then
+        ___size="$(DISK::calculate_size "${___directory}/data")"
+        if [ $(STRINGS_Is_Empty "$___size") -eq 0 ]; then
                 return 1
         fi
 
-        FS::write_file "$__location" "\
-Package: $__sku
-Version: $__version
-Architecture: $__arch
-Maintainer: $__name <$__email>
-Installed-Size: $__size
-Section: $__section
-Priority: $__priority
-Homepage: $__website
-Description: $__pitch
+        FS::write_file "$___location" "\
+Package: $___sku
+Version: $___version
+Architecture: $___arch
+Maintainer: $___name <$___email>
+Installed-Size: $___size
+Section: $___section
+Priority: $___priority
+Homepage: $___website
+Description: $___pitch
 "
 
 
         # append description data file
-        if [ ! -z "$__description_filepath" ] && [ -f "$__description_filepath" ]; then
-                old_IFS="$IFS"
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        if [ ! -z "$__line" -a -z "${__line%%#*}" ]; then
+        if [ $(STRINGS_Is_Empty "$___description_filepath") -ne 0 ] &&
+                [ -f "$___description_filepath" ]; then
+                ___old_IFS="$IFS"
+                while IFS="" read -r ___line || [ -n "$___line" ]; do
+                        if [ $(STRINGS_Is_Empty "$___line") -ne 0 ] &&
+                                [ $(STRINGS_Is_Empty "${___line%%#*}") -eq 0 ]; then
                                 continue
                         fi
 
-                        if [ -z "$__line" ]; then
-                                __line=" ."
+                        if [ $(STRINGS_Is_Empty "${___line}") -eq 0 ]; then
+                                ___line=" ."
                         else
-                                __line=" ${__line}"
+                                ___line=" ${___line}"
                         fi
 
-                        FS::append_file "$__location" "${__line}\n"
-                done < "${__description_filepath}"
-                IFS="$old_IFS" && unset old_IFS __line
+                        FS::append_file "$___location" "${___line}\n"
+                done < "${___description_filepath}"
+                IFS="$___old_IFS" && unset ___old_IFS ___line
         fi
 
 
@@ -269,80 +311,87 @@ Description: $__pitch
 
 
 
-DEB::create_source_list() {
-        __is_simulated="$1"
-        __directory="$2"
-        __gpg_id="$3"
-        __url="$4"
-        __codename="$5"
-        __distribution="$6"
-        __sku="$7"
+DEB_Create_Source_List() {
+        ___is_simulated="$1"
+        ___directory="$2"
+        ___gpg_id="$3"
+        ___url="$4"
+        ___codename="$5"
+        ___distribution="$6"
+        ___sku="$7"
 
 
         # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ -z "$__gpg_id" -a -z "$__is_simulated" ] ||
-                [ -z "$__url" ] ||
-                [ -z "$__codename" ] ||
-                [ -z "$__distribution" ] ||
-                [ -z "$__sku" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___url") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___codename") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___distribution") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___sku") -eq 0 ]; then
+                return 1
+        fi
+
+        if [ $(STRINGS_Is_Empty "$___gpg_id") -eq 0 ] &&
+                [ $(STRINGS_Is_Empty "$___is_simulated") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___directory"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        __url="${__url}/deb"
-        __url="${__url%//deb*}/deb"
-        __key="usr/local/share/keyrings/${__sku}-keyring.gpg"
-        __filename="${__directory}/data/etc/apt/sources.list.d/${__sku}.list"
+        ___url="${___url}/deb"
+        ___url="${___url%//deb*}/deb"
+        ___key="usr/local/share/keyrings/${___sku}-keyring.gpg"
+        ___filename="${___directory}/data/etc/apt/sources.list.d/${___sku}.list"
 
-        FS::is_file "$__filename"
+        FS::is_file "$___filename"
         if [ $? -eq 0 ]; then
                 return 10
         fi
 
-        FS::is_file "${__directory}/data/$__key"
+        FS::is_file "${___directory}/data/${___key}"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
 
-        FS::make_housing_directory "$__filename"
-        FS::write_file "${__filename}" "\
+        FS::make_housing_directory "$___filename"
+        FS::write_file "$___filename" "\
 # WARNING: AUTO-GENERATED - DO NOT EDIT!
-deb [signed-by=/${__key}] ${__url} ${__codename} ${__distribution}
+deb [signed-by=/${___key}] ${___url} ${___codename} ${___distribution}
 "
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::make_housing_directory "${__directory}/data/$__key"
-        if [ ! -z "$__is_simulated" ]; then
-                FS::write_file "${__directory}/data/${__key}" ""
+        FS::make_housing_directory "${___directory}/data/${___key}"
+        if [ $(STRINGS_Is_Empty "$___is_simulated") -ne 0 ]; then
+                FS::write_file "${___directory}/data/${___key}" ""
         else
-                GPG::export_public_keyring "${__directory}/data/${__key}" "$__gpg_id"
+                GPG::export_public_keyring "${___directory}/data/${___key}" "$___gpg_id"
         fi
-
-
-        # report status
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+
+        # report status
         return 0
 }
 
 
 
 
-DEB::get_architecture() {
+DEB_Get_Architecture() {
         #___os="$1"
         #___arch="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 printf -- ""
                 return 1
         fi
@@ -403,11 +452,11 @@ DEB::get_architecture() {
 
 
 
-DEB::is_available() {
-        __os="$1"
-        __arch="$2"
+DEB_Is_Available() {
+        #___os="$1"
+        #___arch="$2"
 
-        if [ -z "$__os" ] || [ -z "$__arch" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 
@@ -439,12 +488,25 @@ DEB::is_available() {
         fi
 
 
+        # check compatible target os
+        case "$1" in
+        windows|darwin)
+                return 2
+                ;;
+        *)
+                # accepted
+                ;;
+        esac
+
+
+
         # check compatible target cpu architecture
-        case "$__arch" in
+        case "$2" in
         any)
                 return 3
                 ;;
         *)
+                # accepted
                 ;;
         esac
 
@@ -456,12 +518,17 @@ DEB::is_available() {
 
 
 
-DEB::is_valid() {
-        #__target="$1"
+DEB_Is_Valid() {
+        #___target="$1"
 
 
         # validate input
-        if [ -z "$1" ] || [ -d "$1" ] || [ ! -f "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 

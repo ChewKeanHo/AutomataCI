@@ -88,7 +88,7 @@ I18N_Status_Print_Package_Exec_Failed() {
         *)
                 # fallback to default english
                 ___subject="$(I18N_Status_Param_Process "${___subject}")"
-                I18N_Status_Print error "package failed - ${___subject}\n\n"
+                I18N_Status_Print error "package failed - ${___subject}\n"
                 ;;
         esac
 

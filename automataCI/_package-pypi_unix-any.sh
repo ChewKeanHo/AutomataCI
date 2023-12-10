@@ -80,7 +80,7 @@ PACKAGE::run_pypi() {
 
         I18N_Status_Print_File_Check_Exists "$_target_path"
         FS::is_directory "$_target_path"
-        if [ $? -ne 0 ]; then
+        if [ $? -eq 0 ]; then
                 I18N_Status_Print_File_Check_Failed
                 return 1
         fi

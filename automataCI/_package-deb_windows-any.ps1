@@ -9,16 +9,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\deb.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\deb.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
 	return
 }
 
@@ -42,32 +45,29 @@ function PACKAGE-Run-DEB {
 
 
 	# validate input
-	OS-Print-Status info "checking deb functions availability..."
+	$null = I18N-Status-Print-Check-Availability "DEB"
 	$__process = DEB-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($__process) {
-	2 {
-		OS-Print-Status warning "DEB is incompatible (OS type). Skipping."
-		return 0
-	} 3 {
-		OS-Print-Status warning "DEB is incompatible (CPU type). Skipping."
+	{ $_ -in 2, 3 } {
+		$null = I18N-Status-Print-Check-Availability-Incompatible "DEB"
 		return 0
 	} 0 {
-		break
+		# accepted
 	} Default {
-		OS-Print-Status warning "DEB is unavailable. Skipping."
+		$null = I18N-Status-Print-Check-Availability-Failed "DEB"
 		return 0
 	}}
 
 
 	# prepare workspace and required values
+	$null = I18N-Status-Print-Package-Create "DEB"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}.deb"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb_${_src}"
-	OS-Print-Status info "Creating DEB package..."
-	OS-Print-Status info "remaking workspace directory ${_src}"
-	$__process = FS-Remake-Directory "${_src}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "remake failed."
+	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$___process = FS-Remake-Directory "${_src}"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
 	$null = FS-Make-Directory "${_src}\control"
@@ -75,58 +75,58 @@ function PACKAGE-Run-DEB {
 
 
 	# execute
-	OS-Print-Status info "checking output file existence..."
-	$__process = FS-Is-File "${_target_path}"
-	if ($__process -eq 0) {
-		OS-Print-Status error "check failed - output exists!"
+	$null = I18N-Status-Print-File-Check-Exists "${_target_path}"
+	$___process = FS-Is-File "${_target_path}"
+	if ($___process -eq 0) {
+		$null = I18N-Status-Print-File-Check-Failed
 		return 1
 	}
 
-	OS-Print-Status info "checking PACKAGE-Assemble-DEB-Content function..."
-	$__process = OS-Is-Command-Available "PACKAGE-Assemble-DEB-Content"
-	if ($__process -ne 0) {
-		OS-Print-Status error "check failed."
+	$cmd = "PACKAGE-Assemble-DEB-Content"
+	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$___process = OS-Is-Command-Available "$cmd"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Package-Check-Failed
 		return 1
 	}
 
-	OS-Print-Status info "assembling package files..."
-	$__process = PACKAGE-Assemble-DEB-Content `
+	$null = I18N-Status-Print-Package-Assembler-Exec
+	$___process = PACKAGE-Assemble-DEB-Content `
 		"${_target}" `
 		"${_src}" `
 		"${_target_filename}" `
 		"${_target_os}" `
 		"${_target_arch}" `
 		"${_changelog_deb}"
-	switch ($__process) {
+	switch ($___process) {
 	10 {
+		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
 		$null = FS-Remove-Silently "${_src}"
-		OS-Print-Status warning "packaging is not required. Skipping process."
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		OS-Print-Status error "assembly failed."
+		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
 		return 1
 	}}
 
-	OS-Print-Status info "checking control\md5sums file..."
-	$__process = FS-Is-File "${_src}\control\md5sums"
-	if ($__process -ne 0) {
-		OS-Print-Status error "check failed."
+	$null = I18N-Status-Print-File-Check-Exists "${_src}\control\md5sums"
+	$___process = FS-Is-File "${_src}\control\md5sums"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-File-Check-Failed
 		return 1
 	}
 
-	OS-Print-Status info "checking control\control file..."
-	$__process = FS-Is-File "${_src}\control\control"
-	if ($__process -ne 0) {
-		OS-Print-Status error "check failed."
+	$null = I18N-Status-Print-File-Check-Exists "${_src}\control\control"
+	$___process = FS-Is-File "${_src}\control\control"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-File-Check-Failed
 		return 1
 	}
 
-	OS-Print-Status info "archiving .deb package..."
-	$__process = DEB-Create-Archive "${_src}" "${_target_path}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "package failed."
+	$null = I18N-Status-Print-Package-Exec "${_target_path}"
+	$___process = DEB-Create-Archive "${_src}" "${_target_path}"
+	if ($___process -ne 0) {
 		return 1
 	}
 

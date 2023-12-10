@@ -22,79 +22,98 @@
 
 function DEB-Create-Archive {
 	param (
-		[string]$__directory,
-		[string]$__destination
+		[string]$___directory,
+		[string]$___destination
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty(${__directory}) -or
-		(-not (Test-Path "${__directory}" -PathType Container)) -or
-		(-not (Test-Path "${__directory}\control" -PathType Container)) -or
-		(-not (Test-Path "${__directory}\data" -PathType Container)) -or
-		(-not (Test-Path "${__directory}\control\control"))) {
+	if ($(STRINGS-Is-Empty "${__directory}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}/control"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}/data"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___directory}/control/control"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# change directory into workspace
-	$__current_path = Get-Location
+	$___current_path = Get-Location
 
 
 	# package control
-	$null = Set-Location "${__directory}\control"
-	$__process = TAR-Create-XZ "..\control.tar.xz" "*"
-	$null = Set-Location $__current_path
-	if ($__process -ne 0) {
-		$null = Remove-Variable -Name __current_path
+	$null = Set-Location "${___directory}\control"
+	$___process = TAR-Create-XZ "..\control.tar.xz" "*"
+	if ($___process -ne 0) {
+		$null = Set-Location $___current_path
+		$null = Remove-Variable -Name ___current_path
 		return 1
 	}
 
 
 	# package data
-	$null = Set-Location "${__directory}\data"
-	$__process = TAR-Create-XZ "..\data.tar.xz" "*"
-	$null = Set-Location $__current_path
-	if ($__process -ne 0) {
-		$null = Remove-Variable -Name __current_path
+	$null = Set-Location "${___directory}\data"
+	$___process = TAR-Create-XZ "..\data.tar.xz" "*"
+	if ($___process -ne 0) {
+		$null = Set-Location $___current_path
+		$null = Remove-Variable -Name ___current_path
 		return 1
 	}
 
 
 	# generate debian-binary
-	$null = Set-Location "${__directory}"
-	$__process = FS-Write-File ".\debian-binary" "2.0`n"
-	$null = Set-Location $__current_path
-	if ($__process -ne 0) {
-		$null = Remove-Variable -Name __current_path
+	$null = Set-Location "${___directory}"
+	$___process = FS-Write-File ".\debian-binary" "2.0`n"
+	if ($___process -ne 0) {
+		$null = Set-Location -Path $___current_path
+		$null = Remove-Variable -Name ___current_path
 		return 1
 	}
 
 
 	# archive into deb
-	$null = Set-Location "${__directory}"
-	$__file = "package.deb"
-	$__process = AR-Create "${__file}" "debian-binary control.tar.xz data.tar.xz"
-	$null = Set-Location $__current_path
-	if ($__process -ne 0) {
-		$null = Remove-Variable -Name __current_path
+	$null = Set-Location "${___directory}"
+	$___file = "package.deb"
+	$___process = AR-Create "${___file}" "debian-binary control.tar.xz data.tar.xz"
+	if ($___process -ne 0) {
+		$null = Set-Location -Path $___current_path
+		$null = Remove-Variable -Name ___current_path
 		return 1
 	}
 
 
 	# move to destination
-	$null = Set-Location "${__directory}"
-	$null = FS-Remove-Silently "${__destination}"
-	$__process = FS-Move "${__file}" "${__destination}"
+	$null = FS-Remove-Silently "${___destination}"
+	$___process = FS-Move "${___file}" "${___destination}"
 
 
 	# return back to current path
-	$null = Set-Location -Path $__current_path
-	$null = Remove-Variable -Name __current_path
+	$null = Set-Location -Path $___current_path
+	$null = Remove-Variable -Name ___current_path
 
 
 	# report status
-	return $__process
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	return 0
 }
 
 
@@ -102,42 +121,53 @@ function DEB-Create-Archive {
 
 function DEB-Create-Changelog {
 	param (
-		[string]$__directory,
-		[string]$__filepath,
-		[string]$__is_native,
-		[string]$__sku
+		[string]$___directory,
+		[string]$___filepath,
+		[string]$___is_native,
+		[string]$___sku
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path $__directory -PathType Container)) -or
-		[string]::IsNullOrEmpty($__filepath) -or
-		(-not (Test-Path $__filepath)) -or
-		[string]::IsNullOrEmpty($__is_native) -or
-		[string]::IsNullOrEmpty($__sku)) {
+	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___filepath}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___is_native}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___sku}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___filepath}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# check if the document has already injected
-	$__location = "${__directory}\data\usr\local\share\doc\${__sku}\changelog.gz"
-	if ($__is_native -eq "true") {
-		$__location = "${__directory}\data\usr\share\doc\${__sku}\changelog.gz"
+	$___location = "${___directory}\data\usr\local\share\doc\${___sku}\changelog.gz"
+	if ($___is_native -eq "true") {
+		$___location = "${___directory}\data\usr\share\doc\${___sku}\changelog.gz"
 	}
 
 
 	# create housing directory path
-	$null = FS-Make-Housing-Directory "${__location}"
-	$null = FS-Remove-Silently "${__location}"
+	$null = FS-Make-Housing-Directory "${___location}"
+	$null = FS-Remove-Silently "${___location}"
 
 
 	# copy processed file to the target location
-	$__process = FS-Copy-File "${__filepath}" "${__location}"
+	$___process = FS-Copy-File "${___filepath}" "${___location}"
+	if ($___process -ne 0) {
+		return 1
+	}
 
 
 	# report status
-	return $__process
+	return 0
 }
 
 
@@ -145,30 +175,35 @@ function DEB-Create-Changelog {
 
 function DEB-Create-Checksum {
 	param (
-		[string]$__directory
+		[string]$___directory
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path "${__directory}" -PathType Container))) {
+	if ($(STRINGS-Is-Empty "${___directory}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "$1"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# check if is the document already injected
-	$__location = "${__directory}\control\md5sums"
-	$null = FS-Remove-Silently "${__location}"
-	$null = FS-Make-Housing-Directory "${__location}"
+	$___location = "${___directory}\control\md5sums"
+	$null = FS-Remove-Silently "${___location}"
+	$null = FS-Make-Housing-Directory "${___location}"
 
 
 	# checksum each file
-	foreach ($__file in (Get-ChildItem -Path "${__directory}\data" -File -Recurse)) {
-		$__checksum = MD5-Checksum-File $__file.FullName
-		$__path = $__file.FullName -replace [regex]::Escape("${__directory}\data\"), ""
-		$__path = $__path -replace "\\", "/"
-		$__process = FS-Append-File "${__location}" "${__checksum} ${__path}"
-		if ($__process -ne 0) {
+	foreach ($___file in (Get-ChildItem -Path "${___directory}\data" -File -Recurse)) {
+		$___checksum = MD5-Checksum-File $___file.FullName
+		$___path = $___file.FullName `
+			-replace [regex]::Escape("${___directory}\data\"), ""
+		$___path = $___path -replace "\\", "/"
+		$___process = FS-Append-File "${___location}" "${___checksum} ${___path}"
+		if ($___process -ne 0) {
 			return 1
 		}
 	}
@@ -183,91 +218,99 @@ function DEB-Create-Checksum {
 
 function DEB-Create-Control {
 	param (
-		[string]$__directory,
-		[string]$__resources,
-		[string]$__sku,
-		[string]$__version,
-		[string]$__arch,
-		[string]$__os,
-		[string]$__name,
-		[string]$__email,
-		[string]$__website,
-		[string]$__pitch,
-		[string]$__priority,
-		[string]$__section,
-		[string]$__description_filepath
+		[string]$___directory,
+		[string]$___resources,
+		[string]$___sku,
+		[string]$___version,
+		[string]$___arch,
+		[string]$___os,
+		[string]$___name,
+		[string]$___email,
+		[string]$___website,
+		[string]$___pitch,
+		[string]$___priority,
+		[string]$___section,
+		[string]$___description_filepath
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path $__directory -PathType Container)) -or
-		[string]::IsNullOrEmpty($__resources) -or
-		(-not (Test-Path $__resources -PathType Container)) -or
-		[string]::IsNullOrEmpty($__sku) -or
-		[string]::IsNullOrEmpty($__version) -or
-		[string]::IsNullOrEmpty($__arch) -or
-		[string]::IsNullOrEmpty($__os) -or
-		[string]::IsNullOrEmpty($__name) -or
-		[string]::IsNullOrEmpty($__email) -or
-		[string]::IsNullOrEmpty($__website) -or
-		[string]::IsNullOrEmpty($__pitch) -or
-		[string]::IsNullOrEmpty($__priority) -or
-		[string]::IsNullOrEmpty($__section)) {
+	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___resources}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___sku}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___version}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___arch}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___os}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___name}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___email}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___website}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___pitch}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___priority}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___section}") -eq 0)) {
 		return 1
 	}
 
-	switch (${__priority}) {
+	$___process = FS-Is-Directory "${___directory}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___resources}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	switch (${___priority}) {
 	{ $_ -in "required", "important", "standard", "optional", "extra" } {
-		break
+		# accepted
 	} Default {
 		return 1
 	}}
 
 
 	# check if is the document already injected
-	$__arch = DEB-Get-Architecture "${__os}" "${__arch}"
-	$__location = "${__directory}\control\control"
-	$null = FS-Make-Housing-Directory "${__location}"
-	$null = FS-Remove-Silently "${__location}"
+	$___arch = DEB-Get-Architecture "${___os}" "${___arch}"
+	$___location = "${___directory}\control\control"
+	$null = FS-Make-Housing-Directory "${___location}"
+	$null = FS-Remove-Silently "${___location}"
 
 
 	# generate control file
-	$__size = DISK-Calculate-Size "${__directory}\data"
-	if ([string]::IsNullOrEmpty($__size)) {
+	$___size = DISK-Calculate-Size "${___directory}\data"
+	if ($(STRINGS-Is-Empty "${___size}") -eq 0) {
 		return 1
 	}
 
-	$null = FS-Write-File "${__location}" @"
-Package: ${__sku}
-Version: ${__version}
-Architecture: ${__arch}
-Maintainer: ${__name} <${__email}>
-Installed-Size: ${__size}
-Section: ${__section}
-Priority: ${__priority}
-Homepage: ${__website}
-Description: ${__pitch}
+	$null = FS-Write-File "${___location}" @"
+Package: ${___sku}
+Version: ${___version}
+Architecture: ${___arch}
+Maintainer: ${___name} <${___email}>
+Installed-Size: ${___size}
+Section: ${___section}
+Priority: ${___priority}
+Homepage: ${___website}
+Description: ${___pitch}
 "@
 
 
 	# append description data file
-	if ((-not [string]::IsNullOrEmpty($__description_filepath)) -and
-		(Test-Path -Path "${__description_filepath}")) {
-		foreach ($__line in (Get-Content -Path "${__description_filepath}")) {
-			if ((-not [string]::IsNullOrEmpty($__line)) -and
-				[string]::IsNullOrEmpty($__line -replace "#.*$")) {
+	if (($(STRINGS-Is-Empty "${___description_filepath}") -eq 0) -and
+		($(FS-Is-File "${___description_filepath}") -eq 0)) {
+		foreach ($___line in (Get-Content -Path "${___description_filepath}")) {
+			if (($(STRINGS-Is-Empty "${___line}") -ne 0) -and
+				($(STRINGS-Is-Empty "$($___line -replace "#.*$")") -eq 0)) {
 				continue
 			}
 
-			$__line = $__line -replace '#.*'
-			if ([string]::IsNullOrEmpty($__line)) {
-				$__line = " ."
+			$___line = $___line -replace '#.*'
+			if ($(STRINGS-Is-Empty "${___line}") -eq 0) {
+				$___line = " ."
 			} else {
-				$__line = " ${__line}"
+				$___line = " ${___line}"
 			}
 
-			$null = FS-Append-File $__location $__line
+			$null = FS-Append-File $___location $___line
 		}
 	}
 
@@ -281,66 +324,74 @@ Description: ${__pitch}
 
 function DEB-Create-Source-List {
 	param(
-		[string]$__is_simulated,
-		[string]$__directory,
-		[string]$__gpg_id,
-		[string]$__url,
-		[string]$__codename,
-		[string]$__distribution,
-		[string]$__sku
+		[string]$___is_simulated,
+		[string]$___directory,
+		[string]$___gpg_id,
+		[string]$___url,
+		[string]$___codename,
+		[string]$___distribution,
+		[string]$___sku
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty(${__directory}) -or
-		(-not (Test-Path "${__directory}" -PathType Container)) -or
-		([string]::IsNullOrEmpty(${__gpg_id}) -and
-			[string]::IsNullOrEmpty(${__is_simulated})) -or
-		[string]::IsNullOrEmpty(${__url}) -or
-		[string]::IsNullOrEmpty(${__codename}) -or
-		[string]::IsNullOrEmpty(${__distribution}) -or
-		[string]::IsNullOrEmpty(${__sku})) {
+	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___url}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___codename}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___distribution}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___sku}") -eq 0)) {
+		return 1
+	}
+
+	if (($(STRINGS-Is-Empty "${___gpg_id}") -eq 0) -and
+			($(STRINGS-Is-Empty "${___is_simulated}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__url = "${__url}/deb"
-	$__url = $__url -replace "//deb", "/deb"
-	$__key = "usr\local\share\keyrings\${__sku}-keyring.gpg"
-	$__filename = "${__directory}\data\etc\apt\sources.list.d\${__sku}.list"
+	$___url = "${___url}/deb"
+	$___url = $___url -replace "//deb", "/deb"
+	$___key = "usr\local\share\keyrings\${___sku}-keyring.gpg"
+	$___filename = "${___directory}\data\etc\apt\sources.list.d\${___sku}.list"
 
-	$__process = FS-Is-File "${__filename}"
-	if ($__process -eq 0) {
+	$___process = FS-Is-File "${___filename}"
+	if ($___process -eq 0) {
 		return 10
 	}
 
-	$__process = FS-Is-File "${__directory}\data\${__key}"
-	if ($__process -eq 0) {
+	$___process = FS-Is-File "${___directory}\data\${___key}"
+	if ($___process -eq 0) {
 		return 1
 	}
 
-	$null = FS-Make-Housing-Directory "${__filename}"
-	$__process = FS-Write-File "${__filename}" @"
+	$null = FS-Make-Housing-Directory "${___filename}"
+	$___process = FS-Write-File "${___filename}" @"
 # WARNING: AUTO-GENERATED - DO NOT EDIT!
-deb [signed-by=/${__key}] ${__url} ${__codename} ${__distribution}
+deb [signed-by=/${___key}] ${___url} ${___codename} ${___distribution}
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$null = FS-Make-Housing-Directory "${__directory}\data\${__key}"
-	if (-not [string]::IsNullOrEmpty($__is_simulated)) {
-		$__process = FS-Write-File "${__directory}\data\${__key}" ""
+	$null = FS-Make-Housing-Directory "${___directory}\data\${___key}"
+	if ($(STRINGS-Is-Empty "${___is_simulated}") -eq 0) {
+		$null = FS-Make-Housing-Directory "${___directory}\data\${___key}"
+		$___process = FS-Write-File "${___directory}\data\${___key}" ""
 	} else {
-		$__process = GPG-Export-Public-Keyring `
-			"${__directory}\data\${__key}" `
-			"${__gpg_id}"
+		$___process = GPG-Export-Public-Keyring `
+			"${___directory}\data\${___key}" `
+			"${___gpg_id}"
 	}
 
 
 	# report status
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -358,7 +409,8 @@ function DEB-Get-Architecture {
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($___os) -or [string]::IsNullOrEmpty($___arch)) {
+	if (($(STRINGS-Is-Empty "${___os}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___arch}") -eq 0)) {
 		return ""
 	}
 
@@ -406,39 +458,40 @@ function DEB-Get-Architecture {
 
 function DEB-Is-Available {
 	param(
-		[string]$__os,
-		[string]$__arch
+		[string]$___os,
+		[string]$___arch
 	)
 
-	if ([string]::IsNullOrEmpty($__os) -or [string]::IsNullOrEmpty($__arch)) {
+	if (($(STRINGS-Is-Empty "${___os}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___arch}") -eq 0)) {
 		return 1
 	}
 
 
 	# validate dependencies
-	$__process = MD5-Is-Available
-	if ($__process -ne 0) {
+	$___process = MD5-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = TAR-Is-Available
-	if ($__process -ne 0) {
+	$___process = TAR-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = AR-Is-Available
-	if ($__process -ne 0) {
+	$___process = AR-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = DISK-Is-Available
-	if ($__process -ne 0) {
+	$___process = DISK-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# check compatible target os
-	switch ($__os) {
+	switch ($___os) {
 	{ $_ -in 'windows', 'darwin' } {
 		return 2
 	} Default {
@@ -447,7 +500,7 @@ function DEB-Is-Available {
 
 
 	# check compatible target cpu architecture
-	switch ($__arch) {
+	switch ($___arch) {
 	{ $_ -in 'any' } {
 		return 3
 	} Default {
@@ -464,20 +517,23 @@ function DEB-Is-Available {
 
 function DEB-Is-Valid {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or
-		(Test-Path "${__target}" -PathType Container) -or
-		(-not (Test-Path "${__target}"))) {
+	if ($(STRINGS-Is-Empty "${___target}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	if ($(${__target} -split '\.')[-1] -eq "deb") {
+	if ($(${___target} -split '\.')[-1] -eq "deb") {
 		return 0
 	}
 

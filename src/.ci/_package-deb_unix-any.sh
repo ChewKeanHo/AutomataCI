@@ -29,7 +29,7 @@ fi
 
 
 
-PACKAGE::assemble_deb_content() {
+PACKAGE_Assemble_DEB_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -116,7 +116,7 @@ PACKAGE::assemble_deb_content() {
 
         # NOTE: REQUIRED file
         OS::print_status info "creating changelog.gz files...\n"
-        DEB::create_changelog \
+        DEB_Create_Changelog \
                 "$_directory" \
                 "$_changelog" \
                 "$PROJECT_DEBIAN_IS_NATIVE" \
@@ -130,7 +130,7 @@ PACKAGE::assemble_deb_content() {
         OS::print_status info "creating copyright.gz file...\n"
         COPYRIGHT::create_deb \
                 "$_directory" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/deb-copyright" \
                 "$PROJECT_DEBIAN_IS_NATIVE" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
@@ -157,7 +157,7 @@ PACKAGE::assemble_deb_content() {
 
         # NOTE: REQUIRED file
         OS::print_status info "creating control/md5sum files...\n"
-        DEB::create_checksum "$_directory"
+        DEB_Create_Checksum "$_directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -165,7 +165,7 @@ PACKAGE::assemble_deb_content() {
 
         # NOTE: OPTIONAL (Comment to turn it off)
         OS::print_status info "creating source.list files...\n"
-        DEB::create_source_list \
+        DEB_Create_Source_List \
                 "$PROJECT_SIMULATE_RELEASE_REPO" \
                 "$_directory" \
                 "$PROJECT_GPG_ID" \
@@ -180,9 +180,9 @@ PACKAGE::assemble_deb_content() {
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
         OS::print_status info "creating control/control file...\n"
-        DEB::create_control \
+        DEB_Create_Control \
                 "$_directory" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
                 "$_package" \
                 "$PROJECT_VERSION" \
                 "$_target_arch" \
@@ -193,7 +193,7 @@ PACKAGE::assemble_deb_content() {
                 "$PROJECT_PITCH" \
                 "$PROJECT_DEBIAN_PRIORITY" \
                 "$PROJECT_DEBIAN_SECTION" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/ABSTRACTS.txt"
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/ABSTRACTS.txt"
         if [ $? -ne 0 ]; then
                 return 1
         fi

@@ -75,7 +75,7 @@ function I18N-Status-Print-Package-Exec-Failed {
 	default {
 		# fallback to default english
 		$___subject = I18N-Status-Param-Process "${___subject}"
-		$null = I18N-Status-Print error "package failed - ${___subject}`n`n"
+		$null = I18N-Status-Print error "package failed - ${___subject}`n"
 	}}
 
 

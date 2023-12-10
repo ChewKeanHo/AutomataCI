@@ -190,7 +190,7 @@ ${__common}|${__log}|PACKAGE::run_chocolatey
 
         __log="${__log_directory}/deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__parallel_control" "\
-${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE::run_deb
+${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE_Run_DEB
 "
         if [ $? -ne 0 ]; then
                 return 1
