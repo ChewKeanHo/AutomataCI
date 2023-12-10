@@ -23,13 +23,13 @@ RELEASE::run_docker() {
 
 
         # validate input
-        DOCKER::is_valid "$_target"
+        DOCKER_Is_Valid "$_target"
         if [ $? -ne 0 ]; then
                 return 0
         fi
 
         OS::print_status info "checking required docker availability...\n"
-        DOCKER::is_available
+        DOCKER_Is_Available
         if [ $? -ne 0 ]; then
                 OS::print_status warning "Docker is unavailable. Skipping...\n"
                 return 0
@@ -42,7 +42,7 @@ RELEASE::run_docker() {
                 OS::print_status warning "Simulating multiarch docker manifest release...\n"
                 OS::print_status warning "Simulating remove package artifact...\n"
         else
-                DOCKER::release "$_target" "$PROJECT_VERSION"
+                DOCKER_Release "$_target" "$PROJECT_VERSION"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "release failed.\n"
                         return 1

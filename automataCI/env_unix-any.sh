@@ -21,6 +21,7 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
 fi
 
 . "${LIBS_AUTOMATACI}/services/io/net/http.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/installer.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/dotnet.sh"
@@ -58,7 +59,7 @@ fi
 
 
 I18N_Status_Print_Env_Install "docker"
-INSTALLER::setup_docker
+DOCKER_Setup
 if [ $? -ne 0 ]; then
         I18N_Status_Print_Env_Install_Failed
         return 1

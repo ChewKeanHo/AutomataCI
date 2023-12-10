@@ -12,7 +12,6 @@
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\c.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\docker.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
 
 
@@ -95,35 +94,6 @@ function INSTALLER-Setup-C {
 	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
 		+ ";" `
 		+ [System.Environment]::GetEnvironmentVariable("Path","User")
-
-
-	# report status
-	return 0
-}
-
-
-
-
-function INSTALLER-Setup-Docker {
-	# validate input
-	$__process =  OS-Is-Command-Available "choco"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = DOCKER-Is-Available
-	if ($__process -ne 0) {
-		# NOTE: nothing else can be done since it's host-specific.
-		#       DO NOT choco install Docker-Desktop autonomously.
-		return 0
-	}
-
-
-	# execute
-	$__process = DOCKER-Setup-Builder-Multiarch
-	if ($__process -ne 0) {
-		return 1
-	}
 
 
 	# report status

@@ -198,7 +198,7 @@ ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE::run_deb
 
         __log="${__log_directory}/docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__series_control" "\
-${__common}|${__log}|PACKAGE::run_docker
+${__common}|${__log}|PACKAGE_Run_Docker
 "
         if [ $? -ne 0 ]; then
                 return 1

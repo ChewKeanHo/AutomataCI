@@ -10,9 +10,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/docker.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -26,112 +30,99 @@ fi
 
 
 
-PACKAGE::run_docker() {
+PACKAGE_Run_Docker() {
         #__line="$1"
 
 
         # parse input
-        __line="${1%|*}"
+        __line="$1"
 
-        _target_arch="${__line##*|}"
-        __line="${__line%|*}"
+        _dest="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target_os="${__line##*|}"
-        __line="${__line%|*}"
+        _target="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target_filename="${__line##*|}"
-        __line="${__line%|*}"
+        _target_filename="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target="${__line##*|}"
-        __line="${__line%|*}"
+        _target_os="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _dest="${__line##*|}"
+        _target_arch="${__line%%|*}"
+        __line="${__line#*|}"
 
 
         # validate input
-        OS::print_status info "checking docker functions availability...\n"
-        DOCKER::is_available
+        I18N_Status_Print_Check_Availability "DOCKER"
+        DOCKER_Is_Available
         case $? in
-        2)
-                OS::print_status warning "DOCKER is incompatible (OS type). Skipping.\n"
-                return 0
-                ;;
-        3)
-                OS::print_status warning "DOCKER is incompatible (CPU type). Skipping.\n"
+        2|3)
+                I18N_Status_Print_Check_Availability_Incompatible "DOCKER"
                 return 0
                 ;;
         0)
+                # accepted
                 ;;
         *)
-                OS::print_status warning "DOCKER is unavailable. Skipping.\n"
+                I18N_Status_Print_Check_Availability_Failed "DOCKER"
                 return 0
                 ;;
         esac
 
-        OS::print_status info "checking docker registry login credentials...\n"
-        DOCKER::check_login
+        I18N_Status_Print_Run_Login_Check "DOCKER"
+        DOCKER_Check_Login
         if [ $? -ne 0 ]; then
-                OS::print_status warning "DOCKER is unavailable (login). Skipping.\n"
-                return 0
+                I18N_Status_Print_Run_Login_Check_Failed
+                return 1
         fi
 
 
         # prepare workspace and required values
+        I18N_Status_Print_Package_Create "DOCKER"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/docker.txt"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/docker_${_src}"
-        OS::print_status info "dockering ${_src} for ${_target_os}-${_target_arch}\n"
-        OS::print_status info "remaking workspace directory ${_src}\n"
+        I18N_Status_Print_Package_Workspace_Remake "$_src"
         FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
-                OS::print_status error "remake failed.\n"
+                I18N_Status_Print_Package_Remake_Failed
                 return 1
         fi
 
 
         # copy all complimentary files to the workspace
-        OS::print_status info "assembling package files...\n"
-        OS::is_command_available "PACKAGE::assemble_docker_content"
+        cmd="PACKAGE::assemble_docker_content"
+        I18N_Status_Print_Package_Assembler_Check "$cmd"
+        OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
-                OS::print_status error "missing PACKAGE::assemble_docker_content function.\n"
+                I18N_Status_Print_Package_Check_Failed
                 return 1
         fi
 
-        PACKAGE::assemble_docker_content \
-                "$_target" \
-                "$_src" \
-                "$_target_filename" \
-                "$_target_os" \
-                "$_target_arch"
+        I18N_Status_Print_Package_Assembler_Exec
+        "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)
+                I18N_Status_Print_Package_Assembler_Exec_Skipped
                 FS::remove_silently "$_src"
-                OS::print_status warning "packaging is not required. Skipping process.\n"
                 return 0
                 ;;
         0)
+                # accepted
                 ;;
         *)
-                OS::print_status error "assembly failed.\n"
+                I18N_Status_Print_Package_Assembler_Exec_Failed
                 return 1
                 ;;
         esac
 
 
         # check required files
-        OS::print_status info "checking required dockerfile...\n"
+        I18N_Status_Print_File_Check_Exists "${_src}/Dockerfile"
         FS::is_file "${_src}/Dockerfile"
         if [ $? -ne 0 ]; then
-                OS::print_status error "check failed.\n"
-                return 1
-        fi
-
-
-        # check login credentials
-        OS::print_status info "checking docker login credentials...\n"
-        DOCKER::check_login
-        if [ $? -ne 0 ]; then
-                OS::print_status error "check failed.\n"
+                I18N_Status_Print_File_Check_Failed
                 return 1
         fi
 
@@ -141,8 +132,8 @@ PACKAGE::run_docker() {
 
 
         # archive the assembled payload
-        OS::print_status info "packaging docker image: ${_target_path}\n"
-        DOCKER::create \
+        I18N_Status_Print_Package_Exec "$_target_path"
+        DOCKER_Create \
                 "$_target_path" \
                 "$_target_os" \
                 "$_target_arch" \
@@ -151,27 +142,27 @@ PACKAGE::run_docker() {
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                OS::print_status error "package failed.\n"
+                I18N_Status_Print_Package_Exec_Failed "$_target_path"
                 return 1
         fi
 
 
         # logout
-        OS::print_status info "logging out docker account...\n"
-        DOCKER::logout
+        I18N_Status_Print_Run_Logout "DOCKER"
+        DOCKER_Logout
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                OS::print_status error "logout failed.\n"
+                I18N_Status_Print_Run_Logout_Failed
                 return 1
         fi
 
 
         # clean up dangling images
-        OS::print_status info "cleaning up dangling images...\n"
-        DOCKER::clean_up
+        I18N_Status_Print_Run_Clean "DOCKER"
+        DOCKER_Clean_Up
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                OS::print_status error "package failed.\n"
+                I18N_Status_Print_Run_Clean_Failed
                 return 1
         fi
 

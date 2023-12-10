@@ -19,6 +19,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 	return 1
 }
 
+. "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\installer.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
@@ -48,7 +49,7 @@ if ($__process -ne 0) {
 
 
 $null = I18N-Status-Print-Env-Install "docker"
-$__process = INSTALLER-Setup-Docker
+$__process = DOCKER-Setup
 if ($__process -ne 0) {
 	$null = I18N-Status-Print-Env-Install-Failed
 	return 1

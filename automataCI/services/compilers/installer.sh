@@ -13,7 +13,6 @@
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/c.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/docker.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
 
 
@@ -97,35 +96,6 @@ INSTALLER::setup_c() {
 
         # report status
         return 1
-}
-
-
-
-
-INSTALLER::setup_docker() {
-        # validate input
-        OS::is_command_available "brew"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        DOCKER::is_available
-        if [ $? -ne 0 ]; then
-                # NOTE: nothing else can be done since it's host-specific.
-                #       DO NOT brew install Docker-Desktop autonomously.
-                return 0
-        fi
-
-
-        # execute
-        DOCKER::setup_builder_multiarch
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-
-        # report status
-        return 0
 }
 
 

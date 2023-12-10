@@ -9,16 +9,20 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\docker.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
 	return 1
 }
 
@@ -41,67 +45,67 @@ function PACKAGE-Run-DOCKER {
 
 
 	# validate input
-	OS-Print-Status info "checking docker functions availability..."
-	$__process = DOCKER-Is-Available
-	switch ($__process) {
-	2 {
-		OS-Print-Status warning "DOCKER is incompatible (OS type). Skipping."
-		return 0
-	} 3 {
-		OS-Print-Status warning "DOCKER is incompatible (CPU type). Skipping."
+	$null = I18N-Status-Print-Check-Availability "DOCKER"
+	$___process = DOCKER-Is-Available
+	switch ($___process) {
+	{ $_ -in 2, 3 } {
+		$null = I18N-Status-Print-Check-Availability-Incompatible "DOCKER"
 		return 0
 	} 0 {
-		break
+		# accepted
 	} Default {
-		OS-Print-Status warning "DOCKER is unavailable. Skipping."
+		$null = I18N-Status-Print-Check-Availability-Failed "DOCKER"
 		return 0
 	}}
 
 
 	# prepare workspace and required values
+	$null = I18N-Status-Print-Package-Create "DOCKER"
 	$_src = "${__target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\docker.txt"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\docker_${_src}"
-	OS-Print-Status info "dockering ${_src} for ${_target_os}-${_target_arch}"
-	OS-Print-Status info "remaking workspace directory ${_src}"
-	$__process = FS-Remake-Directory "${_src}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "remake failed."
+	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$___process = FS-Remake-Directory "${_src}"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
-	OS-Print-Status info "assembling package files..."
-	$__process = OS-Is-Command-Available "PACKAGE-Assemble-DOCKER-Content"
-	if ($__process -ne 0) {
-		OS-Print-Status error "missing PACKAGE-Assemble-DOCKER-Content function."
+	$cmd = "PACKAGE-Assemble-DOCKER-Content"
+	$null = I18N-Status-Print-Package-Assembler-Check "${cmd}"
+	$___process = OS-Is-Command-Available "$cmd"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Package-Check-Failed
 		return 1
 	}
-	$__process = PACKAGE-Assemble-DOCKER-Content `
+
+	$null = I18N-Status-Print-Package-Assembler-Exec
+	$___process = PACKAGE-Assemble-DOCKER-Content `
 		"${_target}" `
 		"${_src}" `
 		"${_target_filename}" `
 		"${_target_os}" `
 		"${_target_arch}"
-	switch ($__process) {
+	switch ($___process) {
 	10 {
+		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
 		$null = FS-Remove-Silently "${_src}"
-		OS-Print-Status warning "packaging is not required. Skipping process."
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		OS-Print-Status error "assembly failed."
+		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
 		return 1
 	}}
 
 
 	# check required files
-	OS-Print-Status info "checking required dockerfile..."
-	$__process = FS-Is-File "${_src}/Dockerfile"
-	if ($__process -ne 0) {
-		OS-Print-Status error "check failed."
+	$null = I18N-Status-Print-File-Check-Exists "${_src}/Dockerfile"
+	$___process = FS-Is-File "${_src}/Dockerfile"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-File-Check-Failed
 		return 1
 	}
 
@@ -112,37 +116,38 @@ function PACKAGE-Run-DOCKER {
 
 
 	# archive the assembled payload
-	OS-Print-Status info "packaging docker image: ${_target_path}"
-	$__process = DOCKER-Create `
+	$null = I18N-Status-Print-Package-Exec "${_target_path}"
+	$___process = DOCKER-Create `
 		"${_target_path}" `
 		"${_target_os}" `
 		"${_target_arch}" `
 		"${env:PROJECT_CONTAINER_REGISTRY}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = Set-Location -Path "${__current_path}"
 		$null = Remove-Variable -Name __current_path
-		OS-Print-Status error "package failed."
+		$null = I18N-Status-Print-Package-Exec-Failed "${_target_path}"
 		return 1
 	}
 
 
 	# logout
-	OS-Print-Status info "logging out docker account..."
-	$__process = DOCKER-Logout
-	if ($__process -ne 0) {
-		$null = Set-Location -Path "${__current_path}"
-		$null = Remove-Variable -Name __current_path
-		OS-Print-Status error "logout failed."
+	$null = I18N-Status-Print-Run-Logout "DOCKER"
+	$___process = DOCKER-Logout
+	if ($___process -ne 0) {
+		$null = Set-Location -Path "${___current_path}"
+		$null = Remove-Variable -Name ___current_path
+		$null = I18N-Status-Print-Run-Logout-Failed
 		return 1
 	}
 
-	$__process = DOCKER-Clean-Up
-	if ($__process -ne 0) {
-		$null = Set-Location -Path "${__current_path}"
-		$null = Remove-Variable -Name __current_path
-		OS-Print-Status error "package failed."
+	$null = I18N-Status-Print-Run-Clean "DOCKER"
+	$___process = DOCKER-Clean-Up
+	if ($___process -ne 0) {
+		$null = Set-Location -Path "${___current_path}"
+		$null = Remove-Variable -Name ___current_path
+		$null = I18N-Status-Print-Run-Clean-Failed
 		return 1
 	}
 
