@@ -31,7 +31,7 @@ RELEASE::run_chocolatey() {
         fi
 
 
-        CHOCOLATEY::is_valid_nupkg "$1"
+        CHOCOLATEY_Is_Valid_Nupkg "$1"
         if [ $? -ne 0 ]; then
                 return 0
         fi
@@ -39,7 +39,7 @@ RELEASE::run_chocolatey() {
 
         # execute
         OS::print_status info "registering ${1} into chocolatey repo...\n"
-        CHOCOLATEY::publish "$1" "${2}/${PROJECT_CHOCOLATEY_DIRECTORY}/"
+        CHOCOLATEY_Publish "$1" "${2}/${PROJECT_CHOCOLATEY_DIRECTORY}/"
         if [ $? -ne 0 ]; then
                 OS::print_status error "registration failed.\n"
                 return 1

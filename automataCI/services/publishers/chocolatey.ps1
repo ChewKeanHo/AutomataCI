@@ -19,8 +19,8 @@
 
 function CHOCOLATEY-Is-Available {
 	# execute
-	$__process = OS-Is-Command-Available "choco"
-	if ($__process -eq 0) {
+	$___process = OS-Is-Command-Available "choco"
+	if ($___process -eq 0) {
 		return 0
 	}
 
@@ -34,28 +34,33 @@ function CHOCOLATEY-Is-Available {
 
 function CHOCOLATEY-Is-Valid-Nupkg {
 	param(
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or (-not (Test-Path -Path "${__target}"))) {
+	if ($(STRINGS-Is-Empty "${___target}") -eq 0) {
 		return 1
 	}
 
-	if ($__target -like "*.asc") {
+	$___process = FS-Is-File
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	if ($___target -like "*.asc") {
 		return 1
 	}
 
 
 	# execute
-	$__process = FS-Is-Target-A-Chocolatey "${__target}"
-	if ($__process -ne 0) {
+	$___process = FS-Is-Target-A-Chocolatey "${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Is-Target-A-Nupkg "${__target}"
-	if ($__process -ne 0) {
+	$___process = FS-Is-Target-A-Nupkg "${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -69,24 +74,30 @@ function CHOCOLATEY-Is-Valid-Nupkg {
 
 function CHOCOLATEY-Archive {
 	param (
-		[string]$__destination,
-		[string]$__source
+		[string]$___destination,
+		[string]$___source
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
+	if (($(STRINGS-Is-Empty "${___source}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___destination}") -eq 0)) {
+		return 1
+	}
+
+	$___process = ZIP-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__current_path = Get-Location
-	$null = Set-Location -Path "${__source}"
-	$__process = ZIP-Create "${__destination}" "*"
-	$null = Set-Location -Path "${__current_path}"
-	$null = Remove-Variable -Name __current_path
-	if ($__process -ne 0) {
+	$___current_path = Get-Location
+	$null = Set-Location -Path "${___source}"
+	$___process = ZIP-Create "${___destination}" "*"
+	$null = Set-Location -Path "${___current_path}"
+	$null = Remove-Variable -Name ___current_path
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -100,23 +111,24 @@ function CHOCOLATEY-Archive {
 
 function CHOCOLATEY-Publish {
 	param (
-		[string]$__target,
-		[string]$__destination
+		[string]$___target,
+		[string]$___destination
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or [string]::IsNullOrEmpty($__destination)) {
+	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___destination}") -eq 0)) {
 		return 1
 	}
 
 
 	# execute
-	$null = FS-Make-Directory "${__destination}"
-	$__process = FS-Copy-File `
-		"${__target}" `
-		"${__destination}\$(Split-Path -Leaf -Path "${__target}")"
-	if ($__process -ne 0) {
+	$null = FS-Make-Directory "${___destination}"
+	$___process = FS-Copy-File `
+		"${___target}" `
+		"${___destination}\$(Split-Path -Leaf -Path "${___target}")"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -130,30 +142,30 @@ function CHOCOLATEY-Publish {
 
 function CHOCOLATEY-Setup {
 	# validate input
-	$__process = OS-Is-Command-Available "choco"
-	if ($__process -eq 0) {
+	$___process = OS-Is-Command-Available "choco"
+	if ($___process -eq 0) {
 		$null = choco upgrade chocolatey -y
 		return 0
 	}
 
 
 	# execute
-	$__process = HTTP-Download `
+	$___process = HTTP-Download `
 		"GET" `
 		"https://community.chocolatey.org/install.ps1" `
 		"install.ps1"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Is-File ".\install.ps1"
-	if ($__process -ne 0) {
+	$___process = FS-Is-File ".\install.ps1"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$null = Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-	$__process = OS-Exec "powershell" ".\install.ps1"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "powershell" ".\install.ps1"
+	if ($___process -ne 0) {
 		return 1
 	}
 	$null = FS-Remove-Silently ".\install.ps1"
@@ -168,54 +180,59 @@ function CHOCOLATEY-Setup {
 
 function CHOCOLATEY-Test {
 	param(
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or (-not (Test-Path "${__target}"))) {
+	if ($(STRINGS-Is-Empty "${___target}") -eq 0) {
 		return 1
 	}
 
-	$__process = CHOCOLATEY-Is-Available
-	if ($__process -ne 0) {
+	$___process = FS-Is-File "${___target}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = CHOCOLATEY-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__name = Split-Path -Leaf -Path "${__target}"
-	$__name = $__name -replace '\-chocolatey.*$', ''
+	$___name = Split-Path -Leaf -Path "${___target}"
+	$___name = $___name -replace '\-chocolatey.*$', ''
 
 
 	## test install
-	$__current_path = Get-Location
-	$null = Set-Location "$(Split-Path -Parent -Path "${__target}")"
-	$__arguments = "install ${__name} " `
+	$___current_path = Get-Location
+	$null = Set-Location "$(Split-Path -Parent -Path "${___target}")"
+	$___arguments = "install ${___name} " `
 			+ "--debug " `
 			+ "--verbose " `
 			+ "--force " `
 			+ "--source `".`" "
-	$__process = OS-Exec "choco" "${__arguments}"
-	$null = Set-Location "${__current_path}"
-	$null = Remove-Variable "__current_path"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "choco" "${___arguments}"
+	$null = Set-Location "${___current_path}"
+	$null = Remove-Variable "___current_path"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	## test uninstall
-	$__current_path = Get-Location
-	$null = Set-Location "$(Split-Path -Parent -Path "${__target}")"
-	$__arguments = "uninstall ${__name} " `
+	$___current_path = Get-Location
+	$null = Set-Location "$(Split-Path -Parent -Path "${___target}")"
+	$___arguments = "uninstall ${___name} " `
 			+ "--debug " `
 			+ "--verbose " `
 			+ "--force " `
 			+ "--source `".`" "
-	$__process = OS-Exec "choco" "${__arguments}"
-	$null = Set-Location "${__current_path}"
-	$null = Remove-Variable "__current_path"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "choco" "${___arguments}"
+	$null = Set-Location "${___current_path}"
+	$null = Remove-Variable "___current_path"
+	if ($___process -ne 0) {
 		return 1
 	}
 

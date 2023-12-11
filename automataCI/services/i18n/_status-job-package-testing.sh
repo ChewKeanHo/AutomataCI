@@ -11,17 +11,10 @@
 # under the License.
 . "${LIBS_AUTOMATACI}/services/i18n/printer.sh"
 
-. "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-assembler.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-export.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-parallelism.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-remake.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-source.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/_status-job-package-testing.sh"
 
 
 
-
-I18N_Status_Print_Package_Create() {
+I18N_Status_Print_Package_Testing() {
         ___subject="$1"
 
 
@@ -30,7 +23,7 @@ I18N_Status_Print_Package_Create() {
         *)
                 # fallback to default english
                 ___subject="$(I18N_Status_Param_Process "${___subject}")"
-                I18N_Status_Print info "creating ${___subject} package...\n"
+                I18N_Status_Print info "testing package: ${___subject}\n"
                 ;;
         esac
 
@@ -42,12 +35,12 @@ I18N_Status_Print_Package_Create() {
 
 
 
-I18N_Status_Print_Package_Check_Failed() {
+I18N_Status_Print_Package_Testing_Failed() {
         # execute
         case "$AUTOMATACI_LANG" in
         *)
                 # fallback to default english
-                I18N_Status_Print error "check failed.\n\n"
+                I18N_Status_Print error "test failed\n\n"
                 ;;
         esac
 
@@ -59,37 +52,12 @@ I18N_Status_Print_Package_Check_Failed() {
 
 
 
-I18N_Status_Print_Package_Exec() {
-        ___subject="$1"
-
-
+I18N_Status_Print_Package_Testing_Skipped() {
         # execute
         case "$AUTOMATACI_LANG" in
         *)
                 # fallback to default english
-                ___subject="$(I18N_Status_Param_Process "${___subject}")"
-                I18N_Status_Print info "packaging ${___subject}\n"
-                ;;
-        esac
-
-
-        # report status
-        return 0
-}
-
-
-
-
-I18N_Status_Print_Package_Exec_Failed() {
-        ___subject="$1"
-
-
-        # execute
-        case "$AUTOMATACI_LANG" in
-        *)
-                # fallback to default english
-                ___subject="$(I18N_Status_Param_Process "${___subject}")"
-                I18N_Status_Print error "package failed - ${___subject}\n"
+                I18N_Status_Print warning "test skipped\n\n"
                 ;;
         esac
 

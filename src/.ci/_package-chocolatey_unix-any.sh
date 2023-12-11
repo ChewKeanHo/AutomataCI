@@ -26,7 +26,7 @@ fi
 
 
 
-PACKAGE::assemble_chocolatey_content() {
+PACKAGE_Assemble_Chocolatey_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"

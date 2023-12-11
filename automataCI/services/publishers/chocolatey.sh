@@ -12,13 +12,14 @@
 # the License.
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/net/http.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/zip.sh"
 
 
 
 
-CHOCOLATEY::is_available() {
+CHOCOLATEY_Is_Available() {
         # execute
         OS::is_command_available "choco"
         if [ $? -eq 0 ]; then
@@ -33,12 +34,12 @@ CHOCOLATEY::is_available() {
 
 
 
-CHOCOLATEY::is_valid_nupkg() {
-        #__target="$1"
+CHOCOLATEY_Is_Valid_Nupkg() {
+        #___target="$1"
 
 
         # validate input
-        if [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
@@ -64,13 +65,13 @@ CHOCOLATEY::is_valid_nupkg() {
 
 
 
-CHOCOLATEY::archive() {
-        #__destination="$1"
-        #__source="$2"
+CHOCOLATEY_Archive() {
+        #___destination="$1"
+        #___source="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 
@@ -81,11 +82,11 @@ CHOCOLATEY::archive() {
 
 
         # execute
-        __current_path="$PWD" && cd "$2"
+        ___current_path="$PWD" && cd "$2"
         ZIP::create "$1" "*"
-        __exit=$?
-        cd "$__current_path" && unset __current_path
-        if [ $__exit -ne 0 ]; then
+        ___process=$?
+        cd "$___current_path" && unset ___current_path
+        if [ $___process -ne 0 ]; then
                 return 1
         fi
 
@@ -97,13 +98,13 @@ CHOCOLATEY::archive() {
 
 
 
-CHOCOLATEY::publish() {
-        #__target="$1"
-        #__destination="$2"
+CHOCOLATEY_Publish() {
+        #___target="$1"
+        #___destination="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 
@@ -123,51 +124,56 @@ CHOCOLATEY::publish() {
 
 
 
-CHOCOLATEY::Setup() {
+CHOCOLATEY_Setup() {
         return 1 # not supported
 }
 
 
 
 
-CHOCOLATEY::test() {
-        #__target="$1"
+CHOCOLATEY_Test() {
+        #___target="$1"
 
 
         # validate input
-        if [ -z "$1" ] || [ ! -f "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        CHOCOLATEY::is_available
+        FS::is_file "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        CHOCOLATEY_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        __name="${1##*/}"
-        __name="${__name%%-chocolatey*}"
+        ___name="${1##*/}"
+        ___name="${___name%%-chocolatey*}"
 
 
         # test install
-        __current_path="$PWD"
+        ___current_path="$PWD"
         cd "${1%/*}"
         choco install "${1##*/}" --debug --verbose --force --source .
-        __exit=$?
-        cd "$__current_path" && unset __current_path
-        if [ $__exit -ne 0 ]; then
+        ___process=$?
+        cd "$___current_path" && unset ___current_path
+        if [ $___process -ne 0 ]; then
                 return 1
         fi
 
 
         # test uninstall
-        __current_path="$PWD"
+        ___current_path="$PWD"
         cd "${1%/*}"
         choco uninstall "${1##*/}" --debug --verbose --force --source .
-        __exit=$?
-        cd "$__current_path" && unset __current_path
-        if [ $__exit -ne 0 ]; then
+        ___process=$?
+        cd "$___current_path" && unset ___current_path
+        if [ $___process -ne 0 ]; then
                 return 1
         fi
 

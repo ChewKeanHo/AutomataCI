@@ -11,17 +11,10 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\i18n\printer.ps1"
 
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-assembler.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-export.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-parallelism.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-remake.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-source.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-job-package-testing.ps1"
 
 
 
-
-function I18N-Status-Print-Package-Create {
+function I18N-Status-Print-Package-Testing {
 	param(
 		[string]$___subject
 	)
@@ -32,7 +25,7 @@ function I18N-Status-Print-Package-Create {
 	default {
 		# fallback to default english
 		$___subject = I18N-Status-Param-Process "${___subject}"
-		$null = I18N-Status-Print info "creating ${___subject} package...`n"
+		$null = I18N-Status-Print info "testing: ${___subject}`n"
 	}}
 
 
@@ -43,18 +36,12 @@ function I18N-Status-Print-Package-Create {
 
 
 
-function I18N-Status-Print-Package-Exec {
-	param(
-		[string]$___subject
-	)
-
-
+function I18N-Status-Print-Package-Testing-Failed {
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$___subject = I18N-Status-Param-Process "${___subject}"
-		$null = I18N-Status-Print info "packaging ${___subject}`n"
+		$null = I18N-Status-Print error "testing failed.`n`n"
 	}}
 
 
@@ -65,18 +52,12 @@ function I18N-Status-Print-Package-Exec {
 
 
 
-function I18N-Status-Print-Package-Exec-Failed {
-	param(
-		[string]$___subject
-	)
-
-
+function I18N-Status-Print-Package-Testing-Skipped {
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$___subject = I18N-Status-Param-Process "${___subject}"
-		$null = I18N-Status-Print error "package failed - ${___subject}`n"
+		$null = I18N-Status-Print warning "testing skipped.`n`n"
 	}}
 
 
