@@ -28,7 +28,7 @@ fi
 
 # safety checking control surfaces
 OS::print_status info "activating localized environment...\n"
-RUST::activate_local_environment
+RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
         OS::print_status error "activation failed.\n"
         return 1

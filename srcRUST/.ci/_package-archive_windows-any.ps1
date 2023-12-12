@@ -47,7 +47,7 @@ function PACKAGE-Assemble-Archive-Content {
 		}
 		$null = FS-Remove-Silently "${_directory}\.ci"
 
-		$__process = RUST-Create-Cargo-TOML `
+		$__process = RUST-Create-CARGO-TOML `
 			"${_directory}\Cargo.toml" `
 			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 			"${env:PROJECT_SKU}" `

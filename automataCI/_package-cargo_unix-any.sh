@@ -10,9 +10,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -26,92 +30,94 @@ fi
 
 
 
-PACKAGE::run_cargo() {
+PACKAGE_Run_CARGO() {
         #__line="$1"
 
 
         # parse input
-        __line="${1%|*}"
+        __line="$1"
 
-        _target_arch="${__line##*|}"
-        __line="${__line%|*}"
+        _dest="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target_os="${__line##*|}"
-        __line="${__line%|*}"
+        _target="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target_filename="${__line##*|}"
-        __line="${__line%|*}"
+        _target_filename="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target="${__line##*|}"
-        __line="${__line%|*}"
+        _target_os="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _dest="${__line##*|}"
+        _target_arch="${__line%%|*}"
+        __line="${__line#*|}"
 
 
         # validate input
-        if [ ! -z "$PROJECT_RUST" ]; then
-                RUST::activate_local_environment
+        if [ $(STRINGS-Is-Empty "$PROJECT_RUST") -eq 0 ]; then
+                RUST_Activate_Local_Environment
         fi
 
-        RUST::is_available
+        I18N_Status_Print_Check_Availability "RUST"
+        RUST_Is_Available
         if [ $? -ne 0 ]; then
-                OS::print_status warning "Rust is incompatible or unavailable. Skipping.\n"
+                I18N_Status_Print_Check_Availability_Failed "RUST"
                 return 0
         fi
 
 
         # prepare workspace and required values
+        I18N_Status_Print_Package_Create "RUST"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/cargo_${_src}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/cargo_${_src}"
-        OS::print_status info "Creating Rust cargo package...\n"
-        OS::print_status info "remaking workspace directory ${_src}\n"
+        I18N_Status_Print_Package_Workspace_Remake "$_src"
         FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
-                OS::print_status error "remake failed.\n"
+                I18N_Status_Print_Package_Remake_Failed
                 return 1
         fi
 
-        OS::print_status info "checking output file existence...\n"
-        if [ -d "$_target_path" ]; then
-                OS::print_status error "check failed - output exists!\n"
+        I18N_Status_Print_File_Check_Exists "$_target_path"
+        FS::is_directory "$_target_path"
+        if [ $? -eq 0 ]; then
+                I18N_Status_Print_File_Check_Failed
                 return 1
         fi
 
 
         # copy all complimentary files to the workspace
-        OS::print_status info "assembling package files...\n"
-        if [ -z "$(type -t PACKAGE::assemble_cargo_content)" ]; then
-                OS::print_status error "missing PACKAGE::assemble_cargo_content function.\n"
+        cmd="PACKAGE_Assemble_CARGO_Content"
+        I18N_Status_Print_Package_Assembler_Check "$cmd"
+        OS::is_command_available "$cmd"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_Package_Check_Failed
                 return 1
         fi
-        PACKAGE::assemble_cargo_content \
-                "$_target" \
-                "$_src" \
-                "$_target_filename" \
-                "$_target_os" \
-                "$_target_arch"
+
+        I18N_Status_Print_Package_Assembler_Exec
+        "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)
+                I18N_Status_Print_Package_Assembler_Exec_Skipped
                 FS::remove_silently "$_src"
-                OS::print_status warning "packaging is not required. Skipping process.\n"
                 return 0
                 ;;
         0)
                 ;;
         *)
-                OS::print_status error "assembly failed.\n"
+                I18N_Status_Print_Package_Assembler_Exec_Failed
                 return 1
                 ;;
         esac
 
 
         # archive the assembled payload
-        OS::print_status info "archiving Rust cargo package...\n"
+        I18N_Status_Print_Package_Exec "$_target_path"
         FS::make_directory "$_target_path"
-        RUST::create_archive "$_src" "$_target_path"
+        RUST_Create_Archive "$_src" "$_target_path"
         if [ $? -ne 0 ]; then
-                OS::print_status error "package failed.\n"
+                I18N_Status_Print_Package_Exec_Failed "$_target_path"
                 return 1
         fi
 

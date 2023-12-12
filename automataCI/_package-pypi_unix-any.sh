@@ -87,7 +87,7 @@ PACKAGE::run_pypi() {
 
 
         # copy all complimentary files to the workspace
-        cmd="PACKAGE::assemble_rpm_content"
+        cmd="PACKAGE::assemble_pypi_content"
         I18N_Status_Print_Package_Assembler_Check "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then

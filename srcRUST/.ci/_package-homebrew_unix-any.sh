@@ -80,7 +80,7 @@ PACKAGE::assemble_homebrew_content() {
                 return 1
         fi
 
-        RUST::create_cargo_toml \
+        RUST_Create_CARGO_TOML \
                 "${_directory}/${PROJECT_RUST}/Cargo.toml" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                 "$PROJECT_SKU" \

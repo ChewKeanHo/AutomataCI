@@ -84,7 +84,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		return 1
 	}
 
-	$__process = RUST-Create-Cargo-TOML `
+	$__process = RUST-Create-CARGO-TOML `
 		"${_directory}\Data\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_SKU}" `

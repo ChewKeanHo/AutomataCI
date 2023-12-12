@@ -97,7 +97,7 @@ PACKAGE_Assemble_Chocolatey_Content() {
                 return 1
         fi
 
-        RUST::create_cargo_toml \
+        RUST_Create_CARGO_TOML \
                 "${_directory}/Data/${PROJECT_RUST}/Cargo.toml" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                 "$PROJECT_SKU" \

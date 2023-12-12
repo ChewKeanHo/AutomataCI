@@ -1,3 +1,25 @@
+automataCI: added i18n feature to chocolatey packaging function
+automataCI: added i18n feature to deb packaging function
+automataCI: added i18n feature to docker packaging function
+automataCI: added i18n feature to flatpak packaging function
+automataCI: added i18n feature to homebrew packaging function
+automataCI: added i18n feature to ipk packaging function
+automataCI: applied i18n feature to pypi packaging function
+automataCI: added i18n feature to rpm packager function
+automataCI: added i18n for package sourcing function libraries
+automataCI: added i18n feature for notarize CI job function
+.internals: shifted business reason to first chapter in documentation
+automataCI: added i18n feature for common CI job function
+root: removed unwanted executable permissions in automataCI/
+root: internationalized handbook
+root: added msi packager function
+automataCI: upgraded status printing styling
+root: added msi packagers environment CI job function
+root: enhanced package CI job with parallel executions
+root: added CITATION.cff generative function
+root: tided up homebrew and chocolatey packagers' implementations
+src: tidied up DESCRIPTION.txt template to ABSTRACTS.txt
+root: added deploy CI job recipe
 root: added support for Rust programming language
 root: added Angular frontend framework technology
 root: added notarize CI job

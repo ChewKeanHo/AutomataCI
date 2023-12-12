@@ -20,13 +20,13 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
 
 
 
 
-PACKAGE::assemble_cargo_content() {
+PACKAGE_Assemble_CARGO_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"

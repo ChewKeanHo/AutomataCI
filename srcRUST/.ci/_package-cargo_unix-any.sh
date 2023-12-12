@@ -27,7 +27,7 @@ fi
 
 
 
-PACKAGE::assemble_cargo_content() {
+PACKAGE_Assemble_CARGO_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -60,7 +60,7 @@ PACKAGE::assemble_cargo_content() {
 
         FS::remove_silently "${_directory}/Cargo.lock"
         FS::remove_silently "${_directory}/.ci"
-        RUST::create_cargo_toml \
+        RUST_Create_CARGO_TOML \
                 "${_directory}/Cargo.toml" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                 "$PROJECT_SKU" \

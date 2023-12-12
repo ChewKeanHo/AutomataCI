@@ -74,7 +74,7 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 		return 1
 	}
 
-	$__process = RUST-Create-Cargo-TOML `
+	$__process = RUST-Create-CARGO-TOML `
 		"${_directory}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_SKU}" `

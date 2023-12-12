@@ -29,7 +29,7 @@ fi
 
 # safety checking control surfaces
 OS::print_status info "activating local environment...\n"
-RUST::activate_local_environment
+RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
         OS::print_status error "activation failed.\n"
         return 1
@@ -40,7 +40,7 @@ fi
 
 # execute
 __report_location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/rust-test-report"
-__target="$(RUST::get_build_target "$PROJECT_OS" "$PROJECT_ARCH")"
+__target="$(RUST_Get_Build_Target "$PROJECT_OS" "$PROJECT_ARCH")"
 __filename="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
 __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rust-test-${__filename}"
 

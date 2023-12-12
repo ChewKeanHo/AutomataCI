@@ -17,22 +17,23 @@
 
 
 
-RUST::activate_local_environment() {
+RUST_Activate_Local_Environment() {
         # validate input
-        RUST::is_localized
+        RUST_Is_Localized
         if [ $? -eq 0 ] ; then
                 return 0
         fi
 
 
         # execute
-        __location="$(RUST::get_activator_path)"
-        if [ ! -f "$__location" ]; then
+        ___location="$(RUST_Get_Activator_Path)"
+        FS::is_file "$___location"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        . "$__location"
-        RUST::is_localized
+        . "$___location"
+        RUST_Is_Localized
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -45,9 +46,10 @@ RUST::activate_local_environment() {
 
 
 
-RUST::cargo_login() {
+RUST_Cargo_Login() {
         # validate input
-        if [ -z "$CARGO_REGISTRY" ] || [ -z "$CARGO_PASSWORD" ]; then
+        if [ $(STRINGS_Is_Empty "$CARGO_REGISTRY") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$CARGO_PASSWORD") -eq 0 ]; then
                 return 1
         fi
 
@@ -66,7 +68,7 @@ RUST::cargo_login() {
 
 
 
-RUST::cargo_logout() {
+RUST_Cargo_Logout() {
         # execute
         cargo logout
         if [ $? -ne 0 ]; then
@@ -83,23 +85,28 @@ RUST::cargo_logout() {
 
 
 
-RUST::cargo_release_crate() {
-        #__source_directory="$1"
+RUST_Cargo_Release_Crate() {
+        #___source_directory="$1"
 
 
         # validate input
-        if [ -z "$1" ] || [ ! -d "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        __current_path="$PWD" && cd "$1"
+        ___current_path="$PWD" && cd "$1"
         cargo publish
-        __exit_code=$?
-        cd "$__current_path" && unset __current_path
+        ___process=$?
+        cd "$___current_path" && unset ___current_path
 
-        if [ $__exit_code -ne 0 ]; then
+        if [ $___process -ne 0 ]; then
                 return 1
         fi
 
@@ -111,12 +118,17 @@ RUST::cargo_release_crate() {
 
 
 
-RUST::crate_is_valid() {
-        #__target="$1"
+RUST_Crate_Is_Valid() {
+        #___target="$1"
 
 
         # validate input
-        if [ -z "$1" ] || [ ! -d "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
@@ -128,18 +140,18 @@ RUST::crate_is_valid() {
         fi
 
 
-        __hasCARGO="false"
-        for __file in "${1}/"*; do
-                if [ ! -e "$__file" ]; then
+        ___hasCARGO="false"
+        for ___file in "${1}/"*; do
+                if [ ! -e "$___file" ]; then
                         continue
                 fi
 
-                if [ ! "${__file%%Cargo.toml*}" = "${__file}" ]; then
-                        __hasCARGO="true"
+                if [ ! "${___file%%Cargo.toml*}" = "${___file}" ]; then
+                        ___hasCARGO="true"
                 fi
         done
 
-        if [ "$__hasCARGO" = "true" ]; then
+        if [ "$___hasCARGO" = "true" ]; then
                 return 0
         fi
 
@@ -151,50 +163,55 @@ RUST::crate_is_valid() {
 
 
 
-RUST::create_archive() {
-        __source_directory="$1"
-        __target_directory="$2"
+RUST_Create_Archive() {
+        ___source_directory="$1"
+        ___target_directory="$2"
 
 
         # validate input
-        if [ -z "$__source_directory" ] ||
-                [ -z "$__target_directory" ] ||
-                [ ! -d "$__source_directory" ] ||
-                [ ! -d "$__target_directory" ]; then
+        if [ $(STRINGS_Is_Empty "$___source_directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___target_directory") -eq 0 ]; then
                 return 1
         fi
 
-        RUST::is_localized
+        FS::is_directory "$___source_directory"
         if [ $? -ne 0 ]; then
-                RUST::activate_local_environment
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
+                return 1
+        fi
+
+        FS::is_directory "$___target_directory"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RUST_Activate_Local_Environment
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
 
         # execute
-        FS::remove_silently "${__source_directory}/Cargo.lock"
+        FS::remove_silently "${___source_directory}/Cargo.lock"
 
-        __current_path="$PWD" && cd "$__source_directory"
+        ___current_path="$PWD" && cd "$___source_directory"
 
         cargo build
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
         cargo publish --dry-run
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
-        cd "$__current_path" && unset __current_path
+        cd "$___current_path" && unset ___current_path
 
-        FS::remove_silently "${__source_directory}/target"
-        FS::remake_directory "${__target_directory}"
-        FS::copy_all "${__source_directory}/" "${__target_directory}"
+        FS::remove_silently "${___source_directory}/target"
+        FS::remake_directory "${___target_directory}"
+        FS::copy_all "${___source_directory}/" "${___target_directory}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -207,55 +224,59 @@ RUST::create_archive() {
 
 
 
-RUST::create_cargo_toml() {
-        __filepath="$1"
-        __template="$2"
-        __sku="$3"
-        __version="$4"
-        __pitch="$5"
-        __edition="$6"
-        __license="$7"
-        __docs="$8"
-        __website="$9"
-        __repo="${10}"
-        __readme="${11}"
-        __contact_name="${12}"
-        __contact_email="${13}"
+RUST_Create_CARGO_TOML() {
+        ___filepath="$1"
+        ___template="$2"
+        ___sku="$3"
+        ___version="$4"
+        ___pitch="$5"
+        ___edition="$6"
+        ___license="$7"
+        ___docs="$8"
+        ___website="$9"
+        ___repo="${10}"
+        ___readme="${11}"
+        ___contact_name="${12}"
+        ___contact_email="${13}"
 
 
         # validate input
-        if [ -z "$__filepath" ] ||
-                [ -z "$__template" ] ||
-                [ ! -f "$__template" ] ||
-                [ -z "$__sku" ] ||
-                [ -z "$__version" ] ||
-                [ -z "$__pitch" ] ||
-                [ -z "$__edition" ] ||
-                [ -z "$__license" ] ||
-                [ -z "$__docs" ] ||
-                [ -z "$__website" ] ||
-                [ -z "$__repo" ] ||
-                [ -z "$__readme" ] ||
-                [ -z "$__contact_name" ] ||
-                [ -z "$__contact_email" ]; then
+        if [ $(STRINGS_Is_Empty "$___filepath") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___template") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___sku") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___pitch") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___edition") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___license") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___docs") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___website") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___repo") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___readme") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___contact_name") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___contact_email") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "$___template"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        FS::remove_silently "$__filepath"
-        FS::write_file "$__filepath" "\
+        FS::remove_silently "$___filepath"
+        FS::write_file "$___filepath" "\
 [package]
-name = '$__sku'
-version = '$__version'
-description = '$__pitch'
-edition = '$__edition'
-license = '$__license'
-documentation = '$__docs'
-homepage = '$__website'
-repository = '$__repo'
-readme = '$__readme'
-authors = [ '$__contact_name <$__contact_email>' ]
+name = '$___sku'
+version = '$___version'
+description = '$___pitch'
+edition = '$___edition'
+license = '$___license'
+documentation = '$___docs'
+homepage = '$___website'
+repository = '$___repo'
+readme = '$___readme'
+authors = [ '$___contact_name <$___contact_email>' ]
 
 
 
@@ -265,49 +286,46 @@ authors = [ '$__contact_name <$__contact_email>' ]
                 return 1
         fi
 
-        __begin_append=1
-        __old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                if [ $__begin_append -ne 0 ] &&
-                        [ ! "${__line%%\[AUTOMATACI BEGIN\]*}" = "${__line}" ]; then
-                        __begin_append=0
+        ___begin_append=1
+        ___old_IFS="$IFS"
+        while IFS="" read -r ___line || [ -n "$___line" ]; do
+                if [ $___begin_append -ne 0 ] &&
+                        [ ! "${___line%%\[AUTOMATACI BEGIN\]*}" = "${___line}" ]; then
+                        ___begin_append=0
                         continue
                 fi
 
-                if [ $__begin_append -ne 0 ]; then
+                if [ $___begin_append -ne 0 ]; then
                         continue
                 fi
 
-                FS::append_file "$__filepath" "$__line\n"
+                FS::append_file "$___filepath" "$___line\n"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
-        done < "$__template"
-        IFS="$__old_IFS" && unset __old_IFS
+        done < "$___template"
+        IFS="$___old_IFS" && unset ___old_IFS
 
 
         # update Cargo.lock
-        RUST::is_localized
+        RUST_Activate_Local_Environment
         if [ $? -ne 0 ]; then
-                RUST::activate_local_environment
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
+                return 1
         fi
 
-        __current_path="$PWD" && cd "${__filepath%/*}"
+        ___current_path="$PWD" && cd "${___filepath%/*}"
         cargo update
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
         cargo clean
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
-        cd "$__current_path" && unset __current_path
+        cd "$___current_path" && unset ___current_path
 
 
         # report status
@@ -317,236 +335,245 @@ authors = [ '$__contact_name <$__contact_email>' ]
 
 
 
-RUST::get_activator_path() {
-        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_RUST_ENGINE}"
-        __location="${__location}/activate.sh"
-        printf -- "%b" "$__location"
+RUST_Get_Activator_Path() {
+        # execute
+        ___location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_RUST_ENGINE}"
+        ___location="${___location}/activate.sh"
+        printf -- "%b" "$___location"
 }
 
 
 
 
-RUST::get_build_target() {
-        #__os="$1"
-        #__arch="$2"
+RUST_Get_Build_Target() {
+        #___os="$1"
+        #___arch="$2"
 
 
         # execute
         case "${1}-${2}" in
         aix-ppc64)
-                __target='powerpc64-ibm-aix'
+                ___target='powerpc64-ibm-aix'
                 ;;
         android-amd64)
-                __target='x86_64-linux-android'
+                ___target='x86_64-linux-android'
                 ;;
         android-arm64)
-                __target='aarch64-linux-android'
+                ___target='aarch64-linux-android'
                 ;;
         darwin-amd64)
-                __target='x86_64-apple-darwin'
+                ___target='x86_64-apple-darwin'
                 ;;
         darwin-arm64)
-                __target='aarch64-apple-darwin'
+                ___target='aarch64-apple-darwin'
                 ;;
         dragonfly-amd64)
-                __target='x86_64-unknown-dragonfly'
+                ___target='x86_64-unknown-dragonfly'
                 ;;
         freebsd-amd64)
-                __target='x86_64-unknown-freebsd'
+                ___target='x86_64-unknown-freebsd'
                 ;;
         fuchsia-amd64)
-                __target='x86_64-unknown-fuchsia'
+                ___target='x86_64-unknown-fuchsia'
                 ;;
         fuchsia-arm64)
-                __target='aarch64-unknown-fuchsia'
+                ___target='aarch64-unknown-fuchsia'
                 ;;
         haiku-amd64)
-                __target='x86_64-unknown-haiku'
+                ___target='x86_64-unknown-haiku'
                 ;;
         illumos-amd64)
-                __target='x86_64-unknown-illumos'
+                ___target='x86_64-unknown-illumos'
                 ;;
         ios-amd64)
-                __target='x86_64-apple-ios'
+                ___target='x86_64-apple-ios'
                 ;;
         ios-arm64)
-                __target='aarch64-apple-ios'
+                ___target='aarch64-apple-ios'
                 ;;
         js-wasm)
-                __target='wasm32-unknown-emscripten'
+                ___target='wasm32-unknown-emscripten'
                 ;;
         linux-armel|linux-armle)
-                __target='arm-unknown-linux-musleabi'
+                ___target='arm-unknown-linux-musleabi'
                 ;;
         linux-armhf)
-                __target='arm-unknown-linux-musleabihf'
+                ___target='arm-unknown-linux-musleabihf'
                 ;;
         linux-armv7)
-                __target='armv7-unknown-linux-musleabihf'
+                ___target='armv7-unknown-linux-musleabihf'
                 ;;
         linux-amd64)
-                __target='x86_64-unknown-linux-musl'
+                ___target='x86_64-unknown-linux-musl'
                 ;;
         linux-arm64)
-                __target='aarch64-unknown-linux-musl'
+                ___target='aarch64-unknown-linux-musl'
                 ;;
         linux-loongarch64)
-                __target='loongarch64-unknown-linux-gnu'
+                ___target='loongarch64-unknown-linux-gnu'
                 ;;
         linux-mips)
-                __target='mips-unknown-linux-musl'
+                ___target='mips-unknown-linux-musl'
                 ;;
         linux-mipsle|linux-mipsel)
-                __target='mipsel-unknown-linux-musl'
+                ___target='mipsel-unknown-linux-musl'
                 ;;
         linux-mips64)
-                __target='mips64-unknown-linux-muslabi64'
+                ___target='mips64-unknown-linux-muslabi64'
                 ;;
         linux-mips64el|linux-mips64le)
-                __target='mips64el-unknown-linux-muslabi64'
+                ___target='mips64el-unknown-linux-muslabi64'
                 ;;
         linux-ppc64)
-                __target='powerpc64-unknown-linux-gnu'
+                ___target='powerpc64-unknown-linux-gnu'
                 ;;
         linux-ppc64le)
-                __target='powerpc64le-unknown-linux-gnu'
+                ___target='powerpc64le-unknown-linux-gnu'
                 ;;
         linux-riscv64)
-                __target='riscv64gc-unknown-linux-gnu'
+                ___target='riscv64gc-unknown-linux-gnu'
                 ;;
         linux-s390x)
-                __target='s390x-unknown-linux-gnu'
+                ___target='s390x-unknown-linux-gnu'
                 ;;
         linux-sparc)
-                __target='sparc-unknown-linux-gnu'
+                ___target='sparc-unknown-linux-gnu'
                 ;;
         netbsd-amd64)
-                __target='x86_64-unknown-netbsd'
+                ___target='x86_64-unknown-netbsd'
                 ;;
         netbsd-arm64)
-                __target='aarch64-unknown-netbsd'
+                ___target='aarch64-unknown-netbsd'
                 ;;
         netbsd-riscv64)
-                __target='riscv64gc-unknown-netbsd'
+                ___target='riscv64gc-unknown-netbsd'
                 ;;
         netbsd-sparc)
-                __target='sparc64-unknown-netbsd'
+                ___target='sparc64-unknown-netbsd'
                 ;;
         openbsd-amd64)
-                __target='x86_64-unknown-openbsd'
+                ___target='x86_64-unknown-openbsd'
                 ;;
         openbsd-arm64)
-                __target='aarch64-unknown-openbsd'
+                ___target='aarch64-unknown-openbsd'
                 ;;
         openbsd-ppc64)
-                __target='powerpc64-unknown-openbsd'
+                ___target='powerpc64-unknown-openbsd'
                 ;;
         openbsd-riscv64)
-                __target='riscv64gc-unknown-openbsd'
+                ___target='riscv64gc-unknown-openbsd'
                 ;;
         openbsd-sparc)
-                __target='sparc64-unknown-openbsd'
+                ___target='sparc64-unknown-openbsd'
                 ;;
         redox-amd64)
-                __target='x86_64-unknown-redox'
+                ___target='x86_64-unknown-redox'
                 ;;
         solaris-amd64)
-                __target='x86_64-pc-solaris'
+                ___target='x86_64-pc-solaris'
                 ;;
         wasip1-wasm)
-                __target='wasm32-wasi'
+                ___target='wasm32-wasi'
                 ;;
         windows-amd64)
-                __target='x86_64-pc-windows-gnu'
+                ___target='x86_64-pc-windows-gnu'
                 ;;
         windows-arm64)
-                __target='aarch64-pc-windows-msvc'
+                ___target='aarch64-pc-windows-msvc'
                 ;;
         *)
-                __target=''
+                ___target=''
                 ;;
         esac
-        printf -- "%b" "${__target}"
-
-
-        # report status
-        if [ ! -z "$__target" ]; then
+        printf -- "%b" "${___target}"
+        if [ $(STRINGS_Is_Empty "$___target") -ne 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-RUST::is_available() {
-        if [ -z "$(type -t rustup)" ]; then
+RUST_Is_Available() {
+        # execute
+        OS::is_command_available "rustup"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ -z "$(type -t rustc)" ]; then
+        OS::is_command_available "rustc"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ -z "$(type -t cargo)" ]; then
+        OS::is_command_available "cargo"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
+
+        # report status
         return 0
 }
 
 
 
 
-RUST::is_localized() {
-        if [ ! -z "$PROJECT_RUST_LOCALIZED" ] ; then
+RUST_Is_Localized() {
+        # execute
+        if [ $(STRINGS_Is_Empty "$PROJECT_RUST_LOCALIZED") -ne 0 ] ; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-RUST::setup_local_environment() {
+RUST_Setup_Local_Environment() {
         # validate input
-        if [ -z "$PROJECT_PATH_ROOT" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_PATH_ROOT") -eq 0 ] ; then
                 return 1
         fi
 
-        if [ -z "$PROJECT_PATH_TOOLS" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_PATH_TOOLS") -eq 0 ] ; then
                 return 1
         fi
 
-        if [ -z "$PROJECT_PATH_AUTOMATA" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_PATH_AUTOMATA") -eq 0 ] ; then
                 return 1
         fi
 
-        if [ -z "$PROJECT_PATH_RUST_ENGINE" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_PATH_RUST_ENGINE") -eq 0 ] ; then
                 return 1
         fi
 
-        if [ -z "$PROJECT_OS" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_OS") -eq 0 ] ; then
                 return 1
         fi
 
-        if [ -z "$PROJECT_ARCH" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_ARCH") -eq 0 ] ; then
                 return 1
         fi
 
-        RUST::is_localized
+        RUST_Is_Localized
         if [ $? -eq 0 ] ; then
                 return 0
         fi
 
 
         # execute
-        __label="($PROJECT_PATH_RUST_ENGINE)"
-        __location="$(RUST::get_activator_path)"
-        export CARGO_HOME="${__location%/*}"
-        export RUSTUP_HOME="${__location%/*}"
+        ___label="($PROJECT_PATH_RUST_ENGINE)"
+        ___location="$(RUST_Get_Activator_Path)"
+        export CARGO_HOME="${___location%/*}"
+        export RUSTUP_HOME="${___location%/*}"
 
         ## download installer from official portal
         sh "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust-rustup.sh" \
@@ -554,14 +581,14 @@ RUST::setup_local_environment() {
                 --no-modify-path
 
         ## it's a clean repo. Start setting up localized environment...
-        FS::make_housing_directory "$__location"
-        FS::write_file "${__location}" "\
+        FS::make_housing_directory "$___location"
+        FS::write_file "${___location}" "\
 #!/bin/sh
 deactivate() {
         PATH=:\${PATH}:
         PATH=\${PATH//:\$CARGO_HOME/bin:/:}
         PATH=\${PATH%:}
-        export PS1=\"\${PS1##*${__label} }\"
+        export PS1=\"\${PS1##*${___label} }\"
         unset PROJECT_RUST_LOCALIZED
         unset CARGO_HOME RUSTUP_HOME
         return 0
@@ -570,9 +597,9 @@ deactivate() {
 # activate
 export CARGO_HOME='${CARGO_HOME}'
 export RUSTUP_HOME='${RUSTUP_HOME}'
-export PROJECT_RUST_LOCALIZED='${__location}'
+export PROJECT_RUST_LOCALIZED='${___location}'
 export PATH=\$PATH:\${CARGO_HOME}/bin
-export PS1=\"${__label} \${PS1}\"
+export PS1=\"${___label} \${PS1}\"
 
 if [ -z \"\$(type -t 'rustup')\" ] ||
         [ -z \"\$(type -t 'rustc')\" ] ||
@@ -584,20 +611,21 @@ fi
 
 return 0
 "
-        if [ ! -f "${__location}" ]; then
+        FS::is_file "$___location"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # testing the activation
-        RUST::activate_local_environment
+        RUST_Activate_Local_Environment
         if [ $? -ne 0 ] ; then
                 return 1
         fi
 
 
         # setup localized compiler
-        rustup target add "$(RUST::get_build_target "$PROJECT_OS" "$PROJECT_ARCH")"
+        rustup target add "$(RUST_Get_Build_Target "$PROJECT_OS" "$PROJECT_ARCH")"
         if [ $? -ne 0 ]; then
                 return 1
         fi

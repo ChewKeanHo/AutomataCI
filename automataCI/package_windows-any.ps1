@@ -190,7 +190,7 @@ ${__common}|${__log}|PACKAGE-Run-Archive
 
 	$__log = "${__log_directory}\cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$__process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-Cargo
+${__common}|${__log}|PACKAGE-Run-CARGO
 "@
 	if ($__process -ne 0) {
 		return 1

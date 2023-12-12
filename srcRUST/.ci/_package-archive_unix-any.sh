@@ -46,7 +46,7 @@ PACKAGE::assemble_archive_content() {
                 fi
                 FS::remove_silently "${_directory}/.ci"
 
-                RUST::create_cargo_toml \
+                RUST_Create_CARGO_TOML \
                         "${_directory}/Cargo.toml" \
                         "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                         "$PROJECT_SKU" \

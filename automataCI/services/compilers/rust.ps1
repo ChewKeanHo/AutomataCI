@@ -9,30 +9,31 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
 
 function RUST-Activate-Local-Environment {
 	# validate input
-	$__process = RUST-Is-Localized
-	if ($__process -eq 0) {
+	$___process = RUST-Is-Localized
+	if ($___process -eq 0) {
 		return 0
 	}
 
 
 	# execute
-	$__location = "$(RUST-Get-Activator-Path)"
-	if (-not (Test-Path "${__location}")) {
+	$___location = "$(RUST-Get-Activator-Path)"
+	$___process = FS-Is-File "${___location}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	. $__location
-	$__process = RUST-Is-Localized
-	if ($__process -eq 0) {
+	. $___location
+	$___process = RUST-Is-Localized
+	if ($___process -eq 0) {
 		return 0
 	}
 
@@ -46,18 +47,18 @@ function RUST-Activate-Local-Environment {
 
 function RUST-Cargo-Login {
 	# validate input
-	if ([string]::IsNullOrEmpty(${env:CARGO_REGISTRY}) -or
-		[string]::IsNullOrEmpty(${env:CARGO_PASSWORD})) {
+	if (($(STRINGS-Is-Empty "${env:CARGO_REGISTRY}") -eq 0) -or
+		($(STRINGS-Is-Empty "${env:CARGO_PASSWORD}") -eq 0)) {
 		return 1
 	}
 
 
 	# execute
-	$__arguments = "login " `
+	$___arguments = "login " `
 		+ "--registry `"${env:CARGO_REGISTRY}`" " `
 		+ "`"${env:CARGO_PASSWORD}`" "
-	$__process = OS-Exec "cargo" "${__arguments}"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "cargo" "${___arguments}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -71,8 +72,8 @@ function RUST-Cargo-Login {
 
 function RUST-Cargo-Logout {
 	# execute
-	$__process = OS-Exec "cargo" "logout"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "cargo" "logout"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -88,25 +89,29 @@ function RUST-Cargo-Logout {
 
 function RUST-Cargo-Release-Crate {
 	param(
-		[string]$__source_directory
+		[string]$___source_directory
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__source_directory) -or
-		(-not (Test-Path -PathType Container -Path "${__source_directory}"))) {
+	if (($(STRINGS-Is-Empty "${___source_directory}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___source_directory}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__current_path = Get-Location
-	$null = Set-Location "${__source_directory}"
-	$__process = OS-Exec "cargo" "publish"
-	$null = Set-Location "${__current_path}"
-	$null = Remove-Variable __current_path
+	$___current_path = Get-Location
+	$null = Set-Location "${___source_directory}"
+	$___process = OS-Exec "cargo" "publish"
+	$null = Set-Location "${___current_path}"
+	$null = Remove-Variable ___current_path
 
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -120,30 +125,34 @@ function RUST-Cargo-Release-Crate {
 
 function RUST-Crate-Is-Valid {
 	param(
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or
-		(-not (Test-Path -PathType Container -Path "${__target}"))) {
+	if (($(STRINGS-Is-Empty "${___target}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = STRINGS-Has-Prefix "cargo" (Split-Path -Leaf -Path "${__target}")
-	if ($__process -ne 0) {
+	$___process = STRINGS-Has-Prefix "cargo" (Split-Path -Leaf -Path "${___target}")
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__hasCARGO = "false"
-	foreach ($__file in (Get-ChildItem -Path ${__target})) {
-		if ($__file.Name -eq "Cargo.toml") {
-			$__hasCARGO = "true"
+	$___hasCARGO = "false"
+	foreach ($___file in (Get-ChildItem -Path ${___target})) {
+		if ($___file.Name -eq "Cargo.toml") {
+			$___hasCARGO = "true"
 		}
 	}
-	if ($__hasCARGO -eq "true") {
+	if ($___hasCARGO -eq "true") {
 		return 0
 	}
 
@@ -157,55 +166,60 @@ function RUST-Crate-Is-Valid {
 
 function RUST-Create-Archive {
 	param(
-		[string]$__source_directory,
-		[string]$__target_directory
+		[string]$___source_directory,
+		[string]$___target_directory
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__source_directory) -or
-		[string]::IsNullOrEmpty($__target_directory) -or
-		(-not (Test-Path -PathType Container -Path "${__source_directory}")) -or
-		(-not (Test-Path -PathType Container -Path "${__target_directory}"))) {
+	if (($(STRINGS-Is-Empty "${___source_directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___target_directory}") -eq 0)) {
 		return 1
 	}
 
-	$__process = RUST-Is-Localized
-	if ($__process -ne 0) {
-		$__process = RUST-Activate-Local-Environment
-		if ($__process -ne 0) {
-			return 1
-		}
+	$___process = FS-Is-Directory "${___source_directory}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___target_directory}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RUST-Activate-Local-Environment
+	if ($___process -ne 0) {
+		return 1
 	}
 
 
 	# execute
-	$null = FS-Remove-Silently "${__source_directory}\Cargo.lock"
+	$null = FS-Remove-Silently "${___source_directory}\Cargo.lock"
 
-	$__current_path = Get-Location
-	$null = Set-Location "${__source_directory}"
+	$___current_path = Get-Location
+	$null = Set-Location "${___source_directory}"
 
-	$__process = OS-Exec "cargo" "build"
-	if ($__process -ne 0) {
-		$null = Set-Location "${__current_path}"
-		$null = Remove-Variable __current_path
+	$___process = OS-Exec "cargo" "build"
+	if ($___process -ne 0) {
+		$null = Set-Location "${___current_path}"
+		$null = Remove-Variable ___current_path
 		return 1
 	}
 
-	$__process = OS-Exec "cargo" "publish --dry-run"
-	if ($__process -ne 0) {
-		$null = Set-Location "${__current_path}"
-		$null = Remove-Variable __current_path
+	$___process = OS-Exec "cargo" "publish --dry-run"
+	if ($___process -ne 0) {
+		$null = Set-Location "${___current_path}"
+		$null = Remove-Variable ___current_path
 		return 1
 	}
 
-	$null = Set-Location "${__current_path}"
-	$null = Remove-Variable __current_path
+	$null = Set-Location "${___current_path}"
+	$null = Remove-Variable ___current_path
 
-	$null = FS-Remove-Silently "${__source_directory}\target"
-	$null = FS-Remake-Directory "${__target_directory}"
-	$__process = FS-Copy-All "${__source_directory}\" "${__target_directory}"
-	if ($__process -ne 0) {
+	$null = FS-Remove-Silently "${___source_directory}\target"
+	$null = FS-Remake-Directory "${___target_directory}"
+	$___process = FS-Copy-All "${___source_directory}\" "${___target_directory}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -217,108 +231,109 @@ function RUST-Create-Archive {
 
 
 
-function RUST-Create-Cargo-TOML {
+function RUST-Create-CARGO-TOML {
 	param(
-		[string]$__filepath,
-		[string]$__template,
-		[string]$__sku,
-		[string]$__version,
-		[string]$__pitch,
-		[string]$__edition,
-		[string]$__license,
-		[string]$__docs,
-		[string]$__website,
-		[string]$__repo,
-		[string]$__readme,
-		[string]$__contact_name,
-		[string]$__contact_email
+		[string]$___filepath,
+		[string]$___template,
+		[string]$___sku,
+		[string]$___version,
+		[string]$___pitch,
+		[string]$___edition,
+		[string]$___license,
+		[string]$___docs,
+		[string]$___website,
+		[string]$___repo,
+		[string]$___readme,
+		[string]$___contact_name,
+		[string]$___contact_email
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__filepath) -or
-		[string]::IsNullOrEmpty($__template) -or
-		(-not (Test-Path "${__template}")) -or
-		[string]::IsNullOrEmpty($__sku) -or
-		[string]::IsNullOrEmpty($__version) -or
-		[string]::IsNullOrEmpty($__pitch) -or
-		[string]::IsNullOrEmpty($__edition) -or
-		[string]::IsNullOrEmpty($__license) -or
-		[string]::IsNullOrEmpty($__docs) -or
-		[string]::IsNullOrEmpty($__website) -or
-		[string]::IsNullOrEmpty($__repo) -or
-		[string]::IsNullOrEmpty($__readme) -or
-		[string]::IsNullOrEmpty($__contact_name) -or
-		[string]::IsNullOrEmpty($__contact_email)) {
+	if (($(STRINGS-Is-Empty "${___filepath}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___template}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___sku}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___version}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___pitch}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___edition}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___license}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___docs}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___website}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___repo}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___readme}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___contact_name}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___contact_email}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___template}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$null = FS-Remove-Silently "${__filepath}"
-	$__process = FS-Write-File "${__filepath}" @"
+	$null = FS-Remove-Silently "${___filepath}"
+	$___process = FS-Write-File "${___filepath}" @"
 [package]
-name = '${__sku}'
-version = '${__version}'
-description = '${__pitch}'
-edition = '${__edition}'
-license = '${__license}'
-documentation = '${__docs}'
-homepage = '${__website}'
-repository = '${__repo}'
-readme = '${__readme}'
-authors = [ '${__contact_name} <${__contact_email}>' ]
+name = '${___sku}'
+version = '${___version}'
+description = '${___pitch}'
+edition = '${___edition}'
+license = '${___license}'
+documentation = '${___docs}'
+homepage = '${___website}'
+repository = '${___repo}'
+readme = '${___readme}'
+authors = [ '${___contact_name} <${___contact_email}>' ]
 
 
 
 
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
-	$__begin_append = 1
-	foreach ($__line in (Get-Content "${__template}")) {
-		if (($__begin_append -ne 0) -and
-			($("${__line}" -replace '\[AUTOMATACI BEGIN\]') -ne "${__line}")) {
-			$__begin_append = 0
+	$___begin_append = 1
+	foreach ($___line in (Get-Content "${___template}")) {
+		if (($___begin_append -ne 0) -and
+			($("${___line}" -replace '\[AUTOMATACI BEGIN\]') -ne "${___line}")) {
+			$___begin_append = 0
 			continue
 		}
 
-		if ($__begin_append -ne 0) {
+		if ($___begin_append -ne 0) {
 			continue
 		}
 
-		$__process = FS-Append-File "${__filepath}" "${__line}"
-		if ($__process -ne 0) {
+		$___process = FS-Append-File "${___filepath}" "${___line}"
+		if ($___process -ne 0) {
 			return 1
 		}
 	}
 
 
 	# update Cargo.lock
-	$__process = RUST-Is-Localized
-	if ($__process -ne 0) {
-		$__process = RUST-Activate-Local-Environment
-		if ($__process -ne 0) {
-			return 1
-		}
-	}
-
-	$__current_path = Get-Location
-	$null = Set-Location (Split-Path -Parent -Path "${__filepath}")
-	$__process = OS-Exec "cargo" "update"
-	if ($__process -ne 0) {
-		$null = Set-Location "${__current_path}"
-		$null = Remove-Variable __current_path
+	$___process = RUST-Activate-Local-Environment
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = OS-Exec "cargo" "clean"
-	$null = Set-Location "${__current_path}"
-	$null = Remove-Variable __current_path
-	if ($__process -ne 0) {
+	$___current_path = Get-Location
+	$null = Set-Location (Split-Path -Parent -Path "${___filepath}")
+	$___process = OS-Exec "cargo" "update"
+	if ($___process -ne 0) {
+		$null = Set-Location "${___current_path}"
+		$null = Remove-Variable ___current_path
+		return 1
+	}
+
+	$___process = OS-Exec "cargo" "clean"
+	$null = Set-Location "${___current_path}"
+	$null = Remove-Variable ___current_path
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -331,6 +346,7 @@ authors = [ '${__contact_name} <${__contact_email}>' ]
 
 
 function RUST-Get-Activator-Path {
+	# execute
 	return "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}" `
 		+ "\${env:PROJECT_PATH_RUST_ENGINE}\Activate.ps1"
 }
@@ -340,13 +356,13 @@ function RUST-Get-Activator-Path {
 
 function RUST-Get-Build-Target {
 	param(
-		[string]$__os,
-		[string]$__arch
+		[string]$___os,
+		[string]$___arch
 	)
 
 
 	# execute
-	switch ("${__os}-${__arch}") {
+	switch ("${___os}-${___arch}") {
 	aix-ppc64 {
 		return "powerpc64-ibm-aix"
 	} android-amd64 {
@@ -442,21 +458,24 @@ function RUST-Get-Build-Target {
 
 
 function RUST-Is-Available {
-	$__program = Get-Command rustup -ErrorAction SilentlyContinue
-	if (-not $__program) {
+	# execute
+	$___process = OS-Is-Command-Available "rustup"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__program = Get-Command rustc -ErrorAction SilentlyContinue
-	if (-not $__program) {
+	$___process = OS-Is-Command-Available "rustc"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__program = Get-Command cargo -ErrorAction SilentlyContinue
-	if (-not $__program) {
+	$___process = OS-Is-Command-Available "cargo"
+	if ($___process -ne 0) {
 		return 1
 	}
 
+
+	# report status
 	return 0
 }
 
@@ -464,10 +483,13 @@ function RUST-Is-Available {
 
 
 function RUST-Is-Localized {
-	if (-not [string]::IsNullOrEmpty($env:PROJECT_RUST_LOCALIZED)) {
+	# execute
+	if ($(STRINGS-Is-Empty "${env:PROJECT_RUST_LOCALIZED}") -ne 0) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -476,48 +498,48 @@ function RUST-Is-Localized {
 
 function RUST-Setup-Local-Environment {
 	# validate input
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_ROOT)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_ROOT}") -eq 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_TOOLS)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_TOOLS}") -eq 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_AUTOMATA)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_AUTOMATA}") -eq 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_RUST_ENGINE)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_RUST_ENGINE}") -eq 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_OS)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_OS}") -eq 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_ARCH)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_ARCH}") -eq 0) {
 		return 1
 	}
 
-	$__process = RUST-Is-Localized
-	if ($__process -eq 0) {
+	$___process = RUST-Is-Localized
+	if ($___process -eq 0) {
 		return 0
 	}
 
 
 	# execute
-	$__label = "($env:PROJECT_PATH_RUST_ENGINE)"
-	$__location = "$(RUST-Get-Activator-Path)"
-	$env:CARGO_HOME = Split-Path -Parent -Path "${__location}"
-	$env:RUSTUP_HOME = Split-Path -Parent -Path "${__location}"
+	$___label = "($env:PROJECT_PATH_RUST_ENGINE)"
+	$___location = "$(RUST-Get-Activator-Path)"
+	$env:CARGO_HOME = Split-Path -Parent -Path "${___location}"
+	$env:RUSTUP_HOME = Split-Path -Parent -Path "${___location}"
 
 	## download installer from official portal
 	$null = Invoke-Expression "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust-rustup.ps1"
 
 	## it's a clean repo. Start setting up localized environment...
-	$null = FS-Make-Housing-Directory "${__location}"
-	$null = FS-Write-File "${__location}" @"
+	$null = FS-Make-Housing-Directory "${___location}"
+	$null = FS-Write-File "${___location}" @"
 function deactivate {
 	`$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") ``
 		+ ";" ``
@@ -532,7 +554,7 @@ function deactivate {
 # activate
 `${env:CARGO_HOME} = "${CARGO_HOME}"
 `${env:RUSTUP_HOME} = "${RUSTUP_HOME}"
-`${env:PROJECT_RUST_LOCALIZED} = "${__location}"
+`${env:PROJECT_RUST_LOCALIZED} = "${___location}"
 `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") ``
 	+ ";" ``
 	+ [System.Environment]::GetEnvironmentVariable("Path","User") ``
@@ -540,37 +562,38 @@ function deactivate {
 	+ "${CARGO_HOME}\bin"
 Copy-Item -Path function:prompt -Destination function:_OLD_PROMPT
 function global:prompt {
-	Write-Host -NoNewline -ForegroundColor Green "(${__label}) "
+	Write-Host -NoNewline -ForegroundColor Green "(${___label}) "
 	_OLD_VIRTUAL_PROMPT
 }
 "@
 
-	if (-not (Test-Path "${__location}")) {
+	$___process = FS-Is-File "${___location}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# testing the activation
-	$__process = RUST-Activate-Local-Environment
-	if ($__process -ne 0) {
+	$___process = RUST-Activate-Local-Environment
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# setup localized compiler
-	$__target = RUST-Get-Build-Target "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
-	$__process = OS-Exec "rustup" "target add ${__target}"
-	if ($__process -ne 0) {
+	$___target = RUST-Get-Build-Target "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
+	$___process = OS-Exec "rustup" "target add ${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = OS-Exec "rustup" "component add llvm-tools-preview"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "rustup" "component add llvm-tools-preview"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = OS-Exec "cargo" "install grcov"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "cargo" "install grcov"
+	if ($___process -ne 0) {
 		return 1
 	}
 

@@ -26,7 +26,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-function PACKAGE-Assemble-Cargo-Content {
+function PACKAGE-Assemble-CARGO-Content {
 	param (
 		[string]$_target,
 		[string]$_directory,
@@ -61,7 +61,7 @@ function PACKAGE-Assemble-Cargo-Content {
 
 	$null = FS-Remove-Silently "${_directory}\Cargo.lock"
 	$null = FS-Remove-Silently "${_directory}\.ci"
-	$__process = RUST-Create-Cargo-TOML `
+	$__process = RUST-Create-CARGO-TOML `
 		"${_directory}\Cargo.toml" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_SKU}" `

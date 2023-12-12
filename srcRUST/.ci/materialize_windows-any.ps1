@@ -39,7 +39,7 @@ if ($__process -ne 0) {
 
 # build output binary file
 OS-Print-Status info "configuring build settings..."
-$__target = Rust-Get-Build-Target "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
+$__target = RUST-Get-Build-Target "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
 $__filename = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 $__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\rust-${__filename}"
 
