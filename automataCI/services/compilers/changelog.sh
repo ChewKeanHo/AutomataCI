@@ -10,201 +10,74 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compress/gz.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/compress/gz.sh"
 
 
 
 
-CHANGELOG::assemble_deb() {
-        __directory="$1"
-        __target="$2"
-        __version="$3"
+CHANGELOG_Assemble_DEB() {
+        ___directory="$1"
+        ___target="$2"
+        ___version="$3"
 
 
         # validate input
-        if [ -z "$__directory" ] || [ -z "$__target" ] || [ -z "$__version" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___target") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ]; then
                 return 1
         fi
 
-        __directory="${__directory}/deb"
-        __target="${__target%.gz*}"
+        ___directory="${___directory}/deb"
+        ___target="${___target%.gz*}"
 
 
         # assemble file
-        FS::remove_silently "$__target"
-        FS::remove_silently "${__target}.gz"
-        FS::make_housing_directory "$__target"
+        FS::remove_silently "$___target"
+        FS::remove_silently "${___target}.gz"
+        FS::make_housing_directory "$___target"
 
-        __initiated=""
-        old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                FS::append_file "$__target" "$__line\n"
+        ___initiated=""
+        ___old_IFS="$IFS"
+        while IFS="" read -r ___line || [ -n "$___line" ]; do
+                FS::append_file "$___target" "$___line\n"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                __initiated="true"
-        done < "${__directory}/latest"
+                ___initiated="true"
+        done < "${___directory}/latest"
+        IFS="$___old_IFS" && unset ___old_IFS ___line
 
-        for __tag in $(git tag --sort -version:refname); do
-                if [ ! -f "${__directory}/${__tag##*v}" ]; then
+        for ___tag in $(git tag --sort -version:refname); do
+                FS::is_file "${___directory}/${___tag##*v}"
+                if [ $? -ne 0 ]; then
                         continue
                 fi
 
-                if [ ! -z "$__initiated" ]; then
-                        FS::append_file "$__target" "\n\n"
+                if [ $(STRINGS_Is_Empty "$___initiated") -ne 0 ]; then
+                        FS::append_file "$___target" "\n\n"
                 fi
 
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        FS::append_file "$__target" "$__line\n"
+                ___old_IFS="$IFS"
+                while IFS= read -r ___line || [ -n "$___line" ]; do
+                        FS::append_file "$___target" "$___line\n"
                         if [ $? -ne 0 ]; then
                                 return 1
                         fi
 
-                        __initiated="true"
-                done < "${__directory}/${__tag##*v}"
+                        ___initiated="true"
+                done < "${___directory}/${___tag##*v}"
+                IFS="$___old_IFS" && unset ___old_IFS ___line
         done
-        IFS="$old_IFS"
-        unset old_IFS __line __tag
+        unset ___tag
 
 
         # gunzip
-        GZ::create "$__target"
-
-
-        # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
-}
-
-
-
-
-CHANGELOG::assemble_md() {
-        __directory="$1"
-        __target="$2"
-        __version="$3"
-        __title="$4"
-
-
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ -z "$__target" ] ||
-                [ -z "$__version" ] ||
-                [ -z "$__title" ]; then
-                return 1
-        fi
-
-        __directory="${__directory}/data"
-
-
-        # assemble file
-        FS::remove_silently "$__target"
-        FS::make_housing_directory "$__target"
-        FS::write_file "$__target" "# ${__title}\n\n"
-        FS::append_file "$__target" "\n## ${__version}\n\n"
-        old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                FS::append_file "$__target" "* ${__line}\n"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-        done < "${__directory}/latest"
-
-        for __tag in $(git tag --sort -version:refname); do
-                if [ ! -f "${__directory}/${__tag##*v}" ]; then
-                        continue
-                fi
-
-                FS::append_file "$__target" "\n\n## ${__tag}\n\n"
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        FS::append_file "$__target" "* ${__line}\n"
-                        if [ $? -ne 0 ]; then
-                                return 1
-                        fi
-                done < "${__directory}/${__tag##*v}"
-        done
-        IFS="$old_IFS"
-        unset old_IFS __line __tag
-
-
-        # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
-}
-
-
-
-
-CHANGELOG::assemble_rpm() {
-        __target="$1"
-        __resources="$2"
-        __date="$3"
-        __name="$4"
-        __email="$5"
-        __version="$6"
-        __cadence="$7"
-
-
-        # validate input
-        if [ -z "$__target" ] ||
-                [ -z "$__resources" ] ||
-                [ -z "$__date" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__version" ] ||
-                [ -z "$__cadence" ] ||
-                [ ! -f "$__target" ] ||
-                [ ! -d "$__resources" ]; then
-                return 1
-        fi
-
-
-        # emit stanza
-        FS::append_file "$__target" "%%changelog\n"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-
-        # emit latest changelog
-        if [ -f "${__resources}/changelog/data/latest" ]; then
-                FS::append_file "$__target" \
-                        "* ${__date} ${__name} <${__email}> - ${__version}-${__cadence}\n"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-
-                __old_IFS="$IFS"
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        __line="${__line%%#*}"
-                        if [ -z "$__line" ]; then
-                                continue
-                        fi
-
-                        FS::append_file "$__target" "- ${__line}\n"
-                        if [ $? -ne 0 ]; then
-                                return 1
-                        fi
-                done < "${__resources}/changelog/data/latest"
-                IFS="$__old_IFS" && unset __old_IFS __line
-        else
-                FS::append_file "$__target" "# unavailable\n"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-        fi
-
-
-        # emit tailing newline
-        FS::append_file "$__target" "\n"
+        GZ::create "$___target"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -217,73 +90,216 @@ CHANGELOG::assemble_rpm() {
 
 
 
-CHANGELOG::build_data_entry() {
-        __directory="$1"
+CHANGELOG_Assemble_MD() {
+        ___directory="$1"
+        ___target="$2"
+        ___version="$3"
+        ___title="$4"
 
 
         # validate input
-        if [ -z "$__directory" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___target") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___title") -eq 0 ]; then
                 return 1
         fi
 
-
-        # get last tag from git log
-        __tag="$(git rev-list --tags --max-count=1)"
-        if [ -z "$__tag" ]; then
-                __tag="$(git rev-list --max-parents=0 --abbrev-commit HEAD)"
-        fi
+        ___directory="${___directory}/data"
 
 
-        # generate log file from the latest to the last tag
-        __directory="${__directory}/data"
-        FS::make_directory "$__directory"
-        git log --pretty=format:"%s" HEAD..."$__tag" > "${__directory}/.latest"
-        if [ ! -f "${__directory}/.latest" ]; then
-                return 1
-        fi
+        # assemble file
+        FS::remove_silently "$___target"
+        FS::make_housing_directory "$___target"
+        FS::write_file "$___target" "# ${___title}\n\n"
+        FS::append_file "$___target" "\n## ${___version}\n\n"
+        ___old_IFS="$IFS"
+        while IFS="" read -r ___line || [ -n "$___line" ]; do
+                FS::append_file "$___target" "* ${___line}\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        done < "${___directory}/latest"
+
+        for ___tag in $(git tag --sort -version:refname); do
+                FS::is_file "${___directory}/${___tag##*v}"
+                if [ $? -ne 0 ]; then
+                        continue
+                fi
+
+                FS::append_file "$___target" "\n\n## ${___tag}\n\n"
+                while IFS= read -r ___line || [ -n "$___line" ]; do
+                        FS::append_file "$___target" "* ${___line}\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                done < "${___directory}/${___tag##*v}"
+        done
+        IFS="$___old_IFS"
+        unset ___old_IFS ___line ___tag
 
 
-        # good file, update the previous
-        FS::remove_silently "${__directory}/latest" &> /dev/null
-        FS::move "${__directory}/.latest" "${__directory}/latest"
-
-
-        # report verdict
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        # report status
+        return 0
 }
 
 
 
 
-CHANGELOG::build_deb_entry() {
-        __directory="$1"
-        __version="$2"
-        __sku="$3"
-        __dist="$4"
-        __urgency="$5"
-        __name="$6"
-        __email="$7"
-        __date="$8"
+CHANGELOG_Assemble_RPM() {
+        ___target="$1"
+        ___resources="$2"
+        ___date="$3"
+        ___name="$4"
+        ___email="$5"
+        ___version="$6"
+        ___cadence="$7"
 
 
         # validate input
-        if [ -z "$__directory" ] ||
-                [ -z "$__version" ] ||
-                [ ! -f "${__directory}/data/latest" ] ||
-                [ -z "$__sku" ] ||
-                [ -z "$__dist" ] ||
-                [ -z "$__urgency" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__date" ]; then
+        if [ $(STRINGS_Is_Empty "$___target") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___resources") -eq 0 ] ||
+                [ $(STIRNGS_Is_Empty "$___date") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___name") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___email") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___cadence") -eq 0 ]; then
                 return 1
         fi
 
-        case "$__dist" in
+        FS::is_file "$___target"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___resources"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # emit stanza
+        FS::append_file "$___target" "%%changelog\n"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # emit latest changelog
+        FS::is_file "${___resources}/changelog/data/latest"
+        if [ $? -eq 0 ]; then
+                FS::append_file "$___target" \
+                        "* ${___date} ${___name} <${___email}> - ${___version}-${___cadence}\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+                ___old_IFS="$IFS"
+                while IFS= read -r ___line || [ -n "$___line" ]; do
+                        ___line="${___line%%#*}"
+                        if [ $(STRINGS_Is_Empty "$___line") -eq 0 ]; then
+                                continue
+                        fi
+
+                        FS::append_file "$___target" "- ${___line}\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                done < "${___resources}/changelog/data/latest"
+                IFS="$___old_IFS" && unset ___old_IFS ___line
+        else
+                FS::append_file "$___target" "# unavailable\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+
+        # emit tailing newline
+        FS::append_file "$___target" "\n"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+CHANGELOG_Build_Data_Entry() {
+        ___directory="$1"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ]; then
+                return 1
+        fi
+
+
+        # get last tag from git log
+        ___tag="$(git rev-list --tags --max-count=1)"
+        if [ $(STRINGS_Is_Empty "$___tag") -eq 0 ]; then
+                ___tag="$(git rev-list --max-parents=0 --abbrev-commit HEAD)"
+        fi
+
+
+        # generate log file from the latest to the last tag
+        ___directory="${___directory}/data"
+        FS::make_directory "$___directory"
+        git log --pretty=format:"%s" HEAD..."$___tag" > "${___directory}/.latest"
+        FS::is_file "${___directory}/.latest"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # good file, update the previous
+        FS::remove_silently "${___directory}/latest" &> /dev/null
+        FS::move "${___directory}/.latest" "${___directory}/latest"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report verdict
+        return 0
+}
+
+
+
+
+CHANGELOG_Build_DEB_Entry() {
+        ___directory="$1"
+        ___version="$2"
+        ___sku="$3"
+        ___dist="$4"
+        ___urgency="$5"
+        ___name="$6"
+        ___email="$7"
+        ___date="$8"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___sku") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___dist") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___urgency") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___name") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___email") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___date") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "${___directory}/data/latest"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        case "$___dist" in
         stable|unstable|testing|experimental)
                 ;;
         *)
@@ -293,98 +309,101 @@ CHANGELOG::build_deb_entry() {
 
 
         # all good. Generate the log fragment
-        FS::make_directory "${__directory}/deb"
+        FS::make_directory "${___directory}/deb"
 
 
         # create the entry header
-        FS::append_file "${__directory}/deb/.latest" "\
-${__sku} (${__version}) ${__dist}; urgency=${__urgency}
+        FS::append_file "${___directory}/deb/.latest" "\
+${___sku} (${___version}) ${___dist}; urgency=${___urgency}
 
 "
 
 
         # generate body line-by-line
-        old_IFS="$IFS"
-        while IFS="" read -r line || [ -n "$line" ]; do
-                line="${line::80}"
-                FS::append_file "${__directory}/deb/.latest" "  * ${line}\n"
-        done < "${__directory}/data/latest"
-        IFS="$old_IFS"
-        unset line old_IFS
-        FS::append_file "${__directory}/deb/.latest" "\n"
+        ___old_IFS="$IFS"
+        while IFS= read -r ___line || [ -n "$___line" ]; do
+                ___line="${___line::80}"
+                FS::append_file "${___directory}/deb/.latest" "  * ${___line}\n"
+        done < "${___directory}/data/latest"
+        IFS="$___old_IFS" && unset ___line ___old_IFS
+        FS::append_file "${___directory}/deb/.latest" "\n"
 
 
         # create the entry signed-off
-        FS::append_file "${__directory}/deb/.latest" \
-                "-- ${__name} <${__email}>  ${__date}\n"
+        FS::append_file "${___directory}/deb/.latest" \
+                "-- ${___name} <${___email}>  ${___date}\n"
 
 
         # good file, update the previous
-        FS::move "${__directory}/deb/.latest" "${__directory}/deb/latest"
+        FS::move "${___directory}/deb/.latest" "${___directory}/deb/latest"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
+        return 0
+}
+
+
+
+
+CHANGELOG_Compatible_DATA_Version() {
+        ___directory="$1"
+        ___version="$2"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        FS::is_file "${___directory}/data/${___version}"
         if [ $? -eq 0 ]; then
-                return 0
+                return 1
         fi
 
-        return 1
+
+        # report status
+        return 0
 }
 
 
 
 
-CHANGELOG::compatible_data_version() {
-        __directory="$1"
-        __version="$2"
+CHANGELOG_Compatible_DEB_Version() {
+        ___directory="$1"
+        ___version="$2"
 
 
         # validate input
-        if [ -z "$__directory" ] || [ -z "$__version" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ]; then
                 return 1
         fi
 
 
         # execute
-        if [ ! -f "${__directory}/data/${__version}" ]; then
-                return 0
-        fi
-
-
-        # report status
-        return 1
-}
-
-
-
-
-CHANGELOG::compatible_deb_version() {
-        __directory="$1"
-        __version="$2"
-
-
-        # validate input
-        if [ -z "$__directory" ] || [ -z "$__version" ]; then
+        FS::is_file "${___directory}/deb/${___version}"
+        if [ $? -eq 0 ]; then
                 return 1
         fi
 
 
-        # execute
-        if [ ! -f "${__directory}/deb/${__version}" ]; then
-                return 0
-        fi
-
-
         # report status
-        return 1
+        return 0
 }
 
 
 
 
-CHANGELOG::is_available() {
+CHANGELOG_Is_Available() {
         # execute
-        if [ -z "$(type -t git)" ]; then
+        OS::is_command_available "git"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
@@ -401,32 +420,40 @@ CHANGELOG::is_available() {
 
 
 
-CHANGELOG::seal() {
-        __directory="$1"
-        __version="$2"
+CHANGELOG_Seal() {
+        ___directory="$1"
+        ___version="$2"
 
 
         # validate input
-        if [ -z "$__directory" ] || [ -z "$__version" ] || [ ! -d "$__directory" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ]; then
                 return 1
         fi
 
-        if [ ! -f "${__directory}/data/latest" ]; then
+        FS::is_directory "$___directory"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ ! -f "${__directory}/deb/latest" ]; then
+        FS::is_file "${___directory}/data/latest"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "${___directory}/deb/latest"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        FS::move "${__directory}/data/latest" "${__directory}/data/${__version}"
+        FS::move "${___directory}/data/latest" "${___directory}/data/${___version}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::move "${__directory}/deb/latest" "${__directory}/deb/${__version}"
+        FS::move "${___directory}/deb/latest" "${___directory}/deb/${___version}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

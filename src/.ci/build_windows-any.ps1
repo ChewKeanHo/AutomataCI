@@ -40,7 +40,7 @@ if ($__process -ne 0) {
 # execute
 $__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog"
 OS-Print-Status info "building ${env:PROJECT_VERSION} data changelog entry..."
-$__process = CHANGELOG-Build-Data-Entry $__file
+$__process = CHANGELOG-Build-DATA-Entry $__file
 if ($__process -ne 0) {
 	OS-Print-Status error "build failed."
 	return 1

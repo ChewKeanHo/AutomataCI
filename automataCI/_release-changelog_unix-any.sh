@@ -20,7 +20,7 @@
 RELEASE::run_changelog_conclude() {
         # execute
         OS::print_status info "sealing changelog latest entries...\n"
-        CHANGELOG::seal \
+        CHANGELOG_Seal \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then

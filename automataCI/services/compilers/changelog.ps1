@@ -9,73 +9,79 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\gz.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compress\gz.ps1"
 
 
 
 
 function CHANGELOG-Assemble-DEB {
 	param (
-		[string]$__directory,
-		[string]$__target,
-		[string]$__version
+		[string]$___directory,
+		[string]$___target,
+		[string]$___version
 	)
 
-	if ([string]::IsNullOrEmpty($__directory) -or
-		[string]::IsNullOrEmpty($__target) -or
-		[string]::IsNullOrEmpty($__version)) {
+	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___version}") -eq 0)) {
 		return 1
 	}
 
-	$__directory = "${__directory}\deb"
-	$__target = $__target -replace '\.gz.*$'
+	$___directory = "${___directory}\deb"
+	$___target = $___target -replace '\.gz.*$'
 
 
 	# assemble file
-	$null = FS-Remove-Silently "${__target}"
-	$null = FS-Remove-Silently "${__target}.gz"
-	$null = FS-Make-Housing-Directory "${__target}"
+	$null = FS-Remove-Silently "${___target}"
+	$null = FS-Remove-Silently "${___target}.gz"
+	$null = FS-Make-Housing-Directory "${___target}"
 
-	$__initiated = ""
-	foreach ($__line in (Get-Content "${__directory}\latest")) {
-		$__process = FS-Append-File "${__target}" "${__line}"
-		if ($__process -ne 0) {
+	$___initiated = ""
+	foreach ($___line in (Get-Content "${___directory}\latest")) {
+		$___process = FS-Append-File "${___target}" "${___line}"
+		if ($___process -ne 0) {
 			return 1
 		}
 
-		$__initiated = "true"
+		$___initiated = "true"
 	}
 
-	foreach ($__tag in (Invoke-Expression "git tag --sort -version:refname")) {
-		if (-not (Test-Path "${__directory}\$($__tag -replace ".*v")")) {
+	foreach ($___tag in (Invoke-Expression "git tag --sort -version:refname")) {
+		$___process = FS-Is-File "${___directory}\$($___tag -replace ".*v")"
+		if ($___process -ne 0) {
 			continue
 		}
 
-		if (-not [string]::IsNullOrEmpty($__initiated)) {
-			$__process = FS-Append-File "${__target}" "`n"
-			if ($__process -ne 0) {
+		if ($(STRINGS-Is-Empty "${___initiated}") -eq 0) {
+			$___process = FS-Append-File "${___target}" "`n"
+			if ($___process -ne 0) {
 				return 1
 			}
 		}
 
-		foreach ($__line in (Get-Content "${__directory}\$($__tag -replace ".*v")")) {
-			$__process = FS-Append-File "${__target}" "${__line}"
-			if ($__process -ne 0) {
+		foreach ($___line in (Get-Content "${___directory}\$($___tag -replace ".*v")")) {
+			$___process = FS-Append-File "${___target}" "${___line}"
+			if ($___process -ne 0) {
 				return 1
 			}
 
-			$__initiated = "true"
+			$___initiated = "true"
 		}
 	}
 
 
 	# gunzip
-	$__process = GZ-Create "${__target}"
+	$___process = GZ-Create "${___target}"
+	if ($___process -ne 0) {
+		return 1
+	}
 
 
 	# report status
-	return $__process
+	return 0
 }
 
 
@@ -83,43 +89,44 @@ function CHANGELOG-Assemble-DEB {
 
 function CHANGELOG-Assemble-MD {
 	param (
-		[string]$__directory,
-		[string]$__target,
-		[string]$__version,
-		[string]$__title
+		[string]$___directory,
+		[string]$___target,
+		[string]$___version,
+		[string]$___title
 	)
 
-	if ([string]::IsNullOrEmpty($__directory) -or
-		[string]::IsNullOrEmpty($__target) -or
-		[string]::IsNullOrEmpty($__version) -or
-		[string]::IsNullOrEmpty($__title)) {
+	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___version}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___title}") -eq 0)) {
 		return 1
 	}
 
-	$__directory = "${__directory}\data"
+	$___directory = "${___directory}\data"
 
 
 	# assemble file
-	$null = FS-Remove-Silently "${__target}"
-	$null = FS-Make-Housing-Directory "${__target}"
-	$null = FS-Write-File "${__target}" "# ${__title}`n"
-	$null = FS-Append-File "${__target}" "`n## ${__version}`n"
-	foreach ($__line in (Get-Content "${__directory}\latest")) {
-		$__process = FS-Append-File "${__target}" "* ${__line}"
-		if ($__process -ne 0) {
+	$null = FS-Remove-Silently "${___target}"
+	$null = FS-Make-Housing-Directory "${___target}"
+	$null = FS-Write-File "${___target}" "# ${___title}`n"
+	$null = FS-Append-File "${___target}" "`n## ${___version}`n"
+	foreach ($___line in (Get-Content "${___directory}\latest")) {
+		$___process = FS-Append-File "${___target}" "* ${___line}"
+		if ($___process -ne 0) {
 			return 1
 		}
 	}
 
-	foreach ($__tag in (Invoke-Expression "git tag --sort -version:refname")) {
-		if (-not (Test-Path "${__directory}\$($__tag -replace ".*v")")) {
+	foreach ($___tag in (Invoke-Expression "git tag --sort -version:refname")) {
+		$___process = FS-Is-File "${___directory}\$($___tag -replace ".*v")"
+		if ($___process -ne 0) {
 			continue
 		}
 
-		$null = FS-Append-File "${__target}" "`n`n## ${__tag}`n"
-		foreach ($__line in (Get-Content "${__directory}\$($__tag -replace ".*v")")) {
-			$__process = FS-Append-File "${__target}" "* ${__line}"
-			if ($__process -ne 0) {
+		$null = FS-Append-File "${___target}" "`n`n## ${___tag}`n"
+		foreach ($___line in (Get-Content "${___directory}\$($___tag -replace ".*v")")) {
+			$___process = FS-Append-File "${___target}" "* ${___line}"
+			if ($___process -ne 0) {
 				return 1
 			}
 		}
@@ -127,7 +134,7 @@ function CHANGELOG-Assemble-MD {
 
 
 	# report status
-	return $__process
+	return 0
 }
 
 
@@ -135,111 +142,127 @@ function CHANGELOG-Assemble-MD {
 
 function CHANGELOG-Assemble-RPM {
 	param (
-		[string]$__target,
-		[string]$__resources,
-		[string]$__date,
-		[string]$__name,
-		[string]$__email,
-		[string]$__version,
-		[string]$__cadence
+		[string]$___target,
+		[string]$___resources,
+		[string]$___date,
+		[string]$___name,
+		[string]$___email,
+		[string]$___version,
+		[string]$___cadence
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or
-		[string]::IsNullOrEmpty($__resources) -or
-		[string]::IsNullOrEmpty($__date) -or
-		[string]::IsNullOrEmpty($__name) -or
-		[string]::IsNullOrEmpty($__email) -or
-		[string]::IsNullOrEmpty($__version) -or
-		[string]::IsNullOrEmpty($__cadence) -or
-		(-not (Test-Path -Path "${__target}")) -or
-		(-not (Test-Path -Path "${__resources}" -PathType Container))) {
+	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___resources}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___date}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___name}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___email}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___version}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___cadence}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___target}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___resources}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# emit stanza
-	$__process = FS-Write-File "${__target}" "%%changelog`n"
-	if ($__process -ne 0) {
+	$___process = FS-Write-File "${___target}" "%%changelog`n"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# emit latest changelog
-	if (Test-Path -Path "${__resources}\changelog\data\latest") {
-		$__process = FS-Append-File "${__target}" `
-			"* ${__date} ${__name} <${__email}> - ${__version}-${__cadence}`n"
-		if ($__process -ne 0) {
+	$___process = FS-Is-File "${__resources}\changelog\data\latest"
+	if ($___process -eq 0) {
+		$___process = FS-Append-File "${___target}" `
+			"* ${___date} ${___name} <${___email}> - ${___version}-${___cadence}`n"
+		if ($___process -ne 0) {
 			return 1
 		}
 
-		Get-Content -Path "${__directory}\changelog\data\latest" | ForEach-Object {
-			$__line = $_ -replace '#.*'
-			if ([string]::IsNullOrEmpty($__line)) {
+		foreach ($___line in (Get-Content -Path "${___directory}\changelog\data\latest")) {
+			$___line = $___line -replace '#.*'
+			if ($(STRINGS-Is-Empty "${___line}") -eq 0) {
 				continue
 			}
 
-			$__process = FS-Append-File "${__target}" "  * ${__line}"
-			if ($__process -ne 0) {
+			$___process = FS-Append-File "${___target}" "  * ${___line}"
+			if ($___process -ne 0) {
 				return 1
 			}
 		}
 	} else {
-		$__process = FS-Append-File "${__target}" "# unavailable`n"
-		if ($__process -ne 0) {
+		$___process = FS-Append-File "${___target}" "# unavailable`n"
+		if ($___process -ne 0) {
 			return 1
 		}
 	}
 
 
 	# emit tailing newline
-	$__process = FS-Append-File "${__target}" "`n"
+	$___process = FS-Append-File "${___target}" "`n"
+	if ($___process -ne 0) {
+		return 1
+	}
 
 
 	# report status
-	return $__process
+	return 0
 }
 
 
 
 
-function CHANGELOG-Build-Data-Entry {
+function CHANGELOG-Build-DATA-Entry {
 	param(
-		[string]$__directory
+		[string]$___directory
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory)) {
+	if ($(STRINGS-Is-Empty "${___directory}") -eq 0) {
 		return 1
 	}
 
 
 	# get last tag from git log
-	$__tag = Invoke-Expression "git rev-list --tags --max-count=1"
-	if ([string]::IsNullOrEmpty($__tag)) {
-		$__tag = Invoke-Expression "git rev-list --max-parents=0 --abbrev-commit HEAD"
+	$___tag = Invoke-Expression "git rev-list --tags --max-count=1"
+	if ($(STRINGS-Is-Empty "${___tag}") -eq 0) {
+		$___tag = Invoke-Expression "git rev-list --max-parents=0 --abbrev-commit HEAD"
 	}
 
 
 	# generate log file from the latest to the last tag
-	$__directory = "${__directory}\data"
-	$null = FS-Make-Directory "${__directory}"
-	Invoke-Expression "git log --pretty=`"%s`" HEAD...${__tag}" `
-		| Out-File -FilePath "${__directory}\.latest" -Encoding utf8
-	if (-not (Test-Path "${__directory}\.latest")) {
+	$___directory = "${___directory}\data"
+	$null = FS-Make-Directory "${___directory}"
+	Invoke-Expression "git log --pretty=`"%s`" HEAD...${___tag}" `
+		| Out-File -FilePath "${___directory}\.latest" -Encoding utf8
+	$___process = FS-Is-File "${___directory}\.latest"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# good file, update the previous
-	$null = FS-Remove-Silently "${__directory}\latest"
-	$__process = FS-Move "${__directory}\.latest" "${__directory}\latest"
+	$null = FS-Remove-Silently "${___directory}\latest"
+	$___process = FS-Move "${___directory}\.latest" "${___directory}\latest"
+	if ($___process -ne 0) {
+		return 1
+	}
 
 
 	# report status
-	return $__process
+	return 0
 }
 
 
@@ -247,31 +270,36 @@ function CHANGELOG-Build-Data-Entry {
 
 function CHANGELOG-Build-DEB-Entry {
 	param (
-		[string]$__directory,
-		[string]$__version,
-		[string]$__sku,
-		[string]$__dist,
-		[string]$__urgency,
-		[string]$__name,
-		[string]$__email,
-		[string]$__date
+		[string]$___directory,
+		[string]$___version,
+		[string]$___sku,
+		[string]$___dist,
+		[string]$___urgency,
+		[string]$___name,
+		[string]$___email,
+		[string]$___date
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		[string]::IsNullOrEmpty($__version) -or
-		(-not (Test-Path -Path "${__directory}\data\latest")) -or
-		[string]::IsNullOrEmpty($__sku) -or
-		[string]::IsNullOrEmpty($__dist) -or
-		[string]::IsNullOrEmpty($__urgency) -or
-		[string]::IsNullOrEmpty($__name) -or
-		[string]::IsNullOrEmpty($__email) -or
-		[string]::IsNullOrEmpty($__date)) {
+	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___version}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___sku}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___dist}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___urgency}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___name}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___email}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___date}") -eq 0)) {
 		return 1
 	}
 
-	switch ($__dist) {
+	$___process = FS-Is-File "${___directory}\data\latest"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	switch ($___dist) {
 	stable {
 		break
 	} unstable {
@@ -286,56 +314,60 @@ function CHANGELOG-Build-DEB-Entry {
 
 
 	# all good. Generate the log fragment
-	$null = FS-Make-Directory "${__directory}\deb"
+	$null = FS-Make-Directory "${___directory}\deb"
 
 
 	# create the entry header
-	$null = FS-Write-File "${__directory}\deb\.latest" @"
-${__sku} (${__version}) ${__dist}; urgency=${__urgency}
+	$null = FS-Write-File "${___directory}\deb\.latest" @"
+${___sku} (${___version}) ${___dist}; urgency=${___urgency}
 
 "@
 
 
 	# generate body line-by-line
-	Get-Content -Path "${__directory}\data\latest" | ForEach-Object {
-		$__line = $_.Substring(0, [Math]::Min($_.Length, 80))
-		$null = FS-Append-File "${__directory}\deb\.latest" "  * ${__line}"
+	foreach ($___line in (Get-Content -Path "${___directory}\data\latest")) {
+		$___line = $___line.Substring(0, [Math]::Min($___line.Length, 80))
+		$null = FS-Append-File "${___directory}\deb\.latest" "  * ${___line}"
 	}
-	$null = FS-Append-File "${__directory}\deb\.latest" ""
+	$null = FS-Append-File "${___directory}\deb\.latest" ""
 
 
 	# create the entry sign-off
-	$null = FS-Append-File "${__directory}\deb\.latest" `
-		"-- ${__name} <${__email}>  ${__date}"
+	$null = FS-Append-File "${___directory}\deb\.latest" `
+		"-- ${___name} <${___email}>  ${___date}"
 
 
 	# good file, update the previous
-	$__process = FS-Move "${__directory}\deb\.latest" "${__directory}\deb\latest"
+	$___process = FS-Move "${___directory}\deb\.latest" "${___directory}\deb\latest"
+	if ($___process -ne 0) {
+		return 1
+	}
 
 
 	# report status
-	return $__process
+	return 0
 }
 
 
 
 
-function CHANGELOG-Compatible-Data-Version {
+function CHANGELOG-Compatible-DATA-Version {
 	param(
-		[string]$__directory,
-		[string]$__version
+		[string]$___directory,
+		[string]$___version
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or [string]::IsNullOrEmpty($__version)) {
+	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___version}") -eq 0)) {
 		return 1
 	}
 
 
 	# execute
-	$__process = FS-Is-File "${__directory}\data\${__version}"
-	if ($__process -ne 0) {
+	$___process = FS-Is-File "${___directory}\data\${___version}"
+	if ($___process -ne 0) {
 		return 0
 	}
 
@@ -349,20 +381,21 @@ function CHANGELOG-Compatible-Data-Version {
 
 function CHANGELOG-Compatible-DEB-Version {
 	param(
-		[string]$__directory,
-		[string]$__version
+		[string]$___directory,
+		[string]$___version
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or [string]::IsNullOrEmpty($__version)) {
+	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___version}") -eq 0)) {
 		return 1
 	}
 
 
 	# execute
-	$__process = FS-Is-File "${__directory}\deb\${__version}"
-	if ($__process -ne 0) {
+	$___process = FS-Is-File "${___directory}\deb\${___version}"
+	if ($___process -ne 0) {
 		return 0
 	}
 
@@ -376,13 +409,13 @@ function CHANGELOG-Compatible-DEB-Version {
 
 function CHANGELOG-Is-Available {
 	# execute
-	$__program = Get-Command git -ErrorAction SilentlyContinue
-	if (-not ($__program)) {
+	$___process = OS-Is-Command-Available "git"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = GZ-Is-Available
-	if ($__process -ne 0) {
+	$___process = GZ-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -396,35 +429,41 @@ function CHANGELOG-Is-Available {
 
 function CHANGELOG-Seal {
 	param (
-		[string]$__directory,
-		[string]$__version
+		[string]$___directory,
+		[string]$___version
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		[string]::IsNullOrEmpty($__version) -or
-		(-not (Test-Path -Path "${__directory}" -PathType Container))) {
+	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___version}") -eq 0)) {
 		return 1
 	}
 
-	if (-not (Test-Path -Path "${__directory}\data\latest")) {
+	$___process = FS-Is-Directory "${___directory}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	if (-not (Test-Path -Path "${__directory}\deb\latest")) {
+	$___process = FS-Is-File "${___directory}\data\latest"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___directory}\deb\latest"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = FS-Move "${__directory}\data\latest" "${__directory}\data\${__version}"
-	if ($__process -ne 0) {
+	$___process = FS-Move "${___directory}\data\latest" "${___directory}\data\${___version}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Move "${__directory}\deb\latest" "${__directory}\deb\${__version}"
-	if ($__process -ne 0) {
+	$___process = FS-Move "${___directory}\deb\latest" "${___directory}\deb\${___version}"
+	if ($___process -ne 0) {
 		return 1
 	}
 

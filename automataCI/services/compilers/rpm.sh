@@ -394,7 +394,7 @@ URL: ${__website}
                 FS::remove_silently "${__directory}/SPEC_CHANGELOG"
         else
                 __date="$(date "+%a %b %d %Y")"
-                CHANGELOG::assemble_rpm \
+                CHANGELOG_Assemble_RPM \
                         "$__location" \
                         "$__resources" \
                         "$__date" \

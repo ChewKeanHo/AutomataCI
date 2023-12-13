@@ -10,9 +10,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/changelog.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/changelog.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -26,59 +30,59 @@ fi
 
 
 
-PACKAGE::run_changelog() {
+PACKAGE_Run_CHANGELOG() {
         __changelog_md="$1"
         __changelog_deb="$2"
 
 
-        OS::print_status info "checking changelog functions availability...\n"
-        CHANGELOG::is_available
+        I18N_Status_Print_Check_Availability "CHANGELOG"
+        CHANGELOG_Is_Available
         if [ $? -ne 0 ]; then
-                OS::print_status error "checking failed.\n"
+                I18N_Status_Print_File_Check_Failed
                 return 1
         fi
 
 
         # validate input
-        OS::print_status info "validating ${PROJECT_VERSION} data changelog entry...\n"
-        CHANGELOG::compatible_data_version \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
+        I18N_Status_Print_File_Validate "${PROJECT_VERSION} CHANGELOG"
+        CHANGELOG_Compatible_DATA_Version \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog" \
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then
-                OS::print_status error "validation failed - existing entry.\n"
+                I18N_Status_Print_File_Validate_Failed
                 return 1
         fi
 
-        OS::print_status info "validating ${PROJECT_VERSION} deb changelog entry...\n"
-        CHANGELOG::compatible_deb_version \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
+        I18N_Status_Print_File_Validate "${PROJECT_VERSION} DEB CHANGELOG"
+        CHANGELOG_Compatible_DEB_Version \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog" \
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then
-                OS::print_status error "validation failed - there is an existing entry.\n"
+                I18N_Status_Print_File_Validate_Failed
                 return 1
         fi
 
 
         # assemble changelog
-        OS::print_status info "assembling markdown changelog...\n"
-        CHANGELOG::assemble_md \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
+        I18N_Status_Print_File_Create "$__changelog_md"
+        CHANGELOG_Assemble_MD \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog" \
                 "$__changelog_md" \
                 "$PROJECT_VERSION" \
                 "$PROJECT_CHANGELOG_TITLE"
         if [ $? -ne 0 ]; then
-                OS::print_status error "assembly failed.\n"
+                I18N_Status_Print_File_Create_Failed
                 return 1
         fi
 
-        OS::print_status info "assembling deb changelog...\n"
-        mkdir -p "${__changelog_deb%/*}"
-        CHANGELOG::assemble_deb \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
+        I18N_Status_Print_File_Create "$__changelog_deb"
+        FS::make_directory "${__changelog_deb%/*}"
+        CHANGELOG_Assemble_DEB \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog" \
                 "$__changelog_deb" \
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then
-                OS::print_status error "assembly failed.\n"
+                I18N_Status_Print_File_Create_Failed
                 return 1
         fi
 

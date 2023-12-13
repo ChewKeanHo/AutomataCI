@@ -15,6 +15,7 @@
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-check.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-create.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-update.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-validate.ps1"
 
 
 

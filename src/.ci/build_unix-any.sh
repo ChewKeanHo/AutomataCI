@@ -29,7 +29,7 @@ fi
 
 # safety checking control surfaces
 OS::print_status info "checking changelog availability...\n"
-CHANGELOG::is_available
+CHANGELOG_Is_Available
 if [ $? -ne 0 ]; then
         OS::print_status error "changelog builder is unavailable.\n"
         return 1
@@ -41,7 +41,7 @@ fi
 # execute
 __file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog"
 OS::print_status info "building ${PROJECT_VERSION} data changelog entry...\n"
-CHANGELOG::build_data_entry "$__file"
+CHANGELOG_Build_Data_Entry "$__file"
 if [ $? -ne 0 ]; then
         OS::print_status error "build failed.\n"
         return 1
@@ -49,7 +49,7 @@ fi
 
 
 OS::print_status info "building ${PROJECT_VERSION} deb changelog entry...\n"
-CHANGELOG::build_deb_entry \
+CHANGELOG_Build_DEB_Entry \
         "$__file" \
         "$PROJECT_VERSION" \
         "$PROJECT_SKU" \

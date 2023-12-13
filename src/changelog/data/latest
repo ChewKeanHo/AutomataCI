@@ -1,3 +1,4 @@
+automataCI: added i18n feature to cargo packaging function
 automataCI: added i18n feature to chocolatey packaging function
 automataCI: added i18n feature to deb packaging function
 automataCI: added i18n feature to docker packaging function
