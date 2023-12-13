@@ -9,17 +9,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\gz.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compress\xz.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compress\gz.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compress\xz.ps1"
 
 
 
 
 function TAR-Is-Available {
 	# validate input
-	$__process = Get-Command "tar" -ErrorAction SilentlyContinue
-	if (-not ($__process)) {
+	$___process = OS-Is-Command-Available "tar"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -33,40 +35,50 @@ function TAR-Is-Available {
 
 function TAR-Create {
 	param (
-		[string]$__destination,
-		[string]$__source,
-		[string]$__owner,
-		[string]$__group
+		[string]$___destination,
+		[string]$___source,
+		[string]$___owner,
+		[string]$___group
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__destination) -or [string]::IsNullOrEmpty($__source)) {
+	if (($(STRINGS-Is-Empty "${___destination}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___source}") -eq 0)) {
 		return 1
 	}
 
-	if (Test-Path -Path $__destination) {
+	$___process = FS-Is-File "${___destination}"
+	if ($___process -eq 0) {
 		return 1
 	}
 
-	$__process = TAR-Is-Available
-	if ($__process -ne 0) {
+	$___process = FS-Is-Directory "${___destination}"
+	if ($___process -eq 0) {
+		return 1
+	}
+
+	$___process = TAR-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# create tar archive
-	if ((-not [string]::IsNullOrEmpty($__owner)) -and [string]::IsNullOrEmpty($__group)) {
-		$__arguments = "--numeric-owner --group=`"${__group}`" " `
-				+ "--owner=`"${__owner}`" " `
-				+ "-cvf `"${__destination}`" ${__source}"
-		$__process = OS-Exec "tar" "${__arguments}"
-		if ($__process -ne 0) {
+	$___supported = $false # windows' TAR system does not support UNIX UGID system
+	if (($___supported) -and
+		($(STRINGS-Is-Empty "${___owner}") -ne 0) -and
+		($(STRINGS-Is-Empty "${___group}") -ne 0)) {
+		$___arguments = "--numeric-owner --group=`"${___group}`" " `
+				+ "--owner=`"${___owner}`" " `
+				+ "-cvf `"${___destination}`" ${___source}"
+		$___process = OS-Exec "tar" "${___arguments}"
+		if ($___process -ne 0) {
 			return 1
 		}
 	} else {
-		$__process = OS-Exec "tar" "-cvf `"${__destination}`" ${__source}"
-		if ($__process -ne 0) {
+		$___process = OS-Exec "tar" "-cvf `"${___destination}`" ${___source}"
+		if ($___process -ne 0) {
 			return 1
 		}
 	}
@@ -81,32 +93,39 @@ function TAR-Create {
 
 function TAR-Create-GZ {
 	param (
-		[string]$__destination,
-		[string]$__source,
-		[string]$__owner,
-		[string]$__group
+		[string]$___destination,
+		[string]$___source,
+		[string]$___owner,
+		[string]$___group
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__destination) -or [string]::IsNullOrEmpty($__source)) {
+	if (($(STRINGS-Is-Empty "${___destination}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___source}") -eq 0)) {
 		return 1
 	}
 
-	if (Test-Path -Path $__destination) {
+	$___process = FS-Is-File "${___destination}"
+	if ($___process -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___destination}"
+	if ($___process -eq 0) {
 		return 1
 	}
 
 
 	# create tar archive
-	$__dest = $__destination -replace '\.gz.*$'
-	$__process = TAR-Create "${__dest}" "${__source}" "0" "0"
-	if ($__process -ne 0) {
+	$___dest = $___destination -replace '\.gz.*$'
+	$___process = TAR-Create "${___dest}" "${___source}" "${___owner}" "${___group}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = GZ-Create "${__dest}"
-	if ($__process -ne 0) {
+	$___process = GZ-Create "${___dest}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -120,32 +139,44 @@ function TAR-Create-GZ {
 
 function TAR-Create-XZ {
 	param (
-		[string]$__destination,
-		[string]$__source,
-		[string]$__owner,
-		[string]$__group
+		[string]$___destination,
+		[string]$___source,
+		[string]$___owner,
+		[string]$___group
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__destination) -or [string]::IsNullOrEmpty($__source)) {
+	if (($(STRINGS-Is-Empty "${___destination}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___source}") -eq 0)) {
 		return 1
 	}
 
-	if (Test-Path -Path $__destination) {
+	$___process = FS-Is-File "${___destination}"
+	if ($___process -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___destination}"
+	if ($___process -eq 0) {
+		return 1
+	}
+
+	$___process = XZ-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# create tar archive
-	$__dest = $__destination -replace '\.xz.*$'
-	$__process = TAR-Create "${__dest}" "${__source}" "0" "0"
-	if ($__process -ne 0) {
+	$___destination = $___destination -replace '\.xz.*$'
+	$___process = TAR-Create "${___destination}" "${___source}" "${___owner}" "${___group}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = XZ-Create "${__dest}"
-	if ($__process -ne 0) {
+	$___process = XZ-Create "${___destination}"
+	if ($___process -ne 0) {
 		return 1
 	}
 

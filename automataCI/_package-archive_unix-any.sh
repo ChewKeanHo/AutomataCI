@@ -50,7 +50,7 @@ PACKAGE::run_archive() {
 
 
         OS::print_status info "checking tar functions availability...\n"
-        TAR::is_available
+        TAR_Is_Available
         if [ $? -ne 0 ]; then
                 OS::print_status error "check failed.\n"
                 return 1
@@ -121,7 +121,7 @@ PACKAGE::run_archive() {
         *)
                 _target_path="${_target_path}.tar.xz"
                 OS::print_status info "packaging ${_target_path}\n"
-                TAR::create_xz "$_target_path" "*"
+                TAR_Create_XZ "$_target_path" "*"
                 __exit=$?
                 ;;
         esac

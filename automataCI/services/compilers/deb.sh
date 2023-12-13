@@ -59,7 +59,7 @@ DEB_Create_Archive() {
 
         # package control
         cd "${___directory}/control"
-        TAR::create_xz "../control.tar.xz" "*"
+        TAR_Create_XZ "../control.tar.xz" "*"
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
                 return 1
@@ -68,7 +68,7 @@ DEB_Create_Archive() {
 
         # package data
         cd "${___directory}/data"
-        TAR::create_xz "../data.tar.xz" "*"
+        TAR_Create_XZ "../data.tar.xz" "*"
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
                 return 1
@@ -467,7 +467,7 @@ DEB_Is_Available() {
                 return 1
         fi
 
-        TAR::is_available
+        TAR_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi

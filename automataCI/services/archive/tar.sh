@@ -10,15 +10,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compress/gz.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compress/xz.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/compress/gz.sh"
+. "${LIBS_AUTOMATACI}/services/compress/xz.sh"
 
 
 
 
-TAR::is_available() {
+TAR_Is_Available() {
         # execute
-        if [ -z "$(type -t tar)" ]; then
+        OS::is_command_available "tar"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
@@ -30,30 +34,36 @@ TAR::is_available() {
 
 
 
-TAR::create() {
-        #__destination="$1"
-        #__source="$2"
-        #__owner="$3"
-        #__group="$4"
+TAR_Create() {
+        #___destination="$1"
+        #___source="$2"
+        #___owner="$3"
+        #___group="$4"
 
 
         # validate input
-        if [ -z "$2" ] || [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$2") -eq 0 ] || [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        if [ -e "$1" ]; then
+        FS::is_file "$1"
+        if [ $? -eq 0 ]; then
                 return 1
         fi
 
-        TAR::is_available
+        FS::is_directory "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        TAR_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # create tar archive
-        if [ ! -z "$3" -a ! -z "$4" ]; then
+        if [ $(STRINGS_Is_Empty "$3") -ne 0 ] && [ $(STRINGS_Is_Empty "$4") -ne 0 ]; then
                 tar --numeric-owner --group="$4" --owner="$3" -cvf "$1" $2
                 if [ $? -ne 0 ]; then
                         return 1
@@ -73,25 +83,31 @@ TAR::create() {
 
 
 
-TAR::create_gz() {
-        #__destination="$1"
-        #__source="$2"
-        #__owner="$3"
-        #__group="$4"
+TAR_Create_GZ() {
+        #___destination="$1"
+        #___source="$2"
+        #___owner="$3"
+        #___group="$4"
 
 
         # validate input
-        if [ -z "$2" ] || [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$2") -eq 0 ] || [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        if [ -e "$1" ]; then
+        FS::is_file "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -eq 0 ]; then
                 return 1
         fi
 
 
         # create tar archive
-        TAR::create "${1%.gz*}" "$2" "$3" "$4"
+        TAR_Create "${1%.gz*}" "$2" "$3" "$4"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -111,32 +127,43 @@ TAR::create_gz() {
 
 
 
-TAR::create_xz() {
-        #__destination="$1"
-        #__source="$2"
-        #__owner="$3"
-        #__group="$4"
+TAR_Create_XZ() {
+        #___destination="$1"
+        #___source="$2"
+        #___owner="$3"
+        #___group="$4"
 
 
         # validate input
-        if [ -z "$2" ] || [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$2") -eq 0 ] || [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        if [ -e "$1" ]; then
+        FS::is_file "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        XZ_Is_Available
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # create tar archive
-        TAR::create "${1%.xz*}" "$2" "$3" "$4"
+        TAR_Create "${1%.xz*}" "$2" "$3" "$4"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # compress archive
-        XZ::create "${1%%.xz*}"
+        XZ_Create "${1%%.xz*}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

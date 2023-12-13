@@ -58,7 +58,7 @@ PACKAGE::run_homebrew() {
 
         # validate input
         I18N_Status_Print_Check_Availability "TAR"
-        TAR::is_available
+        TAR_Is_Available
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Check_Availability_Incompatible "TAR"
                 return 1
@@ -117,7 +117,7 @@ PACKAGE::run_homebrew() {
         # archive the assembled payload
         __current_path="$PWD" && cd "$_src"
         I18N_Status_Print_File_Archive "${_target_path}.tar.xz"
-        TAR::create_xz "${_target_path}.tar.xz" "*"
+        TAR_Create_XZ "${_target_path}.tar.xz" "*"
         __exit=$?
         cd "$__current_path" && unset __current_path
         if [ $__exit -ne 0 ]; then

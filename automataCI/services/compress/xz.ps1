@@ -9,35 +9,45 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
 
 function XZ-Create {
 	param (
-		[string]$__source
+		[string]$___source
 	)
 
 
 	# validate input
-	$__process = XZ-Is-Available
-	if ($__process -ne 0) {
+	$___process = XZ-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($__source) -or (Test-Path $__source -PathType Container)) {
+	if ($(STRINGS-Is-Empty "${___source}") -eq 0) {
 		return 1
 	}
-	$__source = $__source -replace "\.xz$"
+
+	$___process = FS-Is-Directory "${___source}"
+	if ($___process -eq 0) {
+		return 1
+	}
 
 
 	# create .gz compressed target
-	$__process = OS-Exec "xz" "-9 --compress `"${__source}`""
+	$___source = $___source -replace "\.xz$"
+	$___process = OS-Exec "xz" "-9 --compress `"${___source}`""
+	if ($___process -ne 0) {
+		return 1
+	}
 
 
 	# report status
-	return $__process
+	return 0
 }
 
 
@@ -45,8 +55,8 @@ function XZ-Create {
 
 function XZ-Is-Available {
 	# execute
-	$__process = OS-Is-Command-Available "xz"
-	if ($__process -eq 0) {
+	$___process = OS-Is-Command-Available "xz"
+	if ($___process -eq 0) {
 		return 0
 	}
 

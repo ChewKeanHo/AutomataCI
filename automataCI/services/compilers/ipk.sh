@@ -40,7 +40,7 @@ IPK::create_archive() {
 
         # package control
         cd "${__directory}/control"
-        TAR::create_gz "../control.tar.gz" "*"
+        TAR_Create_GZ "../control.tar.gz" "*"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
                 return 1
@@ -49,7 +49,7 @@ IPK::create_archive() {
 
         # package data
         cd "${__directory}/data"
-        TAR::create_gz "../data.tar.gz" "*"
+        TAR_Create_GZ "../data.tar.gz" "*"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
                 return 1
@@ -67,7 +67,7 @@ IPK::create_archive() {
 
         # archive into ipk
         __file="package.ipk"
-        TAR::create_gz "$__file" "debian-binary control.tar.gz data.tar.gz"
+        TAR_Create_GZ "$__file" "debian-binary control.tar.gz data.tar.gz"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
                 return 1
@@ -217,7 +217,7 @@ IPK::is_available() {
 
 
         # validate dependencies
-        TAR::is_available
+        TAR_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
