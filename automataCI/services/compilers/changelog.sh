@@ -77,7 +77,7 @@ CHANGELOG_Assemble_DEB() {
 
 
         # gunzip
-        GZ::create "$___target"
+        GZ_Create "$___target"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -407,7 +407,7 @@ CHANGELOG_Is_Available() {
                 return 1
         fi
 
-        GZ::is_available
+        GZ_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi

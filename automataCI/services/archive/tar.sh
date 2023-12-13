@@ -98,7 +98,7 @@ TAR::create_gz() {
 
 
         # compress archive
-        GZ::create "${1%.gz*}"
+        GZ_Create "${1%.gz*}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

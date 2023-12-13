@@ -139,7 +139,7 @@ Contact: ${__name} <${__email}>
 
 
         # gunzip the manual
-        GZ::create "$__location"
+        GZ_Create "$__location"
         return $?
 }
 
@@ -148,7 +148,7 @@ Contact: ${__name} <${__email}>
 
 MANUAL::is_available() {
         # execute
-        GZ::is_available
+        GZ_Is_Available
         if [ $? -eq 0 ]; then
                 return 0
         fi

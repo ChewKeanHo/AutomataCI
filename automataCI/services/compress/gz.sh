@@ -10,51 +10,65 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-GZ::create() {
-        __source="$1"
+GZ_Create() {
+        ___source="$1"
 
 
         # validate input
-        GZ::is_available
+        GZ_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ -z "$__source" ] || [ -d "$__source" ]; then
+        if [ $(STRINGS_Is_Empty "$___source") -eq 0 ]; then
                 return 1
         fi
-        __source="${__source%.gz}"
+
+        FS::is_directory "$___source"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
 
 
         # create .gz compressed target
-        if [ ! -z "$(type -t gzip)" ]; then
-                gzip -9 $__source
-                __exit=$?
-        elif [ ! -z "$(type -t gunzip)" ]; then
-                gunzip -9 $__source
-                __exit=$?
-        else
-                __exit=1
+        ___source="${___source%.gz}"
+
+        OS::is_command_available "gzip"
+        if [ $? -eq 0 ]; then
+                gzip -9 "$___source"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+                return 0
+        fi
+
+        OS::is_command_available "gunzip"
+        if [ $? -eq 0 ]; then
+                gunzip -9 "$___source"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+                return 0
         fi
 
 
         # report status
-        if [ $__exit -ne 0 ]; then
-                return 1
-        fi
-
-        return 0
+        return 1
 }
 
 
 
 
-GZ::is_available() {
+GZ_Is_Available() {
         # execute
         OS::is_command_available "gzip"
         if [ $? -eq 0 ]; then
