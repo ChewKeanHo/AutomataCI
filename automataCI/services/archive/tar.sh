@@ -127,6 +127,10 @@ TAR::create_xz() {
                 return 1
         fi
 
+        XZ_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
         # create tar archive
         TAR::create "${1%.xz*}" "$2" "$3" "$4"
@@ -136,7 +140,7 @@ TAR::create_xz() {
 
 
         # compress archive
-        XZ::create "${1%%.xz*}"
+        XZ_Create "${1%%.xz*}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

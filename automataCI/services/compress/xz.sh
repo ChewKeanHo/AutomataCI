@@ -10,44 +10,50 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-XZ::create() {
-        __source="$1"
+XZ_Create() {
+        ___source="$1"
 
 
         # validate input
-        XZ::is_available
+        XZ_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ -z "$__source" ] || [ -d "$__source" ]; then
-                unset __source
+        if [ $(STRINGS_Is_Empty "$___source") -eq 0 ]; then
+                unset ___source
                 return 1
         fi
-        __source="${__source%.xz}"
+
+        FS::is_directory "$___source"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
 
 
         # create .gz compressed target
-        xz -9 --compress "$__source"
+        ___source="${___source%.xz}"
+        xz -9 --compress "$___source"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }
 
 
 
 
-XZ::is_available() {
+XZ_Is_Available() {
         # execute
         OS::is_command_available "xz"
         if [ $? -eq 0 ]; then

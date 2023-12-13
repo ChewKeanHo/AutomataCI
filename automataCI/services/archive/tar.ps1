@@ -136,6 +136,10 @@ function TAR-Create-XZ {
 		return 1
 	}
 
+	$___process = XZ-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
 
 	# create tar archive
 	$__dest = $__destination -replace '\.xz.*$'
