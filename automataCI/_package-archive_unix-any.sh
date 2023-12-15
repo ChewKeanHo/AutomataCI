@@ -57,7 +57,7 @@ PACKAGE::run_archive() {
         fi
 
         OS::print_status info "checking zip functions availability...\n"
-        ZIP::is_available
+        ZIP_Is_Available
         if [ $? -ne 0 ]; then
                 OS::print_status error "check failed.\n"
                 return 1
@@ -115,7 +115,7 @@ PACKAGE::run_archive() {
         windows)
                 _target_path="${_target_path}.zip"
                 OS::print_status info "packaging ${_target_path}\n"
-                ZIP::create "$_target_path" "*"
+                ZIP_Create "$_target_path" "*"
                 __exit=$?
                 ;;
         *)

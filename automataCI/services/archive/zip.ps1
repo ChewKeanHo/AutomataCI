@@ -23,8 +23,9 @@ function ZIP-Create {
 
 	# execute
 	try {
-		Compress-Archive -Path $___source -DestinationPath $___destination
-		if (Test-Path $___destination) {
+		$null = Compress-Archive -Path $___source -DestinationPath $___destination
+		$___process = FS-Is-File "${___destination}"
+		if ($___process -eq 0) {
 			return 0
 		}
 	} catch {
@@ -61,7 +62,7 @@ function ZIP-Extract {
 	# execute
 	try {
 		$null = FS-Make-Directory "${___destination}"
-		Expand-Archive -Path $___source -DestinationPath $___destination
+		$null = Expand-Archive -Path $___source -DestinationPath $___destination
 	} catch {
 		return 1
 	}

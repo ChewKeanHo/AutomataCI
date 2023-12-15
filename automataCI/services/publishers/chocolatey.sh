@@ -75,7 +75,7 @@ CHOCOLATEY_Archive() {
                 return 1
         fi
 
-        ZIP::is_available
+        ZIP_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -83,7 +83,7 @@ CHOCOLATEY_Archive() {
 
         # execute
         ___current_path="$PWD" && cd "$2"
-        ZIP::create "$1" "*"
+        ZIP_Create "$1" "*"
         ___process=$?
         cd "$___current_path" && unset ___current_path
         if [ $___process -ne 0 ]; then

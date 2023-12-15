@@ -57,7 +57,7 @@ PACKAGE_Run_Chocolatey() {
 
         # validate input
         I18N_Status_Print_Check_Availability "ZIP"
-        ZIP::is_available
+        ZIP_Is_Available
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Check_Availability_Incompatible "ZIP"
                 return 1

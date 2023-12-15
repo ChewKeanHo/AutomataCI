@@ -10,18 +10,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 
 
 
 
-ZIP::create() {
-        # __destination="$1"
-        # __source="$2"
+ZIP_Create() {
+        #___destination="$1"
+        #___source="$2"
 
 
         # validate input
-        ZIP::is_available
+        ZIP_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -29,14 +30,13 @@ ZIP::create() {
 
         # execute
         zip -9 -r "$1" $2
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }
 
 
@@ -48,15 +48,18 @@ ZIP_Extract() {
 
 
         # validate input
-        if [ -z "$(type -t unzip)" ]; then
+        OS::is_command_available "unzip"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ ! -f "$___source" ]; then
+        FS::is_file "$___source"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ -f "$___destination" ]; then
+        FS::is_file "$___destination"
+        if [ $? -eq 0 ]; then
                 return 1
         fi
 
@@ -76,11 +79,13 @@ ZIP_Extract() {
 
 
 
-ZIP::is_available() {
+ZIP_Is_Available() {
         # execute
-        if [ ! -z "$(type -t zip)" ]; then
+        OS::is_command_available "zip"
+        if [ $? -eq 0 ]; then
                 return 0
         fi
+
 
         # report status
         return 1
