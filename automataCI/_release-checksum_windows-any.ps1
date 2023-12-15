@@ -83,7 +83,7 @@ function RELEASE-Run-Checksum-Seal {
 
 		if (-not ([string]::IsNullOrEmpty(${env:PROJECT_RELEASE_SHA256}))) {
 			OS-Print-Status info "sha256 checksuming ${TARGET}"
-			$__value = SHASUM-Checksum-File $TARGET.FullName "256"
+			$__value = SHASUM-Checksum-From-File $TARGET.FullName "256"
 			if ([string]::IsNullOrEmpty(${__value})) {
 				OS-Print-Status error "sha256 failed."
 				return 1
@@ -96,7 +96,7 @@ ${__value}  $TARGET
 
 		if (-not ([string]::IsNullOrEmpty(${env:PROJECT_RELEASE_SHA512}))) {
 			OS-Print-Status info "sha512 checksuming ${TARGET}"
-			$__value = SHASUM-Checksum-File $TARGET.FullName "512"
+			$__value = SHASUM-Checksum-From-File $TARGET.FullName "512"
 			if ([string]::IsNullOrEmpty(${__value})) {
 				OS-Print-Status error "sha512 failed."
 				return 1

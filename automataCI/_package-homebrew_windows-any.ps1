@@ -122,7 +122,7 @@ function PACKAGE-Run-Homebrew {
 
 	# sha256 the package
 	$null = I18N-Status-Print-Shasum "SHA256"
-	$__shasum = SHASUM-Checksum-File "${_target_path}.tar.xz" "256"
+	$__shasum = SHASUM-Checksum-From-File "${_target_path}.tar.xz" "256"
 	if ($(STRINGS-Is-Empty "${__shasum}") -eq 0) {
 		$null = I18N-Status-Print-Shasum-Failed
 		return 1

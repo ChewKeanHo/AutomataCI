@@ -128,7 +128,7 @@ PACKAGE::run_homebrew() {
 
         # sha256 the package
         I18N_Status_Print_Shasum "SHA256"
-        __shasum="$(SHASUM::create_file "${_target_path}.tar.xz" "256")"
+        __shasum="$(SHASUM_Create_From_File "${_target_path}.tar.xz" "256")"
         if [ $(STRINGS_Is_Empty "$__shasum") -eq 0 ]; then
                 I18N_Status_Print_Shasum_Failed
                 return 1

@@ -10,13 +10,25 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-SHASUM::create_file() {
-        #__target="$1"
-        #__algo="$2"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+
+
+
+
+SHASUM_Create_From_File() {
+        #___target="$1"
+        #___algo="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ ! -f "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
@@ -30,14 +42,15 @@ SHASUM::create_file() {
 
 
         # execute
-        if [ ! -z "$(type -t shasum)" ]; then
-                __ret="$(shasum -a "$2" "$1")"
-                if [ -z "$__ret" ]; then
+        OS::is_command_available "shasum"
+        if [ $? -eq 0 ]; then
+                ___ret="$(shasum -a "$2" "$1")"
+                if [ -z "$___ret" ]; then
                         return 1
                 fi
 
-                printf "${__ret%% *}"
-                unset __ret
+                printf "${___ret%% *}"
+                unset ___ret
         fi
 
 
@@ -48,9 +61,10 @@ SHASUM::create_file() {
 
 
 
-SHASUM::is_available() {
+SHASUM_Is_Available() {
         # execute
-        if [ ! -z "$(type -t shasum)" ]; then
+        OS::is_command_available "shasum"
+        if [ $? -eq 0 ]; then
                 return 0
         fi
 

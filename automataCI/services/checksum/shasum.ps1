@@ -9,33 +9,43 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-function SHASUM-Checksum-File {
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+
+
+
+
+function SHASUM-Checksum-From-File {
 	param (
-		[string]$__target,
-		[string]$__algo
+		[string]$___target,
+		[string]$___algo
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or
-		(-not (Test-Path -Path "$__target")) -or
-		[string]::IsNullOrEmpty($__algo)) {
+	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___algo}") -eq 0)) {
+		return ""
+	}
+
+	$___process = FS-Is-File "${___target}"
+	if ($___process -ne 0) {
 		return ""
 	}
 
 
 	# execute
-	switch ($__algo) {
+	switch ($___algo) {
 	'1' {
-		$__hasher = New-Object System.Security.Cryptography.SHA1CryptoServiceProvider
+		$___hasher = New-Object System.Security.Cryptography.SHA1CryptoServiceProvider
 	} '224' {
 		return ""
 	} '256' {
-		$__hasher = New-Object System.Security.Cryptography.SHA256CryptoServiceProvider
+		$___hasher = New-Object System.Security.Cryptography.SHA256CryptoServiceProvider
 	} '384' {
-		$__hasher = New-Object System.Security.Cryptography.SHA384CryptoServiceProvider
+		$___hasher = New-Object System.Security.Cryptography.SHA384CryptoServiceProvider
 	} '512' {
-		$__hasher = New-Object System.Security.Cryptography.SHA512CryptoServiceProvider
+		$___hasher = New-Object System.Security.Cryptography.SHA512CryptoServiceProvider
 	} '512224' {
 		return ""
 	} '512256' {
@@ -44,9 +54,9 @@ function SHASUM-Checksum-File {
 		return ""
 	}}
 
-	$__fileStream = [System.IO.File]::OpenRead($__target)
-	$__hash = $__hasher.ComputeHash($__fileStream)
-	return [System.BitConverter]::ToString($__hash).Replace("-", "").ToLower()
+	$___fileStream = [System.IO.File]::OpenRead($___target)
+	$___hash = $___hasher.ComputeHash($___fileStream)
+	return [System.BitConverter]::ToString($___hash).Replace("-", "").ToLower()
 }
 
 
@@ -54,23 +64,23 @@ function SHASUM-Checksum-File {
 
 function SHASUM-Is-Available {
 	# execute
-	$__ret = [System.Security.Cryptography.SHA1]::Create("SHA1")
-	if (-not $__ret) {
+	$___ret = [System.Security.Cryptography.SHA1]::Create("SHA1")
+	if (-not $___ret) {
 		return 1
 	}
 
-	$__ret = [System.Security.Cryptography.SHA256]::Create("SHA256")
-	if (-not $__ret) {
+	$___ret = [System.Security.Cryptography.SHA256]::Create("SHA256")
+	if (-not $___ret) {
 		return 1
 	}
 
-	$__ret = [System.Security.Cryptography.SHA384]::Create("SHA384")
-	if (-not $__ret) {
+	$___ret = [System.Security.Cryptography.SHA384]::Create("SHA384")
+	if (-not $___ret) {
 		return 1
 	}
 
-	$__ret = [System.Security.Cryptography.SHA512]::Create("SHA512")
-	if (-not $__ret) {
+	$___ret = [System.Security.Cryptography.SHA512]::Create("SHA512")
+	if (-not $___ret) {
 		return 1
 	}
 

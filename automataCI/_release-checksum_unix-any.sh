@@ -80,7 +80,7 @@ RELEASE::run_checksum_seal() {
 
                 if [ ! -z "$PROJECT_RELEASE_SHA256" ]; then
                         OS::print_status info "sha256 checksuming $TARGET\n"
-                        __value="$(SHASUM::create_file "$TARGET" "256")"
+                        __value="$(SHASUM_Create_From_File "$TARGET" "256")"
                         if [ $? -ne 0 ]; then
                                 OS::print_status error "sha256 failed.\n"
                                 return 1
@@ -98,7 +98,7 @@ ${__value}  ${TARGET##*/}
 
                 if [ ! -z "$PROJECT_RELEASE_SHA512" ]; then
                         OS::print_status info "sha512 checksuming $TARGET\n"
-                        __value="$(SHASUM::create_file "$TARGET" "512")"
+                        __value="$(SHASUM_Create_From_File "$TARGET" "512")"
                         if [ $? -ne 0 ]; then
                                 OS::print_status error "sha512 failed.\n"
                                 return 1
@@ -149,7 +149,7 @@ RELEASE::initiate_checksum() {
         fi
 
         OS::print_status info "checking shasum availability...\n"
-        SHASUM::is_available
+        SHASUM_Is_Available
         if [ $? -ne 0 ]; then
                 OS::print_status error "Check failed.\n"
                 return 1
