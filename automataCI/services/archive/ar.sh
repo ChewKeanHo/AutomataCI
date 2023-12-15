@@ -10,11 +10,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-AR::is_available() {
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+
+
+
+
+AR_Is_Available() {
         # execute
-        if [ -z "$(type -t ar)" ]; then
+        OS::is_command_available "ar"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         # report status
         return 0
@@ -23,25 +31,30 @@ AR::is_available() {
 
 
 
-AR::create() {
-        # __name="$1"
-        # __list="$2"
+AR_Create() {
+        #___name="$1"
+        #___list="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Available "$1") -eq 0 ] ||
+                [ $(STRINGS_Is_Available "$2") -eq 0 ]; then
+                return 1
+        fi
+
+        AR_Is_Available
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
         ar r "$1" $2
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }

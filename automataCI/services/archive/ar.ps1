@@ -9,15 +9,16 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 
 
 
 
 function AR-Is-Available {
 	# execute
-	$__process = Get-Command "ar" -ErrorAction SilentlyContinue
-	if (-not ($__process)) {
+	$___process = OS-Is-Command-Available "ar"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -31,26 +32,30 @@ function AR-Is-Available {
 
 function AR-Create {
 	param (
-		[string]$__name,
-		[string]$__list
+		[string]$___name,
+		[string]$___list
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__name) -or [string]::IsNullOrEmpty($__list)) {
+	if (($(STRINGS-Is-Empty "${___name}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___list}") -eq 0)) {
 		return 1
 	}
 
-	$__process = AR-Is-Available
-	if ($__process -ne 0) {
+	$___process = AR-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = OS-Exec "ar" "r ${__name} ${__list}"
+	$___process = OS-Exec "ar" "r ${___name} ${___list}"
+	if ($___process -ne 0) {
+		return 1
+	}
 
 
 	# report status
-	return $__process
+	return 0
 }

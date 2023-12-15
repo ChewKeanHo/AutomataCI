@@ -86,7 +86,7 @@ DEB_Create_Archive() {
 
         # archive into deb
         ___file="package.deb"
-        AR::create "$___file" "debian-binary control.tar.xz data.tar.xz"
+        AR_Create "$___file" "debian-binary control.tar.xz data.tar.xz"
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
                 return 1
@@ -472,7 +472,7 @@ DEB_Is_Available() {
                 return 1
         fi
 
-        AR::is_available
+        AR_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
