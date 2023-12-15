@@ -189,7 +189,7 @@ DEB_Create_Checksum() {
 
         # checksum every items
         for ___line in $(find "${1}/data" -type f); do
-                ___checksum="$(MD5::checksum_file "$___line")"
+                ___checksum="$(MD5_Checksum_From_File "$___line")"
                 FS::append_file "$___location" \
                         "${___checksum%% *} ${___line##*${1}/data/}\n"
                 if [ $? -ne 0 ]; then
@@ -462,7 +462,7 @@ DEB_Is_Available() {
 
 
         # validate dependencies
-        MD5::is_available
+        MD5_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi

@@ -10,39 +10,67 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-MD5::checksum_file() {
-        # __target="$1"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+
+
+
+
+MD5_Checksum_From_File() {
+        #___target="$1"
 
 
         # validate input
-        if [ -z "$1" ] || [ ! -f "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        if [ ! -z "$(type -t md5sum)" ]; then
+        OS::is_command_available "md5sum"
+        if [ $? -eq 0 ]; then
                 md5sum "$1"
-        elif [ ! -z "$(type -t md5)" ]; then
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+                return 0
+        fi
+
+        OS::is_command_available "md5"
+        if [ $? -eq 0 ]; then
                 md5 "$1"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+                return 0
         fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
         return 1
 }
 
 
 
 
-MD5::is_available() {
+MD5_Is_Available() {
         # execute
-        if [ ! -z "$(type -t md5sum)" ] || [ ! -z "$(type -t md5)" ]; then
-                return 0
+        OS::is_command_available "md5sum"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "md5"
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
 

@@ -9,27 +9,38 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-function MD5-Checksum-File {
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+
+
+
+
+function MD5-Checksum-From-File {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty("${__target}") -or (-not (Test-Path -Path "${__target}"))) {
+	if ($(STRINGS-Is-Available "${___target}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__hasher = [System.Security.Cryptography.MD5]::Create("MD5")
-	$__stream = [System.IO.File]::OpenRead($__target)
-	$__hash = [System.BitConverter]::ToString($__hasher.ComputeHash($__stream))
-	$null = $__stream.Close()
+	$___hasher = [System.Security.Cryptography.MD5]::Create("MD5")
+	$___stream = [System.IO.File]::OpenRead($___target)
+	$___hash = [System.BitConverter]::ToString($___hasher.ComputeHash($___stream))
+	$null = $___stream.Close()
 
 
 	# report status
-	return $__hash.Replace("-", "").ToLower()
+	return $___hash.Replace("-", "").ToLower()
 }
 
 
@@ -37,8 +48,8 @@ function MD5-Checksum-File {
 
 function MD5-Is-Available {
 	# execute
-	$__md5 = [System.Security.Cryptography.MD5]::Create("MD5")
-	if ($__md5) {
+	$___md5 = [System.Security.Cryptography.MD5]::Create("MD5")
+	if ($___md5) {
 		return 0
 	}
 

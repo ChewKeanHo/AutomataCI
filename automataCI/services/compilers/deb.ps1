@@ -198,7 +198,7 @@ function DEB-Create-Checksum {
 
 	# checksum each file
 	foreach ($___file in (Get-ChildItem -Path "${___directory}\data" -File -Recurse)) {
-		$___checksum = MD5-Checksum-File $___file.FullName
+		$___checksum = MD5-Checksum-From-File $___file.FullName
 		$___path = $___file.FullName `
 			-replace [regex]::Escape("${___directory}\data\"), ""
 		$___path = $___path -replace "\\", "/"
