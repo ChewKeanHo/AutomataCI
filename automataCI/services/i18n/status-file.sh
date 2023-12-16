@@ -14,6 +14,7 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-archive.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-check.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-create.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_status-file-export.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-update.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-validate.sh"
 

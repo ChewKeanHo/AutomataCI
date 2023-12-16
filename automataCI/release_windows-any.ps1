@@ -123,6 +123,11 @@ if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
 			return 1
 		}
 
+		$__process = RELEASE-Run-CITATION-CFF "$TARGET"
+		if ($__process -ne 0) {
+			return 1
+		}
+
 		$__process = RELEASE-Run-Homebrew "$TARGET" "$HOMEBREW_REPO"
 		if ($__process -ne 0) {
 			return 1
@@ -141,12 +146,6 @@ if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
 			}
 		}
 	}
-}
-
-
-$__process = RELEASE-Run-Citation
-if ($__process -ne 0) {
-	return 1
 }
 
 

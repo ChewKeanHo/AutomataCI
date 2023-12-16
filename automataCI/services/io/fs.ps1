@@ -243,6 +243,25 @@ function FS-Is-Target-A-Chocolatey {
 
 
 
+function FS-Is-Target-A-Citation-CFF {
+	param (
+		[string]$___subject
+	)
+
+
+	# execute
+	if ($("${___subject}" -replace '^.*.cff') -ne "${___subject}") {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-Docs {
 	param (
 		[string]$__subject

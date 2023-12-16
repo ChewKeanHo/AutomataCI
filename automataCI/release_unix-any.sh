@@ -120,6 +120,11 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 
+        RELEASE_Run_CITATION_CFF "$TARGET"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
         RELEASE::run_homebrew "$TARGET" "$HOMEBREW_REPO"
         if [ $? -ne 0 ]; then
                 return 1
@@ -138,12 +143,6 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 fi
         fi
 done
-
-
-RELEASE::run_citation
-if [ $? -ne 0 ]; then
-        return 1
-fi
 
 
 RELEASE::run_checksum_seal "$STATIC_REPO"

@@ -243,6 +243,25 @@ FS::is_target_a_chocolatey() {
 
 
 
+FS_Is_Target_A_Citation_CFF() {
+        #___target="$1"
+
+
+        # execute
+        if [ "${1#*.cff}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
 FS::is_target_a_docs() {
         # __target="$1"
 
