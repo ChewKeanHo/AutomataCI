@@ -32,7 +32,7 @@ fi
 
 
 
-PACKAGE_Run_Chocolatey() {
+PACKAGE_Run_CHOCOLATEY() {
         #__line="$1"
 
 
@@ -78,7 +78,7 @@ PACKAGE_Run_Chocolatey() {
 
 
         # copy all complimentary files to the workspace
-        cmd="PACKAGE_Assemble_Chocolatey_Content"
+        cmd="PACKAGE_Assemble_CHOCOLATEY_Content"
         I18N_Status_Print_Package_Assembler_Check "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
@@ -129,7 +129,7 @@ PACKAGE_Run_Chocolatey() {
         __name="${__name}-chocolatey_${PROJECT_VERSION}_${_target_os}-${_target_arch}.nupkg"
         __name="${_dest}/${__name}"
         I18N_Status_Print_File_Archive "$__name"
-        CHOCOLATEY::archive "$__name" "$_src"
+        CHOCOLATEY_Archive "$__name" "$_src"
         if [ $__exit -ne 0 ]; then
                 I18N_Status_Print_File_Archive_Failed
                 return 1
@@ -138,9 +138,9 @@ PACKAGE_Run_Chocolatey() {
 
         # test the package
         I18N_Status_Print_Package_Testing "$__name"
-        CHOCOLATEY::is_available
+        CHOCOLATEY_Is_Available
         if [ $? -eq 0 ]; then
-                CHOCOLATEY::test "$__name"
+                CHOCOLATEY_Test "$__name"
                 if [ $? -ne 0 ]; then
                         I18N_Status_Print_Package_Testing_Failed
                         return 1

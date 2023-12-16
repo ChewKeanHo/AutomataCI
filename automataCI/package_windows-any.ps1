@@ -199,7 +199,7 @@ ${__common}|${__log}|PACKAGE-Run-CARGO
 
 	$__log = "${__log_directory}\chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$__process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-Chocolatey
+${__common}|${__log}|PACKAGE-Run-CHOCOLATEY
 "@
 	if ($__process -ne 0) {
 		return 1

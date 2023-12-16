@@ -31,7 +31,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-function PACKAGE-Run-Chocolatey {
+function PACKAGE-Run-CHOCOLATEY {
 	param (
 		[string]$__line
 	)

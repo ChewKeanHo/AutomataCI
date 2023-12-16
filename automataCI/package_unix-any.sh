@@ -183,7 +183,7 @@ ${__common}|${__log}|PACKAGE_Run_CARGO
 
         __log="${__log_directory}/chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__parallel_control" "\
-${__common}|${__log}|PACKAGE_Run_Chocolatey
+${__common}|${__log}|PACKAGE_Run_CHOCOLATEY
 "
         if [ $? -ne 0 ]; then
                 return 1
