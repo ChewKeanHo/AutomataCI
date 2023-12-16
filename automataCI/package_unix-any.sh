@@ -167,7 +167,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
 
         __log="${__log_directory}/archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__parallel_control" "\
-${__common}|${__log}|PACKAGE::run_archive
+${__common}|${__log}|PACKAGE_Run_ARCHIVE
 "
         if [ $? -ne 0 ]; then
                 return 1

@@ -25,7 +25,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-function PACKAGE-Assemble-Archive-Content {
+function PACKAGE-Assemble-ARCHIVE-Content {
 	param(
 		[string]$_target,
 		[string]$_directory,

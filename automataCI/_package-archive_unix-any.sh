@@ -10,10 +10,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/zip.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/archive/tar.sh"
+. "${LIBS_AUTOMATACI}/services/archive/zip.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -27,80 +31,79 @@ fi
 
 
 
-PACKAGE::run_archive() {
+PACKAGE_Run_ARCHIVE() {
         #__line="$1"
 
 
         # parse input
-        __line="${1%|*}"
+        __line="$1"
 
-        _target_arch="${__line##*|}"
-        __line="${__line%|*}"
+        _dest="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target_os="${__line##*|}"
-        __line="${__line%|*}"
+        _target="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target_filename="${__line##*|}"
-        __line="${__line%|*}"
+        _target_filename="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _target="${__line##*|}"
-        __line="${__line%|*}"
+        _target_os="${__line%%|*}"
+        __line="${__line#*|}"
 
-        _dest="${__line##*|}"
+        _target_arch="${__line%%|*}"
+        __line="${__line#*|}"
 
 
-        OS::print_status info "checking tar functions availability...\n"
+        # validate input
+        I18N_Status_Print_Check_Availability "TAR"
         TAR_Is_Available
         if [ $? -ne 0 ]; then
-                OS::print_status error "check failed.\n"
+                I18N_Status_Print_Check_Availability_Failed "TAR"
                 return 1
         fi
 
-        OS::print_status info "checking zip functions availability...\n"
-        ZIP_Is_Available
+        I18N_Status_Print_Check_Availability "ZIP"
+        TAR_Is_Available
         if [ $? -ne 0 ]; then
-                OS::print_status error "check failed.\n"
+                I18N_Status_Print_Check_Availability_Failed "ZIP"
                 return 1
         fi
 
 
         # prepare workspace and required values
+        I18N_Status_Print_Package_Create "ARCHIVE"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/archive_${_src}"
-        OS::print_status info "archiving ${_src} for ${_target_os}-${_target_arch}\n"
-        OS::print_status info "remaking workspace directory ${_src}\n"
+        I18N_Status_Print_Package_Workspace_Remake "$_src"
         FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
-                OS::print_status error "remake failed.\n"
+                I18N_Status_Print_Package_Remake_Failed
                 return 1
         fi
 
 
         # copy all complimentary files to the workspace
-        OS::is_command_available "PACKAGE::assemble_archive_content"
+        cmd="PACKAGE_Assemble_ARCHIVE_Content"
+        I18N_Status_Print_Package_Assembler_Check "$cmd"
+        OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
-                OS::print_status error "missing PACKAGE::assemble_archive_content function.\n"
+                I18N_Status_Print_Package_Check_Failed
                 return 1
         fi
 
-        OS::print_status info "assembling package files...\n"
-        PACKAGE::assemble_archive_content \
-                "$_target" \
-                "$_src" \
-                "$_target_filename" \
-                "$_target_os" \
-                "$_target_arch"
+        I18N_Status_Print_Package_Assembler_Exec
+        "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)
+                I18N_Status_Print_Package_Assembler_Exec_Skipped
                 FS::remove_silently "$_src"
-                OS::print_status warning "packaging is not required. Skipping process.\n"
                 return 0
                 ;;
         0)
                 ;;
         *)
-                OS::print_status error "assembly failed.\n"
+                I18N_Status_Print_Package_Assembler_Exec_Failed
                 return 1
                 ;;
         esac
@@ -114,15 +117,15 @@ PACKAGE::run_archive() {
         case "$_target_os" in
         windows)
                 _target_path="${_target_path}.zip"
-                OS::print_status info "packaging ${_target_path}\n"
+                I18N_Status_Print_Package_Exec "$_target_path"
                 ZIP_Create "$_target_path" "*"
-                __exit=$?
+                ___process=$?
                 ;;
         *)
                 _target_path="${_target_path}.tar.xz"
-                OS::print_status info "packaging ${_target_path}\n"
+                I18N_Status_Print_Package_Exec "$_target_path"
                 TAR_Create_XZ "$_target_path" "*"
-                __exit=$?
+                ___process=$?
                 ;;
         esac
 
@@ -132,10 +135,9 @@ PACKAGE::run_archive() {
 
 
         # report status
-        if [ $__exit -eq 0 ]; then
-                return 0
+        if [ $___process -ne 0 ]; then
+                return 1
         fi
 
-        OS::print_status error "package failed.\n"
-        return 1
+        return 0
 }

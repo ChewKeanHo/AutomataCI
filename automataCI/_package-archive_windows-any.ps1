@@ -9,24 +9,28 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\tar.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\zip.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\zip.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
 	return
 }
 
 
 
 
-function PACKAGE-Run-Archive {
+function PACKAGE-Run-ARCHIVE {
 	param (
 		[string]$__line
 	)
@@ -42,42 +46,45 @@ function PACKAGE-Run-Archive {
 
 
 	# validate input
-	OS-Print-Status info "checking tar functions availability..."
+	$null = I18N-Status-Print-Check-Availability "TAR"
 	$__process = TAR-Is-Available
 	if ($__process -ne 0) {
-		OS-Print-Status error "checking failed."
+		$null = I18N-Status-Print-Check-Availability-Failed "TAR"
 		return 1
 	}
 
-	OS-Print-Status info "checking zip functions availability..."
+	$null = I18N-Status-Print-Check-Availability "ZIP"
 	$__process = ZIP-Is-Available
 	if ($__process -ne 0) {
-		OS-Print-Status error "checking failed."
+		$null = I18N-Status-Print-Check-Availability-Failed "ZIP"
 		return 1
 	}
 
 
 	# prepare workspace and required values
+	$null = I18N-Status-Print-Package-Create "ARCHIVE"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\archive_${_src}"
-	OS-Print-Status info "archiving ${_src} for ${_target_os}-${_target_arch}"
-	OS-Print-Status info "remaking workspace directory ${_src}"
+	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
 	$__process = FS-Remake-Directory "${_src}"
 	if ($__process -ne 0) {
-		OS-Print-Status error "remake failed."
+		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
-	OS-Print-Status info "assembling package files..."
-	$__process = OS-Is-Command-Available "PACKAGE-Assemble-Archive-Content"
+	$cmd = "PACKAGE-Assemble-ARCHIVE-Content"
+	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$__process = OS-Is-Command-Available "$cmd"
 	if ($__process -ne 0) {
-		OS-Print-Status error "missing PACKAGE-Assemble-Archive-Content function."
+		$null = I18N-Status-Print-Package-Check-Failed
 		return 1
 	}
-	$__process = PACKAGE-Assemble-Archive-Content `
+
+	$null = I18N-Status-Print-Package-Assembler-Exec
+	$__process = PACKAGE-Assemble-ARCHIVE-Content `
 		${_target} `
 		${_src} `
 		${_target_filename} `
@@ -85,13 +92,13 @@ function PACKAGE-Run-Archive {
 		${_target_arch}
 	switch ($__process) {
 	10 {
+		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
 		$null = FS-Remove-Silently "${_src}"
-		OS-Print-Status warning "packaging is not required. Skipping process."
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		OS-Print-Status error "assembly failed."
+		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
 		return 1
 	}}
 
@@ -105,11 +112,11 @@ function PACKAGE-Run-Archive {
 	switch ($_target_os) {
 	windows {
 		$_target_path = "${_target_path}.zip"
-		OS-Print-Status info "packaging ${_target_path}"
+		$null = I18N-Status-Print-Package-Exec "${_target_path}"
 		$__process = ZIP-Create "${_target_path}" "*"
 	} Default {
 		$_target_path = "${_target_path}.tar.xz"
-		OS-Print-Status info "packaging ${_target_path}"
+		$null = I18N-Status-Print-Package-Exec "${_target_path}"
 		$__process = TAR-Create-XZ "${_target_path}" "*"
 	}}
 
@@ -120,10 +127,9 @@ function PACKAGE-Run-Archive {
 
 
 	# report status
-	if ($__process -eq 0) {
-		return 0
+	if ($__process -ne 0) {
+		return 1
 	}
 
-	OS-Print-Status error "package failed."
-	return 1
+	return 0
 }

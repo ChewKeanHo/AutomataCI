@@ -183,7 +183,7 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 
 	$__log = "${__log_directory}\archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$__process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-Archive
+${__common}|${__log}|PACKAGE-Run-ARCHIVE
 "@
 	if ($__process -ne 0) {
 		return 1
