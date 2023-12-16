@@ -29,6 +29,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\i18n\status-sync.ps1"
 
 . "${env:LIBS_AUTOMATACI}\_package-changelog_windows-any.ps1"
+. "${env:LIBS_AUTOMATACI}\_package-citation_windows-any.ps1"
 
 
 
@@ -48,7 +49,15 @@ $FILE_CHANGELOG_MD = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${FILE_CH
 $FILE_CHANGELOG_DEB = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb\changelog.gz"
 $__process = Package-Run-CHANGELOG "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
 if ($__process -ne 0) {
-	exit 1
+	return 1
+}
+
+
+$FILE_CITATION_CFF = "${env:PROJECT_SKU}-CITATION_${env:PROJECT_VERSION}.cff"
+$FILE_CITATION_CFF = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${FILE_CITATION_CFF}"
+$__process = Package-Run-CITATION "$FILE_CITATION_CFF"
+if ($__process -ne 0) {
+	return 1
 }
 
 

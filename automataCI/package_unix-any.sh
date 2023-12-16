@@ -33,6 +33,7 @@ fi
 . "${LIBS_AUTOMATACI}/_package-cargo_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-changelog_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-chocolatey_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-citation_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-deb_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-docker_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-flatpak_unix-any.sh"
@@ -65,6 +66,13 @@ FILE_CHANGELOG_MD="${PROJECT_SKU}-CHANGELOG_${PROJECT_VERSION}.md"
 FILE_CHANGELOG_MD="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${FILE_CHANGELOG_MD}"
 FILE_CHANGELOG_DEB="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb/changelog.gz"
 PACKAGE_Run_CHANGELOG "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+FILE_CITATION_CFF="${PROJECT_SKU}-CITATION_${PROJECT_VERSION}.cff"
+FILE_CITATION_CFF="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${FILE_CITATION_CFF}"
+PACKAGE_Run_CITATION "$FILE_CITATION_CFF"
 if [ $? -ne 0 ]; then
         return 1
 fi
