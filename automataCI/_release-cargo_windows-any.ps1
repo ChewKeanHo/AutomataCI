@@ -9,9 +9,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -23,41 +26,49 @@ function RELEASE-Run-CARGO {
 
 
 	# validate input
-	$__process = RUST-Crate-Is-Valid "${_target}"
-	if ($__process -ne 0) {
+	$___process = RUST-Crate-Is-Valid "${_target}"
+	if ($___process -ne 0) {
 		return 0
 	}
 
-	OS-Print-Status info "activating rust local environment..."
-	$__process = RUST-Activate-Local-Environment
-	if ($__process -ne 0) {
-		OS-Print-Status error "activation failed."
+	$null = I18N-Status-Print-Check-Availability "RUST"
+	$___process = RUST-Activate-Local-Environment
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Check-Availability-Failed "RUST"
 		return 1
 	}
 
 
 	# execute
-	OS-Print-Status info "releasing cargo package..."
-	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
-		OS-Print-Status warning "Simulating cargo package push..."
+	$null = I18N-Status-Print-Run-Publish "CARGO"
+	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
+		$null = I18N-Status-Print-Run-Publish-Simulated "CARGO"
 	} else {
-		OS-Print-Status info "logging in cargo credentials..."
-		$__process = RUST-Cargo-Login
-		if ($__process -ne 0) {
+		$null = I18N-Status-Print-Run-Login-Check "CARGO"
+		$___process = RUST-Cargo-Login
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Run-Login-Check-Failed
+			$null = I18N-Status-Print-Run-Logout
 			$null = RUST-Cargo-Logout
-			OS-Print-Status error "check failed - (CARGO_PASSWORD)."
 			return 1
 		}
 
-		$__process = RUST-Cargo-Release-Crate "${_target}"
-		$null = RUST-Cargo-Logout
-		if ($__process -ne 0) {
-			OS-Print-Status error "release failed."
+		$___process = RUST-Cargo-Release-Crate "${_target}"
+
+		$null = I18N-Status-Print-Run-Logout
+		$____process = RUST-Cargo-Logout
+		if ($____process -ne 0) {
+			$null = I18N-Status-Print-Run-Logout-Failed
+			return 1
+		}
+
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Run-Publish-Failed
 			return 1
 		}
 	}
 
-	OS-Print-Status info "remove package artifact..."
+	$null = I18N-Status-Print-Run-Clean "${_target}"
 	$null = FS-Remove-Silently "${_target}"
 
 

@@ -10,54 +10,65 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
 
-RELEASE::run_cargo() {
+RELEASE_Run_CARGO() {
         _target="$1"
 
 
         # validate input
-        RUST::crate_is_valid "$_target"
+        RUST_Crate_Is_Valid "$_target"
         if [ $? -ne 0 ]; then
                 return 0
         fi
 
-        OS::print_status info "activating rust local environment...\n"
-        RUST::activate_local_environment
+        I18N_Status_Print_Check_Availability "RUST"
+        RUST_Activate_Local_Environment
         if [ $? -ne 0 ]; then
-                OS::print_status error "activation failed.\n"
+                I18N_Status_Print_Check_Availability_Failed "RUST"
                 return 1
         fi
 
 
         # execute
-        OS::print_status info "releasing cargo package...\n"
-        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
-                OS::print_status warning "simulating cargo package push...\n"
+        I18N_Status_Print_Run_Publish "CARGO"
+        if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
+                I18N_Status_Print_Run_Publish_Simulated "CARGO"
         else
-                OS::print_status info "logging in cargo credentials...\n"
-                RUST::cargo_login
+                I18N_Status_Print_Run_Login_Check "CARGO"
+                RUST_Cargo_Login
                 if [ $? -ne 0 ]; then
-                        RUST::cargo_logout
-                        OS::print_status error "login failed (CARGO_PASSWORD).\n"
+                        I18N_Status_Print_Run_Login_Check_Failed
+                        I18N_Status_Print_Run_Logout
+                        RUST_Cargo_Logout
                         return 1
                 fi
 
-                RUST::cargo_release_crate "$_target"
-                __exit_code=$?
-                RUST::cargo_logout
-                if [ $__exit_code -ne 0 ]; then
-                        OS::print_status error "release failed.\n"
+                RUST_Cargo_Release_Crate "$_target"
+                ___process=$?
+
+                I18N_Status_Print_Run_Logout
+                RUST_Cargo_Logout
+                if [ $? -ne 0 ]; then
+                        I18N_Status_Print_Run_Logout_Failed
+                        return 1
+                fi
+
+                if [ $___process -ne 0 ]; then
+                        I18N_Status_Print_Run_Publish_Failed
                         return 1
                 fi
         fi
 
-        OS::print_status info "remove package artifact...\n"
+        I18N_Status_Print_Run_Clean "$_target"
         FS::remove_silently "$_target"
 
 
