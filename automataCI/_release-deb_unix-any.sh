@@ -10,15 +10,17 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/deb.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/publishers/reprepro.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/deb.sh"
+. "${LIBS_AUTOMATACI}/services/publishers/reprepro.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
 
-RELEASE::run_deb() {
+RELEASE_Run_DEB() {
         __target="$1"
         __directory="$2"
 
@@ -29,20 +31,21 @@ RELEASE::run_deb() {
                 return 0
         fi
 
-        OS::print_status info "checking required reprepro availability...\n"
-        REPREPRO::is_available
+        I18N_Status_Print_Check_Availability "REPREPRO"
+        REPREPRO_Is_Available
         if [ $? -ne 0 ]; then
-                OS::print_status warning "Reprepro is unavailable. Skipping...\n"
+                I18N_Status_Print_Check_Availability_Failed "REPREPRO"
                 return 0
         fi
 
 
         # execute
         __conf="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb"
-        FS::is_file "${__conf}/conf/distributions"
+        __file="${__conf}/conf/distributions"
+        FS::is_file "$__file"
         if [ $? -ne 0 ]; then
-                OS::print_status info "create reprepro configuration file...\n"
-                REPREPRO::create_conf \
+                I18N_Status_Print_File_Create "$__file"
+                REPREPRO_Create_Conf \
                         "$__conf" \
                         "$PROJECT_REPREPRO_CODENAME" \
                         "$PROJECT_DEBIAN_DISTRIBUTION" \
@@ -50,31 +53,31 @@ RELEASE::run_deb() {
                         "$PROJECT_REPREPRO_ARCH" \
                         "$PROJECT_GPG_ID"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "create failed.\n"
+                        I18N_Status_Print_File_Create_Failed
                         return 1
                 fi
         fi
 
         __dest="${2}/deb"
-        OS::print_status info "creating destination path: ${__dest}\n"
+        I18N_Status_Print_File_Create "$__dest"
         FS::make_directory "${__dest}"
         if [ $? -ne 0 ]; then
-                OS::print_status error "create failed.\n"
+                I18N_Status_Print_File_Create_Failed
                 return 1
         fi
 
-        OS::print_status info "publishing with reprepro...\n"
+        I18N_Status_Print_Run_Publish "REPREPRO"
         if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
-                OS::print_status warning "Simulating reprepro release...\n"
+                I18N_Status_Print_Run_Publish_Simulated "REPREPRO"
         else
-                REPREPRO::publish \
+                REPREPRO_Publish \
                         "$__target" \
                         "$__dest" \
                         "$__conf" \
                         "${__conf}/db" \
                         "$PROJECT_REPREPRO_CODENAME"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "publish failed.\n"
+                        I18N_Status_Print_Run_Publish_Failed
                         return 1
                 fi
         fi

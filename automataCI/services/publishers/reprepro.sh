@@ -10,49 +10,50 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-REPREPRO::create_conf() {
-        __directory="$1"
-        __codename="$2"
-        __suite="$3"
-        __components="$4"
-        __architectures="$5"
-        __gpg="$6"
+REPREPRO_Create_Conf() {
+        ___directory="$1"
+        ___codename="$2"
+        ___suite="$3"
+        ___components="$4"
+        ___architectures="$5"
+        ___gpg="$6"
 
 
         # validate input
-        if [ -z "$__directory" ] ||
-                [ -z "$__codename" ] ||
-                [ -z "$__suite" ] ||
-                [ -z "$__components" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___codename") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___suite") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___components") -eq 0 ]; then
                 return 1
         fi
 
 
         # execute
-        __filename="${__directory}/conf/distributions"
-        FS::make_housing_directory "$__filename"
-        FS::remove_silently "$__filename"
-        if [ -z "$__gpg" ]; then
-                FS::write_file "$__filename" "\
-Codename: ${__codename}
-Suite: ${__suite}
-Components: ${__components}
+        ___filename="${___directory}/conf/distributions"
+        FS::make_housing_directory "$___filename"
+        FS::remove_silently "$___filename"
+        if [ $(STRINGS_Is_Empty "$___gpg") -eq 0 ]; then
+                FS::write_file "$___filename" "\
+Codename: ${___codename}
+Suite: ${___suite}
+Components: ${___components}
 Architectures:"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
         else
-                FS::write_file "$__filename" "\
-Codename: ${__codename}
-Suite: ${__suite}
-Components: ${__components}
-SignWith: ${__gpg}
+                FS::write_file "$___filename" "\
+Codename: ${___codename}
+Suite: ${___suite}
+Components: ${___components}
+SignWith: ${___gpg}
 Architectures:"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -60,12 +61,12 @@ Architectures:"
         fi
 
 
-        if [ -z "$__architectures" ]; then
-                old_IFS="$IFS"
-                while IFS="" read -r __arch || [ -n "$__arch" ]; do
-                        FS::append_file "$__filename" " ${__arch}"
-                        while IFS="" read -r __os || [ -n "$__os" ]; do
-                                FS::append_file "$__filename" " ${__os}-${__arch}"
+        if [ $(STRINGS_Is_Empty "$___architectures") -eq 0 ]; then
+                ___old_IFS="$IFS"
+                while IFS= read -r ___arch || [ -n "$___arch" ]; do
+                        FS::append_file "$___filename" " $___arch"
+                        while IFS= read -r ___os || [ -n "$___os" ]; do
+                                FS::append_file "$___filename" " ${___os}-${___arch}"
                         done << EOF
 linux
 kfreebsd
@@ -128,10 +129,10 @@ sparc
 sparc64
 tilegx
 EOF
-                IFS="$old_IFS" && unset line old_IFS
-                FS::append_file "$__filename" "\n"
+                IFS="$___old_IFS" && unset ___line ___old_IFS
+                FS::append_file "$___filename" "\n"
         else
-                FS::append_file "$__filename" " ${__architectures}\n"
+                FS::append_file "$___filename" " ${___architectures}\n"
         fi
 
 
@@ -142,7 +143,7 @@ EOF
 
 
 
-REPREPRO::is_available() {
+REPREPRO_Is_Available() {
         # execute
         OS::is_command_available "reprepro"
         if [ $? -ne 0 ]; then
@@ -157,39 +158,42 @@ REPREPRO::is_available() {
 
 
 
-REPREPRO::publish() {
-        __target="$1"
-        __directory="$2"
-        __datastore="$3"
-        __db_directory="$4"
-        __codename="$5"
+REPREPRO_Publish() {
+        ___target="$1"
+        ___directory="$2"
+        ___datastore="$3"
+        ___db_directory="$4"
+        ___codename="$5"
 
 
         # validate input
-        if [ -z "$__target" ] ||
-                [ -z "$__directory" ] ||
-                [ -z "$__datastore" ] ||
-                [ -z "$__codename" ] ||
-                [ ! -d "$__directory" ]; then
+        if [ $(STRINGS_Is_Empty "$___target") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___datastore") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___codename") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___directory"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        FS::make_directory "${__db_directory}"
-        FS::make_directory "${__directory}"
-        FS::make_directory "${__datastore}"
-        reprepro --basedir "${__datastore}" \
-                --dbdir "${__db_directory}" \
-                --outdir "${__directory}" \
-                includedeb "${__codename}" \
-                "$__target"
+        FS::make_directory "${___db_directory}"
+        FS::make_directory "${___directory}"
+        FS::make_directory "${___datastore}"
+        reprepro --basedir "${___datastore}" \
+                --dbdir "${___db_directory}" \
+                --outdir "${___directory}" \
+                includedeb "${___codename}" \
+                "$___target"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }

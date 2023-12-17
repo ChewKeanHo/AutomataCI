@@ -11,15 +11,10 @@
 # under the License.
 . "${LIBS_AUTOMATACI}/services/i18n/printer.sh"
 
-. "${LIBS_AUTOMATACI}/services/i18n/_status-run-check-availability.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/_status-run-clean.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/_status-run-login.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/_status-run-publish.sh"
 
 
 
-
-I18N_Status_Print_Run_CI_Job() {
+I18N_Status_Print_Run_Publish() {
         ___subject="$1"
 
 
@@ -28,7 +23,7 @@ I18N_Status_Print_Run_CI_Job() {
         *)
                 # fallback to default english
                 ___subject="$(I18N_Status_Param_Process "${___subject}")"
-                I18N_Status_Print info "${___subject} job recipe detected. Running...\n"
+                I18N_Status_Print info "publishing ${___subject}...\n"
                 ;;
         esac
 
@@ -40,12 +35,12 @@ I18N_Status_Print_Run_CI_Job() {
 
 
 
-I18N_Status_Print_Run_CI_Job_Validate() {
+I18N_Status_Print_Run_Publish_Failed() {
         # execute
         case "$AUTOMATACI_LANG" in
         *)
                 # fallback to default english
-                I18N_Status_Print info "validating CI job...\n"
+                I18N_Status_Print error "publish failed.\n\n"
                 ;;
         esac
 
@@ -57,46 +52,16 @@ I18N_Status_Print_Run_CI_Job_Validate() {
 
 
 
-I18N_Status_Print_Run_CI_Job_Validate_Failed() {
+I18N_Status_Print_Run_Publish_Simulated() {
+        ___subject="$1"
+
+
         # execute
         case "$AUTOMATACI_LANG" in
         *)
                 # fallback to default english
-                I18N_Status_Print error "validation failed.\n\n"
-                ;;
-        esac
-
-
-        # report status
-        return 0
-}
-
-
-
-
-I18N_Status_Print_Run_Failed() {
-        # execute
-        case "$AUTOMATACI_LANG" in
-        *)
-                # fallback to default english
-                I18N_Status_Print error "CI job - run failed.\n\n"
-                ;;
-        esac
-
-
-        # report status
-        return 0
-}
-
-
-
-
-I18N_Status_Print_Run_Successful() {
-        # execute
-        case "$AUTOMATACI_LANG" in
-        *)
-                # fallback to default english
-                I18N_Status_Print success "\n\n"
+                ___subject="$(I18N_Status_Param_Process "${___subject}")"
+                I18N_Status_Print warning "simulating ${___subject} publications...\n"
                 ;;
         esac
 

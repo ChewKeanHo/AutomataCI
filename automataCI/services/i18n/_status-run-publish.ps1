@@ -11,15 +11,10 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\i18n\printer.ps1"
 
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-run-check-availability.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-run-clean.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-run-login.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_status-run-publish.ps1"
 
 
 
-
-function I18N-Status-Print-Run-CI-Job {
+function I18N-Status-Print-Run-Publish {
 	param(
 		[string]$___subject
 	)
@@ -30,7 +25,7 @@ function I18N-Status-Print-Run-CI-Job {
 	default {
 		# fallback to default english
 		$___subject = I18N-Status-Param-Process "${___subject}"
-		$null = I18N-Status-Print info "${___subject} job recipe detected. Running...`n"
+		$null = I18N-Status-Print info "publishing ${___subject}...`n"
 	}}
 
 
@@ -41,12 +36,12 @@ function I18N-Status-Print-Run-CI-Job {
 
 
 
-function I18N-Status-Print-Run-CI-Job-Validate {
+function I18N-Status-Print-Run-Publish-Failed {
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print info "validating CI job...`n"
+		$null = I18N-Status-Print error "publish failed.`n`n"
 	}}
 
 
@@ -57,44 +52,18 @@ function I18N-Status-Print-Run-CI-Job-Validate {
 
 
 
-function I18N-Status-Print-Run-CI-Job-Validate-Failed {
+function I18N-Status-Print-Run-Publish-Simulated {
+	param(
+		[string]$___subject
+	)
+
+
 	# execute
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print error "validating failed.`n`n"
-	}}
-
-
-	# report status
-	return 0
-}
-
-
-
-
-function I18N-Status-Print-Run-Failed {
-	# execute
-	switch (${env:AUTOMATACI_LANG}) {
-	default {
-		# fallback to default english
-		$null = I18N-Status-Print error "CI job - run failed.`n`n"
-	}}
-
-
-	# report status
-	return 0
-}
-
-
-
-
-function I18N-Status-Print-Run-Successful {
-	# execute
-	switch (${env:AUTOMATACI_LANG}) {
-	default {
-		# fallback to default english
-		$null = I18N-Status-Print success "`n`n"
+		$___subject = I18N-Status-Param-Process "${___subject}"
+		$null = I18N-Status-Print warning "simulating ${___subject} publications...`n"
 	}}
 
 
