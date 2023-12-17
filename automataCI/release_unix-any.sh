@@ -179,7 +179,7 @@ else
                 return 1
         fi
 
-        RELEASE::run_changelog_conclude
+        RELEASE_Conclude_CHANGELOG
         if [ $? -ne 0 ]; then
                 return 1
         fi

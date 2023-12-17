@@ -10,21 +10,21 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/changelog.sh"
+. "${LIBS_ATUOMATACI}/services/compilers/changelog.sh"
+
+. "${LIBS_ATUOMATACI}/services/i18n/status-file.sh"
 
 
 
 
-RELEASE::run_changelog_conclude() {
+RELEASE_Conclude_CHANGELOG() {
         # execute
-        OS::print_status info "sealing changelog latest entries...\n"
+        I18N_Status_Print_File_Export "${PROJECT_VERSION} CHANGELOG"
         CHANGELOG_Seal \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog" \
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then
-                OS::print_status error "seal failed.\n"
+                I18N_Status_Print_File_Export_Failed
                 return 1
         fi
 

@@ -9,20 +9,21 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\changelog.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
 
 
 
 
-function RELEASE-Run-Changelog-Conclude {
+function RELEASE-Conclude-CHANGELOG {
 	# execute
-	OS-Print-Status info "Sealing changelog latest entries..."
-	$__process = CHANGELOG-Seal `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog" `
+	$null = I18N-Status-Print-File-Export "${env:PROJECT_VERSION} CHANGELOG"
+	$___process = CHANGELOG-Seal `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog" `
 		"${env:PROJECT_VERSION}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-File-Export-Failed
 		return 1
 	}
 

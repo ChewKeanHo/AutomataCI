@@ -183,8 +183,8 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 		return 1
 	}
 
-	$__process = RELEASE-Run-Changelog-Conclude
-	if ($__process -ne 0) {
+	$___process = RELEASE-Conclude-CHANGELOG
+	if ($___process -ne 0) {
 		return 1
 	}
 
