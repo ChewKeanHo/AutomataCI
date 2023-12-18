@@ -10,8 +10,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-DISK::calculate_size() {
-        # __location="$1"
+DISK_Calculate_Size() {
+        #___location="$1"
 
 
         # validate input
@@ -19,29 +19,29 @@ DISK::calculate_size() {
                 return 1
         fi
 
-        DISK::is_available
+        DISK_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        __size="$(du -ks "$1")"
-
-
-        # report status
+        ___size="$(du -ks "$1")"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        printf "${__size%%[!0-9]*}"
+        printf "${___size%%[!0-9]*}"
+
+
+        # report status
         return 0
 }
 
 
 
 
-DISK::is_available() {
+DISK_Is_Available() {
         # execute
         if [ ! -z "$(type -t du)" ]; then
                 return 0

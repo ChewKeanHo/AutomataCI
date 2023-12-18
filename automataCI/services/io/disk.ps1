@@ -11,29 +11,29 @@
 # under the License.
 function DISK-Calculate-Size {
 	param (
-		[string]$__location
+		[string]$___location
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__location) -or (-not (Test-Path -Path "$__location"))) {
+	if ([string]::IsNullOrEmpty($___location) -or
+		(-not (Test-Path -Path "${___location}"))) {
 		return 1
 	}
 
-	$__process = DISK-Is-Available
-	if ($__process -ne 0) {
+	$___process = DISK-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__value  = Get-ChildItem ${__location} -Recurse -Force `
+	$___value  = Get-ChildItem "${___location}" -Recurse -Force `
 			-ErrorAction SilentlyContinue -Include * `
 		| Where-Object {$_.psiscontainer -eq $false} `
 		| Measure-Object -Property length -sum `
 		| Select-Object sum
-	$__value = [math]::Round($__value.sum / 1000,0)   #.ToString("#")
-	return $__value
+	return [math]::Round($___value.sum / 1000,0)
 }
 
 

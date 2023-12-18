@@ -264,7 +264,7 @@ DEB_Create_Control() {
 
 
         # generate control file
-        ___size="$(DISK::calculate_size "${___directory}/data")"
+        ___size="$(DISK_Calculate_Size "${___directory}/data")"
         if [ $(STRINGS_Is_Empty "$___size") -eq 0 ]; then
                 return 1
         fi
@@ -477,7 +477,7 @@ DEB_Is_Available() {
                 return 1
         fi
 
-        DISK::is_available
+        DISK_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi

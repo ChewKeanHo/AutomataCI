@@ -142,7 +142,7 @@ IPK::create_control() {
 
 
         # generate control file
-        __size="$(DISK::calculate_size "${__directory}/data")"
+        __size="$(DISK_Calculate_Size "${__directory}/data")"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -222,7 +222,7 @@ IPK::is_available() {
                 return 1
         fi
 
-        DISK::is_available
+        DISK_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
