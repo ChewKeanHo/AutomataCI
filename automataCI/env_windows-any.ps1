@@ -24,6 +24,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\reprepro.ps1"
 
 . "${env:LIBS_AUTOMATACI}\services\i18n\status-job-env.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
@@ -65,8 +66,8 @@ if ($__process -ne 0) {
 
 
 $null = I18N-Status-Print-Env-Install "reprepro"
-$__process = INSTALLER-Setup-Reprepro
-if ($__process -ne 0) {
+$___process = REPREPRO-Setup
+if ($___process -ne 0) {
 	$null = I18N-Status-Print-Env-Install-Failed
 	return 1
 }

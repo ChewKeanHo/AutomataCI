@@ -239,10 +239,3 @@ function INSTALLER-Setup-Python {
 
 	return 1
 }
-
-
-
-
-function INSTALLER-Setup-Reprepro {
-	return 0  # Windows do not have Reprepro
-}

@@ -197,3 +197,30 @@ REPREPRO_Publish() {
         # report status
         return 0
 }
+
+
+
+
+REPREPRO_Setup() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "reprepro"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        brew install reprepro
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}

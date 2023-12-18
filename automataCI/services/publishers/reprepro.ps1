@@ -154,3 +154,10 @@ function REPREPRO-Publish {
 
 	return 1
 }
+
+
+
+
+function REPREPRO-Setup {
+	return 0  # Windows do not have Reprepro
+}

@@ -26,6 +26,7 @@ fi
 . "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/dotnet.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/homebrew.sh"
+. "${LIBS_AUTOMATACI}/services/publishers/reprepro.sh"
 
 . "${LIBS_AUTOMATACI}/services/i18n/status-job-env.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
@@ -67,7 +68,7 @@ fi
 
 
 I18N_Status_Print_Env_Install "reprepro"
-INSTALLER::setup_reprepro
+REPREPRO_Setup
 if [ $? -ne 0 ]; then
         I18N_Status_Print_Env_Install_Failed
         return 1
