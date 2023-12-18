@@ -13,7 +13,6 @@
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/installer.sh"
 
 
 
@@ -38,7 +37,7 @@ RELEASE::docs_repo() {
 
         # execute
         OS::print_status info "setting up release docs repo...\n"
-        INSTALLER::setup_resettable_repo \
+        GIT_Clone_Repo \
                 "$PROJECT_PATH_ROOT" \
                 "$PROJECT_PATH_RELEASE" \
                 "$PWD" \
@@ -64,7 +63,7 @@ RELEASE::docs_repo() {
         fi
 
         OS::print_status info "Sourcing commit id for tagging...\n"
-        __tag="$(GIT::get_latest_commit_id)"
+        __tag="$(GIT_Get_Latest_Commit_ID)"
         if [ -z "$__tag" ]; then
                 OS::print_status error "Source failed.\n"
                 return 1
@@ -73,7 +72,7 @@ RELEASE::docs_repo() {
         __current_path="$PWD" && cd "${__dest}"
 
         OS::print_status info "Committing docs repo...\n"
-        GIT::autonomous_force_commit \
+        GIT_Autonomous_Force_Commit \
                 "$__tag" \
                 "$PROJECT_DOCS_REPO_KEY" \
                 "$PROJECT_DOCS_REPO_BRANCH"

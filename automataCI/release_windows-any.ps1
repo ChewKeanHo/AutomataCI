@@ -79,8 +79,8 @@ if ($__process -ne 0) {
 }
 
 
-$__process = RELEASE-Run-Chocolatey-Repo-Setup
-if ($__process -ne 0) {
+$___process = RELEASE-Setup-CHOCOLATEY
+if ($___process -ne 0) {
 	return 1
 }
 
@@ -133,8 +133,8 @@ if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
 			return 1
 		}
 
-		$__process = RELEASE-Run-Chocolatey "$TARGET" "$CHOCOLATEY_REPO"
-		if ($__process -ne 0) {
+		$___process = RELEASE-Run-CHOCOLATEY "$TARGET" "$CHOCOLATEY_REPO"
+		if ($___process -ne 0) {
 			return 1
 		}
 
@@ -178,8 +178,8 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 		return 1
 	}
 
-	$__process = RELEASE-Run-Chocolatey-Repo-Conclude "$CHOCOLATEY_REPO"
-	if ($__process -ne 0) {
+	$___process = RELEASE-Conclude-CHOCOLATEY "$CHOCOLATEY_REPO"
+	if ($___process -ne 0) {
 		return 1
 	}
 

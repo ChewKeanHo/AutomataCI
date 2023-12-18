@@ -10,61 +10,30 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-GIT::at_root_repo() {
-        #__directory="$1"
+GIT_At_Root_Repo() {
+        #___directory="$1"
 
 
         # validate input
-        if [ -z "$1" ] || [ ! -d "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        if [ -f "${1}/.git/config" ]; then
-                return 0
-        fi
-
-
-        # report status
-        return 1
-}
-
-
-
-
-GIT::autonomous_commit() {
-        #__tracker="$1"
-
-
-        # validate input
-        if [ -z "$1" ]; then
-                return 1
-        fi
-
-        GIT::is_available
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        if [ -z "$(git status --porcelain)" ]; then
-                return 0 # nothing to commit
-        fi
-
-
-        # execute
-        git add .
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        git commit -m "automation: publish as of ${1}"
+        FS::is_file "${1}/.git/config"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -77,21 +46,21 @@ GIT::autonomous_commit() {
 
 
 
-GIT::autonomous_force_commit() {
-        #__tracker="$1"
+GIT_Autonomous_Commit() {
+        #___tracker="$1"
 
 
         # validate input
-        if [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        GIT::is_available
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ -z "$(git status --porcelain)" ]; then
+        if [ $(STRINGS_Is_Empty "$(git status --porcelain)") -eq 0 ]; then
                 return 0 # nothing to commit
         fi
 
@@ -102,7 +71,7 @@ GIT::autonomous_force_commit() {
                 return 1
         fi
 
-        git commit -m "automation: publish as of ${1}"
+        git commit -m "automation: published as of ${1}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -115,16 +84,54 @@ GIT::autonomous_force_commit() {
 
 
 
-GIT::change_branch() {
-        #__branch="$1"
+GIT_Autonomous_Force_Commit() {
+        #___tracker="$1"
 
 
         # validate input
-        if [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        GIT::is_available
+        GIT_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        if [ $(STRINGS_Is_Empty "$(git status --porcelain)") -eq 0 ]; then
+                return 0 # nothing to commit
+        fi
+
+
+        # execute
+        git add .
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        git commit -m "automation: published as of ${1}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+GIT_Change_Branch() {
+        #___branch="$1"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -132,67 +139,166 @@ GIT::change_branch() {
 
         # execute
         git checkout "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }
 
 
 
 
-GIT::clone() {
-        #__url="$1"
-        #__name="$2"
+GIT_Clone() {
+        #___url="$1"
+        #___name="$2"
 
 
         # validate input
-        if [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        GIT::is_available
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ ! -z "$2" ]; then
-                if [ -f "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$2") -ne 0 ]; then
+                FS::is_file "$2"
+                if [ $? -eq 0 ]; then
                         return 1
                 fi
 
-                if [ -d "$2" ]; then
+                FS::is_directory "$2"
+                if [ $? -eq 0 ]; then
                         return 2
                 fi
         fi
 
 
         # execute
-        if [ ! -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$2") -ne 0 ]; then
                 git clone "$1" "$2"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         else
                 git clone "$1"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }
 
 
 
 
-GIT::get_first_commit_id() {
+GIT_Clone_Repo() {
+        ___root="$1"
+        ___relative_path="$2"
+        ___current="$3"
+        ___git_repo="$4"
+        ___simulate="$5"
+        ___label="$6"
+        ___branch="$7"
+        ___reset="$8"
+
+
         # validate input
-        GIT::is_available
+        if [ $(STRINGS_Is_Empty "$___root") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___relative_path") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___current") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___git_repo") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___label") -eq 0 ]; then
+                return 1
+        fi
+
+        GIT_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        ___path="${___root}/${___relative_path}"
+        FS::make_directory "$___path"
+        ___path="${___path}/${___label}"
+
+        FS::is_directory "$___path"
+        if [ $? -eq 0 ]; then
+                cd "${___path}"
+                ___directory="$(GIT_Get_Root_Directory)"
+                cd "$___current"
+
+                if [ "$___directory" = "$___root" ]; then
+                        FS::remove_silently "${___path}"
+                fi
+        fi
+
+
+        if [ $(STRINGS_Is_Empty "$___simulate") -ne 0 ]; then
+                FS::make_directory "${___path}"
+                cd "${___path}"
+                git init --initial-branch=main
+                git commit --allow-empty -m "Initial Commit"
+                cd "$___current"
+                return 0
+        else
+                cd "${___path%/*}"
+                GIT_Clone "$___git_repo" "$___label"
+                case $? in
+                0|2)
+                        # Accepted
+                        ;;
+                *)
+                        return 1
+                        ;;
+                esac
+                cd "$___current"
+        fi
+
+
+        # switch branch if available
+        if [ $(STRINGS_Is_Empty "$___branch") -ne 0 ]; then
+                cd "${___path}"
+                GIT_Change_Branch "$___branch"
+                if [ $? -ne 0 ]; then
+                        cd "$___current"
+                        return 1
+                fi
+                cd "$___current"
+        fi
+
+
+        # hard reset
+        if [ $(STRINGS_Is_Empty "$___reset") -ne 0 ]; then
+                cd "${___path}"
+                GIT_Hard_Reset_To_Init "$___root"
+                if [ $? -ne 0 ]; then
+                        cd "$___current"
+                        return 1
+                fi
+                cd "$___current"
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+GIT_Get_First_Commit_ID() {
+        # validate input
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 printf ""
                 return 1
@@ -210,9 +316,9 @@ GIT::get_first_commit_id() {
 
 
 
-GIT::get_latest_commit_id() {
+GIT_Get_Latest_Commit_ID() {
         # validate input
-        GIT::is_available
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 printf ""
                 return 1
@@ -230,9 +336,9 @@ GIT::get_latest_commit_id() {
 
 
 
-GIT::get_root_directory() {
+GIT_Get_Root_Directory() {
         # validate input
-        GIT::is_available
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 printf ""
                 return 1
@@ -250,16 +356,16 @@ GIT::get_root_directory() {
 
 
 
-GIT::hard_reset_to_init() {
-        #__root="$1"
+GIT_Hard_Reset_To_Init() {
+        #___root="$1"
 
 
         # validate input
-        if [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        GIT::is_available
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -268,19 +374,19 @@ GIT::hard_reset_to_init() {
         # CVE-2023-42798 - Make sure the directory is not the same as the root
         #                  directory. If it does, bail out immediately and DO
         #                  not proceed.
-        __first="$(GIT::get_root_directory)"
-        if [ -z "$__first" ]; then
+        ___first="$(GIT_Get_Root_Directory)"
+        if [ $(STRINGS_Is_Empty "$___first") -eq 0 ]; then
                 return 1
         fi
 
-        if [ "$__first" = "$1" ]; then
+        if [ "$___first" = "$1" ]; then
                 return 1
         fi
 
 
         # execute
-        __first="$(GIT::get_first_commit_id)"
-        if [ "$__first" = "" ]; then
+        ___first="$(GIT_Get_First_Commit_ID)"
+        if [ "$___first" = "" ]; then
                 return 1
         fi
 
@@ -302,21 +408,24 @@ GIT::hard_reset_to_init() {
 
 
 
-GIT::is_available() {
+GIT_Is_Available() {
+        # execute
         OS::is_command_available "git"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+
+        # report status
         return 0
 }
 
 
 
 
-GIT::pull_to_latest() {
+GIT_Pull_To_Latest() {
         # validate input
-        GIT::is_available
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -336,17 +445,17 @@ GIT::pull_to_latest() {
 
 
 
-GIT::push() {
-        #__repo="$1"
-        #__branch="$2"
+GIT_Push() {
+        #___repo="$1"
+        #___branch="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 
-        GIT::is_available
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -366,16 +475,16 @@ GIT::push() {
 
 
 
-GIT::remove_worktree() {
-        #__destination="$1"
+GIT_Remove_Worktree() {
+        #___destination="$1"
 
 
         # validate input
-        if [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        GIT::is_available
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -400,17 +509,17 @@ GIT::remove_worktree() {
 
 
 
-GIT::setup_worktree() {
-        #__branch="$1"
-        #__destination="$2"
+GIT_Setup_Worktree() {
+        #___branch="$1"
+        #___destination="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 
-        GIT::is_available
+        GIT_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -419,12 +528,11 @@ GIT::setup_worktree() {
         # execute
         FS::make_directory "$2"
         git worktree add "$2" "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }

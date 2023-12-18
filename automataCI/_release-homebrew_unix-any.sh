@@ -68,21 +68,21 @@ RELEASE::run_homebrew_repo_conclude() {
         # execute
         __current_path="$PWD"
         cd "$1"
-        GIT::autonomous_commit "${PROJECT_SKU} ${PROJECT_VERSION}"
+        GIT_Autonomous_Commit "${PROJECT_SKU} ${PROJECT_VERSION}"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
                 OS::print_status error "commit failed.\n"
                 return 1
         fi
 
-        GIT::pull_to_latest
+        GIT_Pull_To_Latest
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
                 OS::print_status error "commit failed.\n"
                 return 1
         fi
 
-        GIT::push "$PROJECT_CHOCOLATEY_REPO_KEY" "$PROJECT_CHOCOLATEY_REPO_BRANCH"
+        GIT_Push "$PROJECT_CHOCOLATEY_REPO_KEY" "$PROJECT_CHOCOLATEY_REPO_BRANCH"
         __exit=$?
         cd "$__current_path" && unset __current_path
         if [ $__exit -ne 0 ]; then
@@ -110,7 +110,7 @@ RELEASE::run_homebrew_repo_setup() {
 
         # execute
         OS::print_status info "setting up homebrew release repo...\n"
-        INSTALLER::setup_index_repo \
+        GIT_Clone_Repo \
                 "$PROJECT_PATH_ROOT" \
                 "$PROJECT_PATH_RELEASE" \
                 "$PWD" \

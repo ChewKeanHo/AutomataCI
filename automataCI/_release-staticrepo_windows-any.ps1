@@ -12,7 +12,6 @@
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\installer.ps1"
 
 
 
@@ -75,7 +74,7 @@ function RELEASE-Run-Static-Repo-Setup {
 
 	# execute
 	OS-Print-Status info "setting up release static repo..."
-	$__process = INSTALLER-Setup-Resettable-Repo `
+	$__process = GIT-Clone-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
 		"$(Get-Location)" `

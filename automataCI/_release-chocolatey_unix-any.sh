@@ -10,38 +10,39 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/installer.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/publishers/chocolatey.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/versioners/git.sh"
+. "${LIBS_AUTOMATACI}/services/publishers/chocolatey.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-repo.sh"
 
 
 
 
-RELEASE::run_chocolatey() {
-        #__target="$1"
-        #__repo="$2"
+RELEASE_Run_CHOCOLATEY() {
+        #___target="$1"
+        #___repo="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
-                OS::print_status error "registration failed.\n"
-                return 1
-        fi
-
-
         CHOCOLATEY_Is_Valid_Nupkg "$1"
         if [ $? -ne 0 ]; then
                 return 0
         fi
 
+        I18N_Status_Print_File_Export "$1"
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
+                I18N_Status_Print_File_Export_Failed
+                return 1
+        fi
+
 
         # execute
-        OS::print_status info "registering ${1} into chocolatey repo...\n"
         CHOCOLATEY_Publish "$1" "${2}/${PROJECT_CHOCOLATEY_DIRECTORY}/"
         if [ $? -ne 0 ]; then
-                OS::print_status error "registration failed.\n"
+                I18N_Status_Print_File_Export_Failed
                 return 1
         fi
 
@@ -53,14 +54,20 @@ RELEASE::run_chocolatey() {
 
 
 
-RELEASE::run_chocolatey_repo_conclude() {
-        #__directory="$1"
+RELEASE_Conclude_CHOCOLATEY() {
+        #___directory="$1"
 
 
         # validate input
-        OS::print_status info "committing chocolatey release repo...\n"
-        if [ -z "$1" ] || [ ! -d "$1" ]; then
-                OS::print_status error "commit failed.\n"
+        I18N_Status_Print_Repo_Commit "CHOCOLATEY"
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                I18N_Status_Print_Repo_Commit_Failed
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_Repo_Commit_Failed
                 return 1
         fi
 
@@ -68,25 +75,25 @@ RELEASE::run_chocolatey_repo_conclude() {
         # execute
         __current_path="$PWD"
         cd "$1"
-        GIT::autonomous_commit "${PROJECT_SKU} ${PROJECT_VERSION}"
+        GIT_Autonomous_Commit "${PROJECT_SKU} ${PROJECT_VERSION}"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                OS::print_status error "commit failed.\n"
+                I18N_Status_Print_Repo_Commit_Failed
                 return 1
         fi
 
-        GIT::pull_to_latest
+        GIT_Pull_To_Latest
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                OS::print_status error "commit failed.\n"
+                I18N_Status_Print_Repo_Commit_Failed
                 return 1
         fi
 
-        GIT::push "$PROJECT_CHOCOLATEY_REPO_KEY" "$PROJECT_CHOCOLATEY_REPO_BRANCH"
-        __exit=$?
+        GIT_Push "$PROJECT_CHOCOLATEY_REPO_KEY" "$PROJECT_CHOCOLATEY_REPO_BRANCH"
+        ___process=$?
         cd "$__current_path" && unset __current_path
-        if [ $__exit -ne 0 ]; then
-                OS::print_status error "commit failed.\n"
+        if [ $___process -ne 0 ]; then
+                I18N_Status_Print_Repo_Commit_Failed
                 return 1
         fi
 
@@ -98,19 +105,20 @@ RELEASE::run_chocolatey_repo_conclude() {
 
 
 
-RELEASE::run_chocolatey_repo_setup() {
+RELEASE_Setup_CHOCOLATEY() {
         # clean up base directory
-        OS::print_status info "safety checking release directory...\n"
-        if [ -f "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}" ]; then
-                OS::print_status error "check failed.\n"
+        I18N_Status_Print_Repo_Check "CHOCOLATEY"
+        FS::is_file "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+        if [ $? -eq 0 ]; then
+                I18N_Status_Print_Repo_Check_Failed
                 return 1
         fi
         FS::make_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
 
 
         # execute
-        OS::print_status info "setting up chocolatey release repo...\n"
-        INSTALLER::setup_index_repo \
+        I18N_Status_Print_Repo_Setup "CHOCOLATEY"
+        GIT_Clone_Repo \
                 "$PROJECT_PATH_ROOT" \
                 "$PROJECT_PATH_RELEASE" \
                 "$PWD" \
@@ -118,7 +126,7 @@ RELEASE::run_chocolatey_repo_setup() {
                 "$PROJECT_SIMULATE_RELEASE_REPO" \
                 "$PROJECT_CHOCOLATEY_DIRECTORY"
         if [ $? -ne 0 ]; then
-                OS::print_status error "setup failed.\n"
+                I18N_Status_Print_Repo_Setup_Failed
                 return 1
         fi
 

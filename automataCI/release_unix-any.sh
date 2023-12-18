@@ -80,7 +80,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-RELEASE::run_chocolatey_repo_setup
+RELEASE_Setup_CHOCOLATEY
 if [ $? -ne 0 ]; then
         return 1
 fi
@@ -130,7 +130,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 
-        RELEASE::run_chocolatey "$TARGET" "$CHOCOLATEY_REPO"
+        RELEASE_Run_CHOCOLATEY "$TARGET" "$CHOCOLATEY_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -174,7 +174,7 @@ else
                 return 1
         fi
 
-        RELEASE::run_chocolatey_repo_conclude "$CHOCOLATEY_REPO"
+        RELEASE_Conclude_CHOCOLATEY "$CHOCOLATEY_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi

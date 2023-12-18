@@ -9,33 +9,39 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
 
 function GIT-At-Root-Repo {
 	param(
-		[string]$__directory
+		[string]$___directory
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path -PathType Directory -Path "${__directory}"))) {
+	if ($(STRINGS-Is-Empty "${___directory}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	if (Test-Path -Path "${__directory}\.git\config") {
-		return 0
+	$___process = FS-Is-File "${___directory}\.git\config"
+	if ($___process -ne 0) {
+		return 1
 	}
 
 
 	# report status
-	return 1
+	return 0
 }
 
 
@@ -43,34 +49,34 @@ function GIT-At-Root-Repo {
 
 function GIT-Autonomous-Commit {
 	param(
-		[string]$__tracker
+		[string]$___tracker
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__tracker)) {
+	if ($(STRINGS-Is-Empty "${___tracker}") -eq 0) {
 		return 1
 	}
 
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = Invoke-Expression "git status --porcelain"
-	if ([string]::IsNullOrEmpty($__process)) {
+	$___process = Invoke-Expression "git status --porcelain"
+	if ($(STRINGS-Is-Empty "${___process}") -eq 0) {
 		return 0 # nothing to commit
 	}
 
 
 	# execute
-	$__process = OS-Exec "git" "add ."
-	if ($__process -ne 0) {
+	$___process = OS-Exec "git" "add ."
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = OS-Exec "git" "commit -m 'Publish as of ${__tracker}'"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "git" "commit -m 'automation: published as of ${___tracker}'"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -84,34 +90,34 @@ function GIT-Autonomous-Commit {
 
 function GIT-Autonomous-Force-Commit {
 	param(
-		[string]$__tracker
+		[string]$___tracker
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__tracker)) {
+	if ($(STRINGS-Is-Empty "${___tracker}") -eq 0) {
 		return 1
 	}
 
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = Invoke-Expression "git status --porcelain"
-	if ([string]::IsNullOrEmpty($__process)) {
+	$___process = Invoke-Expression "git status --porcelain"
+	if ($(STRINGS-Is-Empty "${___process}") -eq 0) {
 		return 0 # nothing to commit
 	}
 
 
 	# execute
-	$__process = OS-Exec "git" "add ."
-	if ($__process -ne 0) {
+	$___process = OS-Exec "git" "add ."
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = OS-Exec "git" "commit -m 'Publish as of ${__tracker}'"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "git" "commit -m 'Publish as of ${___tracker}'"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -125,31 +131,30 @@ function GIT-Autonomous-Force-Commit {
 
 function GIT-Change-Branch {
 	param (
-		[string]$__branch
+		[string]$___branch
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__branch)) {
+	if ($(STRINGS-Is-Empty "${___branch}") -eq 0) {
 		return 1
 	}
 
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = Os-Exec "git" "checkout ${__branch}"
+	$___process = OS-Exec "git" "checkout ${__branch}"
+	if ($___process -ne 0) {
+		return 1
+	}
 
 
 	# report status
-	if ($__process -eq 0) {
-		return 0
-	}
-
-	return 1
+	return 0
 }
 
 
@@ -157,46 +162,145 @@ function GIT-Change-Branch {
 
 function GIT-Clone {
 	param (
-		[string]$__url,
-		[string]$__name
+		[string]$___url,
+		[string]$___name
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__url)) {
+	if ($(STRINGS-Is-Empty "${___url}") -eq 0) {
 		return 1
 	}
 
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	if (-not ([string]::IsNullOrEmpty($__url))) {
-		if (Test-Path $__name) {
+	if ($(STRINGS-Is-Empty "$2") -ne 0) {
+		$___process = FS-Is-File "${___name}"
+		if ($___process -eq 0) {
 			return 1
 		}
 
-		if (Test-Path $__name -PathType Container) {
+		$___process = FS-Is-Directory "${___name}"
+		if ($___process -eq 0) {
 			return 2
 		}
 	}
 
 
 	# execute
-	if (-not ([string]::IsNullOrEmpty($__url))) {
-		$__process = Os-Exec "git" "clone ${__url} ${__name}"
+	if ($(STRINGS-Is-Empty "${___url}") -ne 0) {
+		$___process = OS-Exec "git" "clone ${___url} ${___name}"
+		if ($___process -ne 0) {
+			return 1
+		}
 	} else {
-		$__process = Os-Exec "git" "clone ${__url}"
+		$___process = OS-Exec "git" "clone ${___url}"
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
 
 	# report status
-	if ($__process -eq 0) {
-		return 0
+	return 0
+}
+
+
+
+
+function GIT-Clone-Repo {
+	param(
+		[string]$___root,
+		[string]$___relative_path,
+		[string]$___current,
+		[string]$___git_repo,
+		[string]$___simulate,
+		[string]$___label,
+		[string]$___branch,
+		[string]$___reset
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___root}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___relative_path}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___current}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___git_repo}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___label}") -eq 0)) {
+		return 1
 	}
 
-	return 1
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$___path = "${___root}\${___relative_path}"
+	$null = FS-Make-Directory "${___path}"
+	$___path = "${___path}\${___label}"
+
+	$___process = FS-Is-Directory "${___path}"
+	if ($___process -eq 0) {
+		$null = Set-Location "${___path}"
+		$___directory = GIT-Get-Root-Directory
+		$null = Set-Location "${___current}"
+
+		if ($___directory -eq $___root) {
+			$null = FS-Remove-Silently "${___path}"
+		}
+	}
+
+	if ($(STRINGS-Is-Empty "${___simulate}") -ne 0) {
+		$null = FS-Make-Directory "${___path}"
+		$null = Set-Location "${___path}"
+		$null = OS-Exec "git" "init --initial-branch=main"
+		$null = OS-Exec "git" "commit --allow-empty -m `"Initial Commit`""
+		$null = Set-Location "${___current}"
+		return 0
+	} else {
+		$null = Set-Location "$(Split-Path -Parent -Path "${___path}")"
+		$___process = Git-Clone "${___git_repo}" "${___label}"
+		switch ($___process) {
+		{ $_ -in 2, 0 } {
+			# Accepted
+		} default {
+			return 1
+		}}
+		$null = Set-Location "${___current}"
+	}
+
+
+	# switch branch if available
+	if ($(STRINGS-Is-Empty "${___branch}") -ne 0) {
+		$null = FS-Make-Directory "${___path}"
+		$___process = GIT-Change-Branch "${___branch}"
+		if ($___process -ne 0) {
+			$null = Set-Location "${___current}"
+			return 1
+		}
+		$null = Set-Location "${___current}"
+	}
+
+
+	# hard reset
+	if ($(STRINGS-Is-Empty "${___reset}") -ne 0) {
+		$null = FS-Make-Directory "${___path}"
+		$___process = GIT-Hard-Reset-To-Init "${___root}"
+		if ($___process -ne 0) {
+			$null = Set-Location "${___current}"
+			return 1
+		}
+		$null = Set-Location "${___current}"
+	}
+
+
+	# report status
+	return 0
 }
 
 
@@ -204,19 +308,14 @@ function GIT-Clone {
 
 function GIT-Get-First-Commit-ID {
 	# validate input
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return ""
 	}
 
 
 	# execute
-	$__value = Invoke-Expression "git rev-list --max-parents=0 --abbrev-commit HEAD"
-	if (-not [string]::IsNullOrEmpty($__value)) {
-		return $__value
-	}
-
-	return ""
+	return Invoke-Expression "git rev-list --max-parents=0 --abbrev-commit HEAD"
 }
 
 
@@ -224,18 +323,14 @@ function GIT-Get-First-Commit-ID {
 
 function GIT-Get-Latest-Commit-ID {
 	# validate input
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return ""
 	}
 
 
 	# execute
-	$__value = Invoke-Expression "git rev-parse HEAD"
-	if (-not [string]::IsNullOrEmpty($__value)) {
-		return $__value
-	}
-	return ""
+	return Invoke-Expression "git rev-parse HEAD"
 }
 
 
@@ -243,21 +338,14 @@ function GIT-Get-Latest-Commit-ID {
 
 function GIT-Get-Root-Directory {
 	# validate input
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return ""
 	}
 i
 
 	# execute
-	$__value = Invoke-Expression "git rev-parse --show-toplevel"
-	if (-not [string]::IsNullOrEmpty($__value)) {
-		return $__value
-	}
-
-
-	# report status
-	return ""
+	return Invoke-Expression "git rev-parse --show-toplevel"
 }
 
 
@@ -265,17 +353,17 @@ i
 
 function GIT-Hard-Reset-To-Init {
 	param (
-		[string]$__root
+		[string]$___root
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__root)) {
+	if ($(STRINGS-Is-Empty "${___root}") -eq 0) {
 		return 1
 	}
 
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -283,29 +371,29 @@ function GIT-Hard-Reset-To-Init {
 	# CVE-2023-42798 - Make sure the directory is not the same as the root
 	#                  directory. If it does, bail out immediately and DO
 	#                  not proceed.
-	$__first = GIT-Get-Root-Directory
-	if ([string]::IsNullOrEmpty($__first)) {
+	$___first = GIT-Get-Root-Directory
+	if ($(STRINGS-Is-Empty "${___first}") -eq 0) {
 		return 1
 	}
 
-	if ($__first -eq $__root) {
+	if ($___first -eq $___root) {
 		return 1
 	}
 
 
 	# execute
-	$__first = GIT-Get-First-Commit-ID
-	if ([string]::IsNullOrEmpty($__first)) {
+	$___first = GIT-Get-First-Commit-ID
+	if ($(STRINGS-Is-Empty "${___first}") -eq 0) {
 		return 1
 	}
 
-	$__process = OS-Exec "git" "reset --hard ${__first}"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "git" "reset --hard ${___first}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = OS-Exec "git" "clean -fd"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "git" "clean -fd"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -318,11 +406,14 @@ function GIT-Hard-Reset-To-Init {
 
 
 function GIT-Is-Available {
-	$__process = OS-Is-Command-Available "git"
-	if ($__process -ne 0) {
+	# execute
+	$___process = OS-Is-Command-Available "git"
+	if ($___process -ne 0) {
 		return 1
 	}
 
+
+	# report status
 	return 0
 }
 
@@ -331,15 +422,15 @@ function GIT-Is-Available {
 
 function GIT-Pull-To-Latest {
 	# validate input
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = OS-Exec "git" "pull --rebase"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "git" "pull --rebase"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -353,25 +444,26 @@ function GIT-Pull-To-Latest {
 
 function GIT-Push {
 	param(
-		[string]$__repo,
-		[string]$__branch
+		[string]$___repo,
+		[string]$___branch
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__repo) -or [string]::IsNullOrEmpty($__branch)) {
+	if (($(STRINGS-Is-Empty "${___repo}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___repo}") -eq 0)) {
 		return 1
 	}
 
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = OS-Exec "git" "push ${__repo} ${__branch}"
-	if ($__process -ne 0) {
+	$___process = OS-Exec "git" "push ${___repo} ${___branch}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -385,29 +477,29 @@ function GIT-Push {
 
 function GIT-Remove-Worktree {
 	param (
-		[string]$__destination
+		[string]$___destination
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__destination)) {
+	if ($(STRINGS-Is-Empty "${___destination}") -eq 0) {
 		return 1
 	}
 
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = OS-Exec "git" "worktree remove `"${__destination}`""
-	if ($__process -ne 0) {
+	$___process = OS-Exec "git" "worktree remove `"${___destination}`""
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Remove-Silently "${__destination}"
-	if ($__process -ne 0) {
+	$___process = FS-Remove-Silently "${___destination}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -421,31 +513,31 @@ function GIT-Remove-Worktree {
 
 function GIT-Setup-Worktree {
 	param (
-		[string]$__branch,
-		[string]$__destination
+		[string]$___branch,
+		[string]$___destination
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__branch) -or [string]::IsNullOrEmpty($__destination)) {
+	if (($(STRINGS-Is-Empty "${___branch}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___branch}") -eq 0)) {
 		return 1
 	}
 
-	$__process = GIT-Is-Available
-	if ($__process -ne 0) {
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$null = FS-Make-Directory "${__destination}"
-	$__process = OS-Exec "git" "worktree add `"${__destination}`" `"${__branch}`""
+	$null = FS-Make-Directory "${___destination}"
+	$___process = OS-Exec "git" "worktree add `"${___destination}`" `"${___branch}`""
+	if ($___process -ne 0) {
+		return 1
+	}
 
 
 	# report status
-	if ($__process -eq 0) {
-		return 0
-	}
-
-	return 1
+	return 0
 }

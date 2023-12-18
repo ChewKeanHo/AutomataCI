@@ -13,7 +13,6 @@
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/installer.sh"
 
 
 
@@ -21,7 +20,7 @@
 RELEASE::run_static_repo_conclude() {
         # validate input
         OS::print_status info "Sourcing commit id for tagging...\n"
-        __tag="$(GIT::get_latest_commit_id)"
+        __tag="$(GIT_Get_Latest_Commit_ID)"
         if [ -z "$__tag" ]; then
                 OS::print_status error "Source failed.\n"
                 return 1
@@ -43,7 +42,7 @@ to \`apt-get install\`, \`yum install\`, or \`flatpak install\`.
 
 
         OS::print_status info "Committing release repo...\n"
-        GIT::autonomous_force_commit \
+        GIT_Autonomous_Force_Commit \
                 "$__tag" \
                 "$PROJECT_STATIC_REPO_KEY" \
                 "$PROJECT_STATIC_REPO_BRANCH"
@@ -75,7 +74,7 @@ RELEASE::run_static_repo_setup() {
 
         # execute
         OS::print_status info "setting up release static repo...\n"
-        INSTALLER::setup_resettable_repo \
+        GIT_Clone_Repo \
                 "$PROJECT_PATH_ROOT" \
                 "$PROJECT_PATH_RELEASE" \
                 "$PWD" \

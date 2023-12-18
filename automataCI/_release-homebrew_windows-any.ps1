@@ -11,7 +11,6 @@
 # under the License.
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\installer.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\homebrew.ps1"
 
@@ -121,7 +120,7 @@ function RELEASE-Run-Homebrew-Repo-Setup {
 
 	# execute
 	OS-Print-Status info "Setting up homebrew release repo..."
-	$__process = INSTALLER-Setup-Index-Repo `
+	$__process = GIT-Clone-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
 		"$(Get-Location)" `
