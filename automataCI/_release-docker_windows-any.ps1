@@ -9,9 +9,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\docker.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -24,32 +25,31 @@ function RELEASE-Run-DOCKER {
 
 
 	# validate input
-	$__process = DOCKER-Is-Valid "${_target}"
-	if ($__process -ne 0) {
+	$___process = DOCKER-Is-Valid "${_target}"
+	if ($___process -ne 0) {
 		return 0
 	}
 
-	OS-Print-Status info "checking required docker availability..."
+	$null = I18N-Status-Print-Check-Availability "DOCKER"
 	$__process = DOCKER-Is-Available
 	if ($__process -ne 0) {
-		OS-Print-Status warning "Docker is unavailable. Skipping..."
-		return 0
+		$null = I18N-Status-Print-Check-Availability-Failed "DOCKER"
+		return 1
 	}
 
 
 	# execute
-	OS-Print-Status info "releasing docker as the latest version..."
-	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
-		OS-Print-Status warning "Simulating multiarch docker manifest release..."
-		OS-Print-Status warning "Simulating remove package artifact..."
+	$null = I18N-Status-Print-Run-Publish "DOCKER"
+	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
+		$null = I18N-Status-Print-Run-Publish-Simulated "DOCKER"
 	} else {
-		$__process = DOCKER-Release "${_target}" "${env:PROJECT_VERSION}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "release failed."
+		$___process = DOCKER-Release "${_target}" "${env:PROJECT_VERSION}"
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Run-Publish-Failed
 			return 1
 		}
 
-		OS-Print-Status info "remove package artifact..."
+		$null = I18N-Status-Print-Run-Clean "${_target}"
 		$null = FS-Remove-Silently "${_target}"
 	}
 

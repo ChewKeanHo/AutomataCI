@@ -265,13 +265,12 @@ DOCKER_Login() {
                 | docker login "$1" \
                         --username "$CONTAINER_USERNAME" \
                         --password-stdin
-
-
-        # report status
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+
+        # report status
         return 0
 }
 
@@ -314,7 +313,7 @@ DOCKER_Release() {
         ___list=""
         ___repo=""
         ___sku=""
-        old_IFS="$IFS"
+        ___old_IFS="$IFS"
         while IFS="" read -r ___line || [ -n "$___line" ]; do
                 if [ $(STRINGS_Is_Empty "$___line") -eq 0 ] || [ "$___line" == "\n" ]; then
                         continue
@@ -331,7 +330,7 @@ DOCKER_Release() {
 
                 ___list="${___list}--amend $___entry"
         done < "$___target"
-        IFS="$old_IFS" && unset old_IFS ___line
+        IFS="$___old_IFS" && unset ___old_IFS ___line
 
         if [ $(STRINGS_Is_Empty "$___list") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___repo") -eq 0 ] ||

@@ -108,8 +108,8 @@ if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
 			return 1
 		}
 
-		$__process = RELEASE-Run-DOCKER "$TARGET"
-		if ($__process -ne 0) {
+		$___process = RELEASE-Run-DOCKER "$TARGET"
+		if ($___process -ne 0) {
 			return 1
 		}
 

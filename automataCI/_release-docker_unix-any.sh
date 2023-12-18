@@ -10,14 +10,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/docker.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
 
-RELEASE::run_docker() {
+RELEASE_Run_DOCKER() {
         _target="$1"
         _directory="$2"
 
@@ -28,27 +29,26 @@ RELEASE::run_docker() {
                 return 0
         fi
 
-        OS::print_status info "checking required docker availability...\n"
+        I18N_Status_Print_Check_Availability "DOCKER"
         DOCKER_Is_Available
         if [ $? -ne 0 ]; then
-                OS::print_status warning "Docker is unavailable. Skipping...\n"
-                return 0
+                I18N_Status_Print_Check_Availability_Failed "DOCKER"
+                return 1
         fi
 
 
         # execute
-        OS::print_status info "releasing docker as the latest version...\n"
-        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
-                OS::print_status warning "Simulating multiarch docker manifest release...\n"
-                OS::print_status warning "Simulating remove package artifact...\n"
+        I18N_Status_Print_Run_Publish "DOCKER"
+        if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
+                I18N_Status_Print_Run_Publish_Simulated "DOCKER"
         else
                 DOCKER_Release "$_target" "$PROJECT_VERSION"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "release failed.\n"
+                        I18N_Status_Print_Run_Publish_Failed
                         return 1
                 fi
 
-                OS::print_status info "remove package artifact...\n"
+                I18N_Status_Print_Run_Clean "$_target"
                 FS::remove_silently "$_target"
         fi
 

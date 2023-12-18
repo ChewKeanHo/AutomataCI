@@ -105,7 +105,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 
-        RELEASE::run_docker "$TARGET"
+        RELEASE_Run_DOCKER "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi
