@@ -73,3 +73,24 @@ I18N_Status_Print_Check_Availability_Incompatible() {
         # report status
         return 0
 }
+
+
+
+
+I18N_Status_Print_Check_Availability_Simulate() {
+        ___subject="$1"
+
+
+        # execute
+        case "$AUTOMATACI_LANG" in
+        *)
+                # fallback to default english
+                ___subject="$(I18N_Status_Param_Process "${___subject}")"
+                I18N_Status_Print warning "simulating ${___subject} is available...\n\n"
+                ;;
+        esac
+
+
+        # report status
+        return 0
+}

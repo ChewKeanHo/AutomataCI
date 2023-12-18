@@ -13,8 +13,10 @@
 
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-archive.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-check.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-checksum.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-create.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-export.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-sign.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-update.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_status-file-validate.ps1"
 
@@ -58,6 +60,28 @@ function I18N-Status-Print-File-Detected {
 		# fallback to default english
 		$___subject = I18N-Status-Param-Process "${___subject}"
 		$null = I18N-Status-Print info "detected file: ${___subject}`n"
+	}}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function I18N-Status-Print-File-Directory-Skipped {
+	param(
+		[string]$___subject
+	)
+
+
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$___subject = I18N-Status-Param-Process "${___subject}"
+		$null = I18N-Status-Print warning "${___subject} is a directory. Skipping...`n"
 	}}
 
 

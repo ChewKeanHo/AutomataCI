@@ -10,9 +10,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${LIBS_ATUOMATACI}/services/compilers/changelog.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/changelog.sh"
 
-. "${LIBS_ATUOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
 
 
 

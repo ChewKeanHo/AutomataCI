@@ -13,8 +13,10 @@
 
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-archive.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-check.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_status-file-checksum.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-create.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-export.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_status-file-sign.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-update.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_status-file-validate.sh"
 
@@ -54,6 +56,27 @@ I18N_Status_Print_File_Detected() {
                 # fallback to default english
                 ___subject="$(I18N_Status_Param_Process "${___subject}")"
                 I18N_Status_Print info "detected file: ${___subject}\n"
+                ;;
+        esac
+
+
+        # report status
+        return 0
+}
+
+
+
+
+I18N_Status_Print_File_Directory_Skipped() {
+        ___subject="$1"
+
+
+        # execute
+        case "$AUTOMATACI_LANG" in
+        *)
+                # fallback to default english
+                ___subject="$(I18N_Status_Param_Process "${___subject}")"
+                I18N_Status_Print info "${___subject} is a directory. Skipping...\n"
                 ;;
         esac
 

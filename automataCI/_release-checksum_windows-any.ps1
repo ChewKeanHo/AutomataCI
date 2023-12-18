@@ -9,15 +9,17 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\crypto\gpg.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\checksum\shasum.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\crypto\gpg.ps1"
+. "${env:LIBS_AUTOMATACI}\services\checksum\shasum.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 
-function RELEASE-Run-Checksum-Seal {
+function RELEASE-Run-CHECKSUM {
 	param (
 		[string]$__static_repo
 	)
@@ -25,49 +27,53 @@ function RELEASE-Run-Checksum-Seal {
 
 	# execute
 	$__sha256_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha256.txt"
-	$__sha256_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\sha256.txt"
-	$__sha512_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha512.txt"
-	$__sha512_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\sha512.txt"
-
-
 	$null = FS-Remove-Silently "${__sha256_file}"
+
+	$__sha256_target = "${env:PROJECT_SKU}-sha256_${env:PROJECT_VERSION}.txt"
+	$__sha256_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${__sha256_target}"
 	$null = FS-Remove-Silently "${__sha256_target}"
+
+	$__sha512_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha512.txt"
 	$null = FS-Remove-Silently "${__sha512_file}"
+
+	$__sha512_target = "${env:PROJECT_SKU}-sha512_${env:PROJECT_VERSION}.txt"
+	$__sha512_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${__sha512_target}"
 	$null = FS-Remove-Silently "${__sha512_target}"
 
 
 	# gpg sign all packages
-	$__process = GPG-Is-Available "${env:PROJECT_GPG_ID}"
-	if ($__process -eq 0) {
-		OS-Print-Status info "exporting GPG public key..."
-		$__keyfile = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${env:PROJECT_SKU}.gpg.asc"
-		$__process = GPG-Export-Public-Key "${__keyfile}" "${env:PROJECT_GPG_ID}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "export failed."
+	$___process = GPG-Is-Available "${env:PROJECT_GPG_ID}"
+	if ($___process -eq 0) {
+		$__keyfile = "${env:PROJECT_SKU}-gpg_${env:PROJECT_VERSION}.keyfile"
+		$null = I18N-Status-Print-File-Export "${__keyfile}"
+		$__keyfile = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${__keyfile}"
+		$null = FS-Remove-Silently "${__keyfile}"
+
+		$___process = GPG-Export-Public-Key "${__keyfile}" "${env:PROJECT_GPG_ID}"
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-File-Export-Failed
 			return 1
 		}
 
-		$__process = FS-Copy-File `
+		$___process = FS-Copy-File `
 			"${__keyfile}" `
-			"${__static_repo}\${env:PROJECT_SKU}.gpg.asc"
-		if ($__process -ne 0) {
-			OS-Print-Status error "export failed."
+			"${__static_repo}\$(Split-Path -Leaf -Path "${__keyfile}")"
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-File-Export-Failed
 			return 1
 		}
 
 		foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
 			$TARGET = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${TARGET}"
-			if ($TARGET.EndsWith(".asc")) {
-				if (-not $TARGET.EndsWith(".gpg.asc")) {
-					continue # it's a gpg cert
-				}
+			if ($("${TARGET}" -replace '^.*.asc') -ne "${TARGET}") {
+				continue # it's a gpg cert
 			}
 
-			OS-Print-Status info "gpg signing: ${TARGET}"
+			$null = I18N-Status-Print-File-Sign "${TARGET}" "GPG"
 			FS-Remove-Silently "${TARGET}.asc"
-			$__process = GPG-Detach-Sign-File "${TARGET}" "${env:PROJECT_GPG_ID}"
-			if ($__process -ne 0) {
-				OS-Print-Status error "sign failed."
+			$___process = GPG-Detach-Sign-File "${TARGET}" "${env:PROJECT_GPG_ID}"
+			if ($___process -ne 0) {
+				$null = I18N-Status-Print-File-Sign-Failed
 				return 1
 			}
 		}
@@ -76,58 +82,65 @@ function RELEASE-Run-Checksum-Seal {
 
 	# shasum all files
 	foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
-		if (Test-Path -PathType Container -Path "${TARGET}") {
-			OS-Print-Status warning "${TARGET} is a directory. Skipping..."
+		$___process = FS-Is-Directory "${TARGET}"
+		if ($___process -eq 0) {
+			$null = I18N-Status-Print-File-Directory-Skipped "$TARGET"
 			continue
 		}
 
-		if (-not ([string]::IsNullOrEmpty(${env:PROJECT_RELEASE_SHA256}))) {
-			OS-Print-Status info "sha256 checksuming ${TARGET}"
+		if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_SHA256}") -ne 0) {
+			$null = I18N-Status-Print-File-Checksum "$TARGET" "SHA256"
 			$__value = SHASUM-Checksum-From-File $TARGET.FullName "256"
-			if ([string]::IsNullOrEmpty(${__value})) {
-				OS-Print-Status error "sha256 failed."
+			if ($(STRINGS-Is-Empty "${__value}") -eq 0) {
+				$null = I18N-Status-Print-File-Checksum-Failed
 				return 1
 			}
 
-			FS-Append-File "${__sha256_file}" @"
+			$___process = FS-Append-File "${__sha256_file}" @"
 ${__value}  $TARGET
 "@
-	}
+			if ($___process -ne 0) {
+				$null = I18N-Status-Print-File-Checksum-Failed
+				return 1
+			}
+		}
 
-		if (-not ([string]::IsNullOrEmpty(${env:PROJECT_RELEASE_SHA512}))) {
-			OS-Print-Status info "sha512 checksuming ${TARGET}"
+		if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_SHA512}") -ne 0) {
+			$null = I18N-Status-Print-File-Checksum "$TARGET" "SHA512"
 			$__value = SHASUM-Checksum-From-File $TARGET.FullName "512"
-			if ([string]::IsNullOrEmpty(${__value})) {
-				OS-Print-Status error "sha512 failed."
+			if ($(STRINGS-Is-Empty "${__value}") -eq 0) {
+				$null = I18N-Status-Print-File-Checksum-Failed
 				return 1
 			}
 
-			$__process = FS-Append-File "${__sha512_file}" @"
+			$___process = FS-Append-File "${__sha512_file}" @"
 ${__value}  $TARGET
 "@
-			if ($__process -ne 0) {
-				OS-Print-Status error "sha512 failed."
+			if ($___process -ne 0) {
+				$null = I18N-Status-Print-File-Checksum-Failed
 				return 1
 			}
 		}
 	}
 
 
-	if (Test-Path -Path "${__sha256_file}") {
-		OS-Print-Status info "exporting sha256.txt..."
-		$__process = FS-Move "${__sha256_file}" "${__sha256_target}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "export failed."
+	$___process = FS-Is-File "${__sha256_file}"
+	if ($___process -eq 0) {
+		$null = I18N-Status-Print-File-Export "${__sha256_target}"
+		$___process = FS-Move "${__sha256_file}" "${__sha256_target}"
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-File-Export-Failed
 			return 1
 		}
 	}
 
 
-	if (Test-Path -Path "${__sha512_file}") {
-		OS-Print-Status info "exporting sha512.txt..."
-		$__process = FS-Move "${__sha512_file}" "${__sha512_target}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "export failed."
+	$___process = FS-Is-File "${__sha512_file}"
+	if ($___process -eq 0) {
+		$null = I18N-Status-Print-File-Export "${__sha512_target}"
+		$___process = FS-Move "${__sha512_file}" "${__sha512_target}"
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-File-Export-Failed
 			return 1
 		}
 	}
@@ -140,13 +153,24 @@ ${__value}  $TARGET
 
 
 
-function RELEASE-Initiate-Checksum {
-	# safety check control surfaces
-	OS-Print-Status info "Checking shasum availability..."
-	$__process = SHASUM-Is-Available
-	if ($__process -ne 0) {
-		OS-Print-Status error "Check failed."
+function RELEASE-Initiate-CHECKSUM {
+	# execute
+	$null = I18N-Status-Print-Check-Availability "SHASUM"
+	$___process = SHASUM-Is-Available
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Check-Availability-Failed
 		return 1
+	}
+
+	$null = I18N-Status-Print-Check-Availability "GPG"
+	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
+		$null = I18N-Status-Print-Check-Availability-Simulate "GPG"
+	} else {
+		$___process = GPG-Is-Available
+		if ($___process -ne 0) {
+			$null = I18N-Status-Print-Check-Availability-Failed
+			return 1
+		}
 	}
 
 

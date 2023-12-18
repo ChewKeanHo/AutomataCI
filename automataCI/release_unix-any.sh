@@ -40,7 +40,7 @@ fi
 
 
 # execute
-RELEASE::initiate_checksum
+RELEASE_Initiate_CHECKSUM
 if [ $? -ne 0 ]; then
         return 1
 fi
@@ -145,7 +145,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
 done
 
 
-RELEASE::run_checksum_seal "$STATIC_REPO"
+RELEASE_Run_CHECKSUM "$STATIC_REPO"
 if [ $? -ne 0 ]; then
         return 1
 fi

@@ -371,7 +371,7 @@ deb [signed-by=/${___key}] ${___url} ${___codename} ${___distribution}
         if [ $(STRINGS_Is_Empty "$___is_simulated") -ne 0 ]; then
                 FS::write_file "${___directory}/data/${___key}" ""
         else
-                GPG::export_public_keyring "${___directory}/data/${___key}" "$___gpg_id"
+                GPG_Export_Public_Keyring "${___directory}/data/${___key}" "$___gpg_id"
         fi
         if [ $? -ne 0 ]; then
                 return 1

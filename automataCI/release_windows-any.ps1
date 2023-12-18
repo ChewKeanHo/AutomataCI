@@ -39,8 +39,8 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 # execute
-$__process = RELEASE-Initiate-Checksum
-if ($__process -ne 0) {
+$___process = RELEASE-Initiate-CHECKSUM
+if ($___process -ne 0) {
 	return 1
 }
 
@@ -149,8 +149,8 @@ if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
 }
 
 
-$__process = RELEASE-Run-Checksum-Seal "$STATIC_REPO"
-if ($__process -ne 0) {
+$___process = RELEASE-Run-CHECKSUM "$STATIC_REPO"
+if ($___process -ne 0) {
 	return 1
 }
 

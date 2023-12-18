@@ -10,61 +10,67 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/gpg.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/checksum/shasum.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/crypto/gpg.sh"
+. "${LIBS_AUTOMATACI}/services/checksum/shasum.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
 
-RELEASE::run_checksum_seal() {
+RELEASE_Run_CHECKSUM() {
         #__static_repo="$1"
 
 
         # execute
         __sha256_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha256.txt"
-        __sha256_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/sha256.txt"
-        __sha512_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha512.txt"
-        __sha512_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/sha512.txt"
-
-
         FS::remove_silently "$__sha256_file"
+
+        __sha256_target="${PROJECT_SKU}-sha256_${PROJECT_VERSION}.txt"
+        __sha256_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${__sha256_target}"
         FS::remove_silently "$__sha256_target"
+
+        __sha512_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha512.txt"
         FS::remove_silently "$__sha512_file"
+
+        __sha512_target="${PROJECT_SKU}-sha512_${PROJECT_VERSION}.txt"
+        __sha512_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${__sha512_target}"
         FS::remove_silently "$__sha512_target"
 
 
         # gpg sign all packages
-        GPG::is_available "$PROJECT_GPG_ID"
+        GPG_Is_Available "$PROJECT_GPG_ID"
         if [ $? -eq 0 ]; then
-                OS::print_status info "exporting GPG public key...\n"
-                __keyfile="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${PROJECT_SKU}.gpg.asc"
-                GPG::export_public_key "$__keyfile" "$PROJECT_GPG_ID"
+                __keyfile="${PROJECT_SKU}-gpg_${PROJECT_VERSION}.keyfile"
+                I18N_Status_Print_File_Export "$__keyfile"
+                __keyfile="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${__keyfile}"
+                FS::remove_silently "${__keyfile}"
+
+                GPG_Export_Public_Key "$__keyfile" "$PROJECT_GPG_ID"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "export failed\n"
+                        I18N_Status_Print_File_Export_Failed
                         return 1
                 fi
 
-                OS::print_status info "exporting GPG public key to static repo...\n"
-                FS::copy_file "$__keyfile" "${1}/${PROJECT_SKU}.gpg.asc"
+                FS::copy_file "$__keyfile" "${1}/${__keyfile##*/}"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "export failed\n"
+                        I18N_Status_Print_File_Export_Failed
                         return 1
                 fi
 
+                # gpg sign all packages
                 for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
-                        if [ "${TARGET%%.asc*}" != "${TARGET}" ]; then
-                                if [ "${TARGET%.gpg.asc*}" = "${TARGET}" ]; then
-                                        continue # it's a gpg cert
-                                fi
+                        if [ ! "${TARGET%%.asc*}" = "${TARGET}" ]; then
+                                continue # it's a gpg cert
                         fi
 
-                        OS::print_status info "gpg signing: ${TARGET}\n"
+                        I18N_Status_Print_File_Sign "${TARGET}" "GPG"
                         FS::remove_silently "${TARGET}.asc"
-                        GPG::detach_sign_file "$TARGET" "$PROJECT_GPG_ID"
+                        GPG_Detach_Sign_File "$TARGET" "$PROJECT_GPG_ID"
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "sign failed\n"
+                                I18N_Status_Print_File_Sign_Failed
                                 return 1
                         fi
                 done
@@ -73,16 +79,17 @@ RELEASE::run_checksum_seal() {
 
         # shasum all files
         for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
-                if [ -d "$TARGET" ]; then
-                        OS::print_status warning "${TARGET} is a directory. Skipping...\n"
+                FS::is_directory "$TARGET"
+                if [ $? -eq 0 ]; then
+                        I18N_Status_Print_File_Directory_Skipped "$TARGET"
                         continue
                 fi
 
-                if [ ! -z "$PROJECT_RELEASE_SHA256" ]; then
-                        OS::print_status info "sha256 checksuming $TARGET\n"
+                if [ $(STRINGS_Is_Empty "$PROJECT_RELEASE_SHA256") -ne 0 ]; then
+                        I18N_Status_Print_File_Checksum "$TARGET" "SHA256"
                         __value="$(SHASUM_Create_From_File "$TARGET" "256")"
-                        if [ $? -ne 0 ]; then
-                                OS::print_status error "sha256 failed.\n"
+                        if [ $(STRINGS_Is_Empty "${__value}") -eq 0 ]; then
+                                I18N_Status_Print_File_Checksum_Failed
                                 return 1
                         fi
 
@@ -90,17 +97,17 @@ RELEASE::run_checksum_seal() {
 ${__value}  ${TARGET##*/}
 "
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "sha256 failed.\n"
+                                I18N_Status_Print_File_Checksum_Failed
                                 return 1
                         fi
                 fi
 
 
-                if [ ! -z "$PROJECT_RELEASE_SHA512" ]; then
-                        OS::print_status info "sha512 checksuming $TARGET\n"
+                if [ $(STRINGS_Is_Empty "$PROJECT_RELEASE_SHA512") -ne 0 ]; then
+                        I18N_Status_Print_File_Checksum "$TARGET" "SHA512"
                         __value="$(SHASUM_Create_From_File "$TARGET" "512")"
-                        if [ $? -ne 0 ]; then
-                                OS::print_status error "sha512 failed.\n"
+                        if [ $(STRINGS_Is_Empty "${__value}") -eq 0 ]; then
+                                I18N_Status_Print_File_Checksum_Failed
                                 return 1
                         fi
 
@@ -108,28 +115,30 @@ ${__value}  ${TARGET##*/}
 ${__value}  ${TARGET##*/}
 "
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "sha512 failed.\n"
+                                I18N_Status_Print_File_Checksum_Failed
                                 return 1
                         fi
                 fi
         done
 
 
-        if [ -f "$__sha256_file" ]; then
-                OS::print_status info "exporting sha256.txt...\n"
+        FS::is_file "$__sha256_file"
+        if [ $? -eq 0 ]; then
+                I18N_Status_Print_File_Export "$__sha256_target"
                 FS::move "${__sha256_file}" "$__sha256_target"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "export failed.\n"
+                        I18N_Status_Print_File_Export_Failed
                         return 1
                 fi
         fi
 
 
-        if [ -f "$__sha512_file" ]; then
-                OS::print_status info "exporting sha512.txt...\n"
+        FS::is_file "$__sha512_file"
+        if [ $? -eq 0 ]; then
+                I18N_Status_Print_File_Export "$__sha512_target"
                 FS::move "${__sha512_file}" "$__sha512_target"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "export failed.\n"
+                        I18N_Status_Print_File_Export_Failed
                         return 1
                 fi
         fi
@@ -142,17 +151,24 @@ ${__value}  ${TARGET##*/}
 
 
 
-RELEASE::initiate_checksum() {
-        # safety check control surfaces
-        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
-                OS::print_status warning "running in simulation mode...\n"
-        fi
-
-        OS::print_status info "checking shasum availability...\n"
+RELEASE_Initiate_CHECKSUM() {
+        # execute
+        I18N_Status_Print_Check_Availability "SHASUM"
         SHASUM_Is_Available
         if [ $? -ne 0 ]; then
-                OS::print_status error "Check failed.\n"
+                I18N_Status_Print_Check_Availability_Failed "SHASUM"
                 return 1
+        fi
+
+        I18N_Status_Print_Check_Availability "GPG"
+        if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
+                I18N_Status_Print_Check_Availability_Simulate "GPG"
+        else
+                GPG_Is_Available "$PROJECT_GPG_ID"
+                if [ $? -ne 0 ]; then
+                        I18N_Status_Print_Check_Availability_Failed "GPG"
+                        return 1
+                fi
         fi
 
 

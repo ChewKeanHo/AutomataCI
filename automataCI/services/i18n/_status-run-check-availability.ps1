@@ -24,6 +24,7 @@ function I18N-Status-Print-Check-Availability {
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
+		$___subject = I18N-Status-Param-Process "${___subject}"
 		$null = I18N-Status-Print info `
 			"checking ${___subject} functions availability...`n"
 	}}
@@ -46,6 +47,7 @@ function I18N-Status-Print-Check-Availability-Failed {
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
+		$___subject = I18N-Status-Param-Process "${___subject}"
 		$null = I18N-Status-Print info "${___subject} is unavailable. Skipping...`n"
 	}}
 
@@ -67,7 +69,30 @@ function I18N-Status-Print-Check-Availability-Incompatible {
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
+		$___subject = I18N-Status-Param-Process "${___subject}"
 		$null = I18N-Status-Print info "${___subject} is incompatible. Skipping...`n"
+	}}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function I18N-Status-Print-Check-Availability-Simulate {
+	param(
+		[string]$___subject
+	)
+
+
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$___subject = I18N-Status-Param-Process "${___subject}"
+		$null = I18N-Status-Print warning "simulating ${___subject} is available...`n"
 	}}
 
 

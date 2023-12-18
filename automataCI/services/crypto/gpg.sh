@@ -10,22 +10,29 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-GPG::detach_sign_file() {
-        #__target="$1"
-        #__id="$2"
+GPG_Detach_Sign_File() {
+        #___target="$1"
+        #___id="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ ! -f "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 
-        GPG::is_available "$2"
+        FS::is_file "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        GPG_Is_Available "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -33,30 +40,29 @@ GPG::detach_sign_file() {
 
         # execute
         gpg --armor --detach-sign --local-user "$2" "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }
 
 
 
 
-GPG::export_public_key() {
-        #__destination="$1"
-        #__id="$2"
+GPG_Export_Public_Key() {
+        #___destination="$1"
+        #___id="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 
-        GPG::is_available "$2"
+        GPG_Is_Available "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -65,30 +71,29 @@ GPG::export_public_key() {
         # execute
         FS::remove_silently "$1"
         gpg --armor --export "$2" > "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }
 
 
 
 
-GPG::export_public_keyring() {
-        #__destination="$1"
-        #__id="$2"
+GPG_Export_Public_Keyring() {
+        #___destination="$1"
+        #___id="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 
-        GPG::is_available "$2"
+        GPG_Is_Available "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -97,25 +102,25 @@ GPG::export_public_keyring() {
         # execute
         FS::remove_silently "$1"
         gpg --export "$2" > "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
+        return 0
 }
 
 
 
 
-GPG::is_available() {
-        #__id="$1"
+GPG_Is_Available() {
+        #___id="$1"
 
 
         # execute
-        if [ -z "$(type -t gpg)" ]; then
+        OS::is_command_available "gpg"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 

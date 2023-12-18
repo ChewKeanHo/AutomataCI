@@ -155,7 +155,7 @@ gpgkey=file:///${__key}
                 return 1
         fi
 
-        GPG::export_public_keyring "${__directory}/BUILD/${__key##*/}" "$__gpg_id"
+        GPG_Export_Public_Keyring "${__directory}/BUILD/${__key##*/}" "$__gpg_id"
         if [ $? -ne 0 ]; then
                 return 1
         fi
