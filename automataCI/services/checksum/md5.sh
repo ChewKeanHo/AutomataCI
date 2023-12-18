@@ -64,13 +64,13 @@ MD5_Checksum_From_File() {
 MD5_Is_Available() {
         # execute
         OS::is_command_available "md5sum"
-        if [ $? -ne 0 ]; then
-                return 1
+        if [ $? -eq 0 ]; then
+                return 0
         fi
 
         OS::is_command_available "md5"
-        if [ $? -ne 0 ]; then
-                return 1
+        if [ $? -eq 0 ]; then
+                return 0
         fi
 
 
