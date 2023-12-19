@@ -243,7 +243,7 @@ ${__target}|${__filename}|${__workspace}|${__source}|${__dest}|${__linker}|${__l
 }
 
 OS-Print-Status info "begin parallel building..."
-$__process = SYNC-Parallel-Exec `
+$__process = SYNC-Exec-Parallel `
 	${function:SUBROUTINE-Build}.ToString() `
 	"${__parallel_directory}\parallel.txt" `
 	"${__parallel_directory}" `

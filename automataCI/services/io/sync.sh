@@ -15,22 +15,22 @@
 
 
 # To use:
-#   $ SYNC::parallel_exec "function_name" "${PWD}/parallel.txt" "/tmp/parallel" "4"
+#   $ SYNC_Exec_Parallel "function_name" "${PWD}/parallel.txt" "/tmp/parallel" "4"
 #
-#   The __parallel_command accepts a wrapper function as shown above. Here is an
-#   example to construct a simple parallelism executions:
+#   The subroutine function accepts a wrapper function as shown above. Here is
+#   an example to construct a simple parallelism executions:
 #       function_name() {
-#               #__line="$1"
+#               #___line="$1"
 #
 #
 #               # break line into multiple parameters (delimiter = '|')
-#               __line="${1%|*}"
+#               ___line="${1%|*}"
 #
-#               __last="${__line##*|}"
-#               __line="${__line%|*}"
+#               ___last="${___line##*|}"
+#               ___line="${___line%|*}"
 #
-#               __2nd_last="${__line##*|}"
-#               __line="${__line%|*}"
+#               ___2nd_last="${___line##*|}"
+#               ___line="${___line%|*}"
 #
 #               ...
 #
@@ -52,7 +52,7 @@
 #
 #
 #       # call the parallel exec
-#       SYNC::parallel_exec "function_name" "${PWD}/parallel.txt" "/tmp/parallel" "4"
+#       SYNC_Exec_Parallel "function_name" "${PWD}/parallel.txt" "/tmp/parallel" "4"
 #
 #
 #   The control file must not have any comment and each line must be the capable
@@ -60,18 +60,18 @@
 #   each line is a long string with your own separator. You will have to break
 #   it inside your wrapper function.
 #
-#   The __parallel_command **MUST** return **ONLY** the following return code:
+#   The subroutine function **MUST** return **ONLY** the following return code:
 #     0 = signal the task execution is done and completed successfully.
 #     1 = signal the task execution has error. This terminates the entire run.
-SYNC::parallel_exec() {
-        __parallel_command="$1"
-        __parallel_control="$2"
-        __parallel_directory="$3"
-        __parallel_available="$4"
+SYNC_Exec_Parallel() {
+        ___parallel_command="$1"
+        ___parallel_control="$2"
+        ___parallel_directory="$3"
+        ___parallel_available="$4"
 
 
         # validate input
-        if [ -z "$__parallel_command" ]; then
+        if [ -z "$___parallel_command" ]; then
                 return 1
         fi
 
@@ -79,134 +79,138 @@ SYNC::parallel_exec() {
                 return 1
         fi
 
-        if [ -z "$__parallel_control" ] || [ ! -f "$__parallel_control" ]; then
+        if [ -z "$___parallel_control" ] || [ ! -f "$___parallel_control" ]; then
                 return 1
         fi
 
-        if [ -z "$__parallel_available" ]; then
-                __parallel_available=$(getconf _NPROCESSORS_ONLN)
+        if [ -z "$___parallel_available" ]; then
+                ___parallel_available=$(getconf _NPROCESSORS_ONLN)
         fi
 
-        if [ $__parallel_available -le 0 ]; then
-                __parallel_available=1
+        if [ $___parallel_available -le 0 ]; then
+                ___parallel_available=1
         fi
 
-        if [ -z "$__parallel_directory" ]; then
-                __parallel_directory="${__parallel_control%/*}"
+        if [ -z "$___parallel_directory" ]; then
+                ___parallel_directory="${___parallel_control%/*}"
         fi
 
-        if [ ! -d "$__parallel_directory" ]; then
+        if [ ! -d "$___parallel_directory" ]; then
                 return 1
         fi
 
 
         # execute
-        __parallel_directory="${__parallel_directory}/flags"
-        __parallel_total=0
-        __parallel_current=0
-        __parallel_working=0
-        __parallel_error=0
-        __parallel_done=0
+        ___parallel_directory="${___parallel_directory}/flags"
+        ___parallel_total=0
+        ___parallel_current=0
+        ___parallel_working=0
+        ___parallel_error=0
+        ___parallel_done=0
 
 
         # scan total tasks
-        __old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                __parallel_total=$(($__parallel_total + 1))
-        done < "$__parallel_control"
-        IFS="$__old_IFS" && unset __old_IFS
+        ___old_IFS="$IFS"
+        while IFS= read -r ___line || [ -n "$___line" ]; do
+                ___parallel_total=$(($___parallel_total + 1))
+        done < "$___parallel_control"
+        IFS="$___old_IFS" && unset ___old_IFS
 
 
         # end the execution if no task is available
-        if [ $__parallel_total -le 0 ]; then
+        if [ $___parallel_total -le 0 ]; then
                 return 0
         fi
 
 
         # run singularly when parallelism is unavailable or has only 1 task
-        if [ $__parallel_available -le 1 ] || [ $__parallel_total -eq 1 ]; then
-                __old_IFS="$IFS"
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        "$__parallel_command" "$__line"
+        if [ $___parallel_available -le 1 ] || [ $___parallel_total -eq 1 ]; then
+                ___old_IFS="$IFS"
+                while IFS= read -r ___line || [ -n "$___line" ]; do
+                        "$___parallel_command" "$___line"
                         if [ $? -ne 0 ]; then
                                 return 1
                         fi
-                done < "$__parallel_control"
-                IFS="$__old_IFS" && unset __old_IFS
+                done < "$___parallel_control"
+                IFS="$___old_IFS" && unset ___old_IFS
+
 
                 # report status
                 return 0
         fi
 
 
-        # run parallely
-        rm -rf "$__parallel_directory" &> /dev/null
-        mkdir -p "$__parallel_directory" &> /dev/null
-        while [ $__parallel_done -ne $__parallel_total ]; do
-                __parallel_done=0
-                __parallel_current=0
-                __parallel_working=0
+        # run in parallel
+        rm -rf "$___parallel_directory" &> /dev/null
+        mkdir -p "$___parallel_directory" &> /dev/null
+        while [ $___parallel_done -ne $___parallel_total ]; do
+                ___parallel_done=0
+                ___parallel_current=0
+                ___parallel_working=0
 
                 # scan state
-                __old_IFS="$IFS"
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        __parallel_flag="$(printf -- "%b" "$__line" | shasum -a 256)"
-                        __parallel_flag="${__parallel_directory}/${__parallel_flag%% *}"
+                ___old_IFS="$IFS"
+                while IFS= read -r ___line || [ -n "$___line" ]; do
+                        ___parallel_flag="$(printf -- "%b" "$___line" | shasum -a 256)"
+                        ___parallel_flag="${___parallel_directory}/${___parallel_flag%% *}"
 
                         # break if error flag is found
-                        if [ -d "${__parallel_flag}.parallel-error" ]; then
-                                __parallel_error=$(($__parallel_error + 1))
+                        if [ -d "${___parallel_flag}.parallel-error" ]; then
+                                ___parallel_error=$(($___parallel_error + 1))
                                 continue
                         fi
 
                         # skip if working flag is found
-                        if [ -d "${__parallel_flag}.parallel-working" ]; then
-                                __parallel_working=$(($__parallel_working + 1))
-                                __parallel_current=$(($__parallel_current + 1))
+                        if [ -d "${___parallel_flag}.parallel-working" ]; then
+                                ___parallel_working=$(($___parallel_working + 1))
+                                ___parallel_current=$(($___parallel_current + 1))
                                 continue
                         fi
 
                         # break entire scan when run is completed
-                        if [ $__parallel_done -eq $__parallel_total ]; then
+                        if [ $___parallel_done -eq $___parallel_total ]; then
                                 break
                         fi
 
                         # skip if done flag is found
-                        if [ -d "${__parallel_flag}.parallel-done" ]; then
-                                __parallel_done=$(($__parallel_done + 1))
-                                __parallel_current=$(($__parallel_current + 1))
+                        if [ -d "${___parallel_flag}.parallel-done" ]; then
+                                ___parallel_done=$(($___parallel_done + 1))
+                                ___parallel_current=$(($___parallel_current + 1))
                                 continue
                         fi
 
                         # it is a working state
-                        if [ $__parallel_working -lt $__parallel_available ]; then
+                        if [ $___parallel_working -lt $___parallel_available ]; then
                                 # secure parallel lock
-                                mkdir -p "${__parallel_flag}.parallel-working"
-                                __parallel_working=$(($__parallel_working + 1))
+                                mkdir -p "${___parallel_flag}.parallel-working"
+                                ___parallel_working=$(($___parallel_working + 1))
+
 
                                 # initiate parallel execution
                                 {
-                                        "$__parallel_command" $__line
+                                        "$___parallel_command" $___line
+
 
                                         # release lock
                                         case $? in
                                         0)
-                                                mkdir -p "${__parallel_flag}.parallel-done"
+                                                mkdir -p "${___parallel_flag}.parallel-done"
                                                 ;;
                                         *)
-                                                mkdir -p "${__parallel_flag}.parallel-error"
+                                                mkdir -p "${___parallel_flag}.parallel-error"
                                                 ;;
                                         esac
-                                        rm -rf "${__parallel_flag}.parallel-working" \
+                                        rm -rf "${___parallel_flag}.parallel-working" \
                                                 &> /dev/null
                                 } &
                         fi
-                        __parallel_current=$(($__parallel_current + 1))
-                done < "$__parallel_control"
-                IFS="$__old_IFS" && unset __old_IFS
+                        ___parallel_current=$(($___parallel_current + 1))
+                done < "$___parallel_control"
+                IFS="$___old_IFS" && unset ___old_IFS
+
 
                 # stop the entire operation if error is detected + no more working tasks
-                if [ $__parallel_error -gt 0 -a $__parallel_working -eq 0 ]; then
+                if [ $___parallel_error -gt 0 -a $___parallel_working -eq 0 ]; then
                         return 1
                 fi
         done
@@ -220,22 +224,22 @@ SYNC::parallel_exec() {
 
 
 # To use:
-#   $ SYNC::series_exec "function_name" "${PWD}/parallel.txt"
+#   $ SYNC_Exec_Series "function_name" "${PWD}/parallel.txt"
 #
-#   The __series_command accepts a wrapper function as shown above. Here is an
-#   example to construct a simple series of executions:
+#   The subroutine function accepts a wrapper function as shown above. Here is
+#   an example to construct a simple series of executions:
 #       function_name() {
-#               #__line="$1"
+#               #___line="$1"
 #
 #
 #               # break line into multiple parameters (delimiter = '|')
-#               __line="${1%|*}"
+#               ___line="${1%|*}"
 #
-#               __last="${__line##*|}"
-#               __line="${__line%|*}"
+#               ___last="${___line##*|}"
+#               ___line="${___line%|*}"
 #
-#               __2nd_last="${__line##*|}"
-#               __line="${__line%|*}"
+#               ___2nd_last="${___line##*|}"
+#               ___line="${___line%|*}"
 #
 #               ...
 #
@@ -257,7 +261,7 @@ SYNC::parallel_exec() {
 #
 #
 #       # call the series exec
-#       SYNC::series_exec "function_name" "${PWD}/parallel.txt"
+#       SYNC_Exec_Series "function_name" "${PWD}/parallel.txt"
 #
 #
 #   The control file must not have any comment and each line must be the capable
@@ -265,33 +269,33 @@ SYNC::parallel_exec() {
 #   each line is a long string with your own separator. You will have to break
 #   it inside your wrapper function.
 #
-#   The __series_command **MUST** return **ONLY** the following return code:
+#   The subroutine function **MUST** return **ONLY** the following return code:
 #     0 = signal the task execution is done and completed successfully.
 #     1 = signal the task execution has error. This terminates the entire run.
-SYNC::series_exec() {
-        __series_command="$1"
-        __series_control="$2"
+SYNC_Exec_Series() {
+        ___series_command="$1"
+        ___series_control="$2"
 
 
         # validate input
-        if [ -z "$__series_command" ]; then
+        if [ -z "$___series_command" ]; then
                 return 1
         fi
 
-        if [ -z "$__series_control" ] || [ ! -f "$__series_control" ]; then
+        if [ -z "$___series_control" ] || [ ! -f "$___series_control" ]; then
                 return 1
         fi
 
 
         # execute
-        __old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                "$__series_command" "$__line"
+        ___old_IFS="$IFS"
+        while IFS= read -r ___line || [ -n "$___line" ]; do
+                "$___series_command" "$___line"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
-        done < "$__series_control"
-        IFS="$__old_IFS" && unset __old_IFS
+        done < "$___series_control"
+        IFS="$___old_IFS" && unset ___old_IFS
 
 
         # report status

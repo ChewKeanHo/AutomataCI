@@ -221,7 +221,7 @@ BUILD::_exec_compile() {
         fi
 
         OS::print_status info "begin parallel building with ${_parallel_available} threads...\n"
-        SYNC::parallel_exec \
+        SYNC_Exec_Parallel \
                 "BUILD::__exec_compile_source_code" \
                 "$1" \
                 "$2" \

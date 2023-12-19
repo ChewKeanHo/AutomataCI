@@ -14,16 +14,16 @@
 
 
 # To use:
-#   $ SYNC-Parallel-Exec ${function:Function-Name}.ToString() `
+#   $ SYNC-Exec-Parallel ${function:Function-Name}.ToString() `
 #                          "$(Get-Location)\parallel.txt" `
 #                          ".\tmp\parallel" `
 #                          "$([System.Environment]::ProcessorCount)"
 #
-#   The __parallel_command accepts a wrapper function as shown above. Here is an
-#   example to construct a simple parallelism executions:
+#   The subroutine function accepts a wrapper function as shown above. Here is
+#   an example to construct a simple parallelism executions:
 #       function Function-Name {
 #               param (
-#                       [string]$__line
+#                       [string]$___line
 #               )
 #
 #
@@ -32,9 +32,9 @@
 #
 #
 #               # break line into multiple parameters (delimiter = '|')
-#               $__list = $__line -split "\|"
-#               $__arg1 = $__list[1]
-#               $__arg2 = $__list[2]
+#               $___list = $___line -split "\|"
+#               $___arg1 = $___list[1]
+#               $___arg2 = $___list[2]
 #               ...
 #
 #
@@ -53,7 +53,7 @@
 #
 #
 #       # calling the parallel exec function
-#       SYNC-Parallel-Exec ${function:Function-Name}.ToString() `
+#       SYNC-Exec-Parallel ${function:Function-Name}.ToString() `
 #                          "$(Get-Location)\parallel.txt" `
 #                          ".\tmp\parallel" `
 #                          "$([System.Environment]::ProcessorCount)"
@@ -64,72 +64,72 @@
 #   each line is a long string with your own separator. You will have to break
 #   it inside your wrapper function.
 #
-#   The __parallel_command **MUST** return **ONLY** the following return code:
+#   The subroutine function **MUST** return **ONLY** the following return code:
 #     0 = signal the task execution is done and completed successfully.
 #     1 = signal the task execution has error. This terminates the entire run.
-function SYNC-Parallel-Exec {
+function SYNC-Exec-Parallel {
 	param(
-		[string]$__parallel_command,
-		[string]$__parallel_control,
-		[string]$__parallel_directory,
-		[string]$__parallel_available
+		[string]$___parallel_command,
+		[string]$___parallel_control,
+		[string]$___parallel_directory,
+		[string]$___parallel_available
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__parallel_command)) {
+	if ([string]::IsNullOrEmpty($___parallel_command)) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($__parallel_control) -or
-		(-not (Test-Path -Path "${__parallel_control}"))) {
+	if ([string]::IsNullOrEmpty($___parallel_control) -or
+		(-not (Test-Path -Path "${___parallel_control}"))) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($__parallel_available)) {
-		$__parallel_available = [System.Environment]::ProcessorCount
+	if ([string]::IsNullOrEmpty($___parallel_available)) {
+		$___parallel_available = [System.Environment]::ProcessorCount
 	}
 
-	if ($__parallel_available -le 0) {
-		$__parallel_available = 1
+	if ($___parallel_available -le 0) {
+		$___parallel_available = 1
 	}
 
-	if ([string]::IsNullOrEmpty($__parallel_directory)) {
-		$__parallel_directory = Split-Path -Path "${__parallel_control}" -Parent
+	if ([string]::IsNullOrEmpty($___parallel_directory)) {
+		$___parallel_directory = Split-Path -Path "${___parallel_control}" -Parent
 	}
 
-	if (-not (Test-Path -Path "${__parallel_directory}" -PathType Container)) {
+	if (-not (Test-Path -Path "${___parallel_directory}" -PathType Container)) {
 		return 1
 	}
 
 
 	# execute
-	$__parallel_directory = "${__parallel_directory}\flags"
-	$__parallel_total = 0
+	$___parallel_directory = "${___parallel_directory}\flags"
+	$___parallel_total = 0
 
 
 	# scan total tasks
-	foreach ($__line in (Get-Content "${__parallel_control}")) {
-		$__parallel_total += 1
+	foreach ($___line in (Get-Content "${___parallel_control}")) {
+		$___parallel_total += 1
 	}
 
 
 	# end the execution if no task is available
-	if ($__parallel_total -le 0) {
+	if ($___parallel_total -le 0) {
 		return 0
 	}
 
 
 	# run singularly when parallelism is unavailable or has only 1 task
-	if (($__parallel_available -le 1) -or ($__parallel_total -eq 1)) {
+	if (($___parallel_available -le 1) -or ($___parallel_total -eq 1)) {
 		# prepare
-		${function:SYNC-Run} = ${__parallel_command}
+		${function:SYNC-Run} = ${___parallel_command}
 
 
 		# execute
-		foreach ($__line in (Get-Content "${__parallel_control}")) {
-			$__process = SYNC-Run "${__line}"
-			if ($__process -ne 0) {
+		foreach ($___line in (Get-Content "${___parallel_control}")) {
+			$___process = SYNC-Run "${___line}"
+			if ($___process -ne 0) {
 				return 1
 			}
 		}
@@ -141,16 +141,16 @@ function SYNC-Parallel-Exec {
 
 
 	# run in parallel
-	$__jobs = @()
-	foreach ($__line in (Get-Content "${__parallel_control}")) {
-		$__jobs += Start-ThreadJob -ScriptBlock {
+	$___jobs = @()
+	foreach ($___line in (Get-Content "${___parallel_control}")) {
+		$___jobs += Start-ThreadJob -ScriptBlock {
 			# prepare
-			${function:SYNC-Run} = ${using:__parallel_command}
+			${function:SYNC-Run} = ${using:___parallel_command}
 
 
 			# execute
-			$__process = SYNC-Run "${using:__line}"
-			if ($__process -ne 0) {
+			$___process = SYNC-Run "${using:___line}"
+			if ($___process -ne 0) {
 				return 1
 			}
 
@@ -160,10 +160,10 @@ function SYNC-Parallel-Exec {
 		}
 	}
 
-	$null = Wait-Job -Job $__jobs
-	foreach ($__job in $__jobs) {
-		$__process = Receive-Job -Job $__job
-		if ($__process -ne 0) {
+	$null = Wait-Job -Job $___jobs
+	foreach ($___job in $___jobs) {
+		$___process = Receive-Job -Job $___job
+		if ($___process -ne 0) {
 			return 1
 		}
 	}
@@ -177,13 +177,13 @@ function SYNC-Parallel-Exec {
 
 
 # To use:
-#   $ SYNC-Series-Exec ${function:Function-Name}.ToString() "$(Get-Location)\parallel.txt"
+#   $ SYNC-Exec-Series ${function:Function-Name}.ToString() "$(Get-Location)\parallel.txt"
 #
-#   The __series_command accepts a wrapper function as shown above. Here is an
-#   example to construct a simple parallelism executions:
+#   The subroutine function accepts a wrapper function as shown above. Here is
+#   an example to construct a simple parallelism executions:
 #       function Function-Name {
 #               param (
-#                       [string]$__line
+#                       [string]$___line
 #               )
 #
 #
@@ -192,11 +192,10 @@ function SYNC-Parallel-Exec {
 #
 #
 #               # break line into multiple parameters (delimiter = '|')
-#               $__list = $__line -split "\|"
-#               $__arg1 = $__list[1]
-#               $__arg2 = $__list[2]
+#               $___list = $___line -split "\|"
+#               $___arg1 = $___list[1]
+#               $___arg2 = $___list[2]
 #               ...
-#
 #
 #
 #               # some tasks in your thread
@@ -213,7 +212,7 @@ function SYNC-Parallel-Exec {
 #
 #
 #       # calling the parallel exec function
-#       SYNC-Series-Exec ${function:Function-Name}.ToString() "$(Get-Location)\parallel.txt"
+#       SYNC-Exec-Series ${function:Function-Name}.ToString() "$(Get-Location)\parallel.txt"
 #
 #
 #   The control file must not have any comment and each line must be the capable
@@ -221,32 +220,32 @@ function SYNC-Parallel-Exec {
 #   each line is a long string with your own separator. You will have to break
 #   it inside your wrapper function.
 #
-#   The __series_command **MUST** return **ONLY** the following return code:
+#   The subroutine function **MUST** return **ONLY** the following return code:
 #     0 = signal the task execution is done and completed successfully.
 #     1 = signal the task execution has error. This terminates the entire run.
-function SYNC-Series-Exec {
+function SYNC-Exec-Series {
 	param(
-		[string]$__series_command,
-		[string]$__series_control
+		[string]$___series_command,
+		[string]$___series_control
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__series_command)) {
+	if ([string]::IsNullOrEmpty($___series_command)) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($__series_control) -or
-		(-not (Test-Path -Path "${__series_control}"))) {
+	if ([string]::IsNullOrEmpty($___series_control) -or
+		(-not (Test-Path -Path "${___series_control}"))) {
 		return 1
 	}
 
 
 	# execute
-	${function:SYNC-Run} = ${__series_command}
-	foreach ($__line in (Get-Content "${__series_control}")) {
-		$__process = SYNC-Run "${__line}"
-		if ($__process -ne 0) {
+	${function:SYNC-Run} = ${___series_command}
+	foreach ($___line in (Get-Content "${___series_control}")) {
+		$___process = SYNC-Run "${___line}"
+		if ($___process -ne 0) {
 			return 1
 		}
 	}

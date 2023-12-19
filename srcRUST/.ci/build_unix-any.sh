@@ -241,7 +241,7 @@ wasip1|wasm|.wasm
 EOF
 IFS="$__old_IFS" && unset __old_IFS
 
-SYNC::parallel_exec "SUBROUTINE::build" "${__parallel_directory}/parallel.txt"
+SYNC_Exec_Parallel "SUBROUTINE::build" "${__parallel_directory}/parallel.txt"
 if [ $? -ne 0 ]; then
         return 1
 fi

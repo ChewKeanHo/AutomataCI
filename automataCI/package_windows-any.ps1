@@ -283,7 +283,7 @@ ${__common}|${__log}|PACKAGE-Run-RPM
 
 $null = I18N-Status-Print-Sync-Exec-Parallel
 if (Test-Path "${__parallel_control}") {
-	$__process = SYNC-Parallel-Exec `
+	$__process = SYNC-Exec-Parallel `
 		${function:SUBROUTINE-Package}.ToString() `
 		"${__parallel_control}" `
 		"${__control_directory}" `
@@ -297,7 +297,7 @@ if (Test-Path "${__parallel_control}") {
 
 $null = I18N-Status-Print-Sync-Exec-Series
 if (Test-Path "${__series_control}") {
-	$__process = SYNC-Series-Exec `
+	$__process = SYNC-Exec-Series `
 		${function:SUBROUTINE-Package}.ToString() `
 		"${__series_control}"
 	if ($__process -ne 0) {

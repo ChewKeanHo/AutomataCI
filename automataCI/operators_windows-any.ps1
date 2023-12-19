@@ -230,7 +230,7 @@ function BUILD-_Exec-Compile {
 	}
 
 	OS-Print-Status info "begin parallel building with ${_parallel_available} threads..."
-	$__process = SYNC-Parallel-Exec `
+	$__process = SYNC-Exec-Parallel `
 		"BUILD-__Exec-Compile-Source-Code" `
 		"${_parallel_control}" `
 		"${_target_directory}" `

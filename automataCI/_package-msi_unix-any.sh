@@ -193,7 +193,7 @@ ${__recipe}|${_dest}|${__log}
                 return 0
         fi
 
-        SYNC::parallel_exec "SUBROUTINE_Package_MSI" "$__parallel_control"
+        SYNC_Exec_Parallel "SUBROUTINE_Package_MSI" "$__parallel_control"
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Package_Parallelism_Run_Failed
                 return 1

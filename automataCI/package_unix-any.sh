@@ -267,7 +267,7 @@ done
 I18N_Status_Print_Sync_Exec_Parallel
 FS::is_file "$__parallel_control"
 if [ $? -eq 0 ]; then
-        SYNC::parallel_exec "SUBROUTINE::package" "$__parallel_control"
+        SYNC_Exec_Parallel "SUBROUTINE::package" "$__parallel_control"
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Sync_Exec_Failed
                 return 1
@@ -278,7 +278,7 @@ fi
 I18N_Status_Print_Sync_Exec_Series
 FS::is_file "$__series_control"
 if [ $? -eq 0 ]; then
-        SYNC::series_exec "SUBROUTINE::package" "$__series_control"
+        SYNC_Exec_Series "SUBROUTINE::package" "$__series_control"
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Sync_Exec_Failed
                 return 1
