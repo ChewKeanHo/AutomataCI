@@ -156,7 +156,7 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 	# NOTE: REQUIRED file
 	OS-Print-Status info "creating copyright.gz file..."
 	$__process = COPYRIGHT-Create-RPM `
-		${_directory} `
+		"${_directory}\BUILD\copyright" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
 		${env:PROJECT_SKU} `
 		${env:PROJECT_CONTACT_NAME} `

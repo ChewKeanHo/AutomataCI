@@ -10,149 +10,70 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-COPYRIGHT::create_deb() {
-        __directory="$1"
-        __manual_file="$2"
-        __is_native="$3"
-        __sku="$4"
-        __name="$5"
-        __email="$6"
-        __website="$7"
+COPYRIGHT_Create() {
+        ___location="$1"
+        ___manual_file="$2"
+        ___sku="$3"
+        ___name="$4"
+        ___email="$5"
+        ___website="$6"
 
 
         # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ -z "$__manual_file" ] ||
-                [ ! -f "$__manual_file" ] ||
-                [ -z "$__sku" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__website" ]; then
+        if [ $(STRINGS_Is_Empty "$___location") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___manual_file") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___sku") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___name") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___email") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___website") -eq 0 ]; then
                 return 1
         fi
 
-
-        # checck if is the document already injected
-        __location="${__directory}/data/usr/local/share/doc/${__sku}/copyright"
-        if [ "$__is_native" = "true" ]; then
-                __location="${__directory}/data/usr/share/doc/${__sku}/copyright"
+        FS::is_directory "${___location}"
+        if [ $? -eq 0 ]; then
+                return 1
         fi
-        if [ -f "$__location" ]; then
+
+        FS::is_file "${___manual_file}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "${___location}"
+        if [ $? -eq 0 ]; then
                 return 0
-        fi
-
-
-        # create baseline
-        COPYRIGHT::create_baseline_deb \
-                "$__location" \
-                "$__manual_file" \
-                "$__sku" \
-                "$__name" \
-                "$__email" \
-                "$__website"
-
-
-        # report status
-        return $?
-}
-
-
-
-
-COPYRIGHT::create_rpm() {
-        __directory="$1"
-        __manual_file="$2"
-        __sku="$3"
-        __name="$4"
-        __email="$5"
-        __website="$6"
-
-
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ -z "$__manual_file" ] ||
-                [ ! -f "$__manual_file" ] ||
-                [ -z "$__sku" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__website" ]; then
-                return 1
-        fi
-
-
-        # check if is the document already injected
-        __location="${__directory}/BUILD/copyright"
-        if [ -f "$__location" ]; then
-                return 0
-        fi
-
-
-        # create baseline
-        COPYRIGHT::create_baseline_deb \
-                "$__location" \
-                "$__manual_file" \
-                "$__sku" \
-                "$__name" \
-                "$__email" \
-                "$__website"
-
-
-        # report status
-        return $?
-}
-
-
-
-
-COPYRIGHT::create_baseline_deb() {
-        __location="$1"
-        __manual_file="$2"
-        __sku="$3"
-        __name="$4"
-        __email="$5"
-        __website="$6"
-
-
-        # validate input
-        if [ -z "$__location" ] ||
-                [ -d "$__location" ] ||
-                [ -z "$__manual_file" ] ||
-                [ ! -f "$__manual_file" ] ||
-                [ -z "$__sku" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__website" ]; then
-                return 1
         fi
 
 
         # create housing directory path
-        FS::make_housing_directory "$__location"
+        FS::make_housing_directory "$___location"
 
 
         # create copyright stanza header
-        FS::write_file "${__location}" "\
+        FS::write_file "$___location" "\
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: ${__sku}
-Upstream-Contact: ${__name} <${__email}>
-Source: ${__website}
+Upstream-Name: ${___sku}
+Upstream-Contact: ${___name} <${___email}>
+Source: ${___website}
 
 "
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # append manually facilitated copyright contents
-        __old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                FS::append_file "$__location" "$__line\n"
-        done < "$__manual_file"
-        IFS="$__old_IFS" && unset __old_IFS __line
+        ___old_IFS="$IFS"
+        while IFS= read -r ___line || [ -n "$___line" ]; do
+                FS::append_file "$___location" "$___line\n"
+        done < "$___manual_file"
+        IFS="$___old_IFS" && unset ___old_IFS ___line
 
 
         # report status

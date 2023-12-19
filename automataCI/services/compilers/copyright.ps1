@@ -9,157 +9,68 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
 
-function COPYRIGHT-Create-DEB {
+function COPYRIGHT-Create {
 	param (
-		[string]$__directory,
-		[string]$__manual_file,
-		[string]$__is_native,
-		[string]$__sku,
-		[string]$__name,
-		[string]$__email,
-		[string]$__website
+		[string]$___location,
+		[string]$___manual_file,
+		[string]$___sku,
+		[string]$___name,
+		[string]$___email,
+		[string]$___website
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path $__directory -PathType Container)) -or
-		[string]::IsNullOrEmpty($__manual_file) -or
-		(-not (Test-Path $__manual_file)) -or
-		[string]::IsNullOrEmpty($__sku) -or
-		[string]::IsNullOrEmpty($__name) -or
-		[string]::IsNullOrEmpty($__email) -or
-		[string]::IsNullOrEmpty($__website)) {
+	if (($(STRINGS-Is-Empty "${___location}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___manual_file}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___sku}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___name}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___email}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___website}") -eq 0)) {
 		return 1
 	}
 
-
-	# checck if is the document already injected
-	$__location = "${__directory}\data\usr\local\share\doc\${__sku}\copyright"
-	if ($__is_native -eq "true") {
-		$__location = "${__directory}\data\usr\share\doc\${__sku}\copyright"
+	$___process = FS-Is-Directory "${___location}"
+	if ($___process -eq 0) {
+		return 1
 	}
 
-	if (Test-Path "${__location}") {
+	$___process = FS-Is-File "${___manual_file}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___location}"
+	if ($___process -eq 0) {
 		return 0
 	}
-
-
-	# create baseline
-	$__process = COPYRIGHT-Create-Baseline-DEB `
-		"${__location}" `
-		"${__manual_file}" `
-		"${__sku}" `
-		"${__name}" `
-		"${__email}" `
-		"${__website}"
-
-
-	# report status
-	return $__process
-}
-
-
-
-
-function COPYRIGHT-Create-RPM {
-	param (
-		[string]$__directory,
-		[string]$__manual_file,
-		[string]$__is_native,
-		[string]$__sku,
-		[string]$__name,
-		[string]$__email,
-		[string]$__website
-	)
-
-
-	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path $__directory -PathType Container)) -or
-		[string]::IsNullOrEmpty($__manual_file) -or
-		(-not (Test-Path $__manual_file)) -or
-		[string]::IsNullOrEmpty($__sku) -or
-		[string]::IsNullOrEmpty($__name) -or
-		[string]::IsNullOrEmpty($__email) -or
-		[string]::IsNullOrEmpty($__website)) {
-		return 1
-	}
-
-
-	# check if is the document already injected
-	$__location = "${__directory}\BUILD\copyright"
-	if (Test-Path "${__location}") {
-		return 0
-	}
-
-
-	# create baseline
-	$__process = COPYRIGHT-Create-Baseline-DEB `
-		"${__location}" `
-		"${__manual_file}" `
-		"${__sku}" `
-		"${__name}" `
-		"${__email}" `
-		"${__website}"
-
-
-	# report status
-	return $__process
-}
-
-
-
-
-function COPYRIGHT-Create-Baseline-DEB {
-	param (
-		[string]$__location,
-		[string]$__manual_file,
-		[string]$__sku,
-		[string]$__name,
-		[string]$__email,
-		[string]$__website
-	)
-
-
-	# validate input
-	if ([string]::IsNullOrEmpty($__location) -or
-		(Test-Path $__location -PathType Container) -or
-		[string]::IsNullOrEmpty($__manual_file) -or
-		(-not (Test-Path $__manual_file)) -or
-		[string]::IsNullOrEmpty($__sku) -or
-		[string]::IsNullOrEmpty($__name) -or
-		[string]::IsNullOrEmpty($__email) -or
-		[string]::IsNullOrEmpty($__website)) {
-		return 1
-	}
-
 
 	# create housing directory path
-	$null = FS-Make-Housing-Directory "${__location}"
+	$null = FS-Make-Housing-Directory "${___location}"
 
 
 	# create copyright stanza header
-	$__process = FS-Write-File "${__location}" @"
+	$___process = FS-Write-File "${___location}" @"
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: ${__sku}
-Upstream-Contact: ${__name} <${__email}>
-Source: ${__website}
+Upstream-Name: ${___sku}
+Upstream-Contact: ${___name} <${___email}>
+Source: ${___website}
 
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# append manually facilitated copyright contents
-	foreach ($__line in (Get-Content -Path $__manual_file)) {
-		$null = FS-Append-File "${__location}" "${__line}"
+	foreach ($___line in (Get-Content -Path $___manual_file)) {
+		$null = FS-Append-File "${___location}" "${___line}"
 	}
 
 

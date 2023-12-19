@@ -126,10 +126,14 @@ function PACKAGE-Assemble-DEB-Content {
 
 	# NOTE: REQUIRED file
 	OS-Print-Status info "creating copyright.gz files..."
-	$__process = COPYRIGHT-Create-DEB `
-		"${_directory}" `
+	$_copyright = "${_directory}\data\usr\local\share\doc\${env:PROJECT_SKU}\copyright"
+	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
+		$_copyright = "${_directory}\data\usr\share\doc\${env:PROJECT_SKU}\copyright"
+	}
+
+	$__process = COPYRIGHT-Create `
+		"${_copyright}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
-		"${env:PROJECT_DEBIAN_IS_NATIVE}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}" `

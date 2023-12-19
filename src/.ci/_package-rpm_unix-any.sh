@@ -153,8 +153,8 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
         # NOTE: REQUIRED file
         OS::print_status info "creating copyright.gz file...\n"
-        COPYRIGHT::create_rpm \
-                "$_directory" \
+        COPYRIGHT_Create \
+                "${_directory}/BUILD/copyright" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \

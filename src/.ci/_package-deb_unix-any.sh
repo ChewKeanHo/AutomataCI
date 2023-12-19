@@ -128,10 +128,14 @@ PACKAGE_Assemble_DEB_Content() {
 
         # NOTE: REQUIRED file
         OS::print_status info "creating copyright.gz file...\n"
-        COPYRIGHT::create_deb \
-                "$_directory" \
+        _copyright="${_directory}/data/usr/local/share/doc/${PROJECT_SKU}/copyright"
+        if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
+                _copyright="${_directory}/data/usr/share/doc/${PROJECT_SKU}/copyright"
+        fi
+
+        COPYRIGHT_Create \
+                "$_copyright" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/deb-copyright" \
-                "$PROJECT_DEBIAN_IS_NATIVE" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
