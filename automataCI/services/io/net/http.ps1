@@ -11,72 +11,72 @@
 # under the License.
 function HTTP-Download {
 	param (
-		[string]$__method,
-		[string]$__url,
-		[string]$__filepath,
-		[string]$__shasum_type,
-		[string]$__shasum_value,
-		[string]$__auth_header
+		[string]$___method,
+		[string]$___url,
+		[string]$___filepath,
+		[string]$___shasum_type,
+		[string]$___shasum_value,
+		[string]$___auth_header
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__url) -or [string]::IsNullOrEmpty($__filepath)) {
+	if ([string]::IsNullOrEmpty($___url) -or [string]::IsNullOrEmpty($___filepath)) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($__method)) {
-		$__method = "GET"
+	if ([string]::IsNullOrEmpty($___method)) {
+		$___method = "GET"
 	}
 
 
 	# execute
 	## clean up workspace
-	$null = Remove-Item $__filepath -Force -Recurse -ErrorAction SilentlyContinue
-	$null = FS-Make-Directory (Split-Path -Path $__filepath) -ErrorAction SilentlyContinue
+	$null = Remove-Item $___filepath -Force -Recurse -ErrorAction SilentlyContinue
+	$null = FS-Make-Directory (Split-Path -Path $___filepath) -ErrorAction SilentlyContinue
 
 	## download payload
-	if (-not [string]::IsNullOrEmpty($__auth_header)) {
+	if (-not [string]::IsNullOrEmpty($___auth_header)) {
 		$null = Invoke-RestMethod `
 			-FollowRelLink `
 			-MaximumFollowRelLink 16 `
-			-Headers $__auth_header `
-			-OutFile $__filepath `
-			-Method $__method `
-			-Uri $__url
+			-Headers $___auth_header `
+			-OutFile $___filepath `
+			-Method $___method `
+			-Uri $___url
 	} else {
 		$null = Invoke-RestMethod `
 			-FollowRelLink `
 			-MaximumFollowRelLink 16 `
-			-OutFile $__filepath `
-			-Method $__method `
-			-Uri $__url
+			-OutFile $___filepath `
+			-Method $___method `
+			-Uri $___url
 	}
 
-	if (-not (Test-Path -Path $__filepath)) {
+	if (-not (Test-Path -Path $___filepath)) {
 		return 1
 	}
 
 	## checksum payload
-	if ([string]::IsNullOrEmpty($__shasum_type) -or
-		[string]::IsNullOrEmpty($__shasum_value)) {
+	if ([string]::IsNullOrEmpty($___shasum_type) -or
+		[string]::IsNullOrEmpty($___shasum_value)) {
 		return 0
 	}
 
-	switch ($__shasum_type) {
+	switch ($___shasum_type) {
 	'1' {
-		$__hasher = New-Object `
+		$___hasher = New-Object `
 			System.Security.Cryptography.SHA1CryptoServiceProvider
 	} '224' {
 		return 1
 	} '256' {
-		$__hasher = New-Object `
+		$___hasher = New-Object `
 			System.Security.Cryptography.SHA256CryptoServiceProvider
 	} '384' {
-		$__hasher = New-Object `
+		$___hasher = New-Object `
 			System.Security.Cryptography.SHA384CryptoServiceProvider
 	} '512' {
-		$__hasher = New-Object `
+		$___hasher = New-Object `
 			System.Security.Cryptography.SHA512CryptoServiceProvider
 	} '512224' {
 		return 1
@@ -86,10 +86,10 @@ function HTTP-Download {
 		return 1
 	}}
 
-	$__fileStream = [System.IO.File]::OpenRead($__filepath)
-	$__hash = $__hasher.ComputeHash($__fileStream)
-	$__hash = [System.BitConverter]::ToString($__hash).Replace("-", "").ToLower()
-	if ($__hash -ne $__shasum_value) {
+	$___fileStream = [System.IO.File]::OpenRead($___filepath)
+	$___hash = $___hasher.ComputeHash($___fileStream)
+	$___hash = [System.BitConverter]::ToString($___hash).Replace("-", "").ToLower()
+	if ($___hash -ne $___shasum_value) {
 		return 1
 	}
 

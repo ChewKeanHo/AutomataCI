@@ -11,16 +11,16 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 HTTP_Download() {
-        __method="$1"
-        __url="$2"
-        __filepath="$3"
-        __shasum_type="$4"
-        __shasum_value="$5"
-        __auth_header="$6"
+        ___method="$1"
+        ___url="$2"
+        ___filepath="$3"
+        ___shasum_type="$4"
+        ___shasum_value="$5"
+        ___auth_header="$6"
 
 
         # validate input
-        if [ -z "$__url" ] || [ -z "$__filepath" ]; then
+        if [ -z "$___url" ] || [ -z "$___filepath" ]; then
                 return 1
         fi
 
@@ -28,55 +28,55 @@ HTTP_Download() {
                 return 1
         fi
 
-        if [ -z "$__method" ]; then
-                __method="GET"
+        if [ -z "$___method" ]; then
+                ___method="GET"
         fi
 
 
         # execute
         ## clean up workspace
-        rm -rf "$__filepath" &> /dev/null
-        mkdir -p "${__filepath%/*}" &> /dev/null
+        rm -rf "$___filepath" &> /dev/null
+        mkdir -p "${___filepath%/*}" &> /dev/null
 
         ## download payload
-        if [ ! -z "$__auth_header" ]; then
+        if [ ! -z "$___auth_header" ]; then
                 if [ ! -z "$(type -t curl)" ]; then
                         curl --location \
-                                --header "$__auth_header" \
-                                --output "$__filepath" \
-                                --request "$__method" \
-                                "$__url"
+                                --header "$___auth_header" \
+                                --output "$___filepath" \
+                                --request "$___method" \
+                                "$___url"
                 elif [ ! -z "$(type -t wget)" ]; then
                         wget --max-redirect 16 \
-                                --header="$__auth_header" \
-                                --output-file"$__filepath" \
-                                --method="$__method" \
-                                "$__url"
+                                --header="$___auth_header" \
+                                --output-file"$___filepath" \
+                                --method="$___method" \
+                                "$___url"
                 else
                         return 1
                 fi
         else
                 if [ ! -z "$(type -t curl)" ]; then
                         curl --location \
-                                --output "$__filepath" \
-                                --request "$__method" \
-                                "$__url"
+                                --output "$___filepath" \
+                                --request "$___method" \
+                                "$___url"
                 elif [ ! -z "$(type -t wget)" ]; then
                         wget --max-redirect 16 \
-                                --output-file"$__filepath" \
-                                --method="$__method" \
-                                "$__url"
+                                --output-file"$___filepath" \
+                                --method="$___method" \
+                                "$___url"
                 else
                         return 1
                 fi
         fi
 
-        if [ ! -f "$__filepath" ]; then
+        if [ ! -f "$___filepath" ]; then
                 return 1
         fi
 
         ## checksum payload
-        if [ -z "$__shasum_type" ] || [ -z "$__shasum_value" ]; then
+        if [ -z "$___shasum_type" ] || [ -z "$___shasum_value" ]; then
                 return 0
         fi
 
@@ -84,7 +84,7 @@ HTTP_Download() {
                 return 1
         fi
 
-        case "$__shasum_type" in
+        case "$___shasum_type" in
         1|224|256|384|512|512224|512256)
                 ;;
         *)
@@ -92,9 +92,9 @@ HTTP_Download() {
                 ;;
         esac
 
-        __target_shasum="$(shasum -a "$__shasum_type" "$__filepath")"
-        __target_shasum="${__target_shasum%% *}"
-        if [ ! "$__target_shasum" = "$__shasum_value" ]; then
+        ___target_shasum="$(shasum -a "$___shasum_type" "$___filepath")"
+        ___target_shasum="${___target_shasum%% *}"
+        if [ ! "$___target_shasum" = "$___shasum_value" ]; then
                 return 1
         fi
 
