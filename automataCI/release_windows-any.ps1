@@ -188,8 +188,8 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 		return 1
 	}
 
-	$__process = RELEASE-Docs-Repo
-	if ($__process -ne 0) {
+	$___process = RELEASE-Conclude-DOCS
+	if ($___process -ne 0) {
 		return 1
 	}
 }

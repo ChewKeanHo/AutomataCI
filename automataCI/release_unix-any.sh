@@ -184,7 +184,7 @@ else
                 return 1
         fi
 
-        RELEASE::docs_repo
+        RELEASE_Conclude_DOCS
         if [ $? -ne 0 ]; then
                 return 1
         fi

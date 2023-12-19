@@ -9,36 +9,33 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\versioners\git.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-repo.ps1"
 
 
 
 
-function RELEASE-Docs-Repo {
+function RELEASE-Conclude-DOCS {
 	# validate input
-	OS-Print-Status info "publishing artifacts to docs repo..."
-	if (-not (Test-Path `
-			-PathType Container `
-			-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}")) {
-		OS-Print-Status warning "release skipped - No docs directory."
+	$null = I18N-Status-Print-Repo-Check "DOCS"
+	$___process = FS-Is-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
+	if ($___process -ne 0) {
 		return 0
 	}
 
-
-	# clean up base directory
-	OS-Print-Status info "safety checking docs repo release directory..."
-	if (Test-Path -PathType Leaf `
-		-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_DOCS_REPO_DIRECTORY}") {
-		OS-Print-Status error "check failed."
+	$___process = FS-Is-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
+	if ($___process -eq 0) {
+		$null = I18N-Status-Print-Repo-Check-Failed
 		return 1
 	}
 	$null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
 
 
 	# execute
-	OS-Print-Status info "setting up release docs repo..."
+	$null = I18N-Status-Print-Repo-Setup "DOCS"
 	$__process = GIT-Clone-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
@@ -48,43 +45,42 @@ function RELEASE-Docs-Repo {
 		"${env:PROJECT_DOCS_REPO_DIRECTORY}" `
 		"${env:PROJECT_DOCS_REPO_BRANCH}"
 	if ($__process -ne 0) {
-		OS-Print-Status error "setup failed."
+		$null = I18N-Status-Print-Repo-Setup-Failed
 		return 1
 	}
 
 
-	# move existing items to docs repo
+	# export contents
 	$__staging = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
 	$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_DOCS_REPO_DIRECTORY}"
 
-	OS-Print-Status info "exporting staging contents to docs repo..."
-	$__process = FS-Copy-All "${__staging}\" "${__dest}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "export failed."
+	$null = I18N-Status-Print-File-Export "${__staging}"
+	$___process = FS-Copy-All "${__staging}\" "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-File-Export-Failed
 		return 1
 	}
 
-	OS-Print-Status info "Sourcing commit id for tagging..."
+	$null = I18N-Status-Print-Repo-Commit "DOCS"
 	$__tag = GIT-Get-Latest-Commit-ID
-	if ([string]::IsNullOrEmpty(${__tag})) {
-		OS-Print-Status error "Source failed."
+	if ($(STRINGS-Is-Empty "${__tag}") -eq 0) {
+		$null = I18N-Status-Print-Repo-Commit-Failed
 		return 1
 	}
 
-	$__current_path = Get-Location
+	$___current_path = Get-Location
 	$null = Set-Location "${__dest}"
 
-	OS-Print-Status info "Committing docs repo..."
-	$__process = Git-Autonomous-Force-Commit `
+	$___process = Git-Autonomous-Force-Commit `
 		"${__tag}" `
 		"${env:PROJECT_DOCS_REPO_KEY}" `
 		"${env:PROJECT_DOCS_REPO_BRANCH}"
 
-	$null = Set-Location "${__current_path}"
-	$null = Remove-Variable __current_path
+	$null = Set-Location "${___current_path}"
+	$null = Remove-Variable ___current_path
 
-	if ($__process -ne 0) {
-		OS-Print-Status error "Commit failed."
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Repo-Commit-Failed
 		return 1
 	}
 
