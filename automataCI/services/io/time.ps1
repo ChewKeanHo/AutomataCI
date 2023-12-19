@@ -11,19 +11,19 @@
 # under the License.
 function TIME-Format-ISO8601-Date {
 	param(
-		[string]$__epoch
+		[string]$___epoch
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__epoch)) {
+	if ([string]::IsNullOrEmpty($___epoch)) {
 		return 1
 	}
 
 
 	# execute
-	$__t = (Get-Date "1970-01-01 00:00:00.000Z") + ([TimeSpan]::FromSeconds($__epoch))
-	return $__t.ToString("yyyy-MM-dd")
+	$___t = (Get-Date "1970-01-01 00:00:00.000Z") + ([TimeSpan]::FromSeconds($___epoch))
+	return $___t.ToString("yyyy-MM-dd")
 }
 
 
