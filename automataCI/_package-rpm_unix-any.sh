@@ -72,7 +72,7 @@ PACKAGE::run_rpm() {
         esac
 
         I18N_Status_Print_Check_Availability "MANUAL DOCS"
-        MANUAL::is_available
+        MANUAL_Is_Available
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Check_Availability_Failed "MANUAL DOCS"
                 return 1

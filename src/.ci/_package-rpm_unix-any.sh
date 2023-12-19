@@ -167,8 +167,8 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
         # NOTE: REQUIRED file
         OS::print_status info "creating man pages file...\n"
-        MANUAL::create_rpm_manpage \
-                "$_directory" \
+        MANUAL_Create \
+                "${_directory}/BUILD/${PROJECT_SKU}.1" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \

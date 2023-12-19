@@ -155,7 +155,7 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 	# NOTE: REQUIRED file
 	OS-Print-Status info "creating copyright.gz file..."
-	$__process = COPYRIGHT-Create-RPM `
+	$__process = COPYRIGHT-Create `
 		"${_directory}\BUILD\copyright" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
 		${env:PROJECT_SKU} `
@@ -169,8 +169,8 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 	# NOTE: REQUIRED file
 	OS-Print-Status info "creating man pages file..."
-	MANUAL-Create-RPM_Manpage `
-		${_directory} `
+	$__process = MANUAL-Create `
+		"${_directory}\BUILD\${env:PROJECT_SKU}.1" `
 		${env:PROJECT_SKU} `
 		${env:PROJECT_CONTACT_NAME} `
 		${env:PROJECT_CONTACT_EMAIL} `

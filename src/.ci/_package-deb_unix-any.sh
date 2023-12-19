@@ -147,9 +147,13 @@ PACKAGE_Assemble_DEB_Content() {
 
         # NOTE: REQUIRED file
         OS::print_status info "creating man(page) files...\n"
-        MANUAL::create_deb \
-                "$_directory" \
-                "$PROJECT_DEBIAN_IS_NATIVE" \
+        _manual="${_directory}/data/usr/local/share/man/man1/${PROJECT_SKU}.1"
+        if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
+                _manual="${_directory}/data/usr/share/man/man1/${PROJECT_SKU}.1"
+        fi
+
+        MANUAL_Create \
+                "$_manual" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \

@@ -145,8 +145,13 @@ function PACKAGE-Assemble-DEB-Content {
 
 	# NOTE: REQUIRED file
 	OS-Print-Status info "creating man(page) files..."
-	$__process = MANUAL-Create-DEB `
-		"${_directory}" `
+	$_manual = "${_directory}\data\usr\local\share\man\man1\${env:PROJECT_SKU}.1"
+	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
+		$_manual = "${_directory}\data\usr\share\man\man1\${env:PROJECT_SKU}.1"
+	}
+
+	$__process = MANUAL-Create `
+		"${_manual}" `
 		"${env:PROJECT_DEBIAN_IS_NATIVE}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
