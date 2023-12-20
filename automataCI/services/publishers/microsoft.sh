@@ -10,44 +10,38 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-
-
-
-
 MICROSOFT_Arch_Get() {
         # execute
         case "$1" in
         alpha)
-                __value="Alpha"
+                ___value="Alpha"
                 ;;
         amd64)
-                __value="x64"
+                ___value="x64"
                 ;;
         arm)
-                __value="ARM"
+                ___value="ARM"
                 ;;
         arm64)
-                __value="ARM64"
+                ___value="ARM64"
                 ;;
         i386)
-                __value="x86"
+                ___value="x86"
                 ;;
         ia64)
-                __value="ia64"
+                ___value="ia64"
                 ;;
         mips)
-                __value="MIPs"
+                ___value="MIPs"
                 ;;
         powerpc)
-                __value="PowerPC"
+                ___value="PowerPC"
                 ;;
         *)
-                __value=""
+                ___value=""
                 ;;
         esac
-        printf -- "%s" "$__value"
+        printf -- "%s" "$___value"
 
 
         # report status
@@ -61,34 +55,34 @@ MICROSOFT_Arch_Interpret() {
         # execute
         case "$1" in
         Alpha)
-                __value="alpha"
+                ___value="alpha"
                 ;;
         ARM)
-                __value="arm"
+                ___value="arm"
                 ;;
         ARM64)
-                __value="arm64"
+                ___value="arm64"
                 ;;
         ia64)
-                __value="ia64"
+                ___value="ia64"
                 ;;
         MIPs)
-                __value="mips"
+                ___value="mips"
                 ;;
         PowerPC)
-                __value="powerpc"
+                ___value="powerpc"
                 ;;
         x86)
-                __value="i386"
+                ___value="i386"
                 ;;
         x64)
-                __value="amd64"
+                ___value="amd64"
                 ;;
         *)
-                __value=""
+                ___value=""
                 ;;
         esac
-        printf -- "%s" "$__value"
+        printf -- "%s" "$___value"
 
 
         # report status
