@@ -22,13 +22,12 @@ fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/apple.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/microsoft.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/notary.sh"
 
 
 
 
-NOTARY::certify() {
+NOTARIZE_Certify() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -59,13 +58,13 @@ NOTARY::certify() {
                         return 12
                 fi
 
-                APPLE::is_available
+                NOTARY_Apple_Is_Available
                 if [ $? -ne 0 ]; then
                         return 11
                 fi
 
                 _dest="${_target%/*}/${_target_name}-signed_${_target_os}-${_target_arch}"
-                APPLE::sign "$_dest" "$_target"
+                NOTARY_Sign_Apple "$_dest" "$_target"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -75,13 +74,13 @@ NOTARY::certify() {
                         return 12
                 fi
 
-                MICROSOFT::is_available
+                NOTARY_Microsoft_Is_Available
                 if [ $? -ne 0 ]; then
                         return 11
                 fi
 
                 _dest="${_target%/*}/${_target_name}-signed_${_target_os}-${_target_arch}.exe"
-                MICROSOFT::sign \
+                NOTARY_Sign_Microsoft \
                         "$_dest" \
                         "$_target" \
                         "$PROJECT_CONTACT_NAME" \

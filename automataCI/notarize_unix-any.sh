@@ -79,7 +79,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
 
 
         # execute
-        cmd="NOTARY::certify"
+        cmd="NOTARIZE_Certify"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Notarize_Function_Unavailable "$cmd"

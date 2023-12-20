@@ -21,13 +21,12 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\crypto\apple.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\crypto\microsoft.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\crypto\notary.ps1"
 
 
 
 
-function NOTARY-Certify {
+function NOTARIZE-Certify {
 	param (
 		[string]$_target,
 		[string]$_directory,
@@ -60,15 +59,15 @@ function NOTARY-Certify {
 			return 12
 		}
 
-		$__process = APPLE-Is-Available
-		if ($__process -ne 0) {
+		$___process = NOTARY-Apple-Is-Available
+		if ($___process -ne 0) {
 			return 11
 		}
 
 		$_dest = "$(Split-Path -Parent -Path "${_target}")"
 		$_dest = "${_dest}\${_target_name}-signed_${_target_os}-${_target_arch}"
-		$__process = APPLE-Sign "${_dest}" "${_target}"
-		if ($__process -ne 0) {
+		$___process = NOTARY-Sign-Apple "${_dest}" "${_target}"
+		if ($___process -ne 0) {
 			return 1
 		}
 	} windows {
@@ -76,19 +75,19 @@ function NOTARY-Certify {
 			return 12
 		}
 
-		$__process = MICROSOFT-Is-Available
-		if ($__process -ne 0) {
+		$___process = NOTARY-Microsoft-Is-Available
+		if ($___process -ne 0) {
 			return 11
 		}
 
 		$_dest = "$(Split-Path -Parent -Path "${_target}")"
 		$_dest = "${_dest}\${_target_name}-signed_${_target_os}-${_target_arch}.exe"
-		$__process = MICROSOFT-Sign `
+		$___process = NOTARY-Sign-Microsoft `
 			"${_dest}" `
 			"${_target}" `
 			"${env:PROJECT_CONTACT_NAME}" `
 			"${env:PROJECT_CONTACT_WEBSITE}"
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			return 1
 		}
 	} default {

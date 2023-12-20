@@ -15,7 +15,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run me from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run me from ci.cmd instead!`n"
 	return 1
 }
 
@@ -33,11 +33,11 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 # source locally provided functions
 $__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_PATH_CI}"
 $__recipe = "${__recipe}\notarize_windows-any.ps1"
-$__process = FS-Is-File "${__recipe}"
-if ($__process -eq 0) {
+$___process = FS-Is-File "${__recipe}"
+if ($___process -eq 0) {
 	$null = I18N-Status-Print-Run-CI-Job "${__recipe}"
-	$__process = . "${__recipe}"
-	if ($__process -ne 0) {
+	$___process = . "${__recipe}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Run-Failed
 		return 1
 	}
@@ -48,8 +48,8 @@ if ($__process -eq 0) {
 
 # begin notarize
 foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}")) {
-	$__process = FS-Is-File "$i"
-	if ($__process -ne 0) {
+	$___process = FS-Is-File "$i"
+	if ($___process -ne 0) {
 		continue
 	}
 
@@ -72,25 +72,25 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 		continue
 	}
 
-	$__process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "$TARGET_FILENAME"
-	if ($__process -ne 0) {
+	$___process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "${TARGET_FILENAME}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-File-Incompatible-Skipped
 		continue
 	}
 
-	$cmd = "NOTARY-Certify"
-	$__process = OS-Is-Command-Available "$cmd"
-	if ($__process -ne 0) {
+	$cmd = "NOTARIZE-Certify"
+	$___process = OS-Is-Command-Available "$cmd"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Notarize-Function-Unavailable "$cmd"
 		continue
 	}
 
-	$___process = NOTARY-Certify `
+	$___process = NOTARIZE-Certify `
 		"$i" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}" `
-		"$TARGET_FILENAME" `
-		"$TARGET_OS" `
-		"$TARGET_ARCH"
+		"${TARGET_FILENAME}" `
+		"${TARGET_OS}" `
+		"${TARGET_ARCH}"
 	switch ($___process) {
 	12 {
 		$null = I18N-Status-Print-Notarize-Simulate
