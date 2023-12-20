@@ -115,16 +115,14 @@ DEB_Create_Archive() {
 
 
 DEB_Create_Changelog() {
-        ___directory="$1"
+        ___location="$1"
         ___filepath="$2"
-        ___is_native="$3"
-        ___sku="$4"
+        ___sku="$3"
 
 
         # validate input
-        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+        if [ $(STRINGS_Is_Empty "$___location") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___filepath") -eq 0 ] ||
-                [ $(STRINGS_Is_Empty "$___is_native") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___sku") -eq 0 ]; then
                 return 1
         fi
@@ -137,13 +135,6 @@ DEB_Create_Changelog() {
         FS::is_file "$___filepath"
         if [ $? -ne 0 ]; then
                 return 1
-        fi
-
-
-        # check if the document has already injected
-        ___location="${___directory}/data/usr/local/share/doc/${___sku}/changelog.gz"
-        if [ "$___is_native" = "true" ]; then
-                ___location="${___directory}/data/usr/share/doc/${___sku}/changelog.gz"
         fi
 
 
@@ -283,25 +274,27 @@ Description: $___pitch
 
 
         # append description data file
-        if [ $(STRINGS_Is_Empty "$___description_filepath") -ne 0 ] &&
-                [ -f "$___description_filepath" ]; then
-                ___old_IFS="$IFS"
-                while IFS="" read -r ___line || [ -n "$___line" ]; do
-                        if [ $(STRINGS_Is_Empty "$___line") -ne 0 ] &&
-                                [ $(STRINGS_Is_Empty "${___line%%#*}") -eq 0 ]; then
-                                continue
-                        fi
-
-                        if [ $(STRINGS_Is_Empty "${___line}") -eq 0 ]; then
-                                ___line=" ."
-                        else
-                                ___line=" ${___line}"
-                        fi
-
-                        FS::append_file "$___location" "${___line}\n"
-                done < "${___description_filepath}"
-                IFS="$___old_IFS" && unset ___old_IFS ___line
+        ___process="$(FS::is_file "$___description_filepath")"
+        if [ $___process -ne 0 ]; then
+                return 0 # report status early
         fi
+
+         ___old_IFS="$IFS"
+        while IFS="" read -r ___line || [ -n "$___line" ]; do
+                if [ $(STRINGS_Is_Empty "$___line") -ne 0 ] &&
+                        [ $(STRINGS_Is_Empty "${___line%%#*}") -eq 0 ]; then
+                        continue
+                fi
+
+                if [ $(STRINGS_Is_Empty "${___line}") -eq 0 ]; then
+                        ___line=" ."
+                else
+                        ___line=" ${___line}"
+                fi
+
+                FS::append_file "$___location" "${___line}\n"
+        done < "${___description_filepath}"
+        IFS="$___old_IFS" && unset ___old_IFS ___line
 
 
         # report status
@@ -444,7 +437,7 @@ DEB_Get_Architecture() {
 
 
         # report status
-        ___output="$(STRINGS::to_lowercase "${___output}")"
+        ___output="$(STRINGS::to_lowercase "$___output")"
         printf -- "%b" "$___output"
         return 0
 }

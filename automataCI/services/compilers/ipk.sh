@@ -10,173 +10,140 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/disk.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/archive/tar.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/disk.sh"
+. "${LIBS_AUTOMATACI}/services/archive/tar.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/deb.sh"
 
 
 
 
-IPK::create_archive() {
-        __directory="$1"
-        __destination="$2"
+IPK_Create_Archive() {
+        ___directory="$1"
+        ___destination="$2"
 
 
         # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ ! -d "${__directory}/control" ] ||
-                [ ! -d "${__directory}/data" ] ||
-                [ ! -f "${__directory}/control/control" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___directory"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "${___directory}/control"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "${___directory}/data"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "${___directory}/control/control"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # capture current directory
-        __current_path="$PWD"
+        ___current_path="$PWD"
 
 
         # package control
-        cd "${__directory}/control"
+        cd "${___directory}/control"
         TAR_Create_GZ "../control.tar.gz" "*"
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
 
         # package data
-        cd "${__directory}/data"
+        cd "${___directory}/data"
         TAR_Create_GZ "../data.tar.gz" "*"
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
 
         # generate debian-binary
-        cd "${__directory}"
-        FS::write_file "${__directory}/debian-binary" "2.0\n"
+        cd "${___directory}"
+        FS::write_file "${___directory}/debian-binary" "2.0\n"
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
 
         # archive into ipk
-        __file="package.ipk"
-        TAR_Create_GZ "$__file" "debian-binary control.tar.gz data.tar.gz"
+        ___file="package.ipk"
+        TAR_Create_GZ "$___file" "debian-binary control.tar.gz data.tar.gz"
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
 
         # move to destination
-        FS::remove_silently "$__destination"
-        FS::move "${__file}.gz" "${__destination}"
-        __exit=$?
+        FS::remove_silently "$___destination"
+        FS::move "${___file}.gz" "$___destination"
+        ___process=$?
 
 
         # return to current directory
-        cd "$__current_path" && unset __current_path
+        cd "$___current_path" && unset ___current_path
 
 
         # report status
-        return $__exit
+        if [ $___process -ne 0 ]; then
+                return 1
+        fi
+
+        return 0
 }
 
 
 
 
-IPK::create_control() {
-        __directory="$1"
-        __resources="$2"
-        __sku="$3"
-        __version="$4"
-        __arch="$5"
-        __os="$6"
-        __name="$7"
-        __email="$8"
-        __website="$9"
-        __pitch="${10}"
-        __priority="${11}"
-        __section="${12}"
-        __description_filepath="${13}"
+IPK_Create_Control() {
+        #___directory="$1"
+        #___resources="$2"
+        #___sku="$3"
+        #___version="$4"
+        #___arch="$5"
+        #___os="$6"
+        #___name="$7"
+        #___email="$8"
+        #___website="$9"
+        #___pitch="${10}"
+        #___priority="${11}"
+        #___section="${12}"
+        #___description_filepath="${13}"
 
 
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ ! -d "$__directory" ] ||
-                [ -z "$__resources" ] ||
-                [ ! -d "$__resources" ] ||
-                [ -z "$__sku" ] ||
-                [ -z "$__version" ] ||
-                [ -z "$__arch" ] ||
-                [ -z "$__os" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__website" ] ||
-                [ -z "$__pitch" ] ||
-                [ -z "$__priority" ] ||
-                [ -z "$__section" ]; then
-                return 1
-        fi
-
-        case "$__priority" in
-        required|important|standard|optional|extra)
-                ;;
-        *)
-                return 1
-                ;;
-        esac
-
-
-        # prepare workspace
-        __arch="$(IPK::get_architecture "$__os" "$__arch")"
-        __location="${__directory}/control/control"
-        FS::make_housing_directory "${__location}"
-        FS::remove_silently "${__location}"
-
-
-        # generate control file
-        __size="$(DISK_Calculate_Size "${__directory}/data")"
+        # execute
+        DEB_Create_Control "$1" \
+                "$2" \
+                "$3" \
+                "$4" \
+                "$5" \
+                "$6" \
+                "$7" \
+                "$8" \
+                "$9" \
+                "${10}" \
+                "${11}" \
+                "${12}" \
+                "${13}"
         if [ $? -ne 0 ]; then
                 return 1
-        fi
-
-        FS::write_file "$__location" "\
-Package: $__sku
-Version: $__version
-Architecture: $__arch
-Maintainer: $__name <$__email>
-Installed-Size: $__size
-Section: $__section
-Priority: $__priority
-Homepage: $__website
-Description: $__pitch
-"
-
-
-        # append description data file
-        if [ ! -z "$__description_filepath" ] && [ -f "$__description_filepath" ]; then
-                old_IFS="$IFS"
-                while IFS="" read -r __line || [ -n "$__line" ]; do
-                        if [ ! -z "$__line" -a -z "${__line%%#*}" ]; then
-                                continue
-                        fi
-
-                        if [ -z "$__line" ]; then
-                                __line=" ."
-                        else
-                                __line=" ${__line}"
-                        fi
-
-                        FS::append_file "$__location" "${__line}\n"
-                done < "${__description_filepath}"
-                IFS="$old_IFS" && unset old_IFS __line
         fi
 
 
@@ -187,13 +154,13 @@ Description: $__pitch
 
 
 
-IPK::get_architecture() {
+IPK_Get_Architecture() {
         #___os="$1"
         #___arch="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 printf -- ""
                 return 1
         fi
@@ -207,11 +174,12 @@ IPK::get_architecture() {
 
 
 
-IPK::is_available() {
-        __os="$1"
-        __arch="$2"
+IPK_Is_Available() {
+        ___os="$1"
+        ___arch="$2"
 
-        if [ -z "$__os" ] || [ -z "$__arch" ]; then
+        if [ $(STRINGS_Is_Empty "$___os") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___arch") -eq 0 ]; then
                 return 1
         fi
 
@@ -234,7 +202,7 @@ IPK::is_available() {
 
 
         # check compatible target cpu architecture
-        case "$__arch" in
+        case "$___arch" in
         any)
                 return 3
                 ;;
@@ -250,12 +218,17 @@ IPK::is_available() {
 
 
 
-IPK::is_valid() {
-        #__target="$1"
+IPK_Is_Valid() {
+        #___target="$1"
 
 
         # validate input
-        if [ -z "$1" ] || [ -d "$1" ] || [ ! -f "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_file "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 

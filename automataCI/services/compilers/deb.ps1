@@ -15,6 +15,7 @@
 . "${env:LIBS_AUTOMATACI}\services\io\disk.ps1"
 . "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
 . "${env:LIBS_AUTOMATACI}\services\archive\ar.ps1"
+. "${env:LIBS_AUTOMATACI}\services\crypto\gpg.ps1"
 . "${env:LIBS_AUTOMATACI}\services\checksum\md5.ps1"
 
 
@@ -28,7 +29,7 @@ function DEB-Create-Archive {
 
 
 	# validate input
-	if ($(STRINGS-Is-Empty "${__directory}") -eq 0) {
+	if ($(STRINGS-Is-Empty "${___directory}") -eq 0) {
 		return 1
 	}
 
@@ -88,7 +89,6 @@ function DEB-Create-Archive {
 
 
 	# archive into deb
-	$null = Set-Location "${___directory}"
 	$___file = "package.deb"
 	$___process = AR-Create "${___file}" "debian-binary control.tar.xz data.tar.xz"
 	if ($___process -ne 0) {
@@ -121,17 +121,15 @@ function DEB-Create-Archive {
 
 function DEB-Create-Changelog {
 	param (
-		[string]$___directory,
+		[string]$___location,
 		[string]$___filepath,
-		[string]$___is_native,
 		[string]$___sku
 	)
 
 
 	# validate input
-	if (($(STRINGS-Is-Empty "${___directory}") -eq 0) -or
+	if (($(STRINGS-Is-Empty "${___location}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___filepath}") -eq 0) -or
-		($(STRINGS-Is-Empty "${___is_native}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___sku}") -eq 0)) {
 		return 1
 	}
@@ -144,13 +142,6 @@ function DEB-Create-Changelog {
 	$___process = FS-Is-File "${___filepath}"
 	if ($___process -ne 0) {
 		return 1
-	}
-
-
-	# check if the document has already injected
-	$___location = "${___directory}\data\usr\local\share\doc\${___sku}\changelog.gz"
-	if ($___is_native -eq "true") {
-		$___location = "${___directory}\data\usr\share\doc\${___sku}\changelog.gz"
 	}
 
 
@@ -197,9 +188,9 @@ function DEB-Create-Checksum {
 
 
 	# checksum each file
-	foreach ($___file in (Get-ChildItem -Path "${___directory}\data" -File -Recurse)) {
-		$___checksum = MD5-Checksum-From-File $___file.FullName
-		$___path = $___file.FullName `
+	foreach ($___line in (Get-ChildItem -Path "${___directory}\data" -File -Recurse)) {
+		$___checksum = MD5-Checksum-From-File $___line.FullName
+		$___path = $___line.FullName `
 			-replace [regex]::Escape("${___directory}\data\"), ""
 		$___path = $___path -replace "\\", "/"
 		$___process = FS-Append-File "${___location}" "${___checksum} ${___path}"
@@ -295,23 +286,25 @@ Description: ${___pitch}
 
 
 	# append description data file
-	if (($(STRINGS-Is-Empty "${___description_filepath}") -eq 0) -and
-		($(FS-Is-File "${___description_filepath}") -eq 0)) {
-		foreach ($___line in (Get-Content -Path "${___description_filepath}")) {
-			if (($(STRINGS-Is-Empty "${___line}") -ne 0) -and
-				($(STRINGS-Is-Empty "$($___line -replace "#.*$")") -eq 0)) {
-				continue
-			}
+	$___process = FS-Is-File "${___description_filepath}"
+	if ($___process -ne 0) {
+		return 0 # report status early
+	}
 
-			$___line = $___line -replace '#.*'
-			if ($(STRINGS-Is-Empty "${___line}") -eq 0) {
-				$___line = " ."
-			} else {
-				$___line = " ${___line}"
-			}
-
-			$null = FS-Append-File $___location $___line
+	foreach ($___line in (Get-Content -Path "${___description_filepath}")) {
+		if (($(STRINGS-Is-Empty "${___line}") -ne 0) -and
+			($(STRINGS-Is-Empty "$($___line -replace "#.*$")") -eq 0)) {
+			continue
 		}
+
+		$___line = $___line -replace '#.*'
+		if ($(STRINGS-Is-Empty "${___line}") -eq 0) {
+			$___line = " ."
+		} else {
+			$___line = " ${___line}"
+		}
+
+		$null = FS-Append-File $___location $___line
 	}
 
 

@@ -27,7 +27,7 @@ fi
 
 
 
-PACKAGE::assemble_ipk_content() {
+PACKAGE_Assemble_IPK_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -102,7 +102,7 @@ PACKAGE::assemble_ipk_content() {
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
         OS::print_status info "creating control/control file...\n"
-        IPK::create_control \
+        IPK_Create_Control \
                 "$_directory" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
                 "$_package" \

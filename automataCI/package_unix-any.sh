@@ -232,7 +232,7 @@ ${__common}|${__log}|PACKAGE_Run_HOMEBREW
 
         __log="${__log_directory}/ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__parallel_control" "\
-${__common}|${__log}|PACKAGE::run_ipk
+${__common}|${__log}|PACKAGE_Run_IPK
 "
         if [ $? -ne 0 ]; then
                 return 1

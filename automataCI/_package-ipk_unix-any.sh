@@ -30,7 +30,7 @@ fi
 
 
 
-PACKAGE::run_ipk() {
+PACKAGE_Run_IPK() {
         #__line="$1"
 
 
@@ -55,7 +55,7 @@ PACKAGE::run_ipk() {
 
         # validate input
         I18N_Status_Print_Check_Availability "IPK"
-        IPK::is_available "$_target_os" "$_target_arch"
+        IPK_Is_Available "$_target_os" "$_target_arch"
         case $? in
         2|3)
                 I18N_Status_Print_Check_Availability_Incompatible "IPK"
@@ -94,7 +94,7 @@ PACKAGE::run_ipk() {
                 return 1
         fi
 
-        cmd="PACKAGE::assemble_ipk_content"
+        cmd="PACKAGE_Assemble_IPK_Content"
         I18N_Status_Print_Package_Assembler_Check "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
@@ -127,7 +127,7 @@ PACKAGE::run_ipk() {
         fi
 
         I18N_Status_Print_Package_Exec "$_target_path"
-        IPK::create_archive "$_src" "$_target_path"
+        IPK_Create_Archive "$_src" "$_target_path"
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Package_Exec_Failed "$_target_path"
                 return 1

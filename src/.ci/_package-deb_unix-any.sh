@@ -116,11 +116,12 @@ PACKAGE_Assemble_DEB_Content() {
 
         # NOTE: REQUIRED file
         OS::print_status info "creating changelog.gz files...\n"
-        DEB_Create_Changelog \
-                "$_directory" \
-                "$_changelog" \
-                "$PROJECT_DEBIAN_IS_NATIVE" \
-                "$PROJECT_SKU"
+        _changelog_path="${_directory}/data/usr/local/share/doc/${PROJECT_SKU}/changelog.gz"
+        if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
+                _changelog_path="${_directory}/data/usr/share/doc/${PROJECT_SKU}/changelog.gz"
+        fi
+
+        DEB_Create_Changelog "$_changelog_path" "$_changelog" "$PROJECT_SKU"
         if [ $? -ne 0 ]; then
                 return 1
         fi

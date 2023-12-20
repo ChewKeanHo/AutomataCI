@@ -9,90 +9,109 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\disk.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\archive\tar.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\disk.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\deb.ps1"
 
 
 
 
 function IPK-Create-Archive {
 	param (
-		[string]$__directory,
-		[string]$__destination
+		[string]$___directory,
+		[string]$___destination
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty(${__directory}) -or
-		(-not (Test-Path "${__directory}" -PathType Container)) -or
-		(-not (Test-Path "${__directory}\control" -PathType Container)) -or
-		(-not (Test-Path "${__directory}\data" -PathType Container)) -or
-		(-not (Test-Path "${__directory}\control\control"))) {
+	if ($(STRINGS-Is-Empty "${___directory}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}/control"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}/data"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___directory}/control/control"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# change directory into workspace
-	$__current_path = Get-Location
+	$___current_path = Get-Location
 
 
 	# package control
-	$null = Set-Location "${__directory}\control"
-	$__process = TAR-Create-GZ "..\control.tar.gz" "*"
-	$null = Set-Location $__current_path
-	if ($__process -ne 0) {
-		$null = Remove-Variable -Name __current_path
+	$null = Set-Location "${___directory}\control"
+	$___process = TAR-Create-GZ "..\control.tar.gz" "*"
+	if ($___process -ne 0) {
+		$null = Set-Location $___current_path
+		$null = Remove-Variable -Name ___current_path
 		return 1
 	}
 
 
 	# package data
-	$null = Set-Location "${__directory}\data"
-	$__process = TAR-Create-GZ "..\data.tar.gz" "*"
-	$null = Set-Location $__current_path
-	if ($__process -ne 0) {
-		$null = Remove-Variable -Name __current_path
+	$null = Set-Location "${___directory}\data"
+	$___process = TAR-Create-GZ "..\data.tar.gz" "*"
+	if ($___process -ne 0) {
+		$null = Set-Location $___current_path
+		$null = Remove-Variable -Name ___current_path
 		return 1
 	}
 
 
 	# generate debian-binary
-	$null = Set-Location "${__directory}"
-	$__process = FS-Write-File ".\debian-binary" "2.0`n"
-	$null = Set-Location $__current_path
-	if ($__process -ne 0) {
-		$null = Remove-Variable -Name __current_path
+	$null = Set-Location "${___directory}"
+	$___process = FS-Write-File ".\debian-binary" "2.0`n"
+	if ($___process -ne 0) {
+		$null = Set-Location $___current_path
+		$null = Remove-Variable -Name ___current_path
 		return 1
 	}
 
 
-	# archive into deb
-	$null = Set-Location "${__directory}"
-	$__file = "package.ipk"
-	$__process = TAR-Create-GZ "${__file}" "debian-binary control.tar.gz data.tar.gz"
-	$null = Set-Location $__current_path
-	if ($__process -ne 0) {
-		$null = Remove-Variable -Name __current_path
+	# archive into ipk
+	$___file = "package.ipk"
+	$___process = TAR-Create-GZ "${___file}" "debian-binary control.tar.gz data.tar.gz"
+	if ($___process -ne 0) {
+		$null = Set-Location $___current_path
+		$null = Remove-Variable -Name ___current_path
 		return 1
 	}
 
 
 	# move to destination
-	$null = Set-Location "${__directory}"
-	$null = FS-Remove-Silently "${__destination}"
-	$__process = FS-Move "${__file}.gz" "${__destination}"
+	$null = FS-Remove-Silently "${___destination}"
+	$___process = FS-Move "${___file}.gz" "${___destination}"
 
 
-	# return back to current path
-	$null = Set-Location -Path $__current_path
-	$null = Remove-Variable -Name __current_path
+	# return to current directory
+	$null = Set-Location -Path $___current_path
+	$null = Remove-Variable -Name ___current_path
 
 
 	# report status
-	return $__process
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	return 0
 }
 
 
@@ -100,91 +119,39 @@ function IPK-Create-Archive {
 
 function IPK-Create-Control {
 	param (
-		[string]$__directory,
-		[string]$__resources,
-		[string]$__sku,
-		[string]$__version,
-		[string]$__arch,
-		[string]$__os,
-		[string]$__name,
-		[string]$__email,
-		[string]$__website,
-		[string]$__pitch,
-		[string]$__priority,
-		[string]$__section,
-		[string]$__description_filepath
+		[string]$___directory,
+		[string]$___resources,
+		[string]$___sku,
+		[string]$___version,
+		[string]$___arch,
+		[string]$___os,
+		[string]$___name,
+		[string]$___email,
+		[string]$___website,
+		[string]$___pitch,
+		[string]$___priority,
+		[string]$___section,
+		[string]$___description_filepath
 	)
 
 
-	# validate input
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path $__directory -PathType Container)) -or
-		[string]::IsNullOrEmpty($__resources) -or
-		(-not (Test-Path $__resources -PathType Container)) -or
-		[string]::IsNullOrEmpty($__sku) -or
-		[string]::IsNullOrEmpty($__version) -or
-		[string]::IsNullOrEmpty($__arch) -or
-		[string]::IsNullOrEmpty($__os) -or
-		[string]::IsNullOrEmpty($__name) -or
-		[string]::IsNullOrEmpty($__email) -or
-		[string]::IsNullOrEmpty($__website) -or
-		[string]::IsNullOrEmpty($__pitch) -or
-		[string]::IsNullOrEmpty($__priority) -or
-		[string]::IsNullOrEmpty($__section)) {
+	# execute
+	$___process = DEB-Create-Control `
+		"${___directory}" `
+		"${___resources}" `
+		"${___sku}" `
+		"${___version}" `
+		"${___arch}" `
+		"${___os}" `
+		"${___name}" `
+		"${___email}" `
+		"${___website}" `
+		"${___pitch}" `
+		"${___priority}" `
+		"${___section}" `
+		"${___description_filepath}"
+	if ($___process -ne 0) {
 		return 1
-	}
-
-	switch (${__priority}) {
-	{ $_ -in "required", "important", "standard", "optional", "extra" } {
-		break
-	} Default {
-		return 1
-	}}
-
-
-	# check if is the document already injected
-	$__arch = IPK-Get-Architecture "${__os}" "${__arch}"
-	$__location = "${__directory}\control\control"
-	$null = FS-Make-Housing-Directory "${__location}"
-	$null = FS-Remove-Silently "${__location}"
-
-
-	# generate control file
-	$__size = DISK-Calculate-Size "${__directory}\data"
-	if ([string]::IsNullOrEmpty($__size)) {
-		return 1
-	}
-
-	$null = FS-Write-File "${__location}" @"
-Package: ${__sku}
-Version: ${__version}
-Architecture: ${__arch}
-Maintainer: ${__name} <${__email}>
-Installed-Size: ${__size}
-Section: ${__section}
-Priority: ${__priority}
-Homepage: ${__website}
-Description: ${__pitch}
-"@
-
-
-	# append description data file
-	if ((-not [string]::IsNullOrEmpty($__description_filepath)) -and
-		(Test-Path -Path "${__description_filepath}")) {
-		foreach ($__line in (Get-Content -Path "${__description_filepath}")) {
-			if ((-not [string]::IsNullOrEmpty($__line)) -and
-				[string]::IsNullOrEmpty($__line -replace "#.*$")) {
-				continue
-			}
-
-			if ([string]::IsNullOrEmpty($__line)) {
-				$__line = " ."
-			} else {
-				$__line = " ${__line}"
-			}
-
-			$null = FS-Append-File $__location $__line
-		}
 	}
 
 
@@ -203,7 +170,8 @@ function IPK-Get-Architecture {
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($___os) -or [string]::IsNullOrEmpty($___arch)) {
+	if (($(STRINGS-Is-Empty "${___os}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___arch}") -eq 0)) {
 		return ""
 	}
 
@@ -217,29 +185,30 @@ function IPK-Get-Architecture {
 
 function IPK-Is-Available {
 	param(
-		[string]$__os,
-		[string]$__arch
+		[string]$___os,
+		[string]$___arch
 	)
 
-	if ([string]::IsNullOrEmpty($__os) -or [string]::IsNullOrEmpty($__arch)) {
+	if (($(STRINGS-Is-Empty "${___os}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___arch}") -eq 0)) {
 		return 1
 	}
 
 
 	# validate dependencies
-	$__process = TAR-Is-Available
-	if ($__process -ne 0) {
+	$___process = TAR-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = DISK-Is-Available
-	if ($__process -ne 0) {
+	$___process = DISK-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# check compatible target cpu architecture
-	switch ($__arch) {
+	switch ($___arch) {
 	{ $_ -in 'any' } {
 		return 3
 	} Default {
@@ -256,20 +225,23 @@ function IPK-Is-Available {
 
 function IPK-Is-Valid {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or
-		(Test-Path "${__target}" -PathType Container) -or
-		(-not (Test-Path "${__target}"))) {
+	if ($(STRINGS-Is-Empty "${___target}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	if ($(${__target} -split '\.')[-1] -eq "ipk") {
+	if ($(${___target} -split '\.')[-1] -eq "ipk") {
 		return 0
 	}
 

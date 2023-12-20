@@ -114,10 +114,14 @@ function PACKAGE-Assemble-DEB-Content {
 
 	# NOTE: REQUIRED file
 	OS-Print-Status info "creating changelog.gz files..."
+	$_changelog_path = "${_directory}\data\usr\local\share\doc\${env:PROJECT_SKU}\changelog.gz"
+	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
+		$_changelog_path = "${_directory}\data\usr\share\doc\${env:PROJECT_SKU}\changelog.gz"
+	}
+
 	$__process = DEB-Create-Changelog `
-		"${_directory}" `
+		"${_changelog_path}" `
 		"${_changelog}" `
-		"${env:PROJECT_DEBIAN_IS_NATIVE}" `
 		"${env:PROJECT_SKU}"
 	if ($__process -ne 0) {
 		return 1
