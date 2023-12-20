@@ -73,8 +73,8 @@ if ($__process -ne 0) {
 }
 
 
-$__process = RELEASE-Run-Homebrew-Repo-Setup
-if ($__process -ne 0) {
+$___process = RELEASE-Setup-HOMEBREW
+if ($___process -ne 0) {
 	return 1
 }
 
@@ -128,8 +128,8 @@ if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
 			return 1
 		}
 
-		$__process = RELEASE-Run-Homebrew "$TARGET" "$HOMEBREW_REPO"
-		if ($__process -ne 0) {
+		$___process = RELEASE-Run-HOMEBREW "$TARGET" "$HOMEBREW_REPO"
+		if ($___process -ne 0) {
 			return 1
 		}
 
@@ -173,8 +173,8 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 		return 1
 	}
 
-	$__process = RELEASE-Run-Homebrew-Repo-Conclude "$HOMEBREW_REPO"
-	if ($__process -ne 0) {
+	$___process = RELEASE-Conclude-HOMEBREW "$HOMEBREW_REPO"
+	if ($___process -ne 0) {
 		return 1
 	}
 

@@ -9,7 +9,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\versioners\git.ps1"
@@ -34,7 +33,7 @@ function RELEASE-Run-CHOCOLATEY {
 		return 0
 	}
 
-	$null = I18N-Status-Print-File-Export "$1"
+	$null = I18N-Status-Print-File-Export "${___target}"
 	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___repo}") -eq 0)) {
 		$null = I18N-Status-Print-File-Export-Failed

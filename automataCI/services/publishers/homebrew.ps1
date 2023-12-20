@@ -9,35 +9,35 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
 
 function HOMEBREW-Is-Valid-Formula {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target)) {
+	if ($(STRINGS-Is-Empty "${___target}") -eq 0) {
 		return 1
 	}
 
-	$__process = FS-Is-Target-A-Homebrew "${__target}"
-	if ($__process -ne 0) {
+	$___process = FS-Is-Target-A-Homebrew "${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	if ($__target -like "*.asc") {
+	if ($___target -like "*.asc") {
 		return 1
 	}
 
 
 	# execute
-	if ($__target -like "*.rb") {
+	if ($___target -like "*.rb") {
 		return 1
 	}
 
@@ -51,23 +51,24 @@ function HOMEBREW-Is-Valid-Formula {
 
 function HOMEBREW-Publish {
 	param (
-		[string]$__target,
-		[string]$__destination
+		[string]$___target,
+		[string]$___destination
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or [string]::IsNullOrEmpty($__destination)) {
+	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___destination}") -eq 0)) {
 		return 1
 	}
 
 
 	# execute
-	$null = FS-Make-Directory "${__destination}"
-	$__process = FS-Copy-File `
-		"${__target}" `
-		"${__destination}\$(Split-Path -Leaf -Path "${__target}")"
-	if ($__process -ne 0) {
+	$null = FS-Make-Directory "${___destination}"
+	$___process = FS-Copy-File `
+		"${___target}" `
+		"${___destination}\$(Split-Path -Leaf -Path "${___target}")"
+	if ($___process -ne 0) {
 		return 1
 	}
 

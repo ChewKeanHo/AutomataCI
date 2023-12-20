@@ -241,7 +241,7 @@ ${__common}|${__flatpak_path}|${__log}|PACKAGE-Run-FLATPAK
 
 	$__log = "${__log_directory}\homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$__process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-Homebrew
+${__common}|${__log}|PACKAGE-Run-HOMEBREW
 "@
 	if ($__process -ne 0) {
 		return 1

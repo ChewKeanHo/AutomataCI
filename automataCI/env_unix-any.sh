@@ -36,7 +36,7 @@ fi
 
 # begin service
 I18N_Status_Print_Env_Install "brew"
-HOMEBREW::setup
+HOMEBREW_Setup
 if [ $? -ne 0 ]; then
         I18N_Status_Print_Env_Install_Failed
         return 1

@@ -33,7 +33,7 @@ fi
 
 
 
-PACKAGE::run_homebrew() {
+PACKAGE_Run_HOMEBREW() {
         #__line="$1"
 
 
@@ -118,9 +118,9 @@ PACKAGE::run_homebrew() {
         __current_path="$PWD" && cd "$_src"
         I18N_Status_Print_File_Archive "${_target_path}.tar.xz"
         TAR_Create_XZ "${_target_path}.tar.xz" "*"
-        __exit=$?
+        ___process=$?
         cd "$__current_path" && unset __current_path
-        if [ $__exit -ne 0 ]; then
+        if [ $___process -ne 0 ]; then
                 I18N_Status_Print_File_Archive_Failed
                 return 1
         fi
@@ -138,8 +138,8 @@ PACKAGE::run_homebrew() {
         # update the formula.rb script
         I18N_Status_Print_File_Update "formula.rb"
         FS::remove_silently "${_target_path}.rb"
-        old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
+        __old_IFS="$IFS"
+        while IFS= read -r __line || [ -n "$__line" ]; do
                 __line="$(STRINGS::replace_all \
                         "$__line" \
                         "{{ TARGET_PACKAGE }}" \
@@ -154,12 +154,12 @@ PACKAGE::run_homebrew() {
 
                 FS::append_file "${_target_path}.rb" "${__line}\n"
                 if [ $? -ne 0 ]; then
-                        IFS="$old_IFS" && unset __line old_IFS
+                        IFS="$__old_IFS" && unset __line __old_IFS
                         I18N_Status_Print_File_Update_Failed
                         return 1
                 fi
         done < "${_src}/formula.rb"
-        IFS="$old_IFS" && unset line old_IFS
+        IFS="$__old_IFS" && unset __line __old_IFS
 
 
         # report status

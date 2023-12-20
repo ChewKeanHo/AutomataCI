@@ -10,18 +10,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-HOMEBREW::is_valid_formula() {
-        #__target="$1"
+HOMEBREW_Is_Valid_Formula() {
+        #___target="$1"
 
 
         # validate input
-        if [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
@@ -47,13 +48,13 @@ HOMEBREW::is_valid_formula() {
 
 
 
-HOMEBREW::publish() {
-        #__target="$1"
-        #__destination="$2"
+HOMEBREW_Publish() {
+        #___target="$1"
+        #___destination="$2"
 
 
         # validate input
-        if [ -z "$1" ] || [ -z "$2" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 
@@ -73,7 +74,7 @@ HOMEBREW::publish() {
 
 
 
-HOMEBREW::setup() {
+HOMEBREW_Setup() {
         # validate input
         OS::is_command_available "curl"
         if [ $? -ne 0 ]; then
@@ -95,29 +96,29 @@ HOMEBREW::setup() {
 
         case "$PROJECT_OS" in
         linux)
-                __location="/home/linuxbrew/.linuxbrew/bin/brew"
+                ___location="/home/linuxbrew/.linuxbrew/bin/brew"
                 ;;
         darwin)
-                __location="/usr/local/bin/brew"
+                ___location="/usr/local/bin/brew"
                 ;;
         *)
                 return 1
                 ;;
         esac
 
-        old_IFS="$IFS"
-        while IFS="" read -r __line || [ -n "$__line" ]; do
-                if [ "$__line" = "eval \"\$(${__location} shellenv)\"" ]; then
-                        unset __location
+        ___old_IFS="$IFS"
+        while IFS= read -r ___line || [ -n "$___line" ]; do
+                if [ "$___line" = "eval \"\$(${___location} shellenv)\"" ]; then
+                        unset ___location
                         break
                 fi
         done < "${HOME}/.bash_profile"
 
-        printf -- "eval \"\$(${__location} shellenv)\"" >> "${HOME}/.bash_profile"
+        printf -- "eval \"\$(${___location} shellenv)\"" >> "${HOME}/.bash_profile"
         if [ $? -ne 0 ]; then
                 return 1
         fi
-        eval "$(${__location} shellenv)"
+        eval "$(${___location} shellenv)"
 
         OS::is_command_available "brew"
         if [ $? -eq 0 ]; then

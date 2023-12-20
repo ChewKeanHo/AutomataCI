@@ -32,7 +32,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-function PACKAGE-Run-Homebrew {
+function PACKAGE-Run-HOMEBREW {
 	param (
 		[string]$__line
 	)
@@ -49,8 +49,8 @@ function PACKAGE-Run-Homebrew {
 
 	# validate input
 	$null = I18N-Status-Print-Check-Availability "TAR"
-	$__process = TAR-Is-Available
-	if ($__process -ne 0) {
+	$___process = TAR-Is-Available
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Check-Availability-Incompatible "TAR"
 		return 1
 	}
@@ -62,8 +62,8 @@ function PACKAGE-Run-Homebrew {
 	$_target_path = "${_dest}\${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\homebrew_${_src}"
 	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
-	$__process = FS-Remake-Directory "${_src}"
-	if ($__process -ne 0) {
+	$___process = FS-Remake-Directory "${_src}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
@@ -71,8 +71,8 @@ function PACKAGE-Run-Homebrew {
 
 	# check formula.rb is available
 	$null = I18N-Status-Print-File-Check-Exists "formula.rb"
-	$__process = FS-Is-File "${_src}/formula.rb"
-	if ($__process -eq 0) {
+	$___process = FS-Is-File "${_src}/formula.rb"
+	if ($___process -eq 0) {
 		$null = I18N-Status-Print-File-Check-Failed
 		return 1
 	}
@@ -81,20 +81,20 @@ function PACKAGE-Run-Homebrew {
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-HOMEBREW-Content"
 	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
-	$__process = OS-Is-Command-Available "$cmd"
-	if ($__process -ne 0) {
+	$___process = OS-Is-Command-Available "$cmd"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Check-Failed
 		return 1
 	}
 
 	$null = I18N-Status-Print-Package-Assembler-Exec
-	$__process = PACKAGE-Assemble-HOMEBREW-Content `
+	$___process = PACKAGE-Assemble-HOMEBREW-Content `
 		"${_target}" `
 		"${_src}" `
 		"${_target_filename}" `
 		"${_target_os}" `
 		"${_target_arch}"
-	switch ($__process) {
+	switch ($___process) {
 	10 {
 		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
 		$null = FS-Remove-Silently "${_src}"
@@ -111,10 +111,10 @@ function PACKAGE-Run-Homebrew {
 	$__current_path = Get-Location
 	$null = Set-Location -Path "${_src}"
 	$null = I18N-Status-Print-File-Archive "${_target_path}.tar.xz"
-	$__process = TAR-Create-XZ "${_target_path}.tar.xz" "*"
+	$___process = TAR-Create-XZ "${_target_path}.tar.xz" "*"
 	$null = Set-Location -Path "${__current_path}"
 	$null = Remove-Variable -Name __current_path
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-File-Archive-Failed
 		return 1
 	}
@@ -143,8 +143,8 @@ function PACKAGE-Run-Homebrew {
 			"{{ TARGET_SHASUM }}" `
 			"${__shasum}"
 
-		$__process = FS-Append-File "${_target_path}.rb" "${__line}"
-		if ($__process -ne 0) {
+		$___process = FS-Append-File "${_target_path}.rb" "${__line}"
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Update-Failed
 			return 1
 		}

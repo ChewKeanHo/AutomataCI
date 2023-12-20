@@ -74,7 +74,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-RELEASE::run_homebrew_repo_setup
+RELEASE_Setup_HOMEBREW
 if [ $? -ne 0 ]; then
         return 1
 fi
@@ -125,7 +125,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 
-        RELEASE::run_homebrew "$TARGET" "$HOMEBREW_REPO"
+        RELEASE_Run_HOMEBREW "$TARGET" "$HOMEBREW_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -169,7 +169,7 @@ else
                 return 1
         fi
 
-        RELEASE::run_homebrew_repo_conclude "$HOMEBREW_REPO"
+        RELEASE_Conclude_HOMEBREW "$HOMEBREW_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi

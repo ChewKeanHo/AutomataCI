@@ -9,39 +9,42 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\homebrew.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\versioners\git.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\homebrew.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-repo.ps1"
 
 
 
 
-function RELEASE-Run-Homebrew {
+function RELEASE-Run-HOMEBREW {
 	param(
-		[string]$__target,
-		[string]$__repo
+		[string]$___target,
+		[string]$___repo
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or [string]::IsNullOrEmpty($__repo)) {
-		OS-Print-Status error "registration failed."
+	$___process = HOMEBREW-Is-Valid-Formula "${___target}"
+	if ($___process -ne 0) {
+		return 0
+	}
+
+	$null = I18N-Status-Print-File-Export "${___target}"
+	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___repo}") -eq 0)) {
+		$null = I18N-Status-Print-File-Export-Failed
 		return 1
 	}
 
 
-	$__process = HOMEBREW-Is-Valid-Formula "${__target}"
-	if ($__process -ne 0) {
-		return 0
-	}
-
-
 	# execute
-	OS-Print-Status info "registering ${__target} into homebrew repo..."
-	$__process = HOMEBREW-Publish "${__target}" "${__repo}/Formula/${env:PROJECT_SKU}.rb"
-	if ($__process -ne 0) {
-		OS-Print-Status error "registration failed."
+	$___process = HOMEBREW-Publish "${___target}" "${___repo}/Formula/${env:PROJECT_SKU}.rb"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-File-Export-Failed
 		return 1
 	}
 
@@ -53,49 +56,54 @@ function RELEASE-Run-Homebrew {
 
 
 
-function RELEASE-Run-Homebrew-Repo-Conclude {
+function RELEASE-Conclude-HOMEBREW {
 	param(
-		[string]$__directory
+		[string]$___directory
 	)
 
 
 	# validate input
-	OS-Print-Status info "Committing homebrew release repo..."
-	if ([string]::IsNullOrEmpty($__directory) -or
-		(-not (Test-Path -PathType Container -Path "${__directory}"))) {
-		OS-Print-Status error "commit failed."
+	$null = I18N-Status-Print-Repo-Commit "HOMEBREW"
+	if ($(STRINGS-Is-Empty "${___directory}") -eq 0) {
+		$null = I18N-Status-Print-Repo-Commit-Failed
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Repo-Commit-Failed
 		return 1
 	}
 
 
 	# execute
 	$__current_path = Get-Location
-	$null = Set-Location "${__directory}"
-	$__process = GIT-Autonomous-Commit "${env:PROJECT_SKU} ${env:PROJECT_VERSION}"
-	if ($__process -ne 0) {
+	$null = Set-Location "${___directory}"
+	$___process = GIT-Autonomous-Commit "${env:PROJECT_SKU} ${env:PROJECT_VERSION}"
+	if ($___process -ne 0) {
 		$null = Set-Location "${__curent_path}"
 		$null = Remove-Variable __current_path
-		OS-Print-Status error "commit failed."
+		$null = I18N-Status-Print-Repo-Commit-Failed
 		return 1
 	}
 
 
-	$__process = GIT-Pull-To-Latest
-	if ($__process -ne 0) {
+	$___process = GIT-Pull-To-Latest
+	if ($___process -ne 0) {
 		$null = Set-Location "${__curent_path}"
 		$null = Remove-Variable __current_path
-		OS-Print-Status error "commit failed."
+		$null = I18N-Status-Print-Repo-Commit-Failed
 		return 1
 	}
 
 
-	$__process = GIT-Push `
+	$___process = GIT-Push `
 		"${env:PROJECT_HOMEBREW_REPO_KEY}" `
 		"${env:PROJECT_HOMEBREW_REPO_BRANCH}"
 	$null = Set-Location "${__curent_path}"
 	$null = Remove-Variable __current_path
-	if ($__process -ne 0) {
-		OS-Print-Status error "commit failed."
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Repo-Commit-Failed
 		return 1
 	}
 
@@ -107,28 +115,28 @@ function RELEASE-Run-Homebrew-Repo-Conclude {
 
 
 
-function RELEASE-Run-Homebrew-Repo-Setup {
+function RELEASE-Setup-HOMEBREW {
 	# clean up base directory
-	OS-Print-Status info "safety checking release directory..."
-	if (Test-Path -PathType Leaf `
-		-Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}") {
-		OS-Print-Status error "check failed."
+	$null = I18N-Status-Print-Repo-Check "HOMEBREW"
+	$___process = FS-Is-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
+	if ($___process -eq 0) {
+		$null = I18N-Status-Print-Repo-Check-Failed
 		return 1
 	}
 	$null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
 
 
 	# execute
-	OS-Print-Status info "Setting up homebrew release repo..."
-	$__process = GIT-Clone-Repo `
+	$null = I18N-Status-Print-Repo-Setup "HOMEBREW"
+	$___process = GIT-Clone-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
 		"$(Get-Location)" `
 		"${env:PROJECT_HOMEBREW_REPO}" `
 		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
 		"${env:PROJECT_HOMEBREW_DIRECTORY}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "setup failed."
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Repo-Setup-Failed
 		return 1
 	}
 
