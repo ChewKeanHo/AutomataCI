@@ -47,7 +47,8 @@ function DOTNET-Add {
 	}
 
 	## begin sourcing nupkg
-	if (-not (Test-Path "${___pkg}/nupkg.zip")) {
+	$___process = FS-Is-File "${___pkg}/nupkg.zip"
+	if ($___process -ne 0) {
 		$___order = "https://www.nuget.org/api/v2/package/${___order}"
 		if ($___version -ne "latest") {
 			$___order = "${___order}/${___version}"
@@ -60,13 +61,14 @@ function DOTNET-Add {
 			return 1
 		}
 
-		if (-not (Test-Path "${___pkg}/nupkg.zip")) {
+		$___process = FS-Is-File "${___pkg}/nupkg.zip"
+		if ($___process -ne 0) {
 			FS-Remove-Silently "${___pkg}"
 			return 1
 		}
 
-		$__process = ZIP-Extract "${___pkg}" "${___pkg}/nupkg.zip"
-		if ($__process -ne 0) {
+		$___process = ZIP-Extract "${___pkg}" "${___pkg}/nupkg.zip"
+		if ($___process -ne 0) {
 			FS-Remove-Silently "${___pkg}"
 			return 1
 		}
@@ -215,11 +217,13 @@ function DOTNET-Is-Activated {
 
 function DOTNET-Is-Available {
 	# execute
-	if (-not (Test-Path -PathType Container -Path "$(DOTNET-Get-Path-Root)")) {
+	$___process = FS-Is-Directory "$(DOTNET-Get-Path-Root)"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	if (Test-Path "$(DOTNET-Get-Path-Root)\dotnet.exe") {
+	$___process = FS-Is-File "$(DOTNET-Get-Path-Root)\dotnet.exe"
+	if ($___process -eq 0) {
 		return 0
 	}
 
@@ -253,7 +257,8 @@ function DOTNET-Setup {
 		return 1
 	}
 
-	if (-not (Test-Path "$(DOTNET-Get-Path-Root)\dotnet.exe")) {
+	$___process = FS-Is-File "$(DOTNET-Get-Path-Root)\dotnet.exe"
+	if ($___process -ne 0) {
 		return 1
 	}
 

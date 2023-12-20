@@ -45,7 +45,8 @@ DOTNET_Add() {
         fi
 
         ## begin sourcing nupkg
-        if [ ! -f "${___pkg}/nupkg.zip" ]; then
+        FS::is_file "${___pkg}/nupkg.zip"
+        if [ $? -ne 0 ]; then
                 ___order="https://www.nuget.org/api/v2/package/${___order}"
                 if [ ! "$___version" = "latest" ]; then
                         ___order="${___order}/${___version}"
@@ -58,7 +59,8 @@ DOTNET_Add() {
                         return 1
                 fi
 
-                if [ ! -f "${___pkg}/nupkg.zip" ]; then
+                FS::is_file "${___pkg}/nupkg.zip"
+                if [ $? -ne 0 ]; then
                         FS::remove_silently "$___pkg"
                         return 1
                 fi
@@ -176,7 +178,7 @@ DOTNET_Install() {
 
 
         # validate input
-        if [ -z "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
@@ -207,7 +209,7 @@ DOTNET_Install() {
 
 DOTNET_Is_Activated() {
         # execute
-        if [ -z "$DOTNET_ROOT" ]; then
+        if [ $(STRINGS_Is_Empty "$DOTNET_ROOT") -eq 0 ]; then
                 return 1
         fi
 
@@ -226,7 +228,8 @@ DOTNET_Is_Activated() {
 
 DOTNET_Is_Available() {
         # execute
-        if [ -f "$(DOTNET_Get_Path_Root)/dotnet" ]; then
+        FS::is_file "$(DOTNET_Get_Path_Root)/dotnet"
+        if [ $? -eq 0 ]; then
                 return 0
         fi
 
@@ -245,7 +248,7 @@ DOTNET_Setup() {
                 return 0
         fi
 
-        if [ -z "$PROJECT_DOTNET_CHANNEL" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_DOTNET_CHANNEL") -eq 0 ]; then
                 return 1
         fi
 
