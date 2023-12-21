@@ -85,12 +85,12 @@ function PACKAGE-Assemble-MSI-Content {
 
 	# download required UI extensions
 	$__toolkit_ui = 'WixToolset.UI.wixext'
-	$__process = DOTNET-Add `
+	$___process = DOTNET-Add `
 		"${__toolkit_ui}" `
 		"4.0.3" `
 		"${_directory}\ext" `
 		"wixext4\${__toolkit_ui}.dll"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -205,14 +205,15 @@ Unfortunately, you can only install this package on a 32-bit Windows.
 		# check required executables for packaging
 		$__var_MAIN_EXE_SOURCE = "${_directory}\${env:PROJECT_SKU}_windows-${__arch}.exe"
 		$null = I18N-Status-Print-File-Check-Exists "${__var_MAIN_EXE_SOURCE}"
-		$__process = FS-Is-File "${__var_MAIN_EXE_SOURCE}"
-		if ($__process -ne 0) {
+		$___process = FS-Is-File "${__var_MAIN_EXE_SOURCE}"
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed-Skipped
 			continue
 		}
 
 
 		# generate all i18n variables and validate readiness for compilation
+		$_wxs = "${env:PROJECT_SKU}_${env:PROJECT_VERSION}"
 		switch ($__i18n) {
 		zh-hans {
 			## Simplified Chinese (International)
@@ -225,7 +226,7 @@ Unfortunately, you can only install this package on a 32-bit Windows.
 			## NOTE: DO NOT change the format. AutomataCI relies on
 			##       it to parse wix4 culture settings.
 			##       https://wixtoolset.org/docs/tools/wixext/wixui/#localization
-			$_wxs = "${env:PROJECT_SKU}_zh-CN_windows-${__arch}.wxs"
+			$_wxs = "${_wxs}_zh-CN"
 
 			$__var_INSTALLER_DESCRIPTION = @"
 ${env:PROJECT_NAME} (${env:PROJECT_VERSION}) 安装包
@@ -269,7 +270,7 @@ ${env:PROJECT_NAME} (${env:PROJECT_VERSION}) 安装包
 			## NOTE: DO NOT change the format. AutomataCI relies on
 			##       it to parse wix4 culture settings. Refer:
 			##       https://wixtoolset.org/docs/tools/wixext/wixui/#localization
-			$_wxs = "${env:PROJECT_SKU}_en-US_windows-${__arch}.wxs"
+			$_wxs = "${_wxs}_en-US"
 
 			$__var_INSTALLER_DESCRIPTION=@"
 ${env:PROJECT_NAME} (${env:PROJECT_VERSION}) Installer
@@ -307,27 +308,27 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 			$__var_FEATURE_DOCS_DESCRIPTION = 'All documentations components.'
 		}}
 		$__var_UI_LICENSE_SOURCE = "${_directory}\LICENSE_${__i18n}.rtf"
-		$_wxs = "${_directory}\${_wxs}"
+		$_wxs = "${_directory}\${_wxs}_windows-${__arch}.wxs"
 
 
 		# check required files for packaging
 		$null = I18N-Status-Print-File-Check-Exists "${__var_MAIN_LICENSE_SOURCE}"
-		$__process = FS-Is-File "${__var_MAIN_LICENSE_SOURCE}"
-		if ($__process -ne 0) {
+		$___process = FS-Is-File "${__var_MAIN_LICENSE_SOURCE}"
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed-Skipped
 			continue
 		}
 
 		$null = I18N-Status-Print-File-Check-Exists "${__var_USER_GUIDE_SOURCE}"
-		$__process = FS-Is-File "${__var_USER_GUIDE_SOURCE}"
-		if ($__process -ne 0) {
+		$___process = FS-Is-File "${__var_USER_GUIDE_SOURCE}"
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed-Skipped
 			continue
 		}
 
 		$null = I18N-Status-Print-File-Check-Exists "${__var_UI_LICENSE_SOURCE}"
-		$__process = FS-Is-File "${__var_UI_LICENSE_SOURCE}"
-		if ($__process -ne 0) {
+		$___process = FS-Is-File "${__var_UI_LICENSE_SOURCE}"
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed-Skipped
 			continue
 		}
@@ -342,7 +343,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 		# creating wxs recipe
 		$null = I18N-Status-Print-MSI-WXS-Script-Start "${_wxs}"
 		$null = I18N-Status-Print-MSI-WXS-Script-Compulsory-Headers
-		$__process = FS-Write-File "${__filepath}" @"
+		$___process = FS-Write-File "${_wxs}" @"
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
 	xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
 >
@@ -494,7 +495,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed
 			return 1
 		}
@@ -502,7 +503,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 		# Define filesystem
 		$null = I18N-Status-Print-MSI-WXS-Script-Filesystem
-		$__process = FS-Append-File "${_wxs}" @"
+		$___process = FS-Append-File "${_wxs}" @"
 		<StandardDirectory Id='${__const_DIR_PROGRAM_FILES}'>
 			<Directory Id='${__tag_DIR_INSTALL}' Name='${env:PROJECT_NAME}'>
 				<Directory Id='${__tag_DIR_INSTALL}Bin' Name='bin'>
@@ -518,14 +519,14 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed
 			return 1
 		}
 
 
 		## BEGIN - Assemble components
-		$__process = FS-Append-File "${_wxs}" @"
+		$___process = FS-Append-File "${_wxs}" @"
 		<ComponentGroup Id='ProductExecutables' Directory='${__tag_DIR_INSTALL}Bin'>
 			<!-- Compulsory Executable Here -->
 			<Component Id='${__tag_COMPONENT_BIN}' Guid='${__uuid_COMPONENT_BIN}'>
@@ -597,7 +598,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed
 			return 1
 		}
@@ -605,7 +606,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 		# create registry key
 		$null = I18N-Status-Print-MSI-WXS-Script-Registries
-		$__process = FS-Append-File "${_wxs}" @"
+		$___process = FS-Append-File "${_wxs}" @"
 		<Component Id='${__tag_COMPONENT_REGISTRIES}'
 			Guid='${__uuid_COMPONENT_REGISTRIES}'
 			Directory='${__tag_DIR_INSTALL}'
@@ -626,7 +627,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed
 			return 1
 		}
@@ -634,7 +635,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 		# Define all feature components
 		$null = I18N-Status-Print-MSI-WXS-Script-Features
-		$__process = FS-Append-File "${_wxs}" @"
+		$___process = FS-Append-File "${_wxs}" @"
 		<Feature Id='${__tag_FEATURE_ID}'
 			Title='${__var_FEATURE_TITLE}'
 			Description='${__var_FEATURE_DESCRIPTION}'
@@ -684,7 +685,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 			</Feature>
 		</Feature>
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed
 			return 1
 		}
@@ -692,14 +693,14 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 		# Add standard UI support
 		$null = I18N-Status-Print-MSI-WXS-Script-UI
-		$__process = FS-Append-File "${_wxs}" @"
+		$___process = FS-Append-File "${_wxs}" @"
 		<!-- UI Customization -->
 		<ui:WixUI Id='WixUI_FeatureTree' InstallDirectory='${__tag_DIR_INSTALL}' />
 		<WixVariable Id='WixUIBannerBmp' Value='${__var_INSTALLER_BANNER_SOURCE}' />
 		<WixVariable Id='WixUIDialogBmp' Value='${__var_INSTALLER_DIALOG_SOURCE}' />
 		<WixVariable Id="WixUILicenseRtf" Value='${__var_UI_LICENSE_SOURCE}' />
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed
 			return 1
 		}
@@ -707,11 +708,11 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 		# conclude the wxs write-up
 		$null = I18N-Status-Print-MSI-WXS-Script-Close
-		$__process = FS-Append-File "${_wxs}" @"
+		$___process = FS-Append-File "${_wxs}" @"
 	</Package>
 </Wix>
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			$null = I18N-Status-Print-File-Failed
 			return 1
 		}

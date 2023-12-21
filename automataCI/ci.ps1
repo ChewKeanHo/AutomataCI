@@ -72,11 +72,15 @@ if (Test-Path ".\ci.ps1") {
 ${env:LIBS_AUTOMATACI} = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}"
 
 
+
+
 # import fundamental libraries
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\status-get-help.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\status-init.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\microsoft.ps1"
+
+
 
 
 # determine os

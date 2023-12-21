@@ -43,6 +43,7 @@ SUBROUTINE_Package_MSI() {
 
         __subject="${__log##*/}"
         __subject="${__subject%.*}"
+        __subject="${__subject#*msi-wxs_}"
 
         __arch="${__subject##*windows-}"
         __arch="${__arch%%_*}"
@@ -188,15 +189,13 @@ ${__recipe}|${_dest}|${__log}
 
         I18N_Status_Print_Package_Parallelism_Run
         FS::is_file "$__parallel_control"
-        if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Parallelism_Run_Skipped
+        if [ $? -eq 0 ]; then
+                SYNC_Exec_Parallel "SUBROUTINE_Package_MSI" "$__parallel_control"
+                ___process=$?
                 return 0
-        fi
-
-        SYNC_Exec_Parallel "SUBROUTINE_Package_MSI" "$__parallel_control"
-        if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Parallelism_Run_Failed
-                return 1
+        else
+                I18N_Status_Print_Package_Parallelism_Run_Skipped
+                ___process=0
         fi
 
         for __log in "${__control_directory}/"*.log; do
@@ -215,5 +214,10 @@ ${__recipe}|${_dest}|${__log}
 
 
         # report status
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_Package_Parallelism_Run_Failed
+                return 1
+        fi
+
         return 0
 }

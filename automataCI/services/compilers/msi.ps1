@@ -32,7 +32,12 @@ function MSI-Compile {
 		return 1
 	}
 
-	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or (-not (Test-Path "${___target}"))) {
+	if ($(STRINGS-Is-Empty "${___target}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 

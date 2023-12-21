@@ -13,6 +13,7 @@
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
 
 . "${env:LIBS_AUTOMATACI}\services\i18n\printer.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
@@ -23,7 +24,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
 	return
 }
 
@@ -51,18 +52,19 @@ function SUBROUTINE-Package-MSI {
 
 	$__subject = Split-Path -Leaf -Path "${__log}"
 	$__subject = FS-Extension-Remove "${__subject}" "*"
+	$__subject = $__subject -replace "^msi-wxs_", ""
 
 	$__arch = $__subject -replace '.*windows-',''
 	$__arch = $__arch -replace '_.*',''
 
 	$__lang = $__subject -split "_"
-	$__lang = $__lang[1]
+	$__lang = $__lang[2]
 
 
 	# execute
 	$null = I18N-Status-Print-Package-Exec "${__subject}"
-	$($__process = MSI-Compile "${__target}" "${__arch}" "${__lang}") *> "${__log}"
-	if ($__process -ne 0) {
+	$($___process = MSI-Compile "${__target}" "${__arch}" "${__lang}") *> "${__log}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Exec-Failed "${__subject}"
 		return 1
 	}
@@ -74,10 +76,10 @@ function SUBROUTINE-Package-MSI {
 		return 1
 	}
 
-	$__process = FS-Copy-File `
+	$___process = FS-Copy-File `
 		"${__target}" `
 		"${__dest}\$(Split-Path -Leaf -Path "${__target}")"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Export-Failed "${__subject}"
 		return 1
 	}
@@ -105,16 +107,11 @@ function PACKAGE-Run-MSI {
 	$_target_arch = $__list[4]
 
 
-	# NOTE: temporary disables MSI since we do not have a Windows OS to
-	#       operate and GitHub Actions' Windows image is no longer usable.
-	return 0
-
-
 	# validate input
-	$null = I18N-Status-Print-MSI-Check-Availability
-	$__process = MSI-Is-Available
-	if ($__process -ne 0) {
-		$null = I18N-Status-Print-MSI-Check-Availability-Failed
+	$null = I18N-Status-Print-Check-Availability "MSI"
+	$___process = MSI-Is-Available
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Check-Availability-Failed
 		return 0
 	}
 
@@ -124,16 +121,16 @@ function PACKAGE-Run-MSI {
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\msi_${_src}"
 	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
-	$__process = FS-Remake-Directory "${_src}"
-	if ($__process -ne 0) {
+	$___process = FS-Remake-Directory "${_src}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
 
 	$__control_directory = "${_src}\.automataCI"
 	$null = I18N-Status-Print-Package-Workspace-Remake-Control "${__control_directory}"
-	$null = FS-Remake-Directory "${__control_directory}"
-	if (-not (Test-Path -PathType Container -Path "${__control_directory}")) {
+	$___process = FS-Remake-Directory "${__control_directory}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
@@ -144,23 +141,23 @@ function PACKAGE-Run-MSI {
 
 	# copy all complimentary files to the workspace
 	$null = I18N-Status-Print-Package-Assembler-Check "PACKAGE-Assemble-MSI-Content"
-	$__process = OS-Is-Command-Available "PACKAGE-Assemble-MSI-Content"
-	if ($__process -ne 0) {
+	$___process = OS-Is-Command-Available "PACKAGE-Assemble-MSI-Content"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Check-Failed
 		return 1
 	}
 
 	$null = I18N-Status-Print-Package-Assembler-Exec
-	$__process = PACKAGE-Assemble-MSI-Content `
+	$___process = PACKAGE-Assemble-MSI-Content `
 		"${_target}" `
 		"${_src}" `
 		"${_target_filename}" `
 		"${_target_os}" `
 		"${_target_arch}"
-	switch ($__process) {
+	switch ($___process) {
 	10 {
-		$null = FS-Remove-Silently "${_src}"
 		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
+		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} 0 {
 		# accepted
@@ -171,43 +168,42 @@ function PACKAGE-Run-MSI {
 
 
 	# archive the assembled payload
-	$null = FS-Remake-Directory "${__control_directory}"
-	foreach ($__recipe in (Get-ChildItem -Path "${_src}" -Filter "*.wxs")) {
-		$__process = FS-Is-File "${__recipe}"
-		if ($__process -ne 0) {
+	foreach ($__recipe in (Get-ChildItem -Path "${_src}" -Filter *.wxs)) {
+		$___process = FS-Is-File "${__recipe}"
+		if ($___process -ne 0) {
 			continue
 		}
 
+
+		# register for packaging in parallel
 		$null = I18N-Status-Print-Package-Parallelism-Register "${__recipe}"
 		$__log = Split-Path -Leaf -Path "${__recipe}"
 		$__log = FS-Extension-Remove "${__log}" "*"
 		$__log = "${__control_directory}\msi-wxs_${__log}.log"
-		$__process = FS-Append-File "${__parallel_control}" @"
+		$___process = FS-Append-File "${__parallel_control}" @"
 ${__recipe}|${_dest}|${__log}
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			return 1
 		}
 	}
 
 	$null = I18N-Status-Print-Package-Parallelism-Run
-	if (Test-Path "${__parallel_control}") {
-		$__process = SYNC-Parallel-Exec `
+	$___process = FS-Is-File "${__parallel_control}"
+	if ($___process -eq 0) {
+		$___process = SYNC-Exec-Parallel `
 			${function:SUBROUTINE-Package-MSI}.ToString() `
 			"${__parallel_control}" `
 			"${__control_directory}" `
 			"$([System.Environment]::ProcessorCount)"
-		if ($__process -ne 0) {
-			$null = I18N-Status-Print-Package-Parallelism-Run-Failed
-			return 1
-		}
 	} else {
 		$null = I18N-Status-Print-Package-Parallelism-Run-Skipped
+		$___process = 0
 	}
 
 	foreach ($__log in (Get-ChildItem -Path "${__control_directory}" -Filter *.log)) {
 		$null = I18N-Status-Print-Package-Parallelism-Log "${__log}"
-		foreach ($__line in (Get-Content "${__control_directory}\${__log}")) {
+		foreach ($__line in (Get-Content "${__log}")) {
 			$null = I18N-Status-Print-Plain "${__line}"
 		}
 		$null = I18N-Status-Print-Newline
@@ -215,5 +211,10 @@ ${__recipe}|${_dest}|${__log}
 
 
 	# report status
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Package-Parallelism-Run-Failed
+		return 1
+	}
+
 	return 0
 }

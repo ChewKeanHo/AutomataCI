@@ -205,6 +205,7 @@ Unfortunately, you can only install this package on a 32-bit Windows."
 
 
                 # generate all i18n variables and validate readiness for compilation
+                _wxs="${PROJECT_SKU}_${PROJECT_VERSION}"
                 case "$__i18n" in
                 zh-hans)
                         ## Simplified Chinese (International)
@@ -217,7 +218,7 @@ Unfortunately, you can only install this package on a 32-bit Windows."
                         ## NOTE: DO NOT change the format. AutomataCI relies on
                         ##       it to parse wix4 culture settings.
                         ##       https://wixtoolset.org/docs/tools/wixext/wixui/#localization
-                        _wxs="${PROJECT_SKU}_zh-CN_windows-${__arch}.wxs"
+                        _wxs="${_wxs}_zh-CN"
 
                         __var_INSTALLER_DESCRIPTION="\
 ${PROJECT_NAME} (${PROJECT_VERSION}) 安装包"
@@ -264,7 +265,7 @@ ${PROJECT_NAME} (${PROJECT_VERSION}) 安装包"
                         ## NOTE: DO NOT change the format. AutomataCI relies on
                         ##       it to parse wix4 culture settings.
                         ##       https://wixtoolset.org/docs/tools/wixext/wixui/#localization
-                        _wxs="${PROJECT_SKU}_en-US_windows-${__arch}.wxs"
+                        _wxs="${_wxs}_en-US"
 
                         __var_INSTALLER_DESCRIPTION="\
 ${PROJECT_NAME} (${PROJECT_VERSION}) Installer"
@@ -301,7 +302,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                         __var_FEATURE_DOCS_DESCRIPTION='All documentations components.'
                         ;;
                 esac
-                _wxs="${_directory}/${_wxs}"
+                _wxs="${_directory}/${_wxs}_windows-${__arch}.wxs"
 
 
                 # check required files for packaging
