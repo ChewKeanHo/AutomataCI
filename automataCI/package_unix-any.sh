@@ -216,7 +216,7 @@ ${__common}|${__log}|PACKAGE_Run_DOCKER
         __flatpak_path="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${PROJECT_PATH_RELEASE}/flatpak"
         __log="${__log_directory}/flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS::append_file "$__series_control" "\
-${__common}|${__flatpak_path}|${__log}|PACKAGE_Run_Flatpak
+${__common}|${__flatpak_path}|${__log}|PACKAGE_Run_FLATPAK
 "
         if [ $? -ne 0 ]; then
                 return 1

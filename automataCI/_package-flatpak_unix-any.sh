@@ -30,7 +30,7 @@ fi
 
 
 
-PACKAGE_Run_Flatpak() {
+PACKAGE_Run_FLATPAK() {
         #__line="$1"
 
 
