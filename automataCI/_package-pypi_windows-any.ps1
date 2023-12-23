@@ -11,6 +11,7 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 
 . "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
@@ -45,13 +46,24 @@ function PACKAGE-Run-PYPI {
 
 
 	# validate input
-	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
-		$null = PYTHON-Activate-VENV
+	if ($(FS-Is-Target-A-Source "${_target}") -ne 0) {
+		return 0
+	}
+
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PYTHON}") -eq 0) {
+		return 0
+	}
+
+	$null = I18N-Status-Print-Check-Availability "PYTHON"
+	$___process = PYTHON-Activate-VENV
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Check-Availability-Failed "PYTHON"
+		return 0
 	}
 
 	$null = I18N-Status-Print-Check-Availability "PYPI"
-	$__process = PYPI-Is-Available
-	if ($__process -ne 0) {
+	$___process = PYTHON-PYPI-Is-Available
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Check-Availability-Failed "PYPI"
 		return 0
 	}
@@ -63,8 +75,8 @@ function PACKAGE-Run-PYPI {
 	$_target_path = "${_dest}\pypi_${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\pypi_${_src}"
 	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
-	$__process = FS-Remake-Directory "${_src}"
-	if ($__process -ne 0) {
+	$___process = FS-Remake-Directory "${_src}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
@@ -107,7 +119,7 @@ function PACKAGE-Run-PYPI {
 
 	# generate required files
 	$null = I18N-Status-Print-File-Create "pyproject.toml"
-	$___process = PYPI-Create-Config `
+	$___process = PYTHON-Create-PYPI-Config `
 		"${_src}" `
 		"${env:PROJECT_NAME}" `
 		"${env:PROJECT_VERSION}" `
@@ -132,7 +144,7 @@ function PACKAGE-Run-PYPI {
 	# archive the assembled payload
 	$null = I18N-Status-Print-Package-Exec "${_target_path}"
 	$null = FS-Make-Directory "${_target_path}"
-	$___process = PYPI-Create-Archive "${_src}" "${_target_path}"
+	$___process = PYTHON-Create-PYPI-Archive "${_src}" "${_target_path}"
 	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Exec-Failed "${_target_path}"
 		return 1

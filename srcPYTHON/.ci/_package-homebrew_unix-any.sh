@@ -64,7 +64,7 @@ PACKAGE::assemble_homebrew_content() {
                 return 1
         fi
 
-        PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}"
+        PYTHON_Clean_Artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}"
         FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1

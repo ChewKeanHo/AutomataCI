@@ -24,6 +24,7 @@ fi
 . "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/installer.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/dotnet.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/homebrew.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/reprepro.sh"
@@ -85,7 +86,7 @@ fi
 
 if [ ! -z "$PROJECT_PYTHON" ]; then
         I18N_Status_Print_Env_Install "python"
-        INSTALLER::setup_python
+        PYTHON_Setup
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Env_Install_Failed
                 return 1

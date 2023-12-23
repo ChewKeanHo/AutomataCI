@@ -15,7 +15,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run me from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run me from ci.cmd instead!`n"
 	return 1
 }
 

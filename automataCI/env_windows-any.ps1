@@ -22,6 +22,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\installer.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\reprepro.ps1"
@@ -75,8 +76,7 @@ if ($___process -ne 0) {
 
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
 	$null = I18N-Status-Print-Env-Install "python"
-	$__process = INSTALLER-Setup-Python
-	if ($__process -ne 0) {
+	if ($(PYTHON-Setup) -ne 0) {
 		$null = I18N-Status-Print-Env-Install-Failed
 		return 1
 	}

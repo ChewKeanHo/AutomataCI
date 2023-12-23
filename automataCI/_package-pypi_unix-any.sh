@@ -12,6 +12,7 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 
 . "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
@@ -30,7 +31,7 @@ fi
 
 
 
-PACKAGE::run_pypi() {
+PACKAGE_Run_PYPI() {
         #__line="$1"
 
 
@@ -54,12 +55,25 @@ PACKAGE::run_pypi() {
 
 
         # validate input
-        if [ ! -z "$PROJECT_PYTHON" ]; then
-                PYTHON::activate_venv
+        FS::is_target_a_source "$_target"
+        if [ $? -ne 0 ]; then
+                return 0
+        fi
+
+        STRINGS_Is_Empty "$PROJECT_PYTHON"
+        if [ $? -ne 0 ]; then
+                return 0
+        fi
+
+        I18N_Status_Print_Check_Availability "PYTHON"
+        PYTHON_Activate_VENV
+        if [ $? -ne 0 ]; then
+                I18N_Status_Print_Check_Availability_Failed "PYTHON"
+                return 0
         fi
 
         I18N_Status_Print_Check_Availability "PYPI"
-        PYPI::is_available
+        PYTHON_PYPI_Is_Available
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Check_Availability_Failed "PYPI"
                 return 0
@@ -87,7 +101,7 @@ PACKAGE::run_pypi() {
 
 
         # copy all complimentary files to the workspace
-        cmd="PACKAGE::assemble_pypi_content"
+        cmd="PACKAGE_Assemble_PYPI_Content"
         I18N_Status_Print_Package_Assembler_Check "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
@@ -115,7 +129,7 @@ PACKAGE::run_pypi() {
 
         # generate required files
         I18N_Status_Print_File_Create "pyproject.toml"
-        PYPI::create_config \
+        PYTHON_Create_PYPI_Config \
                 "$_src" \
                 "$PROJECT_NAME" \
                 "$PROJECT_VERSION" \
@@ -142,7 +156,7 @@ PACKAGE::run_pypi() {
         # archive the assembled payload
         I18N_Status_Print_Package_Exec "$_target_path"
         FS::make_directory "$_target_path"
-        PYPI::create_archive "$_src" "$_target_path"
+        PYTHON_Create_PYPI_Archive "$_src" "$_target_path"
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Package_Exec_Failed "$_target_path"
                 return 1

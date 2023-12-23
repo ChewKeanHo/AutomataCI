@@ -10,29 +10,30 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-PYTHON::activate_venv() {
+PYTHON_Activate_VENV() {
         # validate input
-        PYTHON::is_venv_activated
+        PYTHON_Is_VENV_Activated
         if [ $? -eq 0 ] ; then
                 return 0
         fi
 
 
         # execute
-        __location="$(PYTHON::get_activator_path)"
-        if [ ! -f "$__location" ]; then
+        ___location="$(PYTHON_Get_Activator_Path)"
+        FS::is_file "$___location"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        . "$__location"
-        PYTHON::is_venv_activated
+        . "$___location"
+        PYTHON_Is_VENV_Activated
         if [ $? -ne 0 ] ; then
                 return 1
         fi
@@ -45,12 +46,32 @@ PYTHON::activate_venv() {
 
 
 
-PYTHON::clean_artifact() {
-        # __target="$1"
+PYTHON_Check_PYPI_Login() {
+        # execute
+        if [ $(STRINGS_Is_Empty "$TWINE_USERNAME") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$TWINE_PASSWORD") -eq 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+PYTHON_Clean_Artifact() {
+        #___target="$1"
 
 
         # validate input
-        if [ -z "$1" ] || [ ! -d "$1" ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
@@ -71,292 +92,57 @@ PYTHON::clean_artifact() {
 
 
 
-PYTHON::get_activator_path() {
-        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
-        __location="${__location}/bin/activate"
-        printf -- "$__location"
-}
+PYTHON_Create_PYPI_Archive() {
+        ___directory="$1"
+        ___destination="$2"
 
 
-
-
-PYTHON::has_pip() {
-        OS::is_command_available "pip"
-        return $?
-}
-
-
-
-
-PYTHON::is_available() {
-        # execute
-        if [ ! -z "$(type -t python3)" ]; then
-                return 0
-        elif [ ! -z "$(type -t python)" ]; then
-                return 0
-        fi
-
-
-        # report status
-        return 1
-}
-
-
-
-
-PYTHON::is_venv_activated() {
-        # execute
-        if [ ! -z "$VIRTUAL_ENV" ] ; then
-                return 0
-        fi
-
-
-        # report status
-        return 1
-}
-
-
-
-
-PYTHON::setup_venv() {
         # validate input
-        if [ -z "$PROJECT_PATH_ROOT" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___destination") -eq 0 ]; then
                 return 1
         fi
 
-        if [ -z "$PROJECT_PATH_TOOLS" ]; then
-                return 1
-        fi
-
-        if [ -z "$PROJECT_PATH_PYTHON_ENGINE" ]; then
-                return 1
-        fi
-
-
-        # execute
-        __program=""
-        if [ ! -z "$(type -t python3)" ]; then
-                __program="python3"
-        elif [ ! -z "$(type -t python)" ]; then
-                __program="python"
-        else
-                return 1
-        fi
-
-
-        # check if the repo is already established...
-        if [ -f "$(PYTHON::get_activator_path)" ]; then
-                return 0
-        fi
-
-
-        # it's a clean repo. Start setting up virtual environment...
-        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
-        $__program -m venv "$__location"
+        FS::is_directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        if [ ! -f "$(PYTHON::get_activator_path)" ]; then
-                return 1
-        fi
-
-
-        # report status
-        return 0
-}
-
-
-
-
-PYPI::check_login() {
-        # execute
-        if [ -z "$TWINE_USERNAME" ] || [ -z "$TWINE_PASSWORD" ]; then
-                return 1
-        fi
-
-
-        # report status
-        return 0
-}
-
-
-
-
-PYPI::is_available() {
-        # validate input
-        if [ -z "$PROJECT_PYTHON" ]; then
-                return 1
-        fi
-
-
-        # execute
-        PYTHON::is_venv_activated
+        FS::is_file "${___directory}/pyproject.toml"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-
-        # report status
-        return 0
-}
-
-
-
-
-PYPI::is_valid() {
-        #__target="$1"
-
-
-        # validate input
-        if [ -z "$1" ] || [ ! -d "$1" ]; then
-                return 1
-        fi
-
-
-        # execute
-        STRINGS::has_prefix "pypi" "${1##*/}"
+        FS::is_directory "$___destination"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        __hasWHL=false
-        __hasTAR=false
-        for __file in "${1}/"*; do
-                if [ ! "${__file%%.whl*}" = "${__file}" ]; then
-                        __hasWHL=true
-                fi
-
-                if [ ! "${__file%%.tar*}" = "${__file}" ]; then
-                        __hasTAR=true
-                fi
-        done
-
-        if [ "$__hasWHL" = "true" -a "$__hasTAR" = "true" ]; then
-                return 0
-        fi
-
-
-        # report status
-        return 1
-}
-
-
-
-
-PYPI::create_config() {
-        __directory="$1"
-        __project_name="$2"
-        __version="$3"
-        __name="$4"
-        __email="$5"
-        __website="$6"
-        __pitch="$7"
-        __readme_path="$8"
-        __readme_type="$9"
-        __license="${10}"
-
-
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ -z "$__project_name" ] ||
-                [ -z "$__version" ] ||
-                [ -z "$__name" ] ||
-                [ -z "$__email" ] ||
-                [ -z "$__website" ] ||
-                [ -z "$__pitch" ] ||
-                [ -z "$__readme_path" ] ||
-                [ -z "$__readme_type" ] ||
-                [ -z "$__license" ] ||
-                [ ! -d "$__directory" ] ||
-                [ ! -f "${__directory}/${__readme_path}" ]; then
-                return 1
-        fi
-
-
-        # check existing overriding file
-        if [ -f "${__directory}/pyproject.toml" ]; then
-                return 2
-        fi
-
-
-        # create default file
-        FS::write_file "${__directory}/pyproject.toml" "\
-[build-system]
-requires = [ 'setuptools' ]
-build-backend = 'setuptools.build_meta'
-
-[project]
-name = '${__project_name}'
-version = '${__version}'
-description = '${__pitch}'
-
-[project.license]
-text = '${__license}'
-
-[project.readme]
-file = '${__readme_path}'
-'content-type' = '${__readme_type}'
-
-[[project.authors]]
-name = '${__name}'
-email = '${__email}'
-
-[[project.maintainers]]
-name = '${__name}'
-email = '${__email}'
-
-[project.urls]
-Homepage = '${__website}'
-"
-
-
-        # report status
-        return $?
-}
-
-
-
-
-PYPI::create_archive() {
-        __directory="$1"
-        __destination="$2"
-
-
-        # validate input
-        if [ -z "$__directory" ] ||
-                [ -z "$__destination" ] ||
-                [ ! -d "$__directory" ] ||
-                [ ! -f "${__directory}/pyproject.toml" ] ||
-                [ ! -d "$__destination" ]; then
-                return 1
-        fi
-
-        PYPI::is_available
+        PYTHON_PYPI_Is_Available
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # construct archive
-        __current_path="$PWD" && cd "$__directory"
+        ___current_path="$PWD" && cd "$___directory"
         python -m build --sdist --wheel .
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
-        twine check "${__directory}/dist/"*
+        twine check "${___directory}/dist/"*
         if [ $? -ne 0 ]; then
-                cd "$__current_path" && unset __current_path
+                cd "$___current_path" && unset ___current_path
                 return 1
         fi
-        cd "$__current_path" && unset __current_path
+        cd "$___current_path" && unset ___current_path
 
 
         # export to destination
-        for __file in "${__directory}/dist/"*; do
-                FS::move "$__file" "$__destination"
+        for ___file in "${___directory}/dist/"*; do
+                FS::move "$___file" "$___destination"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -370,37 +156,324 @@ PYPI::create_archive() {
 
 
 
-PYPI::release() {
-        __target="$1"
-        __gpg="$2"
-        __url="$3"
+PYTHON_Create_PYPI_Config() {
+        ___directory="$1"
+        ___project_name="$2"
+        ___version="$3"
+        ___name="$4"
+        ___email="$5"
+        ___website="$6"
+        ___pitch="$7"
+        ___readme_path="$8"
+        ___readme_type="$9"
+        ___license="${10}"
 
 
         # validate input
-        if [ -z "$__target" ] ||
-                [ -z "$__gpg" ] ||
-                [ -z "$__url" ] ||
-                [ ! -d "$__target" ]; then
+        if [ $(STRINGS_Is_Empty "$___directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___project_name") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___version") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___name") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___email") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___website") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___pitch") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___readme_path") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___readme_type") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___license") -eq 0 ]; then
                 return 1
         fi
 
-        PYPI::is_available
+        FS::is_directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        twine check "${__target}/"*
+        FS::is_file "${___directory}/${___readme_path}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # check existing overriding file
+        FS::is_file "${___directory}/pyproject.toml"
+        if [ $? -ne 0 ]; then
+                return 2
+        fi
+
+
+        # create default file
+        FS::write_file "${___directory}/pyproject.toml" "\
+[build-system]
+requires = [ 'setuptools' ]
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = '${___project_name}'
+version = '${___version}'
+description = '${___pitch}'
+
+[project.license]
+text = '${___license}'
+
+[project.readme]
+file = '${___readme_path}'
+'content-type' = '${___readme_type}'
+
+[[project.authors]]
+name = '${___name}'
+email = '${___email}'
+
+[[project.maintainers]]
+name = '${___name}'
+email = '${___email}'
+
+[project.urls]
+Homepage = '${___website}'
+"
+
+
+        # report status
+        return $?
+}
+
+
+
+
+PYTHON_Get_Activator_Path() {
+        ___location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
+        ___location="${___location}/bin/activate"
+        printf -- "$___location"
+
+
+        # report status
+        return 0
+}
+
+
+
+
+PYTHON_Has_PIP() {
+        OS::is_command_available "pip"
+        return $?
+}
+
+
+
+
+PYTHON_Is_Available() {
+        # execute
+        OS::is_command_available "python3"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        OS::is_command_available "python"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # report status
+        return 1
+}
+
+
+
+
+PYTHON_Is_Valid_PYPI() {
+        #___target="$1"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        twine upload "${__target}/"* \
+        STRINGS::has_prefix "pypi" "${1##*/}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        ___hasWHL=false
+        ___hasTAR=false
+        for ___file in "${1}/"*; do
+                if [ ! "${___file%%.whl*}" = "${___file}" ]; then
+                        ___hasWHL=true
+                elif [ ! "${___file%%.tar*}" = "${___file}" ]; then
+                        ___hasTAR=true
+                fi
+        done
+
+        if [ "$___hasWHL" = "true" ] && [ "$___hasTAR" = "true" ]; then
+                return 0
+        fi
+
+
+        # report status
+        return 1
+}
+
+
+
+
+PYTHON_Is_VENV_Activated() {
+        # execute
+        if [ $(STRINGS_Is_Empty "$VIRTUAL_ENV") -ne 0 ] ; then
+                return 0
+        fi
+
+
+        # report status
+        return 1
+}
+
+
+
+
+PYTHON_PYPI_Is_Available() {
+        # validate input
+        if [ $(STRINGS_Is_Empty "$PROJECT_PYTHON") -eq 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        PYTHON_Is_VENV_Activated
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+PYTHON_Release_PYPI() {
+        ___target="$1"
+        ___gpg="$2"
+        ___url="$3"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$___target") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___gpg") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___url") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___target"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        PYTHON_PYPI_Is_available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        twine check "${___target}/"*
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        twine upload "${___target}/"* \
                 --sign \
-                --identity "$__gpg" \
-                --repository-url "$__url" \
+                --identity "$___gpg" \
+                --repository-url "$___url" \
                 --non-interactive
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+PYTHON_Setup() {
+        # validate input
+        OS::is_command_available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS::is_command_available "python"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        OS::is_command_available "python3"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        brew install python
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        PYTHON_Setup_VENV
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 1
+}
+
+
+
+
+PYTHON_Setup_VENV() {
+        # validate input
+        if [ $(STRINGS_Is_Empty "$PROJECT_PATH_ROOT") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_PATH_TOOLS") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_PATH_PYTHON_ENGINE") -eq 0 ]; then
+                return 1
+        fi
+
+        PYTHON_Activate_VENV
+        if [ $? -eq 0 ]; then
+                # already available
+                return 0
+        fi
+
+
+        # execute
+        ___program=""
+        if [ ! -z "$(type -t python3)" ]; then
+                ___program="python3"
+        elif [ ! -z "$(type -t python)" ]; then
+                ___program="python"
+        else
+                return 1
+        fi
+
+        ___location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
+        $___program -m venv "$___location"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        PYTHON_Activate_VENV
         if [ $? -ne 0 ]; then
                 return 1
         fi

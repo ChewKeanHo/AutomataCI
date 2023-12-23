@@ -26,7 +26,7 @@ fi
 
 
 
-PACKAGE::assemble_pypi_content() {
+PACKAGE_Assemble_PYPI_content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -46,7 +46,7 @@ PACKAGE::assemble_pypi_content() {
 
 
         # assemble the python package
-        PYTHON::clean_artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/"
+        PYTHON_Clean_Artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/"
         FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/" "${_directory}"
         if [ $? -ne 0 ]; then
                 return 1

@@ -110,7 +110,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 
-        RELEASE::run_pypi "$TARGET"
+        RELEASE_Run_PYPI "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi

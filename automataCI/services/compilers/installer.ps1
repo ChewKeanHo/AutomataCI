@@ -207,35 +207,3 @@ function INSTALLER-Setup-Node {
 	# report status
 	return 0
 }
-
-
-
-
-function INSTALLER-Setup-Python {
-	# validate input
-	$__process =  OS-Is-Command-Available "choco"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process =  OS-Is-Command-Available "python"
-	if ($__process -eq 0) {
-		return 0
-	}
-
-
-	# execute
-	$__process = OS-Exec "choco" "install python -y"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-
-	# report status
-	$__process = OS-Is-Command-Available "python"
-	if ($__process -eq 0) {
-		return 0
-	}
-
-	return 1
-}

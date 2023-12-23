@@ -207,36 +207,3 @@ INSTALLER::setup_osslsigncode() {
 
         return 1
 }
-
-
-
-
-INSTALLER::setup_python() {
-        # validate input
-        OS::is_command_available "brew"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        OS::is_command_available "python"
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        OS::is_command_available "python3"
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-
-        # execute
-        brew install python
-
-
-        # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
-}

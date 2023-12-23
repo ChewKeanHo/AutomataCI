@@ -10,58 +10,61 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/python.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
 
-RELEASE::run_pypi() {
-        _target="$1"
+RELEASE_Run_PYPI() {
+        #_target="$1"
 
 
         # validate input
-        PYPI::is_valid "$_target"
+        PYTHON_Is_Valid_PYPI "$1"
         if [ $? -ne 0 ]; then
                 return 0
         fi
 
-        OS::print_status info "activating python venv...\n"
-        PYTHON::activate_venv
+        I18N_Status_Print_Check_Availability "PYTHON"
+        PYTHON_Activate_VENV
         if [ $? -ne 0 ]; then
-                OS::print_status error "activation failed.\n"
+                I18N_Status_Print_Check_Availability_Failed "PYTHON"
                 return 1
         fi
 
-        OS::print_status info "checking python availability...\n"
-        PYPI::is_available
+        I18N_Status_Print_Check_Availability "PYPI"
+        PYTHON_PYPI_Is_Available
         if [ $? -ne 0 ]; then
-                OS::print_status error "check failed.\n"
+                I18N_Status_Print_Check_Availability_Failed "PYPI"
                 return 1
         fi
 
 
         # execute
-        OS::print_status info "releasing pypi package...\n"
-        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
-                OS::print_status warning "simulating pypi package push...\n"
+        I18N_Status_Print_Run_Publish "PYPI"
+        if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
+                I18N_Status_Print_Run_Publish_Simulated "PYPI"
         else
-                OS::print_status info "checking pypi twine login credentials...\n"
-                PYPI::check_login
+                I18N_Status_Print_Run_Login_Check "PYPI"
+                PYTHON_Check_PYPI_Login
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "check failed (TWINE_USERNAME|TWINE_PASSWORD).\n"
+                        I18N_Status_Print_Run_Login_Check_Failed
                         return 1
                 fi
 
-                PYPI::release "$_target" "$PROJECT_GPG_ID" "$PROJECT_PYPI_REPO_URL"
+                PYTHON_Release_PYPI "$_target" "$PROJECT_GPG_ID" "$PROJECT_PYPI_REPO_URL"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "release failed.\n"
+                        I18N_Status_Print_Run_Publish_Failed
                         return 1
                 fi
         fi
 
-        OS::print_status info "remove package artifact...\n"
+        I18N_Status_Print_Run_Clean "$_target"
         FS::remove_silently "$_target"
 
 
