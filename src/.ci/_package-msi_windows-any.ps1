@@ -226,7 +226,7 @@ Unfortunately, you can only install this package on a 32-bit Windows.
 			## NOTE: DO NOT change the format. AutomataCI relies on
 			##       it to parse wix4 culture settings.
 			##       https://wixtoolset.org/docs/tools/wixext/wixui/#localization
-			$_wxs = "${_wxs}_zh-CN"
+			$_wxs = "${_wxs}_zh-cn"
 
 			$__var_INSTALLER_DESCRIPTION = @"
 ${env:PROJECT_NAME} (${env:PROJECT_VERSION}) 安装包
@@ -270,7 +270,7 @@ ${env:PROJECT_NAME} (${env:PROJECT_VERSION}) 安装包
 			## NOTE: DO NOT change the format. AutomataCI relies on
 			##       it to parse wix4 culture settings. Refer:
 			##       https://wixtoolset.org/docs/tools/wixext/wixui/#localization
-			$_wxs = "${_wxs}_en-US"
+			$_wxs = "${_wxs}_en-us"
 
 			$__var_INSTALLER_DESCRIPTION=@"
 ${env:PROJECT_NAME} (${env:PROJECT_VERSION}) Installer
