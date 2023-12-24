@@ -10,13 +10,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-CREATEREPO::is_available() {
+CREATEREPO_Is_Available() {
         # execute
         OS::is_command_available "createrepo"
         if [ $? -eq 0 ]; then
@@ -36,16 +37,24 @@ CREATEREPO::is_available() {
 
 
 
-CREATEREPO::publish() {
-        __target="$1"
-        __directory="$2"
+CREATEREPO_Publish() {
+        ___target="$1"
+        ___directory="$2"
 
 
         # validate input
-        if [ -z "$__target" ] ||
-                [ -z "$__directory" ] ||
-                [ -d "$__target" ] ||
-                [ ! -d "$__directory" ]; then
+        if [ $(STRINGS_Is_Empty "$___target") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$__directory") -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___target"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        FS::is_directory "$___directory"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 

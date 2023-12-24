@@ -9,10 +9,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rpm.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\publishers\createrepo.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rpm.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\createrepo.ps1"
+
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -25,32 +28,32 @@ function RELEASE-Run-RPM {
 
 
 	# validate input
-	$__process = RPM-Is-Valid "${__target}"
-	if ($__process -ne 0) {
+	$___process = RPM-Is-Valid "${__target}"
+	if ($___process -ne 0) {
 		return 0
 	}
 
-	OS-Print-Status info "checking required createrepo availability..."
-	$__process = CREATEREPO-Is-Available
-	if ($__process -ne 0) {
-		OS-Print-Status warning "Createrepo is unavailable. Skipping..."
+	$null = I18N-Status-Print-Check-Availability "CREATEREPO"
+	$___process = CREATEREPO-Is-Available
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Check-Availability-Failed "CREATEREPO"
 		return 0
 	}
 
 
 	# execute
 	$__dest = "${__directory}/rpm"
-	OS-Print-Status info "creating destination path..."
-	$__process = FS-Make-Directory "${__dest}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "create failed."
+	$null = I18N-Status-Print-File-Create "${__dest}"
+	$___process = FS-Make-Directory "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-File-Create-Failed
 		return 1
 	}
 
-	OS-Print-Status info "publishing with createrepo..."
-	$__process = CREATEREPO-Publish "${__target}" "${__dest}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "publish failed."
+	$null = I18N-Status-Print-Run-Publish "CREATEREPO"
+	$___process = CREATEREPO-Publish "${__target}" "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Status-Print-Run-Publish-Failed
 		return 1
 	}
 

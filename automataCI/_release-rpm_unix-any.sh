@@ -10,15 +10,17 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rpm.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/publishers/createrepo.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rpm.sh"
+. "${LIBS_AUTOMATACI}/services/publishers/createrepo.sh"
+
+. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
 
-RELEASE::run_rpm() {
+RELEASE_Run_RPM() {
         __target="$1"
         __directory="$2"
 
@@ -29,27 +31,27 @@ RELEASE::run_rpm() {
                 return 0
         fi
 
-        OS::print_status info "checking required createrepo availability...\n"
-        CREATEREPO::is_available
+        I18N_Status_Print_Check_Availability "CREATEREPO"
+        CREATEREPO_Is_Available
         if [ $? -ne 0 ]; then
-                OS::print_status warning "Createrepo is unavailable. Skipping...\n"
+                I18N_Status_Print_Check_Availability_Failed "CREATEREPO"
                 return 0
         fi
 
 
         # execute
         __dest="${2}/rpm"
-        OS::print_status info "creating destination path: ${__dest}\n"
+        I18N_Status_Print_File_Create "$__dest"
         FS::make_directory "${__dest}"
         if [ $? -ne 0 ]; then
-                OS::print_status error "create failed.\n"
+                I18N_Status_Print_File_Create_Failed
                 return 1
         fi
 
-        OS::print_status info "publishing with createrepo...\n"
-        CREATEREPO::publish "$__target" "${__dest}"
+        I18N_Status_Print_Run_Publish "CREATEREPO"
+        CREATEREPO_Publish "$__target" "${__dest}"
         if [ $? -ne 0 ]; then
-                OS::print_status error "publish failed.\n"
+                I18N_Status_Print_Run_Publish_Failed
                 return 1
         fi
 

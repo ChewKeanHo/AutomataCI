@@ -100,7 +100,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 
-        RELEASE::run_rpm "$TARGET" "$STATIC_REPO"
+        RELEASE_Run_RPM "$TARGET" "$STATIC_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi

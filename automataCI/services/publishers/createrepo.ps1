@@ -9,21 +9,22 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
 
 function CREATEREPO-Is-Available {
 	# execute
-	$__process = OS-Is-Command-Available "createrepo"
-	if ($__process -eq 0) {
+	$___process = OS-Is-Command-Available "createrepo"
+	if ($___process -eq 0) {
 		return 0
 	}
 
-	$__process = OS-Is-Command-Available "createrepo_c"
-	if ($__process -eq 0) {
+	$___process = OS-Is-Command-Available "createrepo_c"
+	if ($___process -eq 0) {
 		return 0
 	}
 
@@ -37,38 +38,46 @@ function CREATEREPO-Is-Available {
 
 function CREATEREPO-Publish {
 	param (
-		[string]$__target,
-		[string]$__directory
+		[string]$___target,
+		[string]$___directory
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target) -or
-		[string]::IsNullOrEmpty($__directory) -or
-		(Test-Path "${__target}" -PathType Container) -or
-		(-not (Test-Path "${__directory}" -PathType Container))) {
+	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___directory}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___target}"
+	if ($___process -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___directory}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = FS-Copy-File "${__target}" "${__directory}"
-	if ($__process -ne 0) {
+	$___process = FS-Copy-File "${___target}" "${___directory}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = OS-Is-Command-Available "createrepo"
-	if ($__process -eq 0) {
-		$__process = OS-Exec "createrepo" "--update ${__directory}"
-		if ($__process -eq 0) {
+	$___process = OS-Is-Command-Available "createrepo"
+	if ($___process -eq 0) {
+		$___process = OS-Exec "createrepo" "--update ${___directory}"
+		if ($___process -eq 0) {
 			return 0
 		}
 	}
 
-	$__process = OS-Is-Command-Available "createrepo_c"
-	if ($__process -eq 0) {
-		$__process = OS-Exec "createrepo_c" "--update ${__directory}"
-		if ($__process -eq 0) {
+	$___process = OS-Is-Command-Available "createrepo_c"
+	if ($___process -eq 0) {
+		$___process = OS-Exec "createrepo_c" "--update ${___directory}"
+		if ($___process -eq 0) {
 			return 0
 		}
 	}
