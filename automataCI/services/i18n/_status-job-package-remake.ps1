@@ -122,3 +122,19 @@ function I18N-Status-Print-Package-Workspace-Remake-Control {
 	# report status
 	return 0
 }
+
+
+
+
+function I18N-Status-Print-Package-Remake-Failed {
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$null = I18N-Status-Print error "remake failed`n`n"
+	}}
+
+
+	# report status
+	return 0
+}

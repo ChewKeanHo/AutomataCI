@@ -70,14 +70,14 @@ function I18N-Status-Print-Sync-Register {
 
 
 
-function I18N-Status-Print-Sync-Exec-Series {
+function I18N-Status-Print-Sync-Exec-Serial {
 	# execute
 	$null = I18N-Status-Print-Newline
 
 	switch (${env:AUTOMATACI_LANG}) {
 	default {
 		# fallback to default english
-		$null = I18N-Status-Print info "executing all series run...`n"
+		$null = I18N-Status-Print info "executing all serial run...`n"
 	}}
 
 

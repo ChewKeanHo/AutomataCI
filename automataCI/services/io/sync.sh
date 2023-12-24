@@ -224,7 +224,7 @@ SYNC_Exec_Parallel() {
 
 
 # To use:
-#   $ SYNC_Exec_Series "function_name" "${PWD}/parallel.txt"
+#   $ SYNC_Exec_Serial "function_name" "${PWD}/parallel.txt"
 #
 #   The subroutine function accepts a wrapper function as shown above. Here is
 #   an example to construct a simple series of executions:
@@ -261,7 +261,7 @@ SYNC_Exec_Parallel() {
 #
 #
 #       # call the series exec
-#       SYNC_Exec_Series "function_name" "${PWD}/parallel.txt"
+#       SYNC_Exec_Serial "function_name" "${PWD}/parallel.txt"
 #
 #
 #   The control file must not have any comment and each line must be the capable
@@ -272,7 +272,7 @@ SYNC_Exec_Parallel() {
 #   The subroutine function **MUST** return **ONLY** the following return code:
 #     0 = signal the task execution is done and completed successfully.
 #     1 = signal the task execution has error. This terminates the entire run.
-SYNC_Exec_Series() {
+SYNC_Exec_Serial() {
         ___series_command="$1"
         ___series_control="$2"
 

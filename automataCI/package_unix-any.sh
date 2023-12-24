@@ -87,7 +87,8 @@ I18N_Status_Print_Newline
 __log_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/packagers"
 I18N_Status_Print_Package_Directory_Log_Remake "$__log_directory"
 FS::remake_directory "$__log_directory"
-if [ ! -d "$__log_directory" ]; then
+FS::is_directory "$__log_directory"
+if [ $? -ne 0 ]; then
         I18N_Status_Print_Package_Remake_Failed
         return 1
 fi
@@ -95,7 +96,8 @@ fi
 __control_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-parallel"
 I18N_Status_Print_Package_Directory_Control_Remake "${__control_directory}"
 FS::remake_directory "$__control_directory"
-if [ ! -d "$__control_directory" ]; then
+FS::is_directory "$__control_directory"
+if [ $? -ne 0 ]; then
         I18N_Status_Print_Package_Remake_Failed
         return 1
 fi
@@ -103,11 +105,11 @@ fi
 __parallel_control="${__control_directory}/control-parallel.txt"
 FS::remove_silently "$__parallel_control"
 
-__series_control="${__control_directory}/control-series.txt"
-FS::remove_silently "$__series_control"
+__serial_control="${__control_directory}/control-serial.txt"
+FS::remove_silently "$__serial_control"
 
 
-SUBROUTINE::package() {
+SUBROUTINE_Package() {
         #__line="$1"
 
 
@@ -206,7 +208,7 @@ ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE_Run_DEB
         fi
 
         __log="${__log_directory}/docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__series_control" "\
+        FS::append_file "$__serial_control" "\
 ${__common}|${__log}|PACKAGE_Run_DOCKER
 "
         if [ $? -ne 0 ]; then
@@ -215,7 +217,7 @@ ${__common}|${__log}|PACKAGE_Run_DOCKER
 
         __flatpak_path="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${PROJECT_PATH_RELEASE}/flatpak"
         __log="${__log_directory}/flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__series_control" "\
+        FS::append_file "$__serial_control" "\
 ${__common}|${__flatpak_path}|${__log}|PACKAGE_Run_FLATPAK
 "
         if [ $? -ne 0 ]; then
@@ -239,7 +241,7 @@ ${__common}|${__log}|PACKAGE_Run_IPK
         fi
 
         __log="${__log_directory}/msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__series_control" "\
+        FS::append_file "$__serial_control" "\
 ${__common}|${__log}|PACKAGE_Run_MSI
 "
         if [ $? -ne 0 ]; then
@@ -267,7 +269,7 @@ done
 I18N_Status_Print_Sync_Exec_Parallel
 FS::is_file "$__parallel_control"
 if [ $? -eq 0 ]; then
-        SYNC_Exec_Parallel "SUBROUTINE::package" "$__parallel_control"
+        SYNC_Exec_Parallel "SUBROUTINE_Package" "$__parallel_control"
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Sync_Exec_Failed
                 return 1
@@ -275,10 +277,10 @@ if [ $? -eq 0 ]; then
 fi
 
 
-I18N_Status_Print_Sync_Exec_Series
-FS::is_file "$__series_control"
+I18N_Status_Print_Sync_Exec_Serial
+FS::is_file "$__serial_control"
 if [ $? -eq 0 ]; then
-        SYNC_Exec_Series "SUBROUTINE::package" "$__series_control"
+        SYNC_Exec_Serial "SUBROUTINE_Package" "$__serial_control"
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Sync_Exec_Failed
                 return 1

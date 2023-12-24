@@ -15,7 +15,7 @@
 
 # To use:
 #   $ SYNC-Exec-Parallel ${function:Function-Name}.ToString() `
-#                          "$(Get-Location)\parallel.txt" `
+#                          "$(Get-Location)\control.txt" `
 #                          ".\tmp\parallel" `
 #                          "$([System.Environment]::ProcessorCount)"
 #
@@ -54,7 +54,7 @@
 #
 #       # calling the parallel exec function
 #       SYNC-Exec-Parallel ${function:Function-Name}.ToString() `
-#                          "$(Get-Location)\parallel.txt" `
+#                          "$(Get-Location)\control.txt" `
 #                          ".\tmp\parallel" `
 #                          "$([System.Environment]::ProcessorCount)"
 #
@@ -177,7 +177,7 @@ function SYNC-Exec-Parallel {
 
 
 # To use:
-#   $ SYNC-Exec-Series ${function:Function-Name}.ToString() "$(Get-Location)\parallel.txt"
+#   $ SYNC-Exec-Serial ${function:Function-Name}.ToString() "$(Get-Location)\control.txt"
 #
 #   The subroutine function accepts a wrapper function as shown above. Here is
 #   an example to construct a simple parallelism executions:
@@ -212,7 +212,7 @@ function SYNC-Exec-Parallel {
 #
 #
 #       # calling the parallel exec function
-#       SYNC-Exec-Series ${function:Function-Name}.ToString() "$(Get-Location)\parallel.txt"
+#       SYNC-Exec-Serial ${function:Function-Name}.ToString() "$(Get-Location)\control.txt"
 #
 #
 #   The control file must not have any comment and each line must be the capable
@@ -223,27 +223,27 @@ function SYNC-Exec-Parallel {
 #   The subroutine function **MUST** return **ONLY** the following return code:
 #     0 = signal the task execution is done and completed successfully.
 #     1 = signal the task execution has error. This terminates the entire run.
-function SYNC-Exec-Series {
+function SYNC-Exec-Serial {
 	param(
-		[string]$___series_command,
-		[string]$___series_control
+		[string]$___serial_command,
+		[string]$___serial_control
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($___series_command)) {
+	if ([string]::IsNullOrEmpty($___serial_command)) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($___series_control) -or
-		(-not (Test-Path -Path "${___series_control}"))) {
+	if ([string]::IsNullOrEmpty($___serial_control) -or
+		(-not (Test-Path -Path "${___serial_control}"))) {
 		return 1
 	}
 
 
 	# execute
-	${function:SYNC-Run} = ${___series_command}
-	foreach ($___line in (Get-Content "${___series_control}")) {
+	${function:SYNC-Run} = ${___serial_command}
+	foreach ($___line in (Get-Content "${___serial_control}")) {
 		$___process = SYNC-Run "${___line}"
 		if ($___process -ne 0) {
 			return 1

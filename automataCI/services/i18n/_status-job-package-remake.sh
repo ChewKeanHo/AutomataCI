@@ -132,3 +132,20 @@ I18N_Status_Print_Package_Workspace_Remake_Control() {
         # report status
         return 0
 }
+
+
+
+
+I18N_Status_Print_Package_Remake_Failed() {
+        # execute
+        case "$AUTOMATACI_LANG" in
+        *)
+                # fallback to default english
+                I18N_Status_Print error "remake failed.\n\n"
+                ;;
+        esac
+
+
+        # report status
+        return 0
+}

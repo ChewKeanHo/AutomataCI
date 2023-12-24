@@ -37,8 +37,8 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 # 1-time setup job required materials
 $DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
 $null = I18N-Status-Print-Package-Directory-Remake "$DEST"
-$__process = FS-Remake-Directory $DEST
-if ($__process -ne 0) {
+$___process = FS-Remake-Directory $DEST
+if ($___process -ne 0) {
 	$null = I18N-Status-Print-Package-Remake-Failed
 	return 1
 }
@@ -47,16 +47,16 @@ if ($__process -ne 0) {
 $FILE_CHANGELOG_MD = "${env:PROJECT_SKU}-CHANGELOG_${env:PROJECT_VERSION}.md"
 $FILE_CHANGELOG_MD = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${FILE_CHANGELOG_MD}"
 $FILE_CHANGELOG_DEB = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb\changelog.gz"
-$__process = Package-Run-CHANGELOG "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
-if ($__process -ne 0) {
+$___process = Package-Run-CHANGELOG "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
+if ($___process -ne 0) {
 	return 1
 }
 
 
 $FILE_CITATION_CFF = "${env:PROJECT_SKU}-CITATION_${env:PROJECT_VERSION}.cff"
 $FILE_CITATION_CFF = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${FILE_CITATION_CFF}"
-$__process = Package-Run-CITATION "$FILE_CITATION_CFF"
-if ($__process -ne 0) {
+$___process = Package-Run-CITATION "$FILE_CITATION_CFF"
+if ($___process -ne 0) {
 	return 1
 }
 
@@ -70,7 +70,8 @@ $null = I18N-Status-Print-Newline
 $__log_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\packagers"
 $null = I18N-Status-Print-Package-Directory-Log-Remake "${__log_directory}"
 $null = FS-Remake-Directory "${__log_directory}"
-if (-not (Test-Path -PathType Container -Path "${__log_directory}")) {
+$___process = FS-Is-Directory "${__log_directory}"
+if ($___process -ne 0) {
 	$null = I18N-Status-Print-Package-Remake-Failed
 	return 1
 }
@@ -79,7 +80,8 @@ if (-not (Test-Path -PathType Container -Path "${__log_directory}")) {
 $__control_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-parallel"
 $null = I18N-Status-Print-Package-Directory-Control-Remake "${__control_directory}"
 $null = FS-Remake-Directory "${__control_directory}"
-if (-not (Test-Path -PathType Container -Path "${__control_directory}")) {
+$___process = FS-Is-Directory "${__control_directory}"
+if ($___process -ne 0) {
 	$null = I18N-Status-Print-Package-Remake-Failed
 	return 1
 }
@@ -89,8 +91,8 @@ $__parallel_control = "${__control_directory}\control-parallel.txt"
 $null = FS-Remove-Silently "${__parallel_control}"
 
 
-$__series_control = "${__control_directory}\control-series.txt"
-$null = FS-Remove-Silently "${__series_control}"
+$__serial_control = "${__control_directory}\control-serial.txt"
+$null = FS-Remove-Silently "${__serial_control}"
 
 
 function SUBROUTINE-Package {
@@ -139,11 +141,11 @@ function SUBROUTINE-Package {
 		${function:SUBROUTINE-Exec} = Get-Command `
 			"${__command}" `
 			-ErrorAction SilentlyContinue
-		$($__process = SUBROUTINE-Exec "${__arguments}") *> "${__log}"
+		$($___process = SUBROUTINE-Exec "${__arguments}") *> "${__log}"
 	} catch {
-		$__process = 1
+		$___process = 1
 	}
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Exec-Failed "${__subject}"
 		return 1
 	}
@@ -159,8 +161,8 @@ function SUBROUTINE-Package {
 # begin registering packagers
 foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}" `
 			| Select-Object -ExpandProperty FullName)) {
-	$__process = FS-Is-File "$file"
-	if ($__process -ne 0) {
+	$___process = FS-Is-File "$file"
+	if ($___process -ne 0) {
 		continue
 	}
 
@@ -181,8 +183,8 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 		continue
 	}
 
-	$__process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "${TARGET_FILENAME}"
-	if ($__process -ne 0) {
+	$___process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "${TARGET_FILENAME}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-File-Incompatible-Skipped
 		continue
 	}
@@ -191,116 +193,118 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 	$__common = "${DEST}|${file}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
 
 	$__log = "${__log_directory}\archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
+	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-ARCHIVE
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__log = "${__log_directory}\cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
+	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-CARGO
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__log = "${__log_directory}\chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
+	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-CHOCOLATEY
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__log = "${__log_directory}\deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
+	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE-Run-DEB
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__log = "${__log_directory}\docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__series_control}" @"
+	$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__log}|PACKAGE-Run-DOCKER
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__flatpak_path = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${env:PROJECT_PATH_RELEASE}\flatpak"
 	$__log = "${__log_directory}\flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__series_control}" @"
+	$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__flatpak_path}|${__log}|PACKAGE-Run-FLATPAK
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__log = "${__log_directory}\homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
+	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-HOMEBREW
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__log = "${__log_directory}\ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
+	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-IPK
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__log = "${__log_directory}\msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__series_control}" @"
+	$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__log}|PACKAGE-Run-MSI
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__log = "${__log_directory}\pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
+	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-PYPI
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
 	$__log = "${__log_directory}\rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$__process = FS-Append-File "${__parallel_control}" @"
+	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-RPM
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 }
 
 
 $null = I18N-Status-Print-Sync-Exec-Parallel
-if (Test-Path "${__parallel_control}") {
-	$__process = SYNC-Exec-Parallel `
+$___process = FS-Is-File "${__parallel_control}"
+if ($___process -eq 0) {
+	$___process = SYNC-Exec-Parallel `
 		${function:SUBROUTINE-Package}.ToString() `
 		"${__parallel_control}" `
 		"${__control_directory}" `
 		"$([System.Environment]::ProcessorCount)"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Sync-Exec-Failed
 		return 1
 	}
 }
 
 
-$null = I18N-Status-Print-Sync-Exec-Series
-if (Test-Path "${__series_control}") {
-	$__process = SYNC-Exec-Series `
+$null = I18N-Status-Print-Sync-Exec-Serial
+$___process = FS-Is-File "${__serial_control}"
+if ($___process -eq 0) {
+	$___process = SYNC-Exec-Serial `
 		${function:SUBROUTINE-Package}.ToString() `
-		"${__series_control}"
-	if ($__process -ne 0) {
+		"${__serial_control}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Sync-Exec-Failed
 		return 1
 	}

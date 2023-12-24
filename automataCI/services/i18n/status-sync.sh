@@ -71,14 +71,14 @@ I18N_Status_Print_Sync_Register() {
 
 
 
-I18N_Status_Print_Sync_Exec_Series() {
+I18N_Status_Print_Sync_Exec_Serial() {
         # execute
         I18N_Status_Print_Newline
 
         case "$AUTOMATACI_LANG" in
         *)
                 # fallback to default english
-                I18N_Status_Print info "executing all series run...\n"
+                I18N_Status_Print info "executing all serial run...\n"
                 ;;
         esac
 
