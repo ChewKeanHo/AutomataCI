@@ -31,7 +31,7 @@ fi
 
 
 
-PACKAGE::run_rpm() {
+PACKAGE_Run_RPM() {
         #__line="$1"
 
 
@@ -56,7 +56,7 @@ PACKAGE::run_rpm() {
 
         # validate input
         I18N_Status_Print_Check_Availability "RPM"
-        RPM::is_available "$_target_os" "$_target_arch"
+        RPM_Is_Available "$_target_os" "$_target_arch"
         case $? in
         2|3)
                 I18N_Status_Print_Check_Availability_Incompatible "RPM"
@@ -94,7 +94,7 @@ PACKAGE::run_rpm() {
 
 
         # copy all complimentary files to the workspace
-        cmd="PACKAGE::assemble_rpm_content"
+        cmd="PACKAGE_Assemble_RPM_Content"
         I18N_Status_Print_Package_Assembler_Check "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
@@ -122,7 +122,7 @@ PACKAGE::run_rpm() {
 
         # archive the assembled payload
         I18N_Status_Print_Package_Exec "$_dest"
-        RPM::create_archive "$_src" "$_dest" "$_target_arch"
+        RPM_Create_Archive "$_src" "$_dest" "$_target_arch"
         if [ $? -ne 0 ]; then
                 I18N_Status_Print_Package_Exec_Failed "$_dest"
                 return 1

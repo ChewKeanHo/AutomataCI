@@ -47,8 +47,8 @@ function PACKAGE-Run-RPM {
 
 	# validate input
 	$null = I18N-Status-Print-Check-Availability "RPM"
-	$__process = RPM-Is-Available "${_target_os}" "${_target_arch}"
-	switch ($__process) {
+	$___process = RPM-Is-Available "${_target_os}" "${_target_arch}"
+	switch ($___process) {
 	{ $_ -in 2, 3 } {
 		$null = I18N-Status-Print-Check-Availability-Incompatible "RPM"
 		return 0
@@ -60,8 +60,8 @@ function PACKAGE-Run-RPM {
 	}}
 
 	$null = I18N-Status-Print-Check-Availability "MANUAL DOCS"
-	$__process = MANUAL-Is-Available
-	if ($__process -ne 0) {
+	$___process = MANUAL-Is-Available
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Check-Availability-Failed "MANUAL DOCS"
 		return 1
 	}
@@ -72,8 +72,8 @@ function PACKAGE-Run-RPM {
 	$_src = "${_target_filename}_${_target_os}-${_target_arch}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\rpm_${_src}"
 	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
-	$__process = FS-Remake-Directory "${_src}"
-	if ($__process -ne 0) {
+	$___process = FS-Remake-Directory "${_src}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Remake-Failed
 		return 1
 	}
@@ -84,8 +84,8 @@ function PACKAGE-Run-RPM {
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-RPM-Content"
 	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
-	$__process = OS-Is-Command-Available "$cmd"
-	if ($__process -ne 0) {
+	$___process = OS-Is-Command-Available "$cmd"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Check-Failed
 		return 1
 	}
@@ -111,8 +111,8 @@ function PACKAGE-Run-RPM {
 
 	# archive the assembled payload
 	$null = I18N-Status-Print-Package-Exec "${_dest}"
-	$__process = RPM-Create-Archive "${_src}" "${_dest}" "${_target_arch}"
-	if ($__process -ne 0) {
+	$___process = RPM-Create-Archive "${_src}" "${_dest}" "${_target_arch}"
+	if ($___process -ne 0) {
 		$null = I18N-Status-Print-Package-Exec-Failed "${_dest}"
 		return 1
 	}

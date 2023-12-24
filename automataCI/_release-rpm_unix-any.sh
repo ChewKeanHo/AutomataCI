@@ -24,7 +24,7 @@ RELEASE::run_rpm() {
 
 
         # validate input
-        RPM::is_valid "$__target"
+        RPM_Is_Valid "$__target"
         if [ $? -ne 0 ]; then
                 return 0
         fi

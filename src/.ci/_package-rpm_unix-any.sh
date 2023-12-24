@@ -26,7 +26,7 @@ fi
 
 
 
-PACKAGE::assemble_rpm_content() {
+PACKAGE_Assemble_RPM_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -45,7 +45,7 @@ PACKAGE::assemble_rpm_content() {
 
         _gpg_keyring="$PROJECT_SKU"
         if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
-                return 10
+                return 10 # not applicable
         elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
@@ -180,7 +180,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
         # NOTE: OPTIONAL (Comment to turn it off)
         OS::print_status info "creating source.repo files...\n"
-        RPM::create_source_repo \
+        RPM_Create_Source_Repo \
                 "$PROJECT_SIMULATE_RELEASE_REPO" \
                 "$_directory" \
                 "$PROJECT_GPG_ID" \
@@ -194,7 +194,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
         OS::print_status info "creating spec file...\n"
-        RPM::create_spec \
+        RPM_Create_Spec \
                 "$_directory" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
                 "$_package" \
