@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -19,6 +19,8 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 	return 1
 }
 
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\installer.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
@@ -27,99 +29,96 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\reprepro.ps1"
 
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-env.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
-
 
 
 
 # begin service
-$null = I18N-Status-Print-Env-Install "dotnet"
+$null = I18N-Install "dotnet"
 $__process = DOTNET-Setup
 if ($__process -ne 0) {
-	$null = I18N-Status-Print-Env-Install-Failed
+	$null = I18N-Install-Failed
 	return 1
 }
 
 
-$null = I18N-Status-Print-Env-Install "chocolatey"
+$null = I18N-Install "chocolatey"
 $__process = CHOCOLATEY-Setup
 if ($__process -ne 0) {
-	$null = I18N-Status-Print-Env-Install-Failed
+	$null = I18N-Install-Failed
 	return 1
 }
 
 
-$null = I18N-Status-Print-Env-Install "docker"
+$null = I18N-Install "docker"
 $__process = DOCKER-Setup
 if ($__process -ne 0) {
-	$null = I18N-Status-Print-Env-Install-Failed
+	$null = I18N-Install-Failed
 	return 1
 }
 
 
-$null = I18N-Status-Print-Env-Install "MSI WiX packager"
+$null = I18N-Install "MSI WiX packager"
 $__process = MSI-Setup
 if ($__process -ne 0) {
-	$null = I18N-Status-Print-Env-Install-Failed
+	$null = I18N-Install-Failed
 	return 1
 }
 
 
-$null = I18N-Status-Print-Env-Install "reprepro"
+$null = I18N-Install "reprepro"
 $___process = REPREPRO-Setup
 if ($___process -ne 0) {
-	$null = I18N-Status-Print-Env-Install-Failed
+	$null = I18N-Install-Failed
 	return 1
 }
 
 
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_PYTHON}))) {
-	$null = I18N-Status-Print-Env-Install "python"
+if ($(STRINGS-Is-Empty "${env:PROJECT_PYTHON}") -ne 0) {
+	$null = I18N-Install "python"
 	if ($(PYTHON-Setup) -ne 0) {
-		$null = I18N-Status-Print-Env-Install-Failed
+		$null = I18N-Install-Failed
 		return 1
 	}
 }
 
 
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_GO}))) {
-	$null = I18N-Status-Print-Env-Install "go"
+if ($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) {
+	$null = I18N-Install "go"
 	$__process = INSTALLER-Setup-Go
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Env-Install-Failed
+		$null = I18N-Install-Failed
 		return 1
 	}
 }
 
 
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_C})) -or
-	(-not ([string]::IsNullOrEmpty(${env:PROJECT_NIM}))) -or
-	(-not ([string]::IsNullOrEmpty(${env:PROJECT_RUST})))) {
-	$null = I18N-Status-Print-Env-Install "c"
+if (($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) -or
+	($(STRINGS-Is-Empty "${env:PROJECT_NIM}") -ne 0) -or
+	($(STRINGS-Is-Empty "${env:PROJECT_RUST}") -ne 0)) {
+	$null = I18N-Install "c"
 	$__process = INSTALLER-Setup-C
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Env-Install-Failed
+		$null = I18N-Install-Failed
 		return 1
 	}
 }
 
 
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_NIM}))) {
-	$null = I18N-Status-Print-Env-Install "nim"
+if ($(STRINGS-Is-Empty "${env:PROJECT_NIM}") -ne 0) {
+	$null = I18N-Install "nim"
 	$__process = INSTALLER-Setup-Nim
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Env-Install-Failed
+		$null = I18N-Install-Failed
 		return 1
 	}
 }
 
 
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_ANGULAR}))) {
-	$null = I18N-Status-Print-Env-Install "angular"
+if ($(STRINGS-Is-Empty "${env:PROJECT_ANGULAR}") -ne 0) {
+	$null = I18N-Install "angular"
 	$__process = INSTALLER-Setup-Angular
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Env-Install-Failed
+		$null = I18N-Install-Failed
 		return 1
 	}
 }
@@ -128,5 +127,5 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_ANGULAR}))) {
 
 
 # report status
-$null = I18N-Status-Print-Run-Successful
+$null = I18N-Run-Successful
 return 0

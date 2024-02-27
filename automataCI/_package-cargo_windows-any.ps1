@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,11 +11,8 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -46,47 +43,48 @@ function PACKAGE-Run-CARGO {
 
 	# validate input
 	if ($(STRINGS-Is-Empty "${env:PROJECT_RUST}") -eq 0) {
-		$null = RUST-Activate-Local-Environment
+		return 0
 	}
 
-	$null = I18N-Status-Print-Check-Availability "RUST"
+	$null = I18N-Check-Availability "RUST"
+	$null = RUST-Activate-Local-Environment
 	$__process = RUST-Is-Available
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "RUST"
+		$null = I18N-Check-Failed
 		return 0
 	}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "RUST"
+	$null = I18N-Create-Package "RUST"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\cargo_${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\cargo_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$__process = FS-Remake-Directory "${_src}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-File-Check-Exists "${_target_path}"
+	$null = I18N-Check "${_target_path}"
 	$__process = FS-Is-Directory "${_target_path}"
 	if ($__process -eq 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-CARGO-Content"
-	$null = I18N-Status-Print-Package-Assembler-Check "${cmd}"
+	$null = I18N-Check-Function "${cmd}"
 	$__process = OS-Is-Command-Available "${cmd}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Package-Assembler-Exec
+	$null = I18N-Assemble-Package
 	$__process = PACKAGE-Assemble-CARGO-Content `
 			${_target} `
 			${_src} `
@@ -94,21 +92,21 @@ function PACKAGE-Run-CARGO {
 			${_target_os} `
 			${_target_arch}
 	if ($__process -eq 10) {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
-		$null = FS-Remove-Silently ${_src}
+		$null = I18N-Assemble-Skipped
+		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} elseif ($__process -ne 0) {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
 
 	# archive the assembled payload
-	$null = I18N-Status-Print-Package-Exec "${_target_path}"
+	$null = I18N-Package "${_target_path}"
 	$null = FS-Make-Directory "${_target_path}"
 	$__process = RUST-Create-Archive "${_src}" "${_target_path}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Package-Exec-Failed "${_target_path}"
+		$null = I18N-Package-Failed
 		return 1
 	}
 

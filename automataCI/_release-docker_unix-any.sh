@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -11,9 +11,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -29,26 +28,26 @@ RELEASE_Run_DOCKER() {
                 return 0
         fi
 
-        I18N_Status_Print_Check_Availability "DOCKER"
+        I18N_Check_Availability "DOCKER"
         DOCKER_Is_Available
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Check_Availability_Failed "DOCKER"
+                I18N_Check_Failed
                 return 1
         fi
 
 
         # execute
-        I18N_Status_Print_Run_Publish "DOCKER"
+        I18N_Publish "DOCKER"
         if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
-                I18N_Status_Print_Run_Publish_Simulated "DOCKER"
+                I18N_Simulate_Publish "DOCKER"
         else
                 DOCKER_Release "$_target" "$PROJECT_VERSION"
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_Run_Publish_Failed
+                        I18N_Publish_Failed
                         return 1
                 fi
 
-                I18N_Status_Print_Run_Clean "$_target"
+                I18N_Clean "$_target"
                 FS::remove_silently "$_target"
         fi
 

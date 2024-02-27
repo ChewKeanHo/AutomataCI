@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,12 +15,13 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
 	return 1
 }
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\i18n\translations.ps1"
 
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-cargo_windows-any.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\_release-changelog_windows-any.ps1"
@@ -49,10 +50,11 @@ $__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_P
 $__recipe = "${__recipe}\release_windows-any.ps1"
 $__process = FS-Is-File "${__recipe}"
 if ($__process -eq 0) {
-	OS-Print-Status info "Baseline source detected. Parsing job recipe: ${__recipe}"
+	$null = I18N-Detected "${__recipe}"
+	$null = I18N-Parse "${__recipe}"
 	$__process = . "${__recipe}"
 	if ($__process -ne 0) {
-		OS-Print-Status error "Parse failed."
+		$null = I18N-Parse-Failed
 		return 1
 	}
 }
@@ -67,7 +69,7 @@ if ($__process -eq 0) {
 }
 
 
-$__process = RELEASE-Run-Static-Repo-Setup
+$__process = RELEASE-Setup-STATIC-REPO
 if ($__process -ne 0) {
 	return 1
 }
@@ -92,11 +94,11 @@ $PACKAGE_DIRECTORY = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
 if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
 	foreach ($TARGET in (Get-ChildItem -Path "${PACKAGE_DIRECTORY}")) {
 		$TARGET = $TARGET.FullName
-
 		if ($TARGET -like "*.asc") {
 			continue
 		}
-		OS-Print-Status info "processing ${TARGET}"
+
+		$null = I18N-Processing "${TARGET}"
 
 		$__process = RELEASE-Run-DEB "$TARGET" "$STATIC_REPO"
 		if ($__process -ne 0) {
@@ -165,10 +167,10 @@ if ($__process -eq 0) {
 
 
 if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
-	OS-Print-Status warning "simulating release repo conclusion..."
-	OS-Print-Status warning "simulating changelog conclusion..."
+	$null = I18N-Simulate-Conclusion "STATIC REPO"
+	$null = I18N-Simulate-Conclusion "CHANGELOG"
 } else {
-	$__process = RELEASE-Run-Static-Repo-Conclude
+	$__process = RELEASE-Conclude-STATIC-REPO
 	if ($__process -ne 0) {
 		return 1
 	}
@@ -198,5 +200,5 @@ if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
 
 
 # report status
-OS-Print-Status success "`n"
+$null = I18N-Run-Successful
 return 0

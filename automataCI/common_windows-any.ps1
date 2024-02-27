@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -21,15 +21,15 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
 # validate input
-$null = I18N-Status-Print-Run-CI-Job-Validate
-if ([string]::IsNullOrEmpty(${env:PROJECT_CI_JOB})) {
-	$null = I18N-Status-Print-Run-CI-Job-Validate-Failed
+$null = I18N-Validate-Job
+if ($(STRINGS-Is-Empty "${env:PROJECT_CI_JOB}") -eq 0) {
+	$null = I18N-Validate-Failed
 	return 1
 }
 
@@ -65,10 +65,10 @@ function RUN-Subroutine-Exec {
 	$ci_job = STRINGS-To-Lowercase "${__job}_windows-any.ps1"
 	$ci_job = "${env:PROJECT_PATH_ROOT}\${__directory}\${env:PROJECT_PATH_CI}\${ci_job}"
 	if ($(FS-Is-File "$ci_job") -eq 0) {
-		$null = I18N-Status-Print-Run-CI-Job "${__name}"
+		$null = I18N-Run "${__name}"
 		$___process = . $ci_job
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-Run-Failed
+			$null = I18N-Run-Failed
 			return 1
 		}
 	}
@@ -118,5 +118,5 @@ if ($___process -ne 0) {
 
 
 # report status
-I18N-Status-Print-Run-Successful
+I18N-Run-Successful
 return 0

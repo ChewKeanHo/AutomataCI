@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -22,11 +22,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-sync.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 . "${env:LIBS_AUTOMATACI}\_package-changelog_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_package-citation_windows-any.ps1"
@@ -36,10 +32,10 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 # 1-time setup job required materials
 $DEST = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
-$null = I18N-Status-Print-Package-Directory-Remake "$DEST"
-$___process = FS-Remake-Directory $DEST
+$null = I18N-Remake "${DEST}"
+$___process = FS-Remake-Directory "${DEST}"
 if ($___process -ne 0) {
-	$null = I18N-Status-Print-Package-Remake-Failed
+	$null = I18N-Remake-Failed
 	return 1
 }
 
@@ -61,28 +57,28 @@ if ($___process -ne 0) {
 }
 
 
-$null = I18N-Status-Print-Newline
+$null = I18N-Newline
 
 
 
 
 # prepare for parallel package
 $__log_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\packagers"
-$null = I18N-Status-Print-Package-Directory-Log-Remake "${__log_directory}"
+$null = I18N-Remake "${__log_directory}"
 $null = FS-Remake-Directory "${__log_directory}"
 $___process = FS-Is-Directory "${__log_directory}"
 if ($___process -ne 0) {
-	$null = I18N-Status-Print-Package-Remake-Failed
+	$null = I18N-Remake-Failed
 	return 1
 }
 
 
 $__control_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-parallel"
-$null = I18N-Status-Print-Package-Directory-Control-Remake "${__control_directory}"
+$null = I18N-Remake "${__control_directory}"
 $null = FS-Remake-Directory "${__control_directory}"
 $___process = FS-Is-Directory "${__control_directory}"
 if ($___process -ne 0) {
-	$null = I18N-Status-Print-Package-Remake-Failed
+	$null = I18N-Remake-Failed
 	return 1
 }
 
@@ -104,8 +100,7 @@ function SUBROUTINE-Package {
 	# initialize libraries from scratch
 	$null = . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
-
-	$null = . "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 	$null = . "${env:LIBS_AUTOMATACI}\_package-archive_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-cargo_windows-any.ps1"
@@ -134,7 +129,7 @@ function SUBROUTINE-Package {
 
 
 	# execute
-	$null = I18N-Status-Print-Package-Exec "${__subject}"
+	$null = I18N-Package "${__subject}"
 	$null = FS-Remove-Silently "${__log}"
 
 	try {
@@ -146,7 +141,7 @@ function SUBROUTINE-Package {
 		$___process = 1
 	}
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Exec-Failed "${__subject}"
+		$null = I18N-Package-Failed
 		return 1
 	}
 
@@ -168,7 +163,7 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 
 
 	# parse build candidate
-	$null = I18N-Status-Print-File-Detected "$file"
+	$null = I18N-Detected "${file}"
 	$TARGET_FILENAME = Split-Path -Leaf $file
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "\..*$"
 	$TARGET_OS = $TARGET_FILENAME -replace ".*_"
@@ -179,17 +174,17 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 	if (($(STRINGS-Is-Empty "${TARGET_OS}") -eq 0) -or
 		($(STRINGS-Is-Empty "${TARGET_ARCH}") -eq 0) -or
 		($(STRINGS-Is-Empty "${TARGET_FILENAME}") -eq 0)) {
-		$null = I18N-Status-Print-File-Bad-Stat-Skipped
+		$null = I18N-File-Has-Bad-Stat-Skipped
 		continue
 	}
 
 	$___process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "${TARGET_FILENAME}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Incompatible-Skipped
+		$null = I18N-Is-Incompatible-Skipped "${TARGET_FILENAME}"
 		continue
 	}
 
-	$null = I18N-Status-Print-Sync-Register "$file"
+	$null = I18N-Sync-Register "$file"
 	$__common = "${DEST}|${file}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
 
 	$__log = "${__log_directory}\archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
@@ -283,7 +278,7 @@ ${__common}|${__log}|PACKAGE-Run-RPM
 }
 
 
-$null = I18N-Status-Print-Sync-Exec-Parallel
+$null = I18N-Sync-Run
 $___process = FS-Is-File "${__parallel_control}"
 if ($___process -eq 0) {
 	$___process = SYNC-Exec-Parallel `
@@ -292,20 +287,20 @@ if ($___process -eq 0) {
 		"${__control_directory}" `
 		"$([System.Environment]::ProcessorCount)"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Sync-Exec-Failed
+		$null = I18N-Sync-Failed
 		return 1
 	}
 }
 
 
-$null = I18N-Status-Print-Sync-Exec-Serial
+$null = I18N-Sync-Run-Series
 $___process = FS-Is-File "${__serial_control}"
 if ($___process -eq 0) {
 	$___process = SYNC-Exec-Serial `
 		${function:SUBROUTINE-Package}.ToString() `
 		"${__serial_control}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Sync-Exec-Failed
+		$null = I18N-Sync-Failed
 		return 1
 	}
 }
@@ -314,5 +309,5 @@ if ($___process -eq 0) {
 
 
 # report status
-$null = I18N-Status-Print-Run-Successful
+$null = I18N-Run-Successful
 return 0

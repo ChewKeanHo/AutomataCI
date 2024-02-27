@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -12,11 +12,8 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -54,57 +51,57 @@ PACKAGE_Run_DOCKER() {
 
 
         # validate input
-        I18N_Status_Print_Check_Availability "DOCKER"
+        I18N_Check_Availability "DOCKER"
         DOCKER_Is_Available
         case $? in
         2|3)
-                I18N_Status_Print_Check_Availability_Incompatible "DOCKER"
+                I18N_Check_Incompatible
                 return 0
                 ;;
         0)
                 # accepted
                 ;;
         *)
-                I18N_Status_Print_Check_Availability_Failed "DOCKER"
+                I18N_Check_Failed
                 return 0
                 ;;
         esac
 
-        I18N_Status_Print_Run_Login_Check "DOCKER"
+        I18N_Check_login "DOCKER"
         DOCKER_Check_Login
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Run_Login_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
 
 
         # prepare workspace and required values
-        I18N_Status_Print_Package_Create "DOCKER"
+        I18N_Create_Package "DOCKER"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/docker.txt"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/docker_${_src}"
-        I18N_Status_Print_Package_Workspace_Remake "$_src"
+        I18N_Remake "$_src"
         FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Remake_Failed
+                I18N_Remake_Failed
                 return 1
         fi
 
 
         # copy all complimentary files to the workspace
         cmd="PACKAGE::assemble_docker_content"
-        I18N_Status_Print_Package_Assembler_Check "$cmd"
+        I18N_Check_Function "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
 
-        I18N_Status_Print_Package_Assembler_Exec
+        I18N_Assemble_Package
         "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)
-                I18N_Status_Print_Package_Assembler_Exec_Skipped
+                I18N_Assemble_Skipped
                 FS::remove_silently "$_src"
                 return 0
                 ;;
@@ -112,17 +109,17 @@ PACKAGE_Run_DOCKER() {
                 # accepted
                 ;;
         *)
-                I18N_Status_Print_Package_Assembler_Exec_Failed
+                I18N_Assemble_Failed
                 return 1
                 ;;
         esac
 
 
         # check required files
-        I18N_Status_Print_File_Check_Exists "${_src}/Dockerfile"
+        I18N_Check "${_src}/Dockerfile"
         FS::is_file "${_src}/Dockerfile"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
 
@@ -132,7 +129,7 @@ PACKAGE_Run_DOCKER() {
 
 
         # archive the assembled payload
-        I18N_Status_Print_Package_Exec "$_target_path"
+        I18N_Package "$_target_path"
         DOCKER_Create \
                 "$_target_path" \
                 "$_target_os" \
@@ -142,27 +139,27 @@ PACKAGE_Run_DOCKER() {
                 "$PROJECT_VERSION"
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                I18N_Status_Print_Package_Exec_Failed "$_target_path"
+                I18N_Package_Failed "$_target_path"
                 return 1
         fi
 
 
         # logout
-        I18N_Status_Print_Run_Logout "DOCKER"
+        I18N_Logout "DOCKER"
         DOCKER_Logout
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                I18N_Status_Print_Run_Logout_Failed
+                I18N_Logout_Failed
                 return 1
         fi
 
 
         # clean up dangling images
-        I18N_Status_Print_Run_Clean "DOCKER"
+        I18N_Clean "DOCKER"
         DOCKER_Clean_Up
         if [ $? -ne 0 ]; then
                 cd "$__current_path" && unset __current_path
-                I18N_Status_Print_Run_Clean_Failed
+                I18N_Clean_Failed
                 return 1
         fi
 

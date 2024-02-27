@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -12,9 +12,8 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/time.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/citation.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
 
 
 
@@ -24,7 +23,7 @@ PACKAGE_Run_CITATION() {
 
 
         # assemble citation
-        I18N_Status_Print_File_Create "$__citation_cff"
+        I18N_Create "$__citation_cff"
         CITATION_Build \
                 "$__citation_cff" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/ABSTRACTS.txt" \
@@ -42,7 +41,7 @@ PACKAGE_Run_CITATION() {
                 "$PROJECT_CONTACT_WEBSITE" \
                 "$PROJECT_CONTACT_EMAIL"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Create_Failed
+                I18N_Create_Failed
                 return 1
         fi
 

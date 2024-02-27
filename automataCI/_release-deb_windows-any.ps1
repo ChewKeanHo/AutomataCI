@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,11 +11,9 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\deb.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\reprepro.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -33,10 +31,10 @@ function RELEASE-Run-DEB {
 		return 0
 	}
 
-	$null = I18N-Status-Print-Check-Availability "REPREPRO"
+	$null = I18N-Check-Availability "REPREPRO"
 	$___process = REPREPRO-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "REPREPRO"
+		$null = I18N-Check-Failed
 		return 0
 	}
 
@@ -46,7 +44,7 @@ function RELEASE-Run-DEB {
 	$__file = "${__conf}\conf\distributions"
 	$___process = FS-Is-File "${__file}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Create "${__file}"
+		$null = I18N-Create "${__file}"
 		$___process = REPREPRO-Create-Conf `
 			"${__conf}" `
 			"${env:PROJECT_REPREPRO_CODENAME}" `
@@ -55,22 +53,22 @@ function RELEASE-Run-DEB {
 			"${env:PROJECT_REPREPRO_ARCH}" `
 			"${env:PROJECT_GPG_ID}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Create-Failed
+			$null = I18N-Create-Failed
 			return 1
 		}
 	}
 
 	$__dest = "${__directory}/deb"
-	$null = I18N-Status-Print-File-Create "${__dest}"
+	$null = I18N-Create "${__dest}"
 	$___process = FS-Make-Directory "${__dest}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Create-Failed
+		$null = I18N-Create-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Run-Publish "REPREPRO"
+	$null = I18N-Publish "REPREPRO"
 	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
-		$null = I18N-Status-Print-Run-Publish-Simulated "REPREPRO"
+		$null = I18N-Simulate-Publish "REPREPRO"
 	} else {
 		$___process = REPREPRO-Publish `
 			"${__target}" `
@@ -79,7 +77,7 @@ function RELEASE-Run-DEB {
 			"${__conf}\db" `
 			"${env:PROJECT_REPREPRO_CODENAME}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-Run-Publish-Failed
+			$null = I18N-Publish-Failed
 			return 1
 		}
 	}

@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,13 +11,9 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\printer.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -39,9 +35,8 @@ function SUBROUTINE-Package-MSI {
 
 	# initialize libraries from scratch
 	$null = . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
-
-	$null = . "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
 
 
 	# parse input
@@ -62,17 +57,17 @@ function SUBROUTINE-Package-MSI {
 
 
 	# execute
-	$null = I18N-Status-Print-Package-Exec "${__subject}"
+	$null = I18N-Package "${__subject}"
 	$($___process = MSI-Compile "${__target}" "${__arch}" "${__lang}") *> "${__log}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Exec-Failed "${__subject}"
+		$null = I18N-Package-Failed
 		return 1
 	}
 
 	$__target = FS-Extension-Replace "${__target}" ".wxs" ".msi"
-	$null = I18N-Status-Print-Package-Export "${__target}"
+	$null = I18N-Export "${__target}"
 	if (-not (Test-Path "${__target}")) {
-		$null = I18N-Status-Print-Package-Export-Failed-Missing "${__subject}"
+		$null = I18N-Export-Missing "${__subject}"
 		return 1
 	}
 
@@ -80,7 +75,7 @@ function SUBROUTINE-Package-MSI {
 		"${__target}" `
 		"${__dest}\$(Split-Path -Leaf -Path "${__target}")"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Export-Failed "${__subject}"
+		$null = I18N-Export-Failed "${__subject}"
 		return 1
 	}
 
@@ -108,30 +103,30 @@ function PACKAGE-Run-MSI {
 
 
 	# validate input
-	$null = I18N-Status-Print-Check-Availability "MSI"
+	$null = I18N-Check-Availability "MSI"
 	$___process = MSI-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed
+		$null = I18N-Check-Failed
 		return 0
 	}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "MSI"
+	$null = I18N-Create-Package "MSI"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\msi_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 
 	$__control_directory = "${_src}\.automataCI"
-	$null = I18N-Status-Print-Package-Workspace-Remake-Control "${__control_directory}"
+	$null = I18N-Remake "${__control_directory}"
 	$___process = FS-Remake-Directory "${__control_directory}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 
@@ -140,14 +135,14 @@ function PACKAGE-Run-MSI {
 
 
 	# copy all complimentary files to the workspace
-	$null = I18N-Status-Print-Package-Assembler-Check "PACKAGE-Assemble-MSI-Content"
+	$null = I18N-Check-Function "PACKAGE-Assemble-MSI-Content"
 	$___process = OS-Is-Command-Available "PACKAGE-Assemble-MSI-Content"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Package-Assembler-Exec
+	$null = I18N-Assemble-Package
 	$___process = PACKAGE-Assemble-MSI-Content `
 		"${_target}" `
 		"${_src}" `
@@ -156,13 +151,13 @@ function PACKAGE-Run-MSI {
 		"${_target_arch}"
 	switch ($___process) {
 	10 {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
+		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}}
 
@@ -176,7 +171,7 @@ function PACKAGE-Run-MSI {
 
 
 		# register for packaging in parallel
-		$null = I18N-Status-Print-Package-Parallelism-Register "${__recipe}"
+		$null = I18N-Sync-Register "${__recipe}"
 		$__log = Split-Path -Leaf -Path "${__recipe}"
 		$__log = FS-Extension-Remove "${__log}" "*"
 		$__log = "${__control_directory}\msi-wxs_${__log}.log"
@@ -188,7 +183,7 @@ ${__recipe}|${_dest}|${__log}
 		}
 	}
 
-	$null = I18N-Status-Print-Package-Parallelism-Run
+	$null = I18N-Sync-Run
 	$___process = FS-Is-File "${__parallel_control}"
 	if ($___process -eq 0) {
 		$___process = SYNC-Exec-Parallel `
@@ -197,22 +192,22 @@ ${__recipe}|${_dest}|${__log}
 			"${__control_directory}" `
 			"$([System.Environment]::ProcessorCount)"
 	} else {
-		$null = I18N-Status-Print-Package-Parallelism-Run-Skipped
+		$null = I18N-Sync-Run-Skipped
 		$___process = 0
 	}
 
 	foreach ($__log in (Get-ChildItem -Path "${__control_directory}" -Filter *.log)) {
-		$null = I18N-Status-Print-Package-Parallelism-Log "${__log}"
+		$null = I18N-Sync-Report-Log "${__log}"
 		foreach ($__line in (Get-Content "${__log}")) {
-			$null = I18N-Status-Print-Plain "${__line}"
+			$null = I18N-Status-Print plain "${__line}"
 		}
-		$null = I18N-Status-Print-Newline
+		$null = I18N-Newline
 	}
 
 
 	# report status
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Parallelism-Run-Failed
+		$null = I18N-Sync-Failed
 		return 1
 	}
 

@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -20,9 +20,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 }
 
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-purge.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 
 
@@ -47,7 +45,7 @@ foreach ($__target in @(
 		continue
 	}
 
-	$null = I18N-Status-Print-Purge-Nuke "${__target}"
+	$null = I18N-Purge "${__target}"
 	$null = FS-Remove-Silently "${__target}"
 }
 
@@ -55,5 +53,5 @@ foreach ($__target in @(
 
 
 # report status
-$null = I18N-Status-Print-Run-Successful
+$null = I18N-Run-Successful
 return 0

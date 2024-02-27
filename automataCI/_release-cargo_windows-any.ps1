@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,10 +11,8 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -31,44 +29,44 @@ function RELEASE-Run-CARGO {
 		return 0
 	}
 
-	$null = I18N-Status-Print-Check-Availability "RUST"
+	$null = I18N-Check-Availability "RUST"
 	$___process = RUST-Activate-Local-Environment
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "RUST"
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# execute
-	$null = I18N-Status-Print-Run-Publish "CARGO"
+	$null = I18N-Publish "CARGO"
 	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
-		$null = I18N-Status-Print-Run-Publish-Simulated "CARGO"
+		$null = I18N-Simulate-Publish "CARGO"
 	} else {
-		$null = I18N-Status-Print-Run-Login-Check "CARGO"
+		$null = I18N-Check-Login "CARGO"
 		$___process = RUST-Cargo-Login
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-Run-Login-Check-Failed
-			$null = I18N-Status-Print-Run-Logout
+			$null = I18N-Check-Failed
+			$null = I18N-Logout
 			$null = RUST-Cargo-Logout
 			return 1
 		}
 
 		$___process = RUST-Cargo-Release-Crate "${_target}"
 
-		$null = I18N-Status-Print-Run-Logout
+		$null = I18N-Logout
 		$____process = RUST-Cargo-Logout
 		if ($____process -ne 0) {
-			$null = I18N-Status-Print-Run-Logout-Failed
+			$null = I18N-Logout-Failed
 			return 1
 		}
 
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-Run-Publish-Failed
+			$null = I18N-Publish-Failed
 			return 1
 		}
 	}
 
-	$null = I18N-Status-Print-Run-Clean "${_target}"
+	$null = I18N-Clean "${_target}"
 	$null = FS-Remove-Silently "${_target}"
 
 

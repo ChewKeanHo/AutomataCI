@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -12,10 +12,8 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -30,24 +28,24 @@ RELEASE_Run_CARGO() {
                 return 0
         fi
 
-        I18N_Status_Print_Check_Availability "RUST"
+        I18N_Check_Availability "RUST"
         RUST_Activate_Local_Environment
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Check_Availability_Failed "RUST"
+                I18N_Check_Failed
                 return 1
         fi
 
 
         # execute
-        I18N_Status_Print_Run_Publish "CARGO"
+        I18N_Publish "CARGO"
         if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
-                I18N_Status_Print_Run_Publish_Simulated "CARGO"
+                I18N_Simulate_Publish "CARGO"
         else
-                I18N_Status_Print_Run_Login_Check "CARGO"
+                I18N_Check_Login "CARGO"
                 RUST_Cargo_Login
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_Run_Login_Check_Failed
-                        I18N_Status_Print_Run_Logout
+                        I18N_Check_Failed
+                        I18N_Logout
                         RUST_Cargo_Logout
                         return 1
                 fi
@@ -55,20 +53,20 @@ RELEASE_Run_CARGO() {
                 RUST_Cargo_Release_Crate "$_target"
                 ___process=$?
 
-                I18N_Status_Print_Run_Logout
+                I18N_Logout
                 RUST_Cargo_Logout
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_Run_Logout_Failed
+                        I18N_Logout_Failed
                         return 1
                 fi
 
                 if [ $___process -ne 0 ]; then
-                        I18N_Status_Print_Run_Publish_Failed
+                        I18N_Publish_Failed
                         return 1
                 fi
         fi
 
-        I18N_Status_Print_Run_Clean "$_target"
+        I18N_Clean "$_target"
         FS::remove_silently "$_target"
 
 

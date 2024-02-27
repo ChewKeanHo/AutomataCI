@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,11 +11,8 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\flatpak.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -46,49 +43,49 @@ function PACKAGE-Run-FLATPAK {
 
 
 	# validate input
-	$null = I18N-Status-Print-Check-Availability "FLATPAK"
+	$null = I18N-Check-Availability "FLATPAK"
 	$___process = FLATPAK-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($___process) {
 	{ $_ -in 2, 3 } {
-		$null = I18N-Status-Print-Check-Availability-Incompatible "FLATPAK"
+		$null = I18N-Check-Incompatible-Skipped
 		return 0
 	} 0 {
 		break
 	} Default {
-		$null = I18N-Status-Print-Check-Availability-Failed "FLATPAK"
+		$null = I18N-Check-Failed
 		return 0
 	}}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "FLATPAK"
+	$null = I18N-Create-Package "FLATPAK"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}.flatpak"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\flatpak_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-File-Check-Exists "${_target_path}"
-	if (Test-Path -Path "${_target_path}" -PathType Container) {
-		$null = I18N-Status-Print-File-Check-Failed
+	$null = I18N-Check "${_target_path}"
+	if ($(FS-Is-File "${_target_path}") -eq 0) {
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-FLATPAK-Content"
-	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$null = I18N-Check-Function "$cmd"
 	$___process = OS-Is-Command-Available "$cmd"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Package-Assembler-Exec
+	$null = I18N-Assemble-Package
 	$___process = PACKAGE-Assemble-FLATPAK-Content `
 			"${_target}" `
 			"${_src}" `
@@ -97,33 +94,33 @@ function PACKAGE-Run-FLATPAK {
 			"${_target_arch}"
 	switch ($___process) {
 	10 {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
+		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
 	} 0 {
 		# accepted
 	} default {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 	}}
 
 
 	# generate required files
-	$null = I18N-Status-Print-File-Check-Exists "${_src}\manifest.yml"
+	$null = I18N-Check "${_src}\manifest.yml"
 	$___process = FS-Is-File "${_src}\manifest.yml"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-File-Check-Exists "${_src}\appdata.xml"
+	$null = I18N-Check "${_src}\appdata.xml"
 	$___process = FS-Is-File "${_src}\appdata.xml"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# archive the assembled payload
-	$null = I18N-Status-Print-Package-Exec "${_target_path}"
+	$null = I18N-Package "${_target_path}"
 	$__process = FLATPAK-Create-Archive `
 		"${_src}" `
 		"${_target_path}" `
@@ -131,7 +128,7 @@ function PACKAGE-Run-FLATPAK {
 		"${env:PROJECT_APP_ID}" `
 		"${env:PROJECT_GPG_ID}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Package-Exec-Failed "${_target_path}"
+		$null = I18N-Package-Failed "${_target_path}"
 		return 1
 	}
 

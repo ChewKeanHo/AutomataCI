@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,9 +11,8 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\time.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\citation.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
 
 
 
@@ -24,7 +23,7 @@ function PACKAGE-Run-CITATION {
 	)
 
 	# execute
-	$null = I18N-Status-Print-File-Create "${__citation_cff}"
+	$null = I18N-Create "${__citation_cff}"
 	$__process = CITATION-Build `
 		"${__citation_cff}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\ABSTRACTS.txt" `
@@ -42,7 +41,7 @@ function PACKAGE-Run-CITATION {
 		"${env:PROJECT_CONTACT_WEBSITE}" `
 		"${env:PROJECT_CONTACT_EMAIL}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-File-Create-Failed
+		$null = I18N-Create-Failed
 		return 1
 	}
 

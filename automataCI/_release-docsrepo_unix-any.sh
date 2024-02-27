@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -11,17 +11,15 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/versioners/git.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-repo.sh"
 
 
 
 
 RELEASE_Conclude_DOCS() {
         # validate input
-        I18N_Status_Print_Repo_Check "DOCS"
+        I18N_Check "DOCS"
         FS::is_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
         if [ $? -ne 0 ]; then
                 return 0
@@ -29,14 +27,14 @@ RELEASE_Conclude_DOCS() {
 
         FS::is_file "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
         if [ $? -eq 0 ]; then
-                I18N_Status_Print_Repo_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
         FS::make_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
 
 
         # execute
-        I18N_Status_Print_Repo_Setup "DOCS"
+        I18N_Setup "DOCS"
         GIT_Clone_Repo \
                 "$PROJECT_PATH_ROOT" \
                 "$PROJECT_PATH_RELEASE" \
@@ -46,7 +44,7 @@ RELEASE_Conclude_DOCS() {
                 "$PROJECT_DOCS_REPO_DIRECTORY" \
                 "$PROJECT_DOCS_REPO_BRANCH"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Repo_Setup_Failed
+                I18N_Setup_Failed
                 return 1
         fi
 
@@ -55,17 +53,17 @@ RELEASE_Conclude_DOCS() {
         __staging="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
         __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_DOCS_REPO_DIRECTORY}"
 
-        I18N_Status_Print_File_Export "$__staging"
+        I18N_Export "$__staging"
         FS::copy_all "${__staging}/" "$__dest"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Export_Failed
+                I18N_Export_Failed
                 return 1
         fi
 
-        I18N_Status_Print_Repo_Commit "DOCS"
+        I18N_Commit "DOCS"
         __tag="$(GIT_Get_Latest_Commit_ID)"
         if [ $(STRINGS_Is_Empty "$__tag") -eq 0 ]; then
-                I18N_Status_Print_Repo_Commit_Failed
+                I18N_Commit_Failed
                 return 1
         fi
 
@@ -78,7 +76,7 @@ RELEASE_Conclude_DOCS() {
         cd "$___current_path" && unset ___current_path
 
         if [ $___process -ne 0 ]; then
-                I18N_Status_Print_Repo_Commit_Failed
+                I18N_Commit_Failed
                 return 1
         fi
 

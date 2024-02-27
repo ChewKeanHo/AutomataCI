@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,11 +11,8 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -45,43 +42,43 @@ function PACKAGE-Run-DOCKER {
 
 
 	# validate input
-	$null = I18N-Status-Print-Check-Availability "DOCKER"
+	$null = I18N-Check-Availability "DOCKER"
 	$___process = DOCKER-Is-Available
 	switch ($___process) {
 	{ $_ -in 2, 3 } {
-		$null = I18N-Status-Print-Check-Availability-Incompatible "DOCKER"
+		$null = I18N-Check-Incompatible-Skipped
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Status-Print-Check-Availability-Failed "DOCKER"
+		$null = I18N-Check-Failed
 		return 0
 	}}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "DOCKER"
+	$null = I18N-Create-Package "DOCKER"
 	$_src = "${__target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\docker.txt"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\docker_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-DOCKER-Content"
-	$null = I18N-Status-Print-Package-Assembler-Check "${cmd}"
+	$null = I18N-Check-Function "${cmd}"
 	$___process = OS-Is-Command-Available "$cmd"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Package-Assembler-Exec
+	$null = I18N-Assemble-Package
 	$___process = PACKAGE-Assemble-DOCKER-Content `
 		"${_target}" `
 		"${_src}" `
@@ -90,22 +87,22 @@ function PACKAGE-Run-DOCKER {
 		"${_target_arch}"
 	switch ($___process) {
 	10 {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
+		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}}
 
 
 	# check required files
-	$null = I18N-Status-Print-File-Check-Exists "${_src}/Dockerfile"
+	$null = I18N-Check "${_src}/Dockerfile"
 	$___process = FS-Is-File "${_src}/Dockerfile"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
@@ -116,7 +113,7 @@ function PACKAGE-Run-DOCKER {
 
 
 	# archive the assembled payload
-	$null = I18N-Status-Print-Package-Exec "${_target_path}"
+	$null = I18N-Package "${_target_path}"
 	$___process = DOCKER-Create `
 		"${_target_path}" `
 		"${_target_os}" `
@@ -127,27 +124,27 @@ function PACKAGE-Run-DOCKER {
 	if ($___process -ne 0) {
 		$null = Set-Location -Path "${__current_path}"
 		$null = Remove-Variable -Name __current_path
-		$null = I18N-Status-Print-Package-Exec-Failed "${_target_path}"
+		$null = I18N-Package-Failed "${_target_path}"
 		return 1
 	}
 
 
 	# logout
-	$null = I18N-Status-Print-Run-Logout "DOCKER"
+	$null = I18N-Logout "DOCKER"
 	$___process = DOCKER-Logout
 	if ($___process -ne 0) {
 		$null = Set-Location -Path "${___current_path}"
 		$null = Remove-Variable -Name ___current_path
-		$null = I18N-Status-Print-Run-Logout-Failed
+		$null = I18N-Logout-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Run-Clean "DOCKER"
+	$null = I18N-Clean "DOCKER"
 	$___process = DOCKER-Clean-Up
 	if ($___process -ne 0) {
 		$null = Set-Location -Path "${___current_path}"
 		$null = Remove-Variable -Name ___current_path
-		$null = I18N-Status-Print-Run-Clean-Failed
+		$null = I18N-Clean-Failed
 		return 1
 	}
 

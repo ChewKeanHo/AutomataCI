@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -11,11 +11,9 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/rpm.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/createrepo.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -31,27 +29,27 @@ RELEASE_Run_RPM() {
                 return 0
         fi
 
-        I18N_Status_Print_Check_Availability "CREATEREPO"
+        I18N_Check_Availability "CREATEREPO"
         CREATEREPO_Is_Available
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Check_Availability_Failed "CREATEREPO"
+                I18N_Check_Failed_Skipped
                 return 0
         fi
 
 
         # execute
         __dest="${2}/rpm"
-        I18N_Status_Print_File_Create "$__dest"
+        I18N_Create "$__dest"
         FS::make_directory "${__dest}"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Create_Failed
+                I18N_Create_Failed
                 return 1
         fi
 
-        I18N_Status_Print_Run_Publish "CREATEREPO"
+        I18N_Publish "CREATEREPO"
         CREATEREPO_Publish "$__target" "${__dest}"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Run_Publish_Failed
+                I18N_Publish_Failed
                 return 1
         fi
 

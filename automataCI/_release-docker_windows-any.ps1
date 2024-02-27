@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -10,9 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -30,26 +29,26 @@ function RELEASE-Run-DOCKER {
 		return 0
 	}
 
-	$null = I18N-Status-Print-Check-Availability "DOCKER"
+	$null = I18N-Check-Availability "DOCKER"
 	$__process = DOCKER-Is-Available
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "DOCKER"
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# execute
-	$null = I18N-Status-Print-Run-Publish "DOCKER"
+	$null = I18N-Publish "DOCKER"
 	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
-		$null = I18N-Status-Print-Run-Publish-Simulated "DOCKER"
+		$null = I18N-Simulate-Publish "DOCKER"
 	} else {
 		$___process = DOCKER-Release "${_target}" "${env:PROJECT_VERSION}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-Run-Publish-Failed
+			$null = I18N-Publish-Failed
 			return 1
 		}
 
-		$null = I18N-Status-Print-Run-Clean "${_target}"
+		$null = I18N-Clean "${_target}"
 		$null = FS-Remove-Silently "${_target}"
 	}
 

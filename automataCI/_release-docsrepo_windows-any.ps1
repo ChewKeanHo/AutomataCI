@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -10,17 +10,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\versioners\git.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-repo.ps1"
 
 
 
 
 function RELEASE-Conclude-DOCS {
 	# validate input
-	$null = I18N-Status-Print-Repo-Check "DOCS"
+	$null = I18N-Check "DOCS"
 	$___process = FS-Is-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
 	if ($___process -ne 0) {
 		return 0
@@ -28,14 +26,14 @@ function RELEASE-Conclude-DOCS {
 
 	$___process = FS-Is-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
 	if ($___process -eq 0) {
-		$null = I18N-Status-Print-Repo-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 	$null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
 
 
 	# execute
-	$null = I18N-Status-Print-Repo-Setup "DOCS"
+	$null = I18N-Setup "DOCS"
 	$__process = GIT-Clone-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
@@ -45,7 +43,7 @@ function RELEASE-Conclude-DOCS {
 		"${env:PROJECT_DOCS_REPO_DIRECTORY}" `
 		"${env:PROJECT_DOCS_REPO_BRANCH}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Repo-Setup-Failed
+		$null = I18N-Setup-Failed
 		return 1
 	}
 
@@ -54,17 +52,17 @@ function RELEASE-Conclude-DOCS {
 	$__staging = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
 	$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_DOCS_REPO_DIRECTORY}"
 
-	$null = I18N-Status-Print-File-Export "${__staging}"
+	$null = I18N-Export "${__staging}"
 	$___process = FS-Copy-All "${__staging}\" "${__dest}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Export-Failed
+		$null = I18N-Export-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Repo-Commit "DOCS"
+	$null = I18N-Commit "DOCS"
 	$__tag = GIT-Get-Latest-Commit-ID
 	if ($(STRINGS-Is-Empty "${__tag}") -eq 0) {
-		$null = I18N-Status-Print-Repo-Commit-Failed
+		$null = I18N-Commit-Failed
 		return 1
 	}
 
@@ -80,7 +78,7 @@ function RELEASE-Conclude-DOCS {
 	$null = Remove-Variable ___current_path
 
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Repo-Commit-Failed
+		$null = I18N-Commit-Failed
 		return 1
 	}
 

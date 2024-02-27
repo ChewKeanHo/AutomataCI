@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,11 +11,8 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\changelog.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -36,54 +33,54 @@ function PACKAGE-Run-CHANGELOG {
 	)
 
 
-	$null = I18N-Status-Print-Check-Availability "CHANGELOG"
+	$null = I18N-Check-Availability "CHANGELOG"
 	$__process = CHANGELOG-Is-Available
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# validate input
-	$null = I18N-Status-Print-File-Validate "${env:PROJECT_VERSION} CHANGELOG"
+	$null = I18N-Validate "${env:PROJECT_VERSION} CHANGELOG"
 	$__process = CHANGELOG-Compatible-DATA-Version `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog" `
 		"${env:PROJECT_VERSION}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-File-Validate-Failed
+		$null = I18N-Validate-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-File-Validate "${env:PROJECT_VERSION} DEB CHANGELOG"
+	$null = I18N-Validate "${env:PROJECT_VERSION} DEB CHANGELOG"
 	$__process = CHANGELOG-Compatible-DEB-Version `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog" `
 		"${env:PROJECT_VERSION}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-File-Validate-Failed
+		$null = I18N-Validate-Failed
 		return 1
 	}
 
 
 	# assemble changelog
-	$null = I18N-Status-Print-File-Create "${__changelog_md}"
+	$null = I18N-Create "${__changelog_md}"
 	$__process = CHANGELOG-Assemble-MD `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog" `
 		"${__changelog_md}" `
 		"${env:PROJECT_VERSION}" `
 		"${env:PROJECT_CHANGELOG_TITLE}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-File-Create-Failed
+		$null = I18N-Create-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-File-Create "${__changelog_deb}"
+	$null = I18N-Create "${__changelog_deb}"
 	$null = FS-Make-Housing-Directory "${__changelog_deb}"
 	$__process = CHANGELOG-Assemble-DEB `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog" `
 		"${__changelog_deb}" `
 		"${env:PROJECT_VERSION}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-File-Create-Failed
+		$null = I18N-Create-Failed
 		return 1
 	}
 

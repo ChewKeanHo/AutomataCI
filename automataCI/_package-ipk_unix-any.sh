@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -12,11 +12,8 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/ipk.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -54,32 +51,32 @@ PACKAGE_Run_IPK() {
 
 
         # validate input
-        I18N_Status_Print_Check_Availability "IPK"
+        I18N_Check_Availability "IPK"
         IPK_Is_Available "$_target_os" "$_target_arch"
         case $? in
         2|3)
-                I18N_Status_Print_Check_Availability_Incompatible "IPK"
+                I18N_Check_Incompatible_Skipped
                 return 0
                 ;;
         0)
                 # accepted
                 ;;
         *)
-                I18N_Status_Print_Check_Availability_Failed "IPK"
+                I18N_Check_Failed
                 return 0
                 ;;
         esac
 
 
         # prepare workspace and required values
-        I18N_Status_Print_Package_Create "IPK"
+        I18N_Create_Package "IPK"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}.ipk"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/ipk_${_src}"
-        I18N_Status_Print_Package_Workspace_Remake "$_src"
+        I18N_Remake "$_src"
         FS::remake_directory "${_src}"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Remake_Failed
+                I18N_Remake_Failed
                 return 1
         fi
         FS::make_directory "${_src}/control"
@@ -87,26 +84,26 @@ PACKAGE_Run_IPK() {
 
 
         # execute
-        I18N_Status_Print_File_Check_Exists "$_target_path"
+        I18N_Check "$_target_path"
         FS::is_file "$_target_path"
         if [ $? -eq 0 ]; then
-                I18N_Status_Print_File_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
 
         cmd="PACKAGE_Assemble_IPK_Content"
-        I18N_Status_Print_Package_Assembler_Check "$cmd"
+        I18N_Check_Function "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
 
-        I18N_Status_Print_Package_Assembler_Exec
+        I18N_Assemble_Package
         "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)
-                I18N_Status_Print_Package_Assembler_Exec_Skipped
+                I18N_Assemble_Skipped
                 FS::remove_silently "$_src"
                 return 0
                 ;;
@@ -114,22 +111,22 @@ PACKAGE_Run_IPK() {
                 # accepted
                 ;;
         *)
-                I18N_Status_Print_Package_Assembler_Exec_Failed
+                I18N_Assemble_Failed
                 return 1
                 ;;
         esac
 
-        I18N_Status_Print_File_Check_Exists "control/control"
+        I18N_Check "control/control"
         FS::is_file "${_src}/control/control"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
 
-        I18N_Status_Print_Package_Exec "$_target_path"
+        I18N_Package "$_target_path"
         IPK_Create_Archive "$_src" "$_target_path"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Exec_Failed "$_target_path"
+                I18N_Package_Failed
                 return 1
         fi
 

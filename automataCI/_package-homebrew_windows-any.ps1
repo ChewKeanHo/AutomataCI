@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -12,13 +12,10 @@
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
 . "${env:LIBS_AUTOMATACI}\services\checksum\shasum.ps1"
 
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-shasum.ps1"
 
 
 
@@ -48,46 +45,46 @@ function PACKAGE-Run-HOMEBREW {
 
 
 	# validate input
-	$null = I18N-Status-Print-Check-Availability "TAR"
+	$null = I18N-Check-Availability "TAR"
 	$___process = TAR-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Incompatible "TAR"
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "HOMEBREW"
+	$null = I18N-Create-Package "HOMEBREW"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\homebrew_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 
 
 	# check formula.rb is available
-	$null = I18N-Status-Print-File-Check-Exists "formula.rb"
+	$null = I18N-Check "formula.rb"
 	$___process = FS-Is-File "${_src}/formula.rb"
 	if ($___process -eq 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-HOMEBREW-Content"
-	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$null = I18N-Check-Function "$cmd"
 	$___process = OS-Is-Command-Available "$cmd"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Package-Assembler-Exec
+	$null = I18N-Assemble-Package
 	$___process = PACKAGE-Assemble-HOMEBREW-Content `
 		"${_target}" `
 		"${_src}" `
@@ -96,13 +93,13 @@ function PACKAGE-Run-HOMEBREW {
 		"${_target_arch}"
 	switch ($___process) {
 	10 {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
+		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}}
 
@@ -110,27 +107,27 @@ function PACKAGE-Run-HOMEBREW {
 	# archive the assembled payload
 	$__current_path = Get-Location
 	$null = Set-Location -Path "${_src}"
-	$null = I18N-Status-Print-File-Archive "${_target_path}.tar.xz"
+	$null = I18N-Archive "${_target_path}.tar.xz"
 	$___process = TAR-Create-XZ "${_target_path}.tar.xz" "*"
 	$null = Set-Location -Path "${__current_path}"
 	$null = Remove-Variable -Name __current_path
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Archive-Failed
+		$null = I18N-Archive-Failed
 		return 1
 	}
 
 
 	# sha256 the package
-	$null = I18N-Status-Print-Shasum "SHA256"
+	$null = I18N-Shasum "SHA256"
 	$__shasum = SHASUM-Checksum-From-File "${_target_path}.tar.xz" "256"
 	if ($(STRINGS-Is-Empty "${__shasum}") -eq 0) {
-		$null = I18N-Status-Print-Shasum-Failed
+		$null = I18N-Shasum-Failed
 		return 1
 	}
 
 
 	# update the formula.rb script
-	$null = I18N-Status-Print-File-Update "formula.rb"
+	$null = I18N-Update "formula.rb"
 	$null = FS-Remove-Silently "${_target_path}.rb"
 	foreach ($__line in (Get-Content "${_src}\formula.rb")) {
 		$__line = STRINGS-Replace-All `
@@ -145,7 +142,7 @@ function PACKAGE-Run-HOMEBREW {
 
 		$___process = FS-Append-File "${_target_path}.rb" "${__line}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Update-Failed
+			$null = I18N-Update-Failed
 			return 1
 		}
 	}

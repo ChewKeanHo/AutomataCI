@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -12,12 +12,10 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/copyright.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/manual.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/rpm.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -55,38 +53,38 @@ PACKAGE_Run_RPM() {
 
 
         # validate input
-        I18N_Status_Print_Check_Availability "RPM"
+        I18N_Check_Availability "RPM"
         RPM_Is_Available "$_target_os" "$_target_arch"
         case $? in
         2|3)
-                I18N_Status_Print_Check_Availability_Incompatible "RPM"
+                I18N_Check_Incompatible_Skipped
                 return 0
                 ;;
         0)
                 # accepted
                 ;;
         *)
-                I18N_Status_Print_Check_Availability_Failed "RPM"
+                I18N_Check_Failed_Skipped
                 return 0
                 ;;
         esac
 
-        I18N_Status_Print_Check_Availability "MANUAL DOCS"
+        I18N_Check_Availability "MANUAL DOCS"
         MANUAL_Is_Available
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Check_Availability_Failed "MANUAL DOCS"
+                I18N_Check_Failed
                 return 1
         fi
 
 
         # prepare workspace and required values
-        I18N_Status_Print_Package_Create "RPM"
+        I18N_Create_Package "RPM"
         _src="${_target_filename}_${_target_os}-${_target_arch}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rpm_${_src}"
-        I18N_Status_Print_Package_Workspace_Remake "$_src"
+        I18N_Remake "$_src"
         FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Remake_Failed
+                I18N_Remake_Failed
                 return 1
         fi
         FS::make_directory "${_src}/BUILD"
@@ -95,18 +93,18 @@ PACKAGE_Run_RPM() {
 
         # copy all complimentary files to the workspace
         cmd="PACKAGE_Assemble_RPM_Content"
-        I18N_Status_Print_Package_Assembler_Check "$cmd"
+        I18N_Check_Function "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
 
-        I18N_Status_Print_Package_Assembler_Exec
+        I18N_Assemble_Package
         "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)
-                I18N_Status_Print_Package_Assembler_Exec_Skipped
+                I18N_Assemble_Skipped
                 FS::remove_silently "$_src"
                 return 0
                 ;;
@@ -114,17 +112,17 @@ PACKAGE_Run_RPM() {
                 # accepted
                 ;;
         *)
-                I18N_Status_Print_Package_Assembler_Exec_Failed
+                I18N_Assemble_Failed
                 return 1
                 ;;
         esac
 
 
         # archive the assembled payload
-        I18N_Status_Print_Package_Exec "$_dest"
+        I18N_Package "$_dest"
         RPM_Create_Archive "$_src" "$_dest" "$_target_arch"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Exec_Failed "$_dest"
+                I18N_Package_Failed
                 return 1
         fi
 

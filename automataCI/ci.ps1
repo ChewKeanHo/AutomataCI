@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -76,8 +76,7 @@ ${env:LIBS_AUTOMATACI} = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}"
 
 # import fundamental libraries
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-get-help.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-init.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\microsoft.ps1"
 
 
@@ -86,7 +85,7 @@ ${env:LIBS_AUTOMATACI} = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}"
 # determine os
 $env:PROJECT_OS = (Get-ComputerInfo).OsName.ToLower()
 if (-not ($env:PROJECT_OS -match "microsoft" -or $env:PROJECT_OS -match "windows")) {
-	$null = I18N-Status-Print-Unsupported-OS
+	$null = I18N-Unsupported-OS
 	return 1
 }
 $env:PROJECT_OS = "windows"
@@ -98,7 +97,7 @@ $env:PROJECT_OS = "windows"
 ${env:PROJECT_ARCH} = MICROSOFT-Arch-Interpret (Get-ComputerInfo).CsProcessors.Architecture
 $__process = STRINGS-Is-Empty "${env:PROJECT_ARCH}"
 if ($__process -eq 0) {
-	$null = I18N-Status-Print-Unsupported-ARCH
+	$null = I18N-Unsupported-ARCH
 	return 1
 }
 
@@ -107,7 +106,7 @@ if ($__process -eq 0) {
 
 # parse repo CI configurations
 if (-not (Test-Path -Path "${env:PROJECT_PATH_ROOT}\CONFIG.toml")) {
-	$null = I18N-Status-Print-Missing-CONFIG-TOML
+	$null = I18N-Missing "CONFIG.toml"
 	return 1
 }
 
@@ -205,11 +204,11 @@ switch ($args[0]) {
 } default {
 	switch ($args[0]) {
 	{ $_ -in '-h', '--help', 'help', '--Help', 'Help', '--HELP', 'HELP' } {
-		$null = I18N-Status-Print-Help info
+		$null = I18N-Help info
 		$__exit_code = 0
 	} default {
-		$null = I18N-Status-Print-Unknown-ACTION
-		$null = I18N-Status-Print-Help note
+		$null = I18N-Unknown-Action
+		$null = I18N-Help note
 		$__exit_code = 1
 	}}
 }}

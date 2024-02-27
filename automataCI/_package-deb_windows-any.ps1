@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,10 +11,8 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\deb.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -45,29 +43,29 @@ function PACKAGE-Run-DEB {
 
 
 	# validate input
-	$null = I18N-Status-Print-Check-Availability "DEB"
+	$null = I18N-Check-Availability "DEB"
 	$__process = DEB-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($__process) {
 	{ $_ -in 2, 3 } {
-		$null = I18N-Status-Print-Check-Availability-Incompatible "DEB"
+		$null = I18N-Check-Incompatible-Skipped
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Status-Print-Check-Availability-Failed "DEB"
+		$null = I18N-Check-Failed
 		return 0
 	}}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "DEB"
+	$null = I18N-Create-Package "DEB"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}.deb"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 	$null = FS-Make-Directory "${_src}\control"
@@ -75,22 +73,22 @@ function PACKAGE-Run-DEB {
 
 
 	# execute
-	$null = I18N-Status-Print-File-Check-Exists "${_target_path}"
+	$null = I18N-Check "${_target_path}"
 	$___process = FS-Is-File "${_target_path}"
 	if ($___process -eq 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 	$cmd = "PACKAGE-Assemble-DEB-Content"
-	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$null = I18N-Check-Function "$cmd"
 	$___process = OS-Is-Command-Available "$cmd"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Package-Assembler-Exec
+	$null = I18N-Assemble-Package
 	$___process = PACKAGE-Assemble-DEB-Content `
 		"${_target}" `
 		"${_src}" `
@@ -100,33 +98,34 @@ function PACKAGE-Run-DEB {
 		"${_changelog_deb}"
 	switch ($___process) {
 	10 {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
+		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}}
 
-	$null = I18N-Status-Print-File-Check-Exists "${_src}\control\md5sums"
+	$null = I18N-Check "${_src}\control\md5sums"
 	$___process = FS-Is-File "${_src}\control\md5sums"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-File-Check-Exists "${_src}\control\control"
+	$null = I18N-Check "${_src}\control\control"
 	$___process = FS-Is-File "${_src}\control\control"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Package-Exec "${_target_path}"
+	$null = I18N-Package "${_target_path}"
 	$___process = DEB-Create-Archive "${_src}" "${_target_path}"
 	if ($___process -ne 0) {
+		$null = I18N-Package-Failed
 		return 1
 	}
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -11,8 +11,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
@@ -28,10 +27,10 @@ RELEASE_Run_CITATION_CFF() {
 
 
         # execute
-        I18N_Status_Print_File_Export "CITATION.cff"
+        I18N_Export "CITATION.cff"
         FS::copy_file "$_target" "${PROJECT_PATH_ROOT}/CITATION.cff"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Export_Failed
+                I18N_Export_Failed
                 return 1
         fi
 

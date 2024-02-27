@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,14 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/i18n/translations.sh"
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-cargo_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-changelog_unix-any.sh"
@@ -50,10 +51,11 @@ __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
 __recipe="${__recipe}/release_unix-any.sh"
 FS::is_file "$__recipe"
 if [ $? -eq 0 ]; then
-        OS::print_status info "Baseline source detected. Parsing job recipe: ${__recipe}\n"
+        I18N_Detected "${__recipe}"
+        I18N_Parse "${__recipe}"
         . "$__recipe"
         if [ $? -ne 0 ]; then
-                OS::print_status error "Parse failed.\n"
+                I18N_Parse_Failed
                 return 1
         fi
 fi
@@ -68,7 +70,7 @@ if [ $? -eq 0 ]; then
 fi
 
 
-RELEASE::run_static_repo_setup
+RELEASE_Setup_STATIC_REPO
 if [ $? -ne 0 ]; then
         return 1
 fi
@@ -93,7 +95,7 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         if [ "${TARGET%.asc*}" != "$TARGET" ]; then
                 continue
         fi
-        OS::print_status info "processing ${TARGET}\n"
+        I18N_Processing "$TARGET"
 
         RELEASE_Run_DEB "$TARGET" "$STATIC_REPO"
         if [ $? -ne 0 ]; then
@@ -161,10 +163,10 @@ fi
 
 
 if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
-        OS::print_status warning "simulating release repo conclusion...\n"
-        OS::print_status warning "simulating changelog conclusion...\n"
+        I18N_Simulate_Conclude "STATIC REPO"
+        I18N_Simulate_Conclude "CHANGELOG"
 else
-        RELEASE::run_static_repo_conclude
+        RELEASE_Conclude_STATIC_REPO
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -194,5 +196,5 @@ fi
 
 
 # report status
-OS::print_status success "\n\n"
+I18N_Run_Successful
 return 0

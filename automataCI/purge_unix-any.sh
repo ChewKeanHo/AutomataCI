@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,13 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
 
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-job-purge.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
@@ -50,7 +48,7 @@ ${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}
         fi
 
 
-        I18N_Status_Print_Purge_Nuke "$__line"
+        I18N_Purge "$__line"
         FS::remove_silently "$__line"
 done
 
@@ -58,5 +56,5 @@ done
 
 
 # report status
-I18N_Status_Print_Run_Successful
+I18N_Run_Successful
 return 0

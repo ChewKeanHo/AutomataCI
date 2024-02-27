@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,12 +15,14 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
         >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
         return 1
 fi
 
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/io/net/http.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/installer.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
@@ -29,116 +31,115 @@ fi
 . "${LIBS_AUTOMATACI}/services/publishers/homebrew.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/reprepro.sh"
 
-. "${LIBS_AUTOMATACI}/services/i18n/status-job-env.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
-
 
 
 
 # begin service
-I18N_Status_Print_Env_Install "brew"
+I18N_Install "brew"
 HOMEBREW_Setup
 if [ $? -ne 0 ]; then
-        I18N_Status_Print_Env_Install_Failed
+        I18N_Install_Failed
         return 1
 fi
 
 
-I18N_Status_Print_Env_Install "curl"
+I18N_Install "curl"
 HTTP_Setup
 if [ $? -ne 0 ]; then
-        I18N_Status_Print_Env_Install_Failed
+        I18N_Install_Failed
         return 1
 fi
 
 
-I18N_Status_Print_Env_Install "msitools"
+I18N_Install "msitools"
 MSI_Setup
 if [ $? -ne 0 ]; then
-        I18N_Status_Print_Env_Install_Failed
+        I18N_Install_Failed
         return 1
 fi
 
 
-I18N_Status_Print_Env_Install "docker"
+I18N_Install "docker"
 DOCKER_Setup
 if [ $? -ne 0 ]; then
-        I18N_Status_Print_Env_Install_Failed
+        I18N_Install_Failed
         return 1
 fi
 
 
-I18N_Status_Print_Env_Install "reprepro"
+I18N_Install "reprepro"
 REPREPRO_Setup
 if [ $? -ne 0 ]; then
-        I18N_Status_Print_Env_Install_Failed
+        I18N_Install_Failed
         return 1
 fi
 
 
-I18N_Status_Print_Env_Install "osslsigncode"
+I18N_Install "osslsigncode"
 INSTALLER::setup_osslsigncode
 if [ $? -ne 0 ]; then
-        I18N_Status_Print_Env_Install_Failed
+        I18N_Install_Failed
         return 1
 fi
 
 
-if [ ! -z "$PROJECT_PYTHON" ]; then
-        I18N_Status_Print_Env_Install "python"
+if [ $(STRINGS_Is_Empty "$PROJECT_PYTHON") -ne 0 ]; then
+        I18N_Install "python"
         PYTHON_Setup
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Env_Install_Failed
+                I18N_Install_Failed
                 return 1
         fi
 fi
 
 
-if [ ! -z "$PROJECT_GO" ]; then
-        I18N_Status_Print_Env_Install "go"
+if [ $(STRINGS_Is_Empty "$PROJECT_GO") -ne 0 ]; then
+        I18N_Install "go"
         INSTALLER::setup_go
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Env_Install_Failed
+                I18N_Install_Failed
                 return 1
         fi
 fi
 
 
-if [ ! -z "$PROJECT_C" ] || [ ! -z "$PROJECT_NIM" ] || [ ! -z "$PROJECT_RUST" ]; then
-        I18N_Status_Print_Env_Install "c"
+if [ $(STRINGS_Is_Empty "$PROJECT_C") -ne 0 ] ||
+        [ $(STRINGS_Is_Empty "$PROJECT_NIM") -ne 0 ] ||
+        [ $(STRINGS_Is_Empty "$PROJECT_RUST") -ne 0 ]; then
+        I18N_Install "c"
         INSTALLER::setup_c "$PROJECT_OS" "$PROJECT_ARCH"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Env_Install_Failed
+                I18N_Install_Failed
                 return 1
         fi
 fi
 
 
-if [ ! -z "$PROJECT_DOTNET" ]; then
-        I18N_Status_Print_Env_Install "dotnet"
+if [ $(STRINGS_Is_Empty "$PROJECT_DOTNET") -ne 0 ]; then
+        I18N_Install "dotnet"
         DOTNET_Setup
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Env_Install_Failed
+                I18N_Install_Failed
                 return 1
         fi
 fi
 
 
-if [ ! -z "$PROJECT_NIM" ]; then
-        I18N_Status_Print_Env_Install "nim"
+if [ $(STRINGS_Is_Empty "$PROJECT_NIM") -ne 0 ]; then
+        I18N_Install "nim"
         INSTALLER::setup_nim "$PROJECT_OS" "$PROJECT_ARCH"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Env_Install_Failed
+                I18N_Install_Failed
                 return 1
         fi
 fi
 
 
-if [ ! -z "$PROJECT_ANGULAR" ]; then
-        I18N_Status_Print_Env_Install "angular"
+if [ $(STRINGS_Is_Empty "$PROJECT_ANGULAR") -ne 0 ]; then
+        I18N_Install "angular"
         INSTALLER::setup_angular "$PROJECT_OS" "$PROJECT_ARCH"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Env_Install_Failed
+                I18N_Install_Failed
                 return 1
         fi
 fi
@@ -147,5 +148,5 @@ fi
 
 
 # report status
-I18N_Status_Print_Run_Successful
+I18N_Run_Successful
 return 0

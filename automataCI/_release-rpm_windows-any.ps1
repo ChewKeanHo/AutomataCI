@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -10,12 +10,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\rpm.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\createrepo.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -33,27 +30,27 @@ function RELEASE-Run-RPM {
 		return 0
 	}
 
-	$null = I18N-Status-Print-Check-Availability "CREATEREPO"
+	$null = I18N-Check-Availability "CREATEREPO"
 	$___process = CREATEREPO-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "CREATEREPO"
+		$null = I18N-Check-Failed-Skipped
 		return 0
 	}
 
 
 	# execute
 	$__dest = "${__directory}/rpm"
-	$null = I18N-Status-Print-File-Create "${__dest}"
+	$null = I18N-Create "${__dest}"
 	$___process = FS-Make-Directory "${__dest}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Create-Failed
+		$null = I18N-Create-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Run-Publish "CREATEREPO"
+	$null = I18N-Publish "CREATEREPO"
 	$___process = CREATEREPO-Publish "${__target}" "${__dest}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Run-Publish-Failed
+		$null = I18N-Publish-Failed
 		return 1
 	}
 

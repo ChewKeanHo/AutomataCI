@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,10 +11,8 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -31,30 +29,30 @@ function RELEASE-Run-PYPI {
 		return 0
 	}
 
-	$null = I18N-Status-Print-Check-Availability "PYTHON"
+	$null = I18N-Check-Availability "PYTHON"
 	$___process = PYTHON-Activate-VENV
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "PYTHON"
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Check-Availability "PYPI"
+	$null = I18N-Check-Availability "PYPI"
 	$___process = PYTHON-PYPI-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "PYPI"
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# execute
-	$null = I18N-Status-Print-Run-Publish "PYPI"
+	$null = I18N-Publish "PYPI"
 	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
-		$null = I18N-Status-Print-Run-Publish-Simulated "PYPI"
+		$null = I18N-Simulate-Publish "PYPI"
 	} else {
-		$null = I18N-Status-Print-Run-Login-Check "PYPI"
+		$null = I18N-Check-Login "PYPI"
 		$___process = PYHTON-Check-PYPI-Login
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-Run-Login-Check-Failed
+			$null = I18N-Check-Failed
 			return 1
 		}
 
@@ -63,12 +61,12 @@ function RELEASE-Run-PYPI {
 			"${env:PROJECT_GPG_ID}" `
 			"${env:PROJECT_PYPI_REPO_URL}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-Run-Publish-Failed
+			$null = I18N-Publish-Failed
 			return 1
 		}
 	}
 
-	$null = I18N-Status-Print-Run-Clean "${_target}"
+	$null = I18N-Clean "${_target}"
 	$null = FS-Remove-Silently "${_target}"
 
 

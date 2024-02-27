@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -23,10 +23,7 @@ fi
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-job-notarize.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
@@ -36,10 +33,10 @@ __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
 __recipe="${__recipe}/notarize_unix-any.sh"
 FS::is_file "$__recipe"
 if [ $? -eq 0 ]; then
-        I18N_Status_Print_Run_CI_Job "$__recipe"
+        I18N_Run "$__recipe"
         . "$__recipe"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Run_Failed
+                I18N_Run_Failed
                 return 1
         fi
 fi
@@ -56,7 +53,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
 
 
         # parse build candidate
-        I18N_Status_Print_File_Detected "$i"
+        I18N_Detected "$i"
         TARGET_FILENAME="${i##*${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/}"
         TARGET_FILENAME="${TARGET_FILENAME%.*}"
         TARGET_OS="${TARGET_FILENAME##*_}"
@@ -67,46 +64,46 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         if [ "$(STRINGS_Is_Empty "$TARGET_OS")" -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$TARGET_ARCH") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$TARGET_FILENAME") -eq 0 ]; then
-                I18N_Status_Print_File_Bad_Stat_Skipped
+                I18N_File_Has_Bad_Stat_Skipped
                 continue
         fi
 
         STRINGS::has_prefix "$PROJECT_SKU" "$TARGET_FILENAME"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Incompatible_Skipped
+                I18N_Is_Incompatible_Skipped "$TARGET_FILENAME"
                 continue
         fi
 
 
         # execute
         cmd="NOTARIZE_Certify"
+        I18N_Check_Availability "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Notarize_Function_Unavailable "$cmd"
+                I18N_Check_Failed
                 continue
         fi
 
-        "$cmd" \
-                "$i" \
+        "$cmd" "$i" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}" \
                 "$TARGET_FILENAME" \
                 "$TARGET_OS" \
                 "$TARGET_ARCH"
         case $? in
         12)
-                I18N_Status_Print_Notarize_Simulate
+                I18N_Simulate_Notarize
                 ;;
         11)
-                I18N_Status_Print_Notarize_Unavailable
+                I18N_Notarize_Unavailable
                 ;;
         10)
-                I18N_Status_Print_Notarize_Not_Applicable
+                I18N_Notarize_Not_Applicable
                 ;;
         0)
-                I18N_Status_Print_Run_Successful
+                I18N_Run_Successful
                 ;;
         *)
-                I18N_Status_Print_Notarize_Failed
+                I18N_Notarize_Failed
                 return 1
                 ;;
         esac

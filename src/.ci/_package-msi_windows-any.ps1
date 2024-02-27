@@ -23,12 +23,12 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\crypto\random.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
 
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
 . "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci\i18n\status-msi.ps1"
 
-. "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
 
 
 
@@ -111,7 +111,7 @@ function PACKAGE-Assemble-MSI-Content {
 		}
 
 		## execute
-		$null = I18N-Status-Print-File-Assemble "${__target}" "${__dest}"
+		$null = I18N-Assemble "${__target}" "${__dest}"
 		if (Test-Path "${__target}") {
 			$null = FS-Copy-File "${__target}" "${__dest}" `
 				-ErrorAction SilentlyContinue
@@ -204,10 +204,10 @@ Unfortunately, you can only install this package on a 32-bit Windows.
 
 		# check required executables for packaging
 		$__var_MAIN_EXE_SOURCE = "${_directory}\${env:PROJECT_SKU}_windows-${__arch}.exe"
-		$null = I18N-Status-Print-File-Check-Exists "${__var_MAIN_EXE_SOURCE}"
+		$null = I18N-Check "${__var_MAIN_EXE_SOURCE}"
 		$___process = FS-Is-File "${__var_MAIN_EXE_SOURCE}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed-Skipped
+			$null = I18N-Check-Failed-Skipped
 			continue
 		}
 
@@ -312,30 +312,30 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 
 		# check required files for packaging
-		$null = I18N-Status-Print-File-Check-Exists "${__var_MAIN_LICENSE_SOURCE}"
+		$null = I18N-Check "${__var_MAIN_LICENSE_SOURCE}"
 		$___process = FS-Is-File "${__var_MAIN_LICENSE_SOURCE}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed-Skipped
+			$null = I18N-Check-Failed-Skipped
 			continue
 		}
 
-		$null = I18N-Status-Print-File-Check-Exists "${__var_USER_GUIDE_SOURCE}"
+		$null = I18N-Check "${__var_USER_GUIDE_SOURCE}"
 		$___process = FS-Is-File "${__var_USER_GUIDE_SOURCE}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed-Skipped
+			$null = I18N-Check-Failed-Skipped
 			continue
 		}
 
-		$null = I18N-Status-Print-File-Check-Exists "${__var_UI_LICENSE_SOURCE}"
+		$null = I18N-Check "${__var_UI_LICENSE_SOURCE}"
 		$___process = FS-Is-File "${__var_UI_LICENSE_SOURCE}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed-Skipped
+			$null = I18N-Check-Failed-Skipped
 			continue
 		}
 
-		$null = I18N-Status-Print-File-Check-Exists "${_wxs}"
+		$null = I18N-Check "${_wxs}"
 		if (Test-Path "${_wxs}") {
-			$null = I18N-Status-Print-File-Failed
+			$null = I18N-Check-Failed
 			return 1
 		}
 
@@ -496,7 +496,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed
+			$null = I18N-Write-Failed
 			return 1
 		}
 
@@ -520,7 +520,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed
+			$null = I18N-Write-Failed
 			return 1
 		}
 
@@ -599,7 +599,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed
+			$null = I18N-Write-Failed
 			return 1
 		}
 
@@ -628,7 +628,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed
+			$null = I18N-Write-Failed
 			return 1
 		}
 
@@ -686,7 +686,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 		</Feature>
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed
+			$null = I18N-Write-Failed
 			return 1
 		}
 
@@ -701,7 +701,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 		<WixVariable Id="WixUILicenseRtf" Value='${__var_UI_LICENSE_SOURCE}' />
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed
+			$null = I18N-Write-Failed
 			return 1
 		}
 
@@ -713,7 +713,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 </Wix>
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Failed
+			$null = I18N-Write-Failed
 			return 1
 		}
 	}

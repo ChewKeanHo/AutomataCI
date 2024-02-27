@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -65,8 +65,7 @@ export LIBS_AUTOMATACI="${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}"
 
 # import fundamental libraries
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-get-help.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-init.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 # determine os
@@ -89,7 +88,7 @@ dragonfly*)
         ;;
 esac
 if [ "$(STRINGS_Is_Empty "$PROJECT_OS")" -eq 0 ]; then
-        I18N_Status_Print_Unsupported_OS
+        I18N_Unsupported_OS
         return 1
 fi
 
@@ -122,7 +121,7 @@ ip*)
         ;;
 esac
 if [ "$(STRINGS_Is_Empty "$PROJECT_ARCH")" -eq 0 ]; then
-        I18N_Status_Print_Unsupported_ARCH
+        I18N_Unsupported_ARCH
         return 1
 fi
 
@@ -131,7 +130,7 @@ fi
 
 # parse repo CI configurations
 if [ ! -f "${PROJECT_PATH_ROOT}/CONFIG.toml" ]; then
-        I18N_Status_Print_Missing_CONFIG_TOML
+        I18N_Missing "CONFIG.toml"
         return 1
 fi
 
@@ -293,12 +292,12 @@ purge|Purge|PURGE)
 *)
         case "$1" in
         -h|--help|help|--Help|Help|--HELP|HELP)
-                I18N_Status_Print_Help info
+                I18N_Help info
                 __exit_code=0
                 ;;
         *)
-                I18N_Status_Print_Unknown_Action
-                I18N_Status_Print_Help note
+                I18N_Unknown_Action
+                I18N_Help note
                 __exit_code=1
                 ;;
         esac

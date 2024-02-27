@@ -30,10 +30,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "activating local environment...\n"
+I18N_Status_Print info "activating local environment...\n"
 RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        I18N_Status_Print error "activation failed.\n"
         return 1
 fi
 
@@ -85,7 +85,7 @@ SUBROUTINE::build() {
 
 
         # building target
-        OS::print_status info "building ${__subject} in parallel...\n"
+        I18N_Status_Print info "building ${__subject} in parallel...\n"
         FS::remove_silently "$__workspace"
         __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_RUST}"
 
@@ -105,7 +105,7 @@ SUBROUTINE::build() {
         __exit_code=$?
         cd "$__current_path" && unset __current_path
         if [ $__exit_code -ne 0 ]; then
-                OS::print_status error "build failed - ${__subject}\n"
+                I18N_Status_Print error "build failed - ${__subject}\n"
                 return 1
         fi
 
@@ -116,7 +116,7 @@ SUBROUTINE::build() {
                 FS::remove_silently "${__dest%.*}.wasm"
                 FS::move "${__source}.wasm" "${__dest%.*}.wasm"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "build failed - ${__subject}\n"
+                        I18N_Status_Print error "build failed - ${__subject}\n"
                         return 1
                 fi
 
@@ -124,7 +124,7 @@ SUBROUTINE::build() {
                         FS::remove_silently "${__dest%.*}.js"
                         FS::move "${__source}.js" "${__dest%.*}.js"
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "build failed - ${__subject}\n"
+                                I18N_Status_Print error "build failed - ${__subject}\n"
                                 return 1
                         fi
                 fi
@@ -132,14 +132,14 @@ SUBROUTINE::build() {
                 FS::remove_silently "${__dest%.*}.exe"
                 FS::move "${__source}.exe" "${__dest%.*}.exe"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "build failed - ${__subject}\n"
+                        I18N_Status_Print error "build failed - ${__subject}\n"
                         return 1
                 fi
         else
                 FS::remove_silently "$__dest"
                 FS::move "$__source" "$__dest"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "build failed - ${__subject}\n"
+                        I18N_Status_Print error "build failed - ${__subject}\n"
                         return 1
                 fi
         fi
@@ -171,17 +171,21 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
 
 
         # validate input
-        OS::print_status info "registering ${__subject} build...\n"
+        I18N_Status_Print info "registering ${__subject} build...\n"
         if [ -z "$__target" ]; then
-                OS::print_status warning "register skipped - missing target.\n"
+                I18N_Status_Print warning "register skipped - missing target.\n"
                 continue
         fi
 
         ## NOTE: perform any hard-coded host system restrictions or gatekeeping
         ##       customization adjustments here.
         case "$__arch" in ### adjust by CPU Architecture
+        mips|mipsel|mipsle|mips64|mips64el|mips64le)
+                I18N_Status_Print warning "register skipped - ${__subject} unsupported.\n"
+                continue
+                ;;
         ppc64|riscv64)
-                OS::print_status warning "register skipped - ${__subject} unsupported.\n"
+                I18N_Status_Print warning "register skipped - ${__subject} unsupported.\n"
                 continue
                 ;;
         wasm)
@@ -189,7 +193,7 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
                 ;;
         *)
                 if [ -z "$__linker" ]; then
-                        OS::print_status warning "register skipped - missing linker.\n"
+                        I18N_Status_Print warning "register skipped - missing linker.\n"
                         continue
                 fi
                 ;;
@@ -198,7 +202,7 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
         case "$__os" in ### adjust by OS
         darwin)
                 if [ ! "$PROJECT_OS" = "darwin" ]; then
-                        OS::print_status warning "register skipped - ${__dest##*/} unsupported.\n"
+                        I18N_Status_Print warning "register skipped - ${__dest##*/} unsupported.\n"
                         continue
                 fi
                 ;;
@@ -211,10 +215,10 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
 
 
         # execute
-        OS::print_status info "adding rust cross-compiler (${__target})...\n"
+        I18N_Status_Print info "adding rust cross-compiler (${__target})...\n"
         rustup target add "$__target"
         if [ $? -ne 0 ]; then
-                OS::print_status error "addition failed.\n"
+                I18N_Status_Print error "addition failed.\n"
                 return 1
         fi
 
@@ -251,10 +255,10 @@ fi
 
 # placeholding source code flag
 __file="${PROJECT_SKU}-src_any-any"
-OS::print_status info "building placeholder file: ${__file}\n"
+I18N_Status_Print info "building placeholder file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        I18N_Status_Print error "build failed.\n"
         return 1
 fi
 
@@ -263,10 +267,10 @@ fi
 
 # placeholding homebrew code flag
 __file="${PROJECT_SKU}-homebrew_any-any"
-OS::print_status info "building placeholder file: ${__file}\n"
+I18N_Status_Print info "building placeholder file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        I18N_Status_Print error "build failed.\n"
         return 1
 fi
 
@@ -275,10 +279,10 @@ fi
 
 # placeholding chocolatey code flag
 __file="${PROJECT_SKU}-chocolatey_any-any"
-OS::print_status info "building placeholder file: ${__file}\n"
+I18N_Status_Print info "building placeholder file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        I18N_Status_Print error "build failed.\n"
         return 1
 fi
 
@@ -287,10 +291,10 @@ fi
 
 # placeholding cargo code flag
 __file="${PROJECT_SKU}-cargo_any-any"
-OS::print_status info "building placeholder file: ${__file}\n"
+I18N_Status_Print info "building placeholder file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        I18N_Status_Print error "build failed.\n"
         return 1
 fi
 
@@ -299,10 +303,10 @@ fi
 
 # placeholding msi code flag
 __file="${PROJECT_SKU}-msi_any-any"
-OS::print_status info "building placeholder file: ${__file}\n"
+I18N_Status_Print info "building placeholder file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        I18N_Status_Print error "build failed.\n"
         return 1
 fi
 

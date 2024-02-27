@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,12 +11,10 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\copyright.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\manual.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\rpm.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -46,35 +44,35 @@ function PACKAGE-Run-RPM {
 
 
 	# validate input
-	$null = I18N-Status-Print-Check-Availability "RPM"
+	$null = I18N-Check-Availability "RPM"
 	$___process = RPM-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($___process) {
 	{ $_ -in 2, 3 } {
-		$null = I18N-Status-Print-Check-Availability-Incompatible "RPM"
+		$null = I18N-Check-Incompatible-Skipped
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Status-Print-Check-Availability-Failed "RPM"
+		$null = I18N-Check-Failed-Skipped
 		return 0
 	}}
 
-	$null = I18N-Status-Print-Check-Availability "MANUAL DOCS"
+	$null = I18N-Check-Availability "MANUAL DOCS"
 	$___process = MANUAL-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "MANUAL DOCS"
+		$null = I18N-Check-Failed "MANUAL DOCS"
 		return 1
 	}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "RPM"
+	$null = I18N-Create-Package "RPM"
 	$_src = "${_target_filename}_${_target_os}-${_target_arch}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\rpm_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 	$null = FS-Make-Directory "${_src}/BUILD"
@@ -83,13 +81,14 @@ function PACKAGE-Run-RPM {
 
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-RPM-Content"
-	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$null = I18N-Check-Function "$cmd"
 	$___process = OS-Is-Command-Available "$cmd"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
+	$null = I18N-Assemble-Package
 	$___process = PACKAGE-Assemble-RPM-Content `
 		${_target} `
 		${_src} `
@@ -98,22 +97,22 @@ function PACKAGE-Run-RPM {
 		${_target_arch}
 	switch ($___process) {
 	10 {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
+		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently ${_src}
 		return 0
 	} 0 {
 		# accepted
 	} default {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}}
 
 
 	# archive the assembled payload
-	$null = I18N-Status-Print-Package-Exec "${_dest}"
+	$null = I18N-Package "${_dest}"
 	$___process = RPM-Create-Archive "${_src}" "${_dest}" "${_target_arch}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Exec-Failed "${_dest}"
+		$null = I18N-Package-Failed
 		return 1
 	}
 

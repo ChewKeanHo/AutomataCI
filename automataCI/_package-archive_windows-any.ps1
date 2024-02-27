@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,12 +11,9 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
 . "${env:LIBS_AUTOMATACI}\services\archive\zip.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -46,44 +43,44 @@ function PACKAGE-Run-ARCHIVE {
 
 
 	# validate input
-	$null = I18N-Status-Print-Check-Availability "TAR"
+	$null = I18N-Check-Availability "TAR"
 	$__process = TAR-Is-Available
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "TAR"
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Check-Availability "ZIP"
+	$null = I18N-Check-Availability "ZIP"
 	$__process = ZIP-Is-Available
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "ZIP"
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "ARCHIVE"
+	$null = I18N-Create-Package "ARCHIVE"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\archive_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$__process = FS-Remake-Directory "${_src}"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-ARCHIVE-Content"
-	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$null = I18N-Check-Function "$cmd"
 	$__process = OS-Is-Command-Available "$cmd"
 	if ($__process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Package-Assembler-Exec
+	$null = I18N-Assemble-Package
 	$__process = PACKAGE-Assemble-ARCHIVE-Content `
 		${_target} `
 		${_src} `
@@ -92,13 +89,13 @@ function PACKAGE-Run-ARCHIVE {
 		${_target_arch}
 	switch ($__process) {
 	10 {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
+		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}}
 
@@ -112,11 +109,11 @@ function PACKAGE-Run-ARCHIVE {
 	switch ($_target_os) {
 	windows {
 		$_target_path = "${_target_path}.zip"
-		$null = I18N-Status-Print-Package-Exec "${_target_path}"
+		$null = I18N-Package "${_target_path}"
 		$__process = ZIP-Create "${_target_path}" "*"
 	} Default {
 		$_target_path = "${_target_path}.tar.xz"
-		$null = I18N-Status-Print-Package-Exec "${_target_path}"
+		$null = I18N-Package "${_target_path}"
 		$__process = TAR-Create-XZ "${_target_path}" "*"
 	}}
 

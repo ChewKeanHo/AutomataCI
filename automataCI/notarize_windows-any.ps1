@@ -22,10 +22,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-notarize.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 
 
@@ -35,10 +32,10 @@ $__recipe = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\${env:PROJECT_P
 $__recipe = "${__recipe}\notarize_windows-any.ps1"
 $___process = FS-Is-File "${__recipe}"
 if ($___process -eq 0) {
-	$null = I18N-Status-Print-Run-CI-Job "${__recipe}"
+	$null = I18N-Run "${__recipe}"
 	$___process = . "${__recipe}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Run-Failed
+		$null = I18N-Run-Failed
 		return 1
 	}
 }
@@ -55,7 +52,7 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 
 
 	# parse build candidate
-	$null = I18N-Status-Print-File-Detected "$i"
+	$null = I18N-Detected "$i"
 	$TARGET_FILENAME = Split-Path -Leaf $i
 	$TARGET_FILENAME = $TARGET_FILENAME -replace `
 		(Join-Path $env:PROJECT_PATH_ROOT $env:PROJECT_PATH_BUILD), ""
@@ -68,40 +65,40 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 	if (($(STRINGS-Is-Empty "$TARGET_OS") -eq 0) -or
 		($(STRINGS-Is-Empty "$TARGET_ARCH") -eq 0) -or
 		($(STRINGS-Is-Empty "$TARGET_FILENAME") -eq 0)) {
-		$null = I18N-Status-Print-File-Bad-Stat-Skipped
+		$null = I18N-File-Has-Bad-Stat-Skipped
 		continue
 	}
 
 	$___process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "${TARGET_FILENAME}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Incompatible-Skipped
+		$null = I18N-Is-Incompatible-Skipped "${TARGET_FILENAME}"
 		continue
 	}
 
 	$cmd = "NOTARIZE-Certify"
+	$null = I18N-Check-Availability "$cmd"
 	$___process = OS-Is-Command-Available "$cmd"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Notarize-Function-Unavailable "$cmd"
+		$null = I18N-Check-Failed
 		continue
 	}
 
-	$___process = NOTARIZE-Certify `
-		"$i" `
+	$___process = NOTARIZE-Certify "$i" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}" `
 		"${TARGET_FILENAME}" `
 		"${TARGET_OS}" `
 		"${TARGET_ARCH}"
 	switch ($___process) {
 	12 {
-		$null = I18N-Status-Print-Notarize-Simulate
+		$null = I18N-Simulate-Notarize
 	} 11 {
-		$null = I18N-Status-Print-Notarize-Unavailable
+		$null = I18N-Notarize-Unavailable
 	} 10 {
-		$null = I18N-Status-Print-Notarize-Not-Applicable
+		$null = I18N-Notarize-Not-Applicable
 	} 0 {
-		$null = I18N-Status-Print-Run-Successful
+		$null = I18N-Run-Successful
 	} default {
-		$null = I18N-Status-Print-Notarize-Failed
+		$null = I18N-Notarize-Failed
 		return 1
 	}}
 }

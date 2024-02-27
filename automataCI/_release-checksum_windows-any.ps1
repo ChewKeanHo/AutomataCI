@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,10 +11,9 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\crypto\gpg.ps1"
 . "${env:LIBS_AUTOMATACI}\services\checksum\shasum.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -45,13 +44,13 @@ function RELEASE-Run-CHECKSUM {
 	$___process = GPG-Is-Available "${env:PROJECT_GPG_ID}"
 	if ($___process -eq 0) {
 		$__keyfile = "${env:PROJECT_SKU}-gpg_${env:PROJECT_VERSION}.keyfile"
-		$null = I18N-Status-Print-File-Export "${__keyfile}"
+		$null = I18N-Export "${__keyfile}"
 		$__keyfile = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${__keyfile}"
 		$null = FS-Remove-Silently "${__keyfile}"
 
 		$___process = GPG-Export-Public-Key "${__keyfile}" "${env:PROJECT_GPG_ID}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Export-Failed
+			$null = I18N-Export-Failed
 			return 1
 		}
 
@@ -59,7 +58,7 @@ function RELEASE-Run-CHECKSUM {
 			"${__keyfile}" `
 			"${__static_repo}\$(Split-Path -Leaf -Path "${__keyfile}")"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Export-Failed
+			$null = I18N-Export-Failed
 			return 1
 		}
 
@@ -69,11 +68,11 @@ function RELEASE-Run-CHECKSUM {
 				continue # it's a gpg cert
 			}
 
-			$null = I18N-Status-Print-File-Sign "${TARGET}" "GPG"
+			$null = I18N-Sign "${TARGET}" "GPG"
 			FS-Remove-Silently "${TARGET}.asc"
 			$___process = GPG-Detach-Sign-File "${TARGET}" "${env:PROJECT_GPG_ID}"
 			if ($___process -ne 0) {
-				$null = I18N-Status-Print-File-Sign-Failed
+				$null = I18N-Sign-Failed
 				return 1
 			}
 		}
@@ -84,15 +83,15 @@ function RELEASE-Run-CHECKSUM {
 	foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
 		$___process = FS-Is-Directory "${TARGET}"
 		if ($___process -eq 0) {
-			$null = I18N-Status-Print-File-Directory-Skipped "$TARGET"
+			$null = I18N-Is-Directory-Skipped "${TARGET}"
 			continue
 		}
 
 		if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_SHA256}") -ne 0) {
-			$null = I18N-Status-Print-File-Checksum "$TARGET" "SHA256"
+			$null = I18N-Checksum "$TARGET" "SHA256"
 			$__value = SHASUM-Checksum-From-File $TARGET.FullName "256"
 			if ($(STRINGS-Is-Empty "${__value}") -eq 0) {
-				$null = I18N-Status-Print-File-Checksum-Failed
+				$null = I18N-Checksum-Failed
 				return 1
 			}
 
@@ -100,16 +99,16 @@ function RELEASE-Run-CHECKSUM {
 ${__value}  $TARGET
 "@
 			if ($___process -ne 0) {
-				$null = I18N-Status-Print-File-Checksum-Failed
+				$null = I18N-Checksum-Failed
 				return 1
 			}
 		}
 
 		if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_SHA512}") -ne 0) {
-			$null = I18N-Status-Print-File-Checksum "$TARGET" "SHA512"
+			$null = I18N-Checksum "$TARGET" "SHA512"
 			$__value = SHASUM-Checksum-From-File $TARGET.FullName "512"
 			if ($(STRINGS-Is-Empty "${__value}") -eq 0) {
-				$null = I18N-Status-Print-File-Checksum-Failed
+				$null = I18N-Checksum-Failed
 				return 1
 			}
 
@@ -117,7 +116,7 @@ ${__value}  $TARGET
 ${__value}  $TARGET
 "@
 			if ($___process -ne 0) {
-				$null = I18N-Status-Print-File-Checksum-Failed
+				$null = I18N-Checksum-Failed
 				return 1
 			}
 		}
@@ -126,10 +125,10 @@ ${__value}  $TARGET
 
 	$___process = FS-Is-File "${__sha256_file}"
 	if ($___process -eq 0) {
-		$null = I18N-Status-Print-File-Export "${__sha256_target}"
+		$null = I18N-Export "${__sha256_target}"
 		$___process = FS-Move "${__sha256_file}" "${__sha256_target}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Export-Failed
+			$null = I18N-Export-Failed
 			return 1
 		}
 	}
@@ -137,10 +136,10 @@ ${__value}  $TARGET
 
 	$___process = FS-Is-File "${__sha512_file}"
 	if ($___process -eq 0) {
-		$null = I18N-Status-Print-File-Export "${__sha512_target}"
+		$null = I18N-Export "${__sha512_target}"
 		$___process = FS-Move "${__sha512_file}" "${__sha512_target}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-File-Export-Failed
+			$null = I18N-Export-Failed
 			return 1
 		}
 	}
@@ -155,20 +154,20 @@ ${__value}  $TARGET
 
 function RELEASE-Initiate-CHECKSUM {
 	# execute
-	$null = I18N-Status-Print-Check-Availability "SHASUM"
+	$null = I18N-Check-Availability "SHASUM"
 	$___process = SHASUM-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Check-Availability "GPG"
+	$null = I18N-Check-Availability "GPG"
 	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Simulate "GPG"
+		$null = I18N-Simulate-Available "GPG"
 	} else {
 		$___process = GPG-Is-Available
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-Check-Availability-Failed
+			$null = I18N-Check-Failed
 			return 1
 		}
 	}

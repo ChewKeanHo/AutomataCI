@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -23,11 +23,7 @@ fi
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/io/sync.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-sync.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 . "${LIBS_AUTOMATACI}/_package-archive_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-cargo_unix-any.sh"
@@ -54,10 +50,10 @@ fi
 
 # 1-time setup job required materials
 DEST="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
-I18N_Status_Print_Package_Directory_Remake "$DEST"
+I18N_Remake "$DEST"
 FS::remake_directory "$DEST"
 if [ $? -ne 0 ]; then
-        I18N_Status_Print_Package_Remake_Failed
+        I18N_Remake_Failed
         return 1
 fi
 
@@ -78,27 +74,27 @@ if [ $? -ne 0 ]; then
 fi
 
 
-I18N_Status_Print_Newline
+I18N_Newline
 
 
 
 
 # prepare for parallel package
 __log_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/packagers"
-I18N_Status_Print_Package_Directory_Log_Remake "$__log_directory"
+I18N_Remake "$__log_directory"
 FS::remake_directory "$__log_directory"
 FS::is_directory "$__log_directory"
 if [ $? -ne 0 ]; then
-        I18N_Status_Print_Package_Remake_Failed
+        I18N_Remake_Failed
         return 1
 fi
 
 __control_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-parallel"
-I18N_Status_Print_Package_Directory_Control_Remake "${__control_directory}"
+I18N_Remake "${__control_directory}"
 FS::remake_directory "$__control_directory"
 FS::is_directory "$__control_directory"
 if [ $? -ne 0 ]; then
-        I18N_Status_Print_Package_Remake_Failed
+        I18N_Remake_Failed
         return 1
 fi
 
@@ -125,12 +121,12 @@ SUBROUTINE_Package() {
 
 
         # execute
-        I18N_Status_Print_Package_Exec "$__subject"
+        I18N_Package "$__subject"
         FS::remove_silently "$__log"
 
         $__command "$__arguments" &> "$__log"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Exec_Failed "${__subject}"
+                I18N_Package_Failed
                 return 1
         fi
 
@@ -151,7 +147,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
 
 
         # parse build candidate
-        I18N_Status_Print_File_Detected "$i"
+        I18N_Detected "$i"
         TARGET_FILENAME="${i##*${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/}"
         TARGET_FILENAME="${TARGET_FILENAME%.*}"
         TARGET_OS="${TARGET_FILENAME##*_}"
@@ -162,17 +158,17 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         if [ "$(STRINGS_Is_Empty "$TARGET_OS")" -eq 0 ] ||
                 [ "$(STRINGS_Is_Empty "$TARGET_ARCH")" -eq 0 ] ||
                 [ "$(STRINGS_Is_Empty "$TARGET_FILENAME")" -eq 0 ]; then
-                I18N_Status_Print_File_Bad_Stat_Skipped
+                I18N_File_Has_Bad_Stat_Skipped
                 continue
         fi
 
         STRINGS::has_prefix "$PROJECT_SKU" "$TARGET_FILENAME"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Incompatible_Skipped
+                I18N_Is_Incompatible_Skipped "$TARGET_FILENAME"
                 continue
         fi
 
-        I18N_Status_Print_Sync_Register "$i"
+        I18N_Sync_Register "$i"
         __common="${DEST}|${i}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
 
         __log="${__log_directory}/archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
@@ -266,23 +262,23 @@ ${__common}|${__log}|PACKAGE_Run_RPM
 done
 
 
-I18N_Status_Print_Sync_Exec_Parallel
+I18N_Sync_Run
 FS::is_file "$__parallel_control"
 if [ $? -eq 0 ]; then
         SYNC_Exec_Parallel "SUBROUTINE_Package" "$__parallel_control"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Sync_Exec_Failed
+                I18N_Sync_Failed
                 return 1
         fi
 fi
 
 
-I18N_Status_Print_Sync_Exec_Serial
+I18N_Sync_Run_Series
 FS::is_file "$__serial_control"
 if [ $? -eq 0 ]; then
         SYNC_Exec_Serial "SUBROUTINE_Package" "$__serial_control"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Sync_Exec_Failed
+                I18N_Sync_Failed
                 return 1
         fi
 fi
@@ -291,5 +287,5 @@ fi
 
 
 # report status
-I18N_Status_Print_Run_Successful
+I18N_Run_Successful
 return 0

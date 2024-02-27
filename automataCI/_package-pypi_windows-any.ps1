@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -12,11 +12,8 @@
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
 
 
 
@@ -54,50 +51,51 @@ function PACKAGE-Run-PYPI {
 		return 0
 	}
 
-	$null = I18N-Status-Print-Check-Availability "PYTHON"
+	$null = I18N-Check-Availability "PYTHON"
 	$___process = PYTHON-Activate-VENV
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "PYTHON"
-		return 0
+		$null = I18N-Check-Failed
+		return 1
 	}
 
-	$null = I18N-Status-Print-Check-Availability "PYPI"
+	$null = I18N-Check-Availability "PYPI"
 	$___process = PYTHON-PYPI-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Failed "PYPI"
-		return 0
+		$null = I18N-Check-Failed
+		return 1
 	}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "PYPI"
+	$null = I18N-Create "PYPI"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\pypi_${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\pypi_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-File-Check-Exists "${_target_path}"
+	$null = I18N-Check "${_target_path}"
 	$___process = FS-Is-Directory "${_target_path}"
 	if ($___process -eq 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-PYPI-Content"
-	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$null = I18N-Check-Function "$cmd"
 	$___process = OS-Is-Command-Available "$cmd"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
+	$null = I18N-Assemble-Package
 	$___process = PACKAGE-Assemble-PYPI-Content `
 			${_target} `
 			${_src} `
@@ -106,19 +104,19 @@ function PACKAGE-Run-PYPI {
 			${_target_arch}
 	switch ($___process) {
 	10 {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
-		$null = FS-Remove-Silently ${_src}
+		$null = I18N-Assemble-Skipped
+		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} 0 {
 		# accepted
 	} default {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}}
 
 
 	# generate required files
-	$null = I18N-Status-Print-File-Create "pyproject.toml"
+	$null = I18N-Create "pyproject.toml"
 	$___process = PYTHON-Create-PYPI-Config `
 		"${_src}" `
 		"${env:PROJECT_NAME}" `
@@ -132,21 +130,21 @@ function PACKAGE-Run-PYPI {
 		"${env:PROJECT_LICENSE}"
 	switch ($___process) {
 	2 {
-		$null = I18N-Status-Print-File-Injected
+		$null = I18N-Injection-Manual-Detected
 	} 0 {
 		# accepted
 	} default {
-		$null = I18N-Status-Print-File-Create-Failed
+		$null = I18N-Create-Failed
 		return 1
 	}}
 
 
 	# archive the assembled payload
-	$null = I18N-Status-Print-Package-Exec "${_target_path}"
+	$null = I18N-Package "${_target_path}"
 	$null = FS-Make-Directory "${_target_path}"
 	$___process = PYTHON-Create-PYPI-Archive "${_src}" "${_target_path}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Exec-Failed "${_target_path}"
+		$null = I18N-Package-Failed
 		return 1
 	}
 

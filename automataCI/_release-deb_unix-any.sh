@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -11,11 +11,10 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/deb.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/reprepro.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -31,10 +30,10 @@ RELEASE_Run_DEB() {
                 return 0
         fi
 
-        I18N_Status_Print_Check_Availability "REPREPRO"
+        I18N_Check_Availability "REPREPRO"
         REPREPRO_Is_Available
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Check_Availability_Failed "REPREPRO"
+                I18N_Check_Failed
                 return 0
         fi
 
@@ -44,7 +43,7 @@ RELEASE_Run_DEB() {
         __file="${__conf}/conf/distributions"
         FS::is_file "$__file"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Create "$__file"
+                I18N_Create "$__file"
                 REPREPRO_Create_Conf \
                         "$__conf" \
                         "$PROJECT_REPREPRO_CODENAME" \
@@ -53,22 +52,22 @@ RELEASE_Run_DEB() {
                         "$PROJECT_REPREPRO_ARCH" \
                         "$PROJECT_GPG_ID"
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Create_Failed
+                        I18N_Create_Failed
                         return 1
                 fi
         fi
 
         __dest="${2}/deb"
-        I18N_Status_Print_File_Create "$__dest"
+        I18N_Create "$__dest"
         FS::make_directory "${__dest}"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Create_Failed
+                I18N_Create_Failed
                 return 1
         fi
 
-        I18N_Status_Print_Run_Publish "REPREPRO"
-        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
-                I18N_Status_Print_Run_Publish_Simulated "REPREPRO"
+        I18N_Publish "REPREPRO"
+        if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
+                I18N_Simulate_Publish "REPREPRO"
         else
                 REPREPRO_Publish \
                         "$__target" \
@@ -77,7 +76,7 @@ RELEASE_Run_DEB() {
                         "${__conf}/db" \
                         "$PROJECT_REPREPRO_CODENAME"
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_Run_Publish_Failed
+                        I18N_Publish_Failed
                         return 1
                 fi
         fi

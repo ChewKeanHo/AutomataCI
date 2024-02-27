@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -10,8 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 
 
@@ -30,10 +29,10 @@ function RELEASE-Run-CITATION-CFF {
 
 
 	# execute
-	$null = I18N-Status-Print-File-Export "CITATION.cff"
+	$null = I18N-Export "CITATION.cff"
 	$___process = FS-Copy-File "${_target}" "${env:PROJECT_PATH_ROOT}\CITATION.cff"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Export-Failed
+		$null = I18N-Export-Failed
 		return 1
 	}
 

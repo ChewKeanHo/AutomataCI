@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -13,13 +13,9 @@
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/archive/tar.sh"
 . "${LIBS_AUTOMATACI}/services/checksum/shasum.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-shasum.sh"
 
 
 
@@ -57,50 +53,50 @@ PACKAGE_Run_HOMEBREW() {
 
 
         # validate input
-        I18N_Status_Print_Check_Availability "TAR"
+        I18N_Check_Availability "TAR"
         TAR_Is_Available
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Check_Availability_Incompatible "TAR"
+                I18N_Check_Failed
                 return 1
         fi
 
 
         # prepare workspace and required values
-        I18N_Status_Print_Package_Create "HOMEBREW"
+        I18N_Create_Package "HOMEBREW"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/homebrew_${_src}"
-        I18N_Status_Print_Package_Workspace_Remake "$_src"
+        I18N_Remake "$_src"
         FS::remake_directory "$_src"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Remake_Failed
+                I18N_Remake_Failed
                 return 1
         fi
 
 
         # check formula.rb is available
-        I18N_Status_Print_File_Check_Exists "formula.rb"
+        I18N_Check "formula.rb"
         FS::is_file "${_src}/formula.rb"
         if [ $? -eq 0 ]; then
-                I18N_Status_Print_File_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
 
 
         # copy all complimentary files to the workspace
         cmd="PACKAGE::assemble_homebrew_content"
-        I18N_Status_Print_Package_Assembler_Check "$cmd"
+        I18N_Check_Function "$cmd"
         OS::is_command_available "$cmd"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Package_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
 
-        I18N_Status_Print_Package_Assembler_Exec
+        I18N_Assemble_Package
         "$cmd" "$_target" "$_src" "$_target_filename" "$_target_os" "$_target_arch"
         case $? in
         10)
-                I18N_Status_Print_Package_Assembler_Exec_Skipped
+                I18N_Assemble_Skipped
                 FS::remove_silently "$_src"
                 return 0
                 ;;
@@ -108,7 +104,7 @@ PACKAGE_Run_HOMEBREW() {
                 # accepted
                 ;;
         *)
-                I18N_Status_Print_Package_Assembler_Exec_Failed
+                I18N_Assemble_Failed
                 return 1
                 ;;
         esac
@@ -116,27 +112,27 @@ PACKAGE_Run_HOMEBREW() {
 
         # archive the assembled payload
         __current_path="$PWD" && cd "$_src"
-        I18N_Status_Print_File_Archive "${_target_path}.tar.xz"
+        I18N_Archive "${_target_path}.tar.xz"
         TAR_Create_XZ "${_target_path}.tar.xz" "*"
         ___process=$?
         cd "$__current_path" && unset __current_path
         if [ $___process -ne 0 ]; then
-                I18N_Status_Print_File_Archive_Failed
+                I18N_Archive_Failed
                 return 1
         fi
 
 
         # sha256 the package
-        I18N_Status_Print_Shasum "SHA256"
+        I18N_Shasum "SHA256"
         __shasum="$(SHASUM_Create_From_File "${_target_path}.tar.xz" "256")"
         if [ $(STRINGS_Is_Empty "$__shasum") -eq 0 ]; then
-                I18N_Status_Print_Shasum_Failed
+                I18N_Shasum_Failed
                 return 1
         fi
 
 
         # update the formula.rb script
-        I18N_Status_Print_File_Update "formula.rb"
+        I18N_Subject_Update "formula.rb"
         FS::remove_silently "${_target_path}.rb"
         __old_IFS="$IFS"
         while IFS= read -r __line || [ -n "$__line" ]; do
@@ -155,7 +151,7 @@ PACKAGE_Run_HOMEBREW() {
                 FS::append_file "${_target_path}.rb" "${__line}\n"
                 if [ $? -ne 0 ]; then
                         IFS="$__old_IFS" && unset __line __old_IFS
-                        I18N_Status_Print_File_Update_Failed
+                        I18N_Update_Failed
                         return 1
                 fi
         done < "${_src}/formula.rb"

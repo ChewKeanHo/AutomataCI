@@ -1,3 +1,40 @@
+automataCI: updated MSI language code for Windows MSI
+automataCI: added i18n feature to release rpm function
+automataCI: backported changes to main packaging function
+automataCI: backported changes to rpm packaging function
+automataCI: added i18n feature to release pypi function
+automataCI: backported changes to msi packaging function
+automataCI: backported changes to flatpak packaging function
+automataCI: finalized dotnet publishing function
+automataCI: finalized microsoft publishing function
+automataCI: backported changes to package ipk function
+automataCI: backported changes to notarize CI job
+automataCI: added i18n feature to release homebrew function
+automataCI: finalized manual library function
+automataCI: finalized copyright library function
+automataCI: backported changes to io/time library
+automataCI: finalized io/sync library
+automataCI: finalized net/http library
+automataCI: added i18n feature to release docs function
+automataCI: finalized disk management library
+automataCI: added i18n feature to release docker function
+automataCI: backported reprepro changes
+automataCI: added i18n feature to release chocolatey function
+automataCI: fixed MD5_Is_Available bug
+automataCI: added i18n feature to release checksum function
+automataCI: added i18n feature to release changelog function
+automataCI: added i18n feature to release cargo function
+automataCI: added i18n feature to release deb function
+automataCI: added i18n feature to release citation function
+automataCI: backported finalization changes for chocolatey packager
+automataCI: added i18n for archive packaging function
+automataCI: finalized shasum library
+automataCI: finalized md5 library
+automataCI: finalized ar library
+automataCI: finalized zip library
+automataCI: finalized tar.gz and tar.xz libraries
+automataCI: finalizeed services/compress/gz library
+automataCI: added i18n feature to changelog packaging function
 automataCI: added i18n feature to cargo packaging function
 automataCI: added i18n feature to chocolatey packaging function
 automataCI: added i18n feature to deb packaging function

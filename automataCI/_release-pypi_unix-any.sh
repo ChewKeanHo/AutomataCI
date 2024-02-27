@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -12,10 +12,8 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/python.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-run.sh"
 
 
 
@@ -30,41 +28,41 @@ RELEASE_Run_PYPI() {
                 return 0
         fi
 
-        I18N_Status_Print_Check_Availability "PYTHON"
+        I18N_Check_Availability "PYTHON"
         PYTHON_Activate_VENV
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Check_Availability_Failed "PYTHON"
+                I18N_Check_Failed
                 return 1
         fi
 
-        I18N_Status_Print_Check_Availability "PYPI"
+        I18N_Check_Availability "PYPI"
         PYTHON_PYPI_Is_Available
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Check_Availability_Failed "PYPI"
+                I18N_Check_Failed "PYPI"
                 return 1
         fi
 
 
         # execute
-        I18N_Status_Print_Run_Publish "PYPI"
+        I18N_Publish "PYPI"
         if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
-                I18N_Status_Print_Run_Publish_Simulated "PYPI"
+                I18N_Simulate_Publish "PYPI"
         else
-                I18N_Status_Print_Run_Login_Check "PYPI"
+                I18N_Check_Login "PYPI"
                 PYTHON_Check_PYPI_Login
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_Run_Login_Check_Failed
+                        I18N_Check_Failed
                         return 1
                 fi
 
                 PYTHON_Release_PYPI "$_target" "$PROJECT_GPG_ID" "$PROJECT_PYPI_REPO_URL"
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_Run_Publish_Failed
+                        I18N_Publish_Failed
                         return 1
                 fi
         fi
 
-        I18N_Status_Print_Run_Clean "$_target"
+        I18N_Clean "$_target"
         FS::remove_silently "$_target"
 
 

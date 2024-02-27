@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -12,11 +12,9 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/versioners/git.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/homebrew.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/status-repo.sh"
 
 
 
@@ -32,9 +30,9 @@ RELEASE_Run_HOMEBREW() {
                 return 0
         fi
 
-        I18N_Status_Print_File_Export "$1"
+        I18N_Export "$1"
         if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
-                I18N_Status_Print_File_Export_Failed
+                I18N_Export_Failed
                 return 1
         fi
 
@@ -42,7 +40,7 @@ RELEASE_Run_HOMEBREW() {
         # execute
         HOMEBREW_Publish "$1" "${2}/Formula/${PROJECT_SKU}.rb"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_File_Export_Failed
+                I18N_Export_Failed
                 return 1
         fi
 
@@ -59,15 +57,15 @@ RELEASE_Conclude_HOMEBREW() {
 
 
         # validate input
-        I18N_Status_Print_Repo_Commit "HOMEBREW"
+        I18N_Commit "HOMEBREW"
         if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
-                I18N_Status_Print_Repo_Commit_Failed
+                I18N_Commit_Failed
                 return 1
         fi
 
         FS::is_directory "$1"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Repo_Commit_Failed
+                I18N_Commit_Failed
                 return 1
         fi
 
@@ -78,14 +76,14 @@ RELEASE_Conclude_HOMEBREW() {
         GIT_Autonomous_Commit "${PROJECT_SKU} ${PROJECT_VERSION}"
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
-                I18N_Status_Print_Repo_Commit_Failed
+                I18N_Commit_Failed
                 return 1
         fi
 
         GIT_Pull_To_Latest
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
-                I18N_Status_Print_Repo_Commit_Failed
+                I18N_Commit_Failed
                 return 1
         fi
 
@@ -93,7 +91,7 @@ RELEASE_Conclude_HOMEBREW() {
         ___process=$?
         cd "$___current_path" && unset ___current_path
         if [ $___process -ne 0 ]; then
-                I18N_Status_Print_Repo_Commit_Failed
+                I18N_Commit_Failed
                 return 1
         fi
 
@@ -107,17 +105,17 @@ RELEASE_Conclude_HOMEBREW() {
 
 RELEASE_Setup_HOMEBREW() {
         # clean up base directory
-        I18N_Status_Print_Repo_Check "HOMEBREW"
+        I18N_Check "HOMEBREW"
         FS::is_file "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
         if [ $? -eq 0 ]; then
-                I18N_Status_Print_Repo_Check_Failed
+                I18N_Check_Failed
                 return 1
         fi
         FS::make_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
 
 
         # execute
-        I18N_Status_Print_Repo_Setup "HOMEBREW"
+        I18N_Setup "HOMEBREW"
         GIT_Clone_Repo \
                 "$PROJECT_PATH_ROOT" \
                 "$PROJECT_PATH_RELEASE" \
@@ -126,7 +124,7 @@ RELEASE_Setup_HOMEBREW() {
                 "$PROJECT_SIMULATE_RELEASE_REPO" \
                 "$PROJECT_HOMEBREW_DIRECTORY"
         if [ $? -ne 0 ]; then
-                I18N_Status_Print_Repo_Setup_Failed
+                I18N_Setup_Failed
                 return 1
         fi
 

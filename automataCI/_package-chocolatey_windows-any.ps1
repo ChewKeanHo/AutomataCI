@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -12,12 +12,8 @@
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-job-package.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-run.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-shasum.ps1"
 
 
 
@@ -47,37 +43,37 @@ function PACKAGE-Run-CHOCOLATEY {
 
 
 	# validate input
-	$null = I18N-Status-Print-Check-Availability "ZIP"
+	$null = I18N-Check-Availability "ZIP"
 	$___process = ZIP-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Check-Availability-Incompatible "ZIP"
+		$null = I18N-Check-Failed
 		return 1
 	}
 
 
 	# prepare workspace and required values
-	$null = I18N-Status-Print-Package-Create "CHOCOLATEY"
+	$null = I18N-Create-Package "CHOCOLATEY"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\choco_${_src}"
-	$null = I18N-Status-Print-Package-Workspace-Remake "${_src}"
+	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Remake-Failed
+		$null = I18N-Remake-Failed
 		return 1
 	}
 
 
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-CHOCOLATEY-Content"
-	$null = I18N-Status-Print-Package-Assembler-Check "$cmd"
+	$null = I18N-Check-Function "${cmd}"
 	$___process = OS-Is-Command-Available "PACKAGE-Assemble-CHOCOLATEY-Content"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Package-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
-	$null = I18N-Status-Print-Package-Assembler-Exec
+	$null = I18N-Assemble-Package
 	$___process = PACKAGE-Assemble-CHOCOLATEY-Content `
 		"${_target}" `
 		"${_src}" `
@@ -86,23 +82,23 @@ function PACKAGE-Run-CHOCOLATEY {
 		"${_target_arch}"
 	switch ($___process) {
 	10 {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Skipped
+		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Status-Print-Package-Assembler-Exec-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}}
 
 
 	# check nuspec is available
-	$null = I18N-Status-Print-File-Check-Exists ".nuspec metadata"
+	$null = I18N-Check ".nuspec metadata"
 	$__name = ""
 	foreach ($__file in (Get-ChildItem -File -Path "${_src}\*.nuspec")) {
 		if ($(STRINGS-Is-Empty "${__name}") -ne 0) {
-			$null = I18N-Status-Print-File-Check-Failed
+			$null = I18N-Check-Failed
 			return 1
 		}
 
@@ -110,7 +106,7 @@ function PACKAGE-Run-CHOCOLATEY {
 	}
 
 	if ($(STRINGS-Is-Empty "${__name}") -eq 0) {
-		$null = I18N-Status-Print-File-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 
@@ -118,25 +114,25 @@ function PACKAGE-Run-CHOCOLATEY {
 	# archive the assembled payload
 	$__name = "${__name}-chocolatey_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}.nupkg"
 	$__name = "${_dest}\${__name}"
-	$null = I18N-Status-Print-File-Archive "${__name}"
+	$null = I18N-Archive "${__name}"
 	$___process = CHOCOLATEY-Archive "${__name}" "${_src}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Archive-Failed
+		$null = I18N-Archive-Failed
 		return 1
 	}
 
 
 	# test the package
-	$null = I18N-Status-Print-Package-Testing "${__name}"
+	$null = I18N-Test "${__name}"
 	$___process = CHOCOLATEY-Is-Available
 	if ($___process -eq 0) {
 		$___process = CHOCOLATEY-Test "${__name}"
 		if ($___process -ne 0) {
-			$null = I18N-Status-Print-Package-Testing-Failed
+			$null = I18N-Test-Failed
 			return 1
 		}
 	} else {
-		$null = I18N-Status-Print-Package-Testing-Skipped
+		$null = I18N-Test-Skipped
 	}
 
 

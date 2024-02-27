@@ -159,7 +159,7 @@ CHANGELOG_Assemble_RPM() {
         # validate input
         if [ $(STRINGS_Is_Empty "$___target") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___resources") -eq 0 ] ||
-                [ $(STIRNGS_Is_Empty "$___date") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___date") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___name") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___email") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___version") -eq 0 ] ||

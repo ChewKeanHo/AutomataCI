@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -12,8 +12,7 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-job-package.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
@@ -51,10 +50,10 @@ while IFS="" read -r tech || [ -n "$tech" ]; do
         package_fx="${PROJECT_PATH_ROOT}/${tech}/${PROJECT_PATH_CI}/package_unix-any.sh"
         FS::is_file "$package_fx"
         if [ $? -eq 0 ]; then
-                I18N_Status_Print_Package_Source "$package_fx"
+                I18N_Source "$package_fx"
                 . "$package_fx"
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_Package_Source_Failed
+                        I18N_Source_Failed
                         return 1
                 fi
         fi
@@ -62,6 +61,8 @@ done <<EOF
 $tech_list
 EOF
 IFS="$old_IFS" && unset old_IFS
+
+
 
 
 # report status

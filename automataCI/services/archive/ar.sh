@@ -37,8 +37,8 @@ AR_Create() {
 
 
         # validate input
-        if [ $(STRINGS_Is_Available "$1") -eq 0 ] ||
-                [ $(STRINGS_Is_Available "$2") -eq 0 ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
                 return 1
         fi
 

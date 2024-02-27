@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,11 +11,9 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\versioners\git.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-file.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\status-repo.ps1"
 
 
 
@@ -33,10 +31,10 @@ function RELEASE-Run-CHOCOLATEY {
 		return 0
 	}
 
-	$null = I18N-Status-Print-File-Export "${___target}"
+	$null = I18N-Export "${___target}"
 	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___repo}") -eq 0)) {
-		$null = I18N-Status-Print-File-Export-Failed
+		$null = I18N-Export-Failed
 		return 1
 	}
 
@@ -46,7 +44,7 @@ function RELEASE-Run-CHOCOLATEY {
 		"${___target}" `
 		"${___repo}\${env:PROJECT_CHOCOLATEY_DIRECTORY}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-File-Export-Failed
+		$null = I18N-Export-Failed
 		return 1
 	}
 
@@ -65,15 +63,15 @@ function RELEASE-Conclude-CHOCOLATEY {
 
 
 	# validate input
-	$null = I18N-Status-Print-Repo-Commit "CHOCOLATEY"
+	$null = I18N-Commit "CHOCOLATEY"
 	if ($(STRINGS-Is-Empty "${___directory}") -eq 0) {
-		$null = I18N-Status-Print-Repo-Commit-Failed
+		$null = I18N-Commit-Failed
 		return 1
 	}
 
 	$___process = FS-Is-Directory "${___directory}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Repo-Commit-Failed
+		$null = I18N-Commit-Failed
 		return 1
 	}
 
@@ -85,7 +83,7 @@ function RELEASE-Conclude-CHOCOLATEY {
 	if ($___process -ne 0) {
 		$null = Set-Location "${__curent_path}"
 		$null = Remove-Variable __current_path
-		$null = I18N-Status-Print-Repo-Commit-Failed
+		$null = I18N-Commit-Failed
 		return 1
 	}
 
@@ -94,7 +92,7 @@ function RELEASE-Conclude-CHOCOLATEY {
 	if ($___process -ne 0) {
 		$null = Set-Location "${__curent_path}"
 		$null = Remove-Variable __current_path
-		$null = I18N-Status-Print-Repo-Commit-Failed
+		$null = I18N-Commit-Failed
 		return 1
 	}
 
@@ -105,7 +103,7 @@ function RELEASE-Conclude-CHOCOLATEY {
 	$null = Set-Location "${__curent_path}"
 	$null = Remove-Variable __current_path
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Repo-Commit-Failed
+		$null = I18N-Commit-Failed
 		return 1
 	}
 
@@ -119,17 +117,17 @@ function RELEASE-Conclude-CHOCOLATEY {
 
 function RELEASE-Setup-CHOCOLATEY {
 	# clean up base directory
-	$null = I18N-Status-Print-Repo-Check "CHOCOLATEY"
+	$null = I18N-Check "CHOCOLATEY"
 	$___process = FS-Is-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
 	if ($___process -eq 0) {
-		$null = I18N-Status-Print-Repo-Check-Failed
+		$null = I18N-Check-Failed
 		return 1
 	}
 	$null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}"
 
 
 	# execute
-	$null = I18N-Status-Print-Repo-Setup "CHOCOLATEY"
+	$null = I18N-Setup "CHOCOLATEY"
 	$___process = GIT-Clone-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
@@ -138,7 +136,7 @@ function RELEASE-Setup-CHOCOLATEY {
 		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
 		"${env:PROJECT_CHOCOLATEY_DIRECTORY}"
 	if ($___process -ne 0) {
-		$null = I18N-Status-Print-Repo-Setup-Failed
+		$null = I18N-Setup-Failed
 		return 1
 	}
 

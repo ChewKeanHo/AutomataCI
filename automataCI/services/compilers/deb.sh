@@ -224,7 +224,7 @@ DEB_Create_Control() {
                 [ $(STRINGS_Is_Empty "$___website") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___pitch") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___priority") -eq 0 ] ||
-                [ $(STRINGS_IS_Empty "$___section") -eq 0 ]; then
+                [ $(STRINGS_Is_Empty "$___section") -eq 0 ]; then
                 return 1
         fi
 
@@ -274,8 +274,7 @@ Description: $___pitch
 
 
         # append description data file
-        ___process="$(FS::is_file "$___description_filepath")"
-        if [ $___process -ne 0 ]; then
+        if [ ! "$(FS::is_file "$___description_filepath")" = "0" ]; then
                 return 0 # report status early
         fi
 

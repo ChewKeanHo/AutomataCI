@@ -22,9 +22,8 @@ fi
 
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/crypto/random.sh"
-
-. "${LIBS_AUTOMATACI}/services/i18n/status-file.sh"
 
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/i18n/status-msi.sh"
 
@@ -100,7 +99,7 @@ arm|zh-hans
                 fi
 
                 ## execute
-                I18N_Status_Print_File_Assemble "$__target" "$__dest"
+                I18N_Assemble "$__target" "$__dest"
                 if [ -e "$__target" ]; then
                         FS::copy_file "$__target" "$__dest" &> /dev/null
                 fi
@@ -196,10 +195,10 @@ Unfortunately, you can only install this package on a 32-bit Windows."
 
                 # check required executables for packaging
                 __var_MAIN_EXE_SOURCE="${_directory}/${PROJECT_SKU}_windows-${__arch}.exe"
-                I18N_Status_Print_File_Check_Exists "${__var_MAIN_EXE_SOURCE}"
+                I18N_Check "${__var_MAIN_EXE_SOURCE}"
                 FS::is_file "$__var_MAIN_EXE_SOURCE"
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Check_Failed_Skipped
+                        I18N_Check_Failed_Skipped
                         continue
                 fi
 
@@ -306,24 +305,24 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
 
                 # check required files for packaging
-                I18N_Status_Print_File_Check_Exists "$__var_MAIN_LICENSE_SOURCE"
+                I18N_Check "$__var_MAIN_LICENSE_SOURCE"
                 FS::is_file "$__var_MAIN_LICENSE_SOURCE"
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Check_Failed_Skipped
+                        I18N_Check_Failed_Skipped
                         continue
                 fi
 
-                I18N_Status_Print_File_Check_Exists "$__var_USER_GUIDE_SOURCE"
+                I18N_Check "$__var_USER_GUIDE_SOURCE"
                 FS::is_file "$__var_USER_GUIDE_SOURCE"
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Check_Failed_Skipped
+                        I18N_Check_Failed_Skipped
                         continue
                 fi
 
-                I18N_Status_Print_File_Check_Exists "$_wxs"
+                I18N_Check "$_wxs"
                 FS::is_file "$_wxs"
                 if [ $? -eq 0 ]; then
-                        I18N_Status_Print_File_Check_Failed
+                        I18N_Check_Failed
                         return 1
                 fi
 
@@ -409,7 +408,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Write_Failed
+                        I18N_Write_Failed
                         return 1
                 fi
 
@@ -423,7 +422,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 >
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Write_Failed
+                        I18N_Write_Failed
                         return 1
                 fi
 
@@ -440,7 +439,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                         </Component>
 "
                         if [ $? -ne 0 ]; then
-                                I18N_Status_Print_File_Write_Failed
+                                I18N_Write_Failed
                                 return 1
                         fi
                 fi
@@ -513,7 +512,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                         </Directory>
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Write_Failed
+                        I18N_Write_Failed
                         return 1
                 fi
 
@@ -522,7 +521,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 </Directory></Directory>
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Write_Failed
+                        I18N_Write_Failed
                         return 1
                 fi
 
@@ -550,7 +549,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Write_Failed
+                        I18N_Write_Failed
                         return 1
                 fi
 
@@ -606,7 +605,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 </Feature>
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Write_Failed
+                        I18N_Write_Failed
                         return 1
                 fi
 
@@ -618,7 +617,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 </Wix>
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Status_Print_File_Write_Failed
+                        I18N_Write_Failed
                         return 1
                 fi
         done
