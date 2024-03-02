@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -10,9 +10,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-STRINGS::has_prefix() {
-        #__prefix="$1"
-        #__content="$2"
+STRINGS_Has_Prefix() {
+        #___prefix="$1"
+        #___content="$2"
 
 
         # validate input
@@ -34,9 +34,9 @@ STRINGS::has_prefix() {
 
 
 
-STRINGS::has_suffix() {
-        #__suffix="$1"
-        #__content="$2"
+STRINGS_Has_Suffix() {
+        #___suffix="$1"
+        #___content="$2"
 
 
         # validate input
@@ -60,7 +60,7 @@ STRINGS::has_suffix() {
 
 
 STRINGS_Is_Empty() {
-        #__target="$1"
+        #___target="$1"
 
 
         # execute
@@ -78,10 +78,10 @@ STRINGS_Is_Empty() {
 
 
 
-STRINGS::replace_all() {
-        #__content="$1"
-        #__subject="$2"
-        #__replacement="$3"
+STRINGS_Replace_All() {
+        #___content="$1"
+        #___subject="$2"
+        #___replacement="$3"
 
 
         # validate input
@@ -102,76 +102,101 @@ STRINGS::replace_all() {
 
 
         # execute
-        __right="$1"
-        __register=""
-        while [ -n "$__right" ]; do
-                __left=${__right%%${2}*}
+        ___right="$1"
+        ___register=""
+        while [ -n "$___right" ]; do
+                ___left=${___right%%${2}*}
 
-                if [ "$__left" = "$__right" ]; then
-                        printf -- "%b" "${__register}${__right}"
+                if [ "$___left" = "$___right" ]; then
+                        printf -- "%b" "${___register}${___right}"
                         return 0
                 fi
 
                 # replace this occurence
-                __register="${__register}${__left}${3}"
-                __right="${__right#*${2}}"
+                ___register="${___register}${___left}${3}"
+                ___right="${___right#*${2}}"
         done
 
 
         # report status
-        printf -- "%b" "${__register}"
+        printf -- "%b" "${___register}"
         return 0
 }
 
 
 
 
-STRINGS::to_lowercase() {
-        #__content="$1"
+STRINGS_To_Lowercase() {
+        #___content="$1"
 
+
+        # execute
         printf -- "%b" "$1" | tr '[:upper:]' '[:lower:]'
+
+
+        # report status
         return 0
 }
 
 
 
 
-STRINGS::trim_whitespace_left() {
-        #__content="$1"
+STRINGS_Trim_Whitespace_Left() {
+        #___content="$1"
 
+
+        # execute
         printf -- "%b" "${1#"${1%%[![:space:]]*}"}"
+
+
+        # report status
         return 0
 }
 
 
 
 
-STRINGS::trim_whitespace_right() {
-        #__content="$1"
+STRINGS_Trim_Whitespace_Right() {
+        #___content="$1"
 
+
+        # execute
         printf -- "%b" "${1%"${1##*[![:space:]]}"}"
+
+
+        # report status
         return 0
 }
 
 
 
 
-STRINGS::trim_whitespace() {
-        #__content="$1"
+STRINGS_Trim_Whitespace() {
+        #___content="$1"
 
-        ___content="$(STRINGS::trim_whitespace_left "$1")"
-        ___content="$(STRINGS::trim_whitespace_right "$___content")"
+
+        # execute
+        ___content="$(STRINGS_Trim_Whitespace_Left "$1")"
+        ___content="$(STRINGS_Trim_Whitespace_Right "$___content")"
         printf -- "%b" "$___content"
         unset ___content
+
+
+        # report status
         return 0
 }
 
 
 
 
-STRINGS::to_uppercase() {
-        #__content="$1"
+STRINGS_To_Uppercase() {
+        #___content="$1"
 
+
+        # execute
         printf -- "%b" "$1" | tr '[:lower:]' '[:upper:]'
+
+
+        # report status
         return 0
 }

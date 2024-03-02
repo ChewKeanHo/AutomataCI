@@ -51,11 +51,11 @@ BASELINE|${PROJECT_PATH_SOURCE:-none}
 old_IFS="$IFS"
 while IFS= read -r tech || [ -n "$tech" ]; do
         if [ $(STRINGS_Is_Empty "${tech#*|}") -eq 0 ] ||
-                [ "$(STRINGS::to_uppercase "${tech#*|}")" = "NONE" ]; then
+                [ "$(STRINGS_To_Uppercase "${tech#*|}")" = "NONE" ]; then
                 continue
         fi
 
-        if [ ! "$(STRINGS::to_uppercase "${tech%|*}")" = "BASELINE" ]; then
+        if [ ! "$(STRINGS_To_Uppercase "${tech%|*}")" = "BASELINE" ]; then
                 case "$1" in
                 deploy)
                         continue # skipped
@@ -67,7 +67,7 @@ while IFS= read -r tech || [ -n "$tech" ]; do
 
 
         # execute
-        ci_job="$(STRINGS::to_lowercase "${PROJECT_CI_JOB}")_unix-any.sh"
+        ci_job="$(STRINGS_To_Lowercase "${PROJECT_CI_JOB}")_unix-any.sh"
         ci_job="${PROJECT_PATH_ROOT}/${tech#*|}/${PROJECT_PATH_CI}/${ci_job}"
         FS::is_file "$ci_job"
         if [ $? -eq 0 ]; then

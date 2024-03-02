@@ -154,10 +154,10 @@ Software\\\\${PROJECT_CONTACT_NAME}\\\\InstalledProducts\\\\${PROJECT_NAME}"
         old_IFS="$IFS"
         printf -- '%s' "$__selections" | while IFS="" read -r __line || [ -n "$__line" ]; do
                 # parse line
-                __arch="$(STRINGS::to_lowercase "${__line%%|*}")"
+                __arch="$(STRINGS_To_Lowercase "${__line%%|*}")"
                 __line="${__line#*|}"
 
-                __i18n="$(STRINGS::to_lowercase "${__line%%|*}")"
+                __i18n="$(STRINGS_To_Lowercase "${__line%%|*}")"
                 __line="${__line#*|}"
 
 

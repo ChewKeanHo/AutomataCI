@@ -34,7 +34,7 @@ DOTNET_Add() {
         if [ $(STRINGS_Is_Empty "$___version") -eq 0 ]; then
                 ___version="latest"
         fi
-        ___version="$(STRINGS::to_lowercase "${___version}")"
+        ___version="$(STRINGS_To_Lowercase "${___version}")"
 
 
         # execute

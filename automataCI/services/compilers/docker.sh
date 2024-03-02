@@ -181,13 +181,13 @@ DOCKER_Get_ID() {
 
         # execute
         if [ $(STRINGS_Is_Empty "$4") -ne 0 ] && [ $(STRINGS_Is_Empty "$5") -ne 0 ]; then
-                printf "$(STRINGS::to_lowercase "${1}/${2}:${4}-${5}_${3}")"
+                printf "$(STRINGS_To_Lowercase "${1}/${2}:${4}-${5}_${3}")"
         elif [ $(STRINGS_Is_Empty "$4") -eq 0 ] && [ $(STRINGS_Is_Empty "$5") -ne 0 ]; then
-                printf "$(STRINGS::to_lowercase "${1}/${2}:${5}_${3}")"
+                printf "$(STRINGS_To_Lowercase "${1}/${2}:${5}_${3}")"
         elif [ $(STRINGS_Is_Empty "$4") -ne 0 ] && [ $(STRINGS_Is_Empty "$5") -eq 0 ]; then
-                printf "$(STRINGS::to_lowercase "${1}/${2}:${4}_${3}")"
+                printf "$(STRINGS_To_Lowercase "${1}/${2}:${4}_${3}")"
         else
-                printf "$(STRINGS::to_lowercase "${1}/${2}:${3}")"
+                printf "$(STRINGS_To_Lowercase "${1}/${2}:${3}")"
         fi
 
 

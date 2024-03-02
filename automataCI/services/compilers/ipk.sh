@@ -167,7 +167,7 @@ IPK_Get_Architecture() {
 
 
         # report status
-        printf -- "%b" "$(STRINGS::to_lowercase "${1}-${2}")"
+        printf -- "%b" "$(STRINGS_To_Lowercase "${1}-${2}")"
         return 0
 }
 

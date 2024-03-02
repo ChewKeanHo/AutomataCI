@@ -296,7 +296,7 @@ PYTHON_Is_Valid_PYPI() {
 
 
         # execute
-        STRINGS::has_prefix "pypi" "${1##*/}"
+        STRINGS_Has_Prefix "pypi" "${1##*/}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

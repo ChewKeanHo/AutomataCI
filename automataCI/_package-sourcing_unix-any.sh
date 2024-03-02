@@ -41,7 +41,7 @@ old_IFS="$IFS"
 while IFS="" read -r tech || [ -n "$tech" ]; do
         # validate input
         if [ $(STRINGS_Is_Empty "$tech") -eq 0 ] ||
-                [ "$(STRINGS::to_uppercase "$tech")" = "NONE" ]; then
+                [ "$(STRINGS_To_Uppercase "$tech")" = "NONE" ]; then
                 continue
         fi
 

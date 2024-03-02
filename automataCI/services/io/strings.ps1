@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,20 +11,20 @@
 # under the License.
 function STRINGS-Has-Prefix {
 	param(
-		[string]$__prefix,
-		[string]$__content
+		[string]$___prefix,
+		[string]$___content
 	)
 
 
 	# validate input
-	$__process = STRINGS-Is-Empty "${__prefix}"
-	if ($__process -eq 0) {
+	$___process = STRINGS-Is-Empty "${___prefix}"
+	if ($___process -eq 0) {
 		return 1
 	}
 
 
 	# execute
-	if ($__content.StartsWith($__prefix)) {
+	if ($___content.StartsWith($___prefix)) {
 		return 0
 	}
 
@@ -38,20 +38,20 @@ function STRINGS-Has-Prefix {
 
 function STRINGS-Has-Suffix {
 	param(
-		[string]$__suffix,
-		[string]$__content
+		[string]$___suffix,
+		[string]$___content
 	)
 
 
 	# validate input
-	$__process = STRINGS-Is-Empty "${__suffix}"
-	if ($__process -eq 0) {
+	$___process = STRINGS-Is-Empty "${___suffix}"
+	if ($___process -eq 0) {
 		return 1
 	}
 
 
 	# execute
-	if ($__content.EndsWith($__suffix)) {
+	if ($___content.EndsWith($___suffix)) {
 		return 0
 	}
 
@@ -65,12 +65,12 @@ function STRINGS-Has-Suffix {
 
 function STRINGS-Is-Empty {
 	param(
-		$__target
+		$___target
 	)
 
 
 	# execute
-	if ([string]::IsNullOrEmpty($__target)) {
+	if ([string]::IsNullOrEmpty($___target)) {
 		return 0
 	}
 
@@ -84,47 +84,47 @@ function STRINGS-Is-Empty {
 
 function STRINGS-Replace-All {
 	param(
-		[string]$__content,
-		[string]$__subject,
-		[string]$__replacement
+		[string]$___content,
+		[string]$___subject,
+		[string]$___replacement
 	)
 
 
 	# validate input
-	$__process = STRINGS-Is-Empty "${__content}"
-	if ($__process -eq 0) {
+	$___process = STRINGS-Is-Empty "${___content}"
+	if ($___process -eq 0) {
 		return ""
 	}
 
-	$__process = STRINGS-Is-Empty "${__subject}"
-	if ($__process -eq 0) {
-		return $__content
+	$___process = STRINGS-Is-Empty "${___subject}"
+	if ($___process -eq 0) {
+		return $___content
 	}
 
-	$__process = STRINGS-Is-Empty "${__replacement}"
-	if ($__process -eq 0) {
-		return $__content
+	$___process = STRINGS-Is-Empty "${___replacement}"
+	if ($___process -eq 0) {
+		return $___content
 	}
 
 
 	# execute
-	$__right = $__content
-	$__register = ""
-	while ($__right) {
-		$__left = $__right -replace "$($__subject).*", ""
+	$___right = $___content
+	$___register = ""
+	while ($___right) {
+		$___left = $___right -replace "$($___subject).*", ""
 
-		if ($__left -eq $__right) {
-			return "${__register}${__right}"
+		if ($___left -eq $___right) {
+			return "${___register}${___right}"
 		}
 
 		# replace this occurence
-		$__register += "${__left}${__replacement}"
-		$__right = $__right -replace "^.*?${__subject}", ""
+		$___register += "${___left}${___replacement}"
+		$___right = $___right -replace "^.*?${___subject}", ""
 	}
 
 
 	# report status
-	return $__register
+	return $___register
 }
 
 
@@ -132,10 +132,12 @@ function STRINGS-Replace-All {
 
 function STRINGS-To-Lowercase {
 	param(
-		[string]$__content
+		[string]$___content
 	)
 
-	return $__content.ToLower()
+
+	# execute
+	return $___content.ToLower()
 }
 
 
@@ -143,10 +145,12 @@ function STRINGS-To-Lowercase {
 
 function STRINGS-Trim-Whitespace-Left {
 	param(
-		[string]$__content
+		[string]$___content
 	)
 
-	return $__content.TrimStart()
+
+	# execute
+	return $___content.TrimStart()
 }
 
 
@@ -154,10 +158,12 @@ function STRINGS-Trim-Whitespace-Left {
 
 function STRINGS-Trim-Whitespace-Right {
 	param(
-		[string]$__content
+		[string]$___content
 	)
 
-	return $__content.TrimEnd()
+
+	# execute
+	return $___content.TrimEnd()
 }
 
 
@@ -165,13 +171,17 @@ function STRINGS-Trim-Whitespace-Right {
 
 function STRINGS-Trim-Whitespace {
 	param(
-		[string]$__content
+		[string]$___content
 	)
 
-	$__content = STRINGS-Trim-Whitespace-Left $__content
-	$__content = STRINGS-Trim-Whitespace-Right $__content
 
-	return $__content
+	# execute
+	$___content = STRINGS-Trim-Whitespace-Left $___content
+	$___content = STRINGS-Trim-Whitespace-Right $___content
+
+
+	# report status
+	return $___content
 }
 
 
@@ -179,8 +189,10 @@ function STRINGS-Trim-Whitespace {
 
 function STRINGS-To-Uppercase {
 	param(
-		[string]$__content
+		[string]$___content
 	)
 
-	return $__content.ToUpper()
+
+	# execute
+	return $___content.ToUpper()
 }

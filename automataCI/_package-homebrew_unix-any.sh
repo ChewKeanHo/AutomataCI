@@ -136,13 +136,13 @@ PACKAGE_Run_HOMEBREW() {
         FS::remove_silently "${_target_path}.rb"
         __old_IFS="$IFS"
         while IFS= read -r __line || [ -n "$__line" ]; do
-                __line="$(STRINGS::replace_all \
+                __line="$(STRINGS_Replace_All \
                         "$__line" \
                         "{{ TARGET_PACKAGE }}" \
                         "${_target_path##*/}.tar.xz" \
                 )"
 
-                __line="$(STRINGS::replace_all \
+                __line="$(STRINGS_Replace_All \
                         "$__line" \
                         "{{ TARGET_SHASUM }}" \
                         "${__shasum}" \

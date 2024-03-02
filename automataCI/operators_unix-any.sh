@@ -250,9 +250,9 @@ BUILD::_exec_build() {
 
         OS::print_status info "validating ${_target_os}-${_target_arch} ${_target_type}...\n"
         _target="${PROJECT_SKU}_${_target_os}-${_target_arch}"
-        _target_arch="$(STRINGS::to_lowercase "$_target_arch")"
+        _target_arch="$(STRINGS_To_Lowercase "$_target_arch")"
         _target_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}"
-        case "$(STRINGS::to_lowercase "$_target_type")" in
+        case "$(STRINGS_To_Lowercase "$_target_type")" in
         nim-binary)
                 _target_source="$PROJECT_NIM"
                 _target_type="none"

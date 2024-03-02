@@ -436,7 +436,7 @@ DEB_Get_Architecture() {
 
 
         # report status
-        ___output="$(STRINGS::to_lowercase "$___output")"
+        ___output="$(STRINGS_To_Lowercase "$___output")"
         printf -- "%b" "$___output"
         return 0
 }

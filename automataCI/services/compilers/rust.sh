@@ -134,7 +134,7 @@ RUST_Crate_Is_Valid() {
 
 
         # execute
-        STRINGS::has_prefix "cargo" "${1##*/}"
+        STRINGS_Has_Prefix "cargo" "${1##*/}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

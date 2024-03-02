@@ -162,7 +162,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 continue
         fi
 
-        STRINGS::has_prefix "$PROJECT_SKU" "$TARGET_FILENAME"
+        STRINGS_Has_Prefix "$PROJECT_SKU" "$TARGET_FILENAME"
         if [ $? -ne 0 ]; then
                 I18N_Is_Incompatible_Skipped "$TARGET_FILENAME"
                 continue
