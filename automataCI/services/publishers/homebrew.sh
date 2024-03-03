@@ -26,7 +26,7 @@ HOMEBREW_Is_Valid_Formula() {
                 return 1
         fi
 
-        if [ $(FS::is_target_a_homebrew "$1") -ne 0 ]; then
+        if [ $(FS_Is_Target_A_Homebrew "$1") -ne 0 ]; then
                 return 1
         fi
 
@@ -60,8 +60,8 @@ HOMEBREW_Publish() {
 
 
         # execute
-        FS::make_housing_directory "$2"
-        FS::copy_file "$1" "$2"
+        FS_Make_Housing_Directory "$2"
+        FS_Copy_File "$1" "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi

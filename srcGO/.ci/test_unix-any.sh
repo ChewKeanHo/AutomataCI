@@ -53,7 +53,7 @@ __coverage_filepath="${__report_location}/test-coverage.html"
 
 
 OS::print_status info "preparing report vault: ${__report_location}\n"
-FS::remake_directory "$__report_location"
+FS_Remake_Directory "$__report_location"
 if [ $? -ne 0 ]; then
         OS::print_status error "preparation failed.\n"
         return 1

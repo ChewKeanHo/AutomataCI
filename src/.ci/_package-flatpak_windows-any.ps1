@@ -165,7 +165,7 @@ modules:
 
 
 	# [ COMPULSORY ] script appdata.xml
-	$___process = FS::write_file "${_directory}/appdata.xml" "\
+	$___process = FS-Write-File "${_directory}/appdata.xml" "\
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- refer: https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html -->
 <component>

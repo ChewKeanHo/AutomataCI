@@ -51,7 +51,7 @@ fi
 # 1-time setup job required materials
 DEST="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
 I18N_Remake "$DEST"
-FS::remake_directory "$DEST"
+FS_Remake_Directory "$DEST"
 if [ $? -ne 0 ]; then
         I18N_Remake_Failed
         return 1
@@ -82,8 +82,8 @@ I18N_Newline
 # prepare for parallel package
 __log_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/packagers"
 I18N_Remake "$__log_directory"
-FS::remake_directory "$__log_directory"
-FS::is_directory "$__log_directory"
+FS_Remake_Directory "$__log_directory"
+FS_Is_Directory "$__log_directory"
 if [ $? -ne 0 ]; then
         I18N_Remake_Failed
         return 1
@@ -91,18 +91,18 @@ fi
 
 __control_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-parallel"
 I18N_Remake "${__control_directory}"
-FS::remake_directory "$__control_directory"
-FS::is_directory "$__control_directory"
+FS_Remake_Directory "$__control_directory"
+FS_Is_Directory "$__control_directory"
 if [ $? -ne 0 ]; then
         I18N_Remake_Failed
         return 1
 fi
 
 __parallel_control="${__control_directory}/control-parallel.txt"
-FS::remove_silently "$__parallel_control"
+FS_Remove_Silently "$__parallel_control"
 
 __serial_control="${__control_directory}/control-serial.txt"
-FS::remove_silently "$__serial_control"
+FS_Remove_Silently "$__serial_control"
 
 
 SUBROUTINE_Package() {
@@ -122,7 +122,7 @@ SUBROUTINE_Package() {
 
         # execute
         I18N_Package "$__subject"
-        FS::remove_silently "$__log"
+        FS_Remove_Silently "$__log"
 
         $__command "$__arguments" &> "$__log"
         if [ $? -ne 0 ]; then
@@ -140,7 +140,7 @@ SUBROUTINE_Package() {
 
 # begin registering packagers
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
-        FS::is_file "$i"
+        FS_Is_File "$i"
         if [ $? -ne 0 ]; then
                 continue
         fi
@@ -172,7 +172,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         __common="${DEST}|${i}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
 
         __log="${__log_directory}/archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
+        FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_ARCHIVE
 "
         if [ $? -ne 0 ]; then
@@ -180,7 +180,7 @@ ${__common}|${__log}|PACKAGE_Run_ARCHIVE
         fi
 
         __log="${__log_directory}/cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
+        FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_CARGO
 "
         if [ $? -ne 0 ]; then
@@ -188,7 +188,7 @@ ${__common}|${__log}|PACKAGE_Run_CARGO
         fi
 
         __log="${__log_directory}/chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
+        FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_CHOCOLATEY
 "
         if [ $? -ne 0 ]; then
@@ -196,7 +196,7 @@ ${__common}|${__log}|PACKAGE_Run_CHOCOLATEY
         fi
 
         __log="${__log_directory}/deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
+        FS_Append_File "$__parallel_control" "\
 ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE_Run_DEB
 "
         if [ $? -ne 0 ]; then
@@ -204,7 +204,7 @@ ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE_Run_DEB
         fi
 
         __log="${__log_directory}/docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__serial_control" "\
+        FS_Append_File "$__serial_control" "\
 ${__common}|${__log}|PACKAGE_Run_DOCKER
 "
         if [ $? -ne 0 ]; then
@@ -213,7 +213,7 @@ ${__common}|${__log}|PACKAGE_Run_DOCKER
 
         __flatpak_path="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${PROJECT_PATH_RELEASE}/flatpak"
         __log="${__log_directory}/flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__serial_control" "\
+        FS_Append_File "$__serial_control" "\
 ${__common}|${__flatpak_path}|${__log}|PACKAGE_Run_FLATPAK
 "
         if [ $? -ne 0 ]; then
@@ -221,7 +221,7 @@ ${__common}|${__flatpak_path}|${__log}|PACKAGE_Run_FLATPAK
         fi
 
         __log="${__log_directory}/homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
+        FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_HOMEBREW
 "
         if [ $? -ne 0 ]; then
@@ -229,7 +229,7 @@ ${__common}|${__log}|PACKAGE_Run_HOMEBREW
         fi
 
         __log="${__log_directory}/ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
+        FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_IPK
 "
         if [ $? -ne 0 ]; then
@@ -237,7 +237,7 @@ ${__common}|${__log}|PACKAGE_Run_IPK
         fi
 
         __log="${__log_directory}/msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__serial_control" "\
+        FS_Append_File "$__serial_control" "\
 ${__common}|${__log}|PACKAGE_Run_MSI
 "
         if [ $? -ne 0 ]; then
@@ -245,7 +245,7 @@ ${__common}|${__log}|PACKAGE_Run_MSI
         fi
 
         __log="${__log_directory}/pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
+        FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_PYPI
 "
         if [ $? -ne 0 ]; then
@@ -253,7 +253,7 @@ ${__common}|${__log}|PACKAGE_Run_PYPI
         fi
 
         __log="${__log_directory}/rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS::append_file "$__parallel_control" "\
+        FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_RPM
 "
         if [ $? -ne 0 ]; then
@@ -263,7 +263,7 @@ done
 
 
 I18N_Sync_Run
-FS::is_file "$__parallel_control"
+FS_Is_File "$__parallel_control"
 if [ $? -eq 0 ]; then
         SYNC_Exec_Parallel "SUBROUTINE_Package" "$__parallel_control"
         if [ $? -ne 0 ]; then
@@ -274,7 +274,7 @@ fi
 
 
 I18N_Sync_Run_Series
-FS::is_file "$__serial_control"
+FS_Is_File "$__serial_control"
 if [ $? -eq 0 ]; then
         SYNC_Exec_Serial "SUBROUTINE_Package" "$__serial_control"
         if [ $? -ne 0 ]; then

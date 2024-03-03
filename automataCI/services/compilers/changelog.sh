@@ -36,14 +36,14 @@ CHANGELOG_Assemble_DEB() {
 
 
         # assemble file
-        FS::remove_silently "$___target"
-        FS::remove_silently "${___target}.gz"
-        FS::make_housing_directory "$___target"
+        FS_Remove_Silently "$___target"
+        FS_Remove_Silently "${___target}.gz"
+        FS_Make_Housing_Directory "$___target"
 
         ___initiated=""
         ___old_IFS="$IFS"
         while IFS="" read -r ___line || [ -n "$___line" ]; do
-                FS::append_file "$___target" "$___line\n"
+                FS_Append_File "$___target" "$___line\n"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -53,18 +53,18 @@ CHANGELOG_Assemble_DEB() {
         IFS="$___old_IFS" && unset ___old_IFS ___line
 
         for ___tag in $(git tag --sort -version:refname); do
-                FS::is_file "${___directory}/${___tag##*v}"
+                FS_Is_File "${___directory}/${___tag##*v}"
                 if [ $? -ne 0 ]; then
                         continue
                 fi
 
                 if [ $(STRINGS_Is_Empty "$___initiated") -ne 0 ]; then
-                        FS::append_file "$___target" "\n\n"
+                        FS_Append_File "$___target" "\n\n"
                 fi
 
                 ___old_IFS="$IFS"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
-                        FS::append_file "$___target" "$___line\n"
+                        FS_Append_File "$___target" "$___line\n"
                         if [ $? -ne 0 ]; then
                                 return 1
                         fi
@@ -109,27 +109,27 @@ CHANGELOG_Assemble_MD() {
 
 
         # assemble file
-        FS::remove_silently "$___target"
-        FS::make_housing_directory "$___target"
-        FS::write_file "$___target" "# ${___title}\n\n"
-        FS::append_file "$___target" "\n## ${___version}\n\n"
+        FS_Remove_Silently "$___target"
+        FS_Make_Housing_Directory "$___target"
+        FS_Write_File "$___target" "# ${___title}\n\n"
+        FS_Append_File "$___target" "\n## ${___version}\n\n"
         ___old_IFS="$IFS"
         while IFS="" read -r ___line || [ -n "$___line" ]; do
-                FS::append_file "$___target" "* ${___line}\n"
+                FS_Append_File "$___target" "* ${___line}\n"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
         done < "${___directory}/latest"
 
         for ___tag in $(git tag --sort -version:refname); do
-                FS::is_file "${___directory}/${___tag##*v}"
+                FS_Is_File "${___directory}/${___tag##*v}"
                 if [ $? -ne 0 ]; then
                         continue
                 fi
 
-                FS::append_file "$___target" "\n\n## ${___tag}\n\n"
+                FS_Append_File "$___target" "\n\n## ${___tag}\n\n"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
-                        FS::append_file "$___target" "* ${___line}\n"
+                        FS_Append_File "$___target" "* ${___line}\n"
                         if [ $? -ne 0 ]; then
                                 return 1
                         fi
@@ -167,28 +167,28 @@ CHANGELOG_Assemble_RPM() {
                 return 1
         fi
 
-        FS::is_file "$___target"
+        FS_Is_File "$___target"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$___resources"
+        FS_Is_Directory "$___resources"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # emit stanza
-        FS::append_file "$___target" "%%changelog\n"
+        FS_Append_File "$___target" "%%changelog\n"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # emit latest changelog
-        FS::is_file "${___resources}/changelog/data/latest"
+        FS_Is_File "${___resources}/changelog/data/latest"
         if [ $? -eq 0 ]; then
-                FS::append_file "$___target" \
+                FS_Append_File "$___target" \
                         "* ${___date} ${___name} <${___email}> - ${___version}-${___cadence}\n"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -201,14 +201,14 @@ CHANGELOG_Assemble_RPM() {
                                 continue
                         fi
 
-                        FS::append_file "$___target" "- ${___line}\n"
+                        FS_Append_File "$___target" "- ${___line}\n"
                         if [ $? -ne 0 ]; then
                                 return 1
                         fi
                 done < "${___resources}/changelog/data/latest"
                 IFS="$___old_IFS" && unset ___old_IFS ___line
         else
-                FS::append_file "$___target" "# unavailable\n"
+                FS_Append_File "$___target" "# unavailable\n"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -216,7 +216,7 @@ CHANGELOG_Assemble_RPM() {
 
 
         # emit tailing newline
-        FS::append_file "$___target" "\n"
+        FS_Append_File "$___target" "\n"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -248,17 +248,17 @@ CHANGELOG_Build_Data_Entry() {
 
         # generate log file from the latest to the last tag
         ___directory="${___directory}/data"
-        FS::make_directory "$___directory"
+        FS_Make_Directory "$___directory"
         git log --pretty=format:"%s" HEAD..."$___tag" > "${___directory}/.latest"
-        FS::is_file "${___directory}/.latest"
+        FS_Is_File "${___directory}/.latest"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # good file, update the previous
-        FS::remove_silently "${___directory}/latest" &> /dev/null
-        FS::move "${___directory}/.latest" "${___directory}/latest"
+        FS_Remove_Silently "${___directory}/latest" &> /dev/null
+        FS_Move "${___directory}/.latest" "${___directory}/latest"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -294,7 +294,7 @@ CHANGELOG_Build_DEB_Entry() {
                 return 1
         fi
 
-        FS::is_file "${___directory}/data/latest"
+        FS_Is_File "${___directory}/data/latest"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -309,11 +309,11 @@ CHANGELOG_Build_DEB_Entry() {
 
 
         # all good. Generate the log fragment
-        FS::make_directory "${___directory}/deb"
+        FS_Make_Directory "${___directory}/deb"
 
 
         # create the entry header
-        FS::append_file "${___directory}/deb/.latest" "\
+        FS_Append_File "${___directory}/deb/.latest" "\
 ${___sku} (${___version}) ${___dist}; urgency=${___urgency}
 
 "
@@ -323,19 +323,19 @@ ${___sku} (${___version}) ${___dist}; urgency=${___urgency}
         ___old_IFS="$IFS"
         while IFS= read -r ___line || [ -n "$___line" ]; do
                 ___line="${___line::80}"
-                FS::append_file "${___directory}/deb/.latest" "  * ${___line}\n"
+                FS_Append_File "${___directory}/deb/.latest" "  * ${___line}\n"
         done < "${___directory}/data/latest"
         IFS="$___old_IFS" && unset ___line ___old_IFS
-        FS::append_file "${___directory}/deb/.latest" "\n"
+        FS_Append_File "${___directory}/deb/.latest" "\n"
 
 
         # create the entry signed-off
-        FS::append_file "${___directory}/deb/.latest" \
+        FS_Append_File "${___directory}/deb/.latest" \
                 "-- ${___name} <${___email}>  ${___date}\n"
 
 
         # good file, update the previous
-        FS::move "${___directory}/deb/.latest" "${___directory}/deb/latest"
+        FS_Move "${___directory}/deb/.latest" "${___directory}/deb/latest"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -361,7 +361,7 @@ CHANGELOG_Compatible_DATA_Version() {
 
 
         # execute
-        FS::is_file "${___directory}/data/${___version}"
+        FS_Is_File "${___directory}/data/${___version}"
         if [ $? -eq 0 ]; then
                 return 1
         fi
@@ -387,7 +387,7 @@ CHANGELOG_Compatible_DEB_Version() {
 
 
         # execute
-        FS::is_file "${___directory}/deb/${___version}"
+        FS_Is_File "${___directory}/deb/${___version}"
         if [ $? -eq 0 ]; then
                 return 1
         fi
@@ -431,29 +431,29 @@ CHANGELOG_Seal() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___directory}/data/latest"
+        FS_Is_File "${___directory}/data/latest"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___directory}/deb/latest"
+        FS_Is_File "${___directory}/deb/latest"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        FS::move "${___directory}/data/latest" "${___directory}/data/${___version}"
+        FS_Move "${___directory}/data/latest" "${___directory}/data/${___version}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::move "${___directory}/deb/latest" "${___directory}/deb/${___version}"
+        FS_Move "${___directory}/deb/latest" "${___directory}/deb/${___version}"
         if [ $? -ne 0 ]; then
                 return 1
         fi

@@ -63,7 +63,7 @@ SUBROUTINE_Package_MSI() {
                 return 1
         fi
 
-        FS::copy_file "$__target" "${__dest}/${__target##*/}" &> "$__log"
+        FS_Copy_File "$__target" "${__dest}/${__target##*/}" &> "$__log"
         if [ $? -ne 0 ]; then
                 I18N_Export_Failed "$__subject"
                 return 1
@@ -114,7 +114,7 @@ PACKAGE_Run_MSI() {
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/msi_${_src}"
         I18N_Remake "$_src"
-        FS::remake_directory "$_src"
+        FS_Remake_Directory "$_src"
         if [ $? -ne 0 ]; then
                 I18N_Remake_Failed
                 return 1
@@ -122,14 +122,14 @@ PACKAGE_Run_MSI() {
 
         __control_directory="${_src}/.automataCI"
         I18N_Remake "$__control_directory"
-        FS::remake_directory "$__control_directory"
+        FS_Remake_Directory "$__control_directory"
         if [ ! -d "$__control_directory" ]; then
                 I18N_Remake_Failed
                 return 1
         fi
 
         __parallel_control="${__control_directory}/control-parallel.txt"
-        FS::remove_silently "$__parallel_control"
+        FS_Remove_Silently "$__parallel_control"
 
 
         # copy all complimentary files to the workspace
@@ -150,7 +150,7 @@ PACKAGE_Run_MSI() {
                 "$_target_arch"
         case $? in
         10)
-                FS::remove_silently "$_src"
+                FS_Remove_Silently "$_src"
                 I18N_Assemble_Skipped
                 return 0
                 ;;
@@ -169,7 +169,7 @@ PACKAGE_Run_MSI() {
                         continue
                 fi
 
-                FS::is_file "$__recipe"
+                FS_Is_File "$__recipe"
                 if [ $? -ne 0 ]; then
                         continue
                 fi
@@ -180,7 +180,7 @@ PACKAGE_Run_MSI() {
                 __log="${__recipe##*/}"
                 __log="${__log%.wxs*}"
                 __log="${__control_directory}/msi-wxs_${__log}.log"
-                FS::append_file "$__parallel_control" "\
+                FS_Append_File "$__parallel_control" "\
 ${__recipe}|${_dest}|${__log}
 "
                 if [ $? -ne 0 ]; then
@@ -189,7 +189,7 @@ ${__recipe}|${_dest}|${__log}
         done
 
         I18N_Sync_Run
-        FS::is_file "$__parallel_control"
+        FS_Is_File "$__parallel_control"
         if [ $? -eq 0 ]; then
                 SYNC_Exec_Parallel "SUBROUTINE_Package_MSI" "$__parallel_control"
                 ___process=$?

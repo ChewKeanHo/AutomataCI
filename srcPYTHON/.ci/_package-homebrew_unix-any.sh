@@ -37,19 +37,19 @@ PACKAGE::assemble_homebrew_content() {
 
 
         # validate project
-        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
+        if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_chocolatey "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Chocolatey "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Homebrew "$_target") -eq 0 ]; then
                 : # accepted
         else
                 return 10 # not applicable
@@ -57,30 +57,30 @@ PACKAGE::assemble_homebrew_content() {
 
 
         # assemble the package
-        FS::make_directory "${_directory}/Data/${PROJECT_PATH_SOURCE}"
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/" \
+        FS_Make_Directory "${_directory}/Data/${PROJECT_PATH_SOURCE}"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/" \
                         "${_directory}/Data/${PROJECT_PATH_SOURCE}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
         PYTHON_Clean_Artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}"
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}" "${_directory}/Data"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_all "${PROJECT_PATH_ROOT}/automataCI" "${_directory}/Data"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/automataCI" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_file "${PROJECT_PATH_ROOT}/CONFIG.toml" "${_directory}/Data"
+        FS_Copy_File "${PROJECT_PATH_ROOT}/CONFIG.toml" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_file "${PROJECT_PATH_ROOT}/ci.cmd" "${_directory}/Data"
+        FS_Copy_File "${PROJECT_PATH_ROOT}/ci.cmd" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -88,7 +88,7 @@ PACKAGE::assemble_homebrew_content() {
 
         # script formula.rb
         OS::print_status info "scripting formula.rb...\n"
-        FS::write_file "${_directory}/formula.rb" "\
+        FS_Write_File "${_directory}/formula.rb" "\
 class ${PROJECT_SKU_TITLECASE} < Formula
   desc \"${PROJECT_PITCH}\"
   homepage \"${PROJECT_CONTACT_WEBSITE}\"

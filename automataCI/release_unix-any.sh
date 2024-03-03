@@ -49,7 +49,7 @@ fi
 
 __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
 __recipe="${__recipe}/release_unix-any.sh"
-FS::is_file "$__recipe"
+FS_Is_File "$__recipe"
 if [ $? -eq 0 ]; then
         I18N_Detected "${__recipe}"
         I18N_Parse "${__recipe}"

@@ -109,7 +109,7 @@ $__main\
 "
         ;;
 esac
-FS::make_directory "$__workspace"
+FS_Make_Directory "$__workspace"
 
 
 
@@ -136,9 +136,9 @@ fi
 __source="${__workspace}/${__target}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
 OS::print_status info "exporting ${__source} to ${__dest}\n"
-FS::make_housing_directory "$__dest"
-FS::remove_silently "$__dest"
-FS::move "$__source" "$__dest"
+FS_Make_Housing_Directory "$__dest"
+FS_Remove_Silently "$__dest"
+FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
         OS::print_status error "export failed.\n"
         return 1

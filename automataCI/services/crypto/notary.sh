@@ -57,7 +57,7 @@ NOTARY_Microsoft_Is_Available() {
                 return 1
         fi
 
-        FS::is_file "$MICROSOFT_CERT"
+        FS_Is_File "$MICROSOFT_CERT"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -101,7 +101,7 @@ NOTARY_Sign_Apple() {
                 return 1
         fi
 
-        FS::is_file "$2"
+        FS_Is_File "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -127,14 +127,14 @@ NOTARY_Sign_Apple() {
                 return 1
         fi
 
-        FS::remove_silently "${2}.zip"
+        FS_Remove_Silently "${2}.zip"
 
         xcrun stapler staple "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::move "$2" "$1"
+        FS_Move "$2" "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -166,7 +166,7 @@ NOTARY_Sign_Microsoft() {
                 return 1
         fi
 
-        FS::is_file "$___file"
+        FS_Is_File "$___file"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -175,12 +175,12 @@ NOTARY_Sign_Microsoft() {
         # execute
         case "$MICROSOFT_CERT_TYPE" in
         CERT)
-                FS::is_file "$MICROSOFT_CERT_KEYFILE"
+                FS_Is_File "$MICROSOFT_CERT_KEYFILE"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                FS::remove_silently "$___destination"
+                FS_Remove_Silently "$___destination"
                 osslsigncode sign \
                         -certs "$MICROSOFT_CERT" \
                         -h "$MICROSOFT_CERT_HASH" \
@@ -196,12 +196,12 @@ NOTARY_Sign_Microsoft() {
                 fi
                 ;;
         SPC)
-                FS::is_file "$MICROSOFT_CERT_KEYFILE"
+                FS_Is_File "$MICROSOFT_CERT_KEYFILE"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                FS::remove_silently "$___destination"
+                FS_Remove_Silently "$___destination"
                 osslsigncode sign \
                         -spc "$MICROSOFT_CERT" \
                         -h "$MICROSOFT_CERT_HASH" \
@@ -217,7 +217,7 @@ NOTARY_Sign_Microsoft() {
                 fi
                 ;;
         PKCS12)
-                FS::remove_silently "$___destination"
+                FS_Remove_Silently "$___destination"
                 osslsigncode sign \
                         -pkcs12 "$MICROSOFT_CERT" \
                         -h "$MICROSOFT_CERT_HASH" \

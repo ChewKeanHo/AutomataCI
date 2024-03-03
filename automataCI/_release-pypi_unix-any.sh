@@ -63,7 +63,7 @@ RELEASE_Run_PYPI() {
         fi
 
         I18N_Clean "$_target"
-        FS::remove_silently "$_target"
+        FS_Remove_Silently "$_target"
 
 
         # report status

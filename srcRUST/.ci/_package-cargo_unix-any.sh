@@ -36,7 +36,7 @@ PACKAGE_Assemble_CARGO_Content() {
 
 
         # validate project
-        if [ $(FS::is_target_a_cargo "$_target") -ne 0 ]; then
+        if [ $(FS_Is_Target_A_Cargo "$_target") -ne 0 ]; then
                 return 10
         fi
 
@@ -46,20 +46,20 @@ PACKAGE_Assemble_CARGO_Content() {
 
 
         # assemble the cargo package
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/" "${_directory}"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/" "${_directory}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_file \
+        FS_Copy_File \
                 "${PROJECT_PATH_ROOT}/${PROJECT_CARGO_README}" \
                 "${_directory}/README.md"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::remove_silently "${_directory}/Cargo.lock"
-        FS::remove_silently "${_directory}/.ci"
+        FS_Remove_Silently "${_directory}/Cargo.lock"
+        FS_Remove_Silently "${_directory}/.ci"
         RUST_Create_CARGO_TOML \
                 "${_directory}/Cargo.toml" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \

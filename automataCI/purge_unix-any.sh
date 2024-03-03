@@ -49,7 +49,7 @@ ${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}
 
 
         I18N_Purge "$__line"
-        FS::remove_silently "$__line"
+        FS_Remove_Silently "$__line"
 done
 
 

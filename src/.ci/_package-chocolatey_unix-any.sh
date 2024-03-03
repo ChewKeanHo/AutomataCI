@@ -35,7 +35,7 @@ PACKAGE_Assemble_CHOCOLATEY_Content() {
 
 
         # validate project
-        if [ $(FS::is_target_a_chocolatey "$_target") -ne 0 ]; then
+        if [ $(FS_Is_Target_A_Chocolatey "$_target") -ne 0 ]; then
                 return 10 # not applicable
         fi
 

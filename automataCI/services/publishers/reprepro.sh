@@ -37,10 +37,10 @@ REPREPRO_Create_Conf() {
 
         # execute
         ___filename="${___directory}/conf/distributions"
-        FS::make_housing_directory "$___filename"
-        FS::remove_silently "$___filename"
+        FS_Make_Housing_Directory "$___filename"
+        FS_Remove_Silently "$___filename"
         if [ $(STRINGS_Is_Empty "$___gpg") -eq 0 ]; then
-                FS::write_file "$___filename" "\
+                FS_Write_File "$___filename" "\
 Codename: ${___codename}
 Suite: ${___suite}
 Components: ${___components}
@@ -49,7 +49,7 @@ Architectures:"
                         return 1
                 fi
         else
-                FS::write_file "$___filename" "\
+                FS_Write_File "$___filename" "\
 Codename: ${___codename}
 Suite: ${___suite}
 Components: ${___components}
@@ -64,9 +64,9 @@ Architectures:"
         if [ $(STRINGS_Is_Empty "$___architectures") -eq 0 ]; then
                 ___old_IFS="$IFS"
                 while IFS= read -r ___arch || [ -n "$___arch" ]; do
-                        FS::append_file "$___filename" " $___arch"
+                        FS_Append_File "$___filename" " $___arch"
                         while IFS= read -r ___os || [ -n "$___os" ]; do
-                                FS::append_file "$___filename" " ${___os}-${___arch}"
+                                FS_Append_File "$___filename" " ${___os}-${___arch}"
                         done << EOF
 linux
 kfreebsd
@@ -130,9 +130,9 @@ sparc64
 tilegx
 EOF
                 IFS="$___old_IFS" && unset ___line ___old_IFS
-                FS::append_file "$___filename" "\n"
+                FS_Append_File "$___filename" "\n"
         else
-                FS::append_file "$___filename" " ${___architectures}\n"
+                FS_Append_File "$___filename" " ${___architectures}\n"
         fi
 
 
@@ -174,16 +174,16 @@ REPREPRO_Publish() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        FS::make_directory "${___db_directory}"
-        FS::make_directory "${___directory}"
-        FS::make_directory "${___datastore}"
+        FS_Make_Directory "${___db_directory}"
+        FS_Make_Directory "${___directory}"
+        FS_Make_Directory "${___datastore}"
         reprepro --basedir "${___datastore}" \
                 --dbdir "${___db_directory}" \
                 --outdir "${___directory}" \

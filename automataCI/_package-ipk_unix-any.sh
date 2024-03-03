@@ -74,18 +74,18 @@ PACKAGE_Run_IPK() {
         _target_path="${_dest}/${_src}.ipk"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/ipk_${_src}"
         I18N_Remake "$_src"
-        FS::remake_directory "${_src}"
+        FS_Remake_Directory "${_src}"
         if [ $? -ne 0 ]; then
                 I18N_Remake_Failed
                 return 1
         fi
-        FS::make_directory "${_src}/control"
-        FS::make_directory "${_src}/data"
+        FS_Make_Directory "${_src}/control"
+        FS_Make_Directory "${_src}/data"
 
 
         # execute
         I18N_Check "$_target_path"
-        FS::is_file "$_target_path"
+        FS_Is_File "$_target_path"
         if [ $? -eq 0 ]; then
                 I18N_Check_Failed
                 return 1
@@ -104,7 +104,7 @@ PACKAGE_Run_IPK() {
         case $? in
         10)
                 I18N_Assemble_Skipped
-                FS::remove_silently "$_src"
+                FS_Remove_Silently "$_src"
                 return 0
                 ;;
         0)
@@ -117,7 +117,7 @@ PACKAGE_Run_IPK() {
         esac
 
         I18N_Check "control/control"
-        FS::is_file "${_src}/control/control"
+        FS_Is_File "${_src}/control/control"
         if [ $? -ne 0 ]; then
                 I18N_Check_Failed
                 return 1

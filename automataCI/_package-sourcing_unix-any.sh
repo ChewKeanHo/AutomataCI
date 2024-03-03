@@ -48,7 +48,7 @@ while IFS="" read -r tech || [ -n "$tech" ]; do
 
         # execute
         package_fx="${PROJECT_PATH_ROOT}/${tech}/${PROJECT_PATH_CI}/package_unix-any.sh"
-        FS::is_file "$package_fx"
+        FS_Is_File "$package_fx"
         if [ $? -eq 0 ]; then
                 I18N_Source "$package_fx"
                 . "$package_fx"

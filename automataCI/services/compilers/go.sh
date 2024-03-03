@@ -120,11 +120,11 @@ GO::setup_local_environment() {
                 __brew=""
         fi
 
-        FS::make_housing_directory "$__location"
-        FS::make_directory "${__location%/*}/bin"
-        FS::make_directory "${__location%/*}/cache"
-        FS::make_directory "${__location%/*}/env"
-        FS::write_file "${__location}" "\
+        FS_Make_Housing_Directory "$__location"
+        FS_Make_Directory "${__location%/*}/bin"
+        FS_Make_Directory "${__location%/*}/cache"
+        FS_Make_Directory "${__location%/*}/env"
+        FS_Write_File "${__location}" "\
 #!/bin/sh
 if [ -z \"\$(type -t 'go')\" ]; then
         1>&2 printf -- '[ ERROR ] missing go compiler.\\\\n'

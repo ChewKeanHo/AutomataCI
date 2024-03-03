@@ -81,7 +81,7 @@ PACKAGE_Run_DOCKER() {
         _target_path="${_dest}/docker.txt"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/docker_${_src}"
         I18N_Remake "$_src"
-        FS::remake_directory "$_src"
+        FS_Remake_Directory "$_src"
         if [ $? -ne 0 ]; then
                 I18N_Remake_Failed
                 return 1
@@ -102,7 +102,7 @@ PACKAGE_Run_DOCKER() {
         case $? in
         10)
                 I18N_Assemble_Skipped
-                FS::remove_silently "$_src"
+                FS_Remove_Silently "$_src"
                 return 0
                 ;;
         0)
@@ -117,7 +117,7 @@ PACKAGE_Run_DOCKER() {
 
         # check required files
         I18N_Check "${_src}/Dockerfile"
-        FS::is_file "${_src}/Dockerfile"
+        FS_Is_File "${_src}/Dockerfile"
         if [ $? -ne 0 ]; then
                 I18N_Check_Failed
                 return 1

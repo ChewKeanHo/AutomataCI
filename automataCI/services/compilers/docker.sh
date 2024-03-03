@@ -111,7 +111,7 @@ DOCKER_Create() {
         ___dockerfile="./Dockerfile"
         ___tag="$(DOCKER_Get_ID "$___repo" "$___sku" "$___version" "$___os" "$___arch")"
 
-        FS::is_file "$___dockerfile"
+        FS_Is_File "$___dockerfile"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -143,7 +143,7 @@ DOCKER_Create() {
                 return 1
         fi
 
-        FS::append_file "$___destination" "${___os} ${___arch} ${___tag}\n"
+        FS_Append_File "$___destination" "${___os} ${___arch} ${___tag}\n"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -228,7 +228,7 @@ DOCKER_Is_Valid() {
 
 
         # execute
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -303,7 +303,7 @@ DOCKER_Release() {
                 return 1
         fi
 
-        FS::is_file "$___target"
+        FS_Is_File "$___target"
         if [ $? -ne 0 ]; then
                 return 1
         fi

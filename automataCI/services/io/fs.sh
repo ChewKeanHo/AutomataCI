@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -10,9 +10,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-FS::append_file() {
-        # __target="$1"
-        # __content="$2"
+FS_Append_File() {
+        #___target="$1"
+        #___content="$2"
 
 
         # validate target
@@ -23,22 +23,21 @@ FS::append_file() {
 
         # perform file write
         printf -- "%b" "$2" >> "$1"
-
-
-        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-FS::copy_all() {
-        # __source="$1"
-        # __destination="$2"
+FS_Copy_All() {
+        #___source="$1"
+        #___destination="$2"
 
 
         # validate input
@@ -49,22 +48,21 @@ FS::copy_all() {
 
         # execute
         cp -r "${1}"* "${2}/."
-
-
-        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-FS::copy_file() {
-        # __source="$1"
-        # __destination="$2"
+FS_Copy_File() {
+        #___source="$1"
+        #___destination="$2"
 
 
         # validate input
@@ -75,12 +73,12 @@ FS::copy_file() {
 
         # execute
         cp "$1" "$2"
-
-
-        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
+
+
+        # report status
         return 1
 }
 
@@ -155,42 +153,50 @@ FS_Extension_Replace() {
         fi
 
         printf -- "%s" "$___target"
+
+
+        # report status
         return 0
 }
 
 
 
 
-FS::is_directory() {
-        # __target="$1"
+FS_Is_Directory() {
+        #___target="$1"
 
 
-        # execute
+        # validate input
         if [ -z "$1" ]; then
                 return 1
         fi
 
 
+        # execute
         if [ -d "$1" ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-FS::is_file() {
-        # __target="$1"
+FS_Is_File() {
+        #___target="$1"
 
 
-        # execute
+        # validate input
         if [ -z "$1" ]; then
                 return 1
         fi
 
-        FS::is_directory "$1"
+
+        # execute
+        FS_Is_Directory "$1"
         if [ $? -eq 0 ]; then
                 return 1
         fi
@@ -199,14 +205,16 @@ FS::is_file() {
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-FS::is_target_a_cargo() {
-        # __target="$1"
+FS_Is_Target_A_Cargo() {
+        #___target="$1"
 
 
         # execute
@@ -224,8 +232,8 @@ FS::is_target_a_cargo() {
 
 
 
-FS::is_target_a_chocolatey() {
-        # __target="$1"
+FS_Is_Target_A_Chocolatey() {
+        #___target="$1"
 
 
         # execute
@@ -262,8 +270,8 @@ FS_Is_Target_A_Citation_CFF() {
 
 
 
-FS::is_target_a_docs() {
-        # __target="$1"
+FS_Is_Target_A_Docs() {
+        #___target="$1"
 
 
         # execute
@@ -281,8 +289,8 @@ FS::is_target_a_docs() {
 
 
 
-FS::is_target_a_homebrew() {
-        # __target="$1"
+FS_Is_Target_A_Homebrew() {
+        #___target="$1"
 
 
         # execute
@@ -300,8 +308,8 @@ FS::is_target_a_homebrew() {
 
 
 
-FS::is_target_a_library() {
-        # __target="$1"
+FS_Is_Target_A_Library() {
+        #___target="$1"
 
 
         # execute
@@ -323,7 +331,7 @@ FS::is_target_a_library() {
 
 
 FS_Is_Target_A_MSI() {
-        # __target="$1"
+        #___target="$1"
 
 
         # execute
@@ -341,27 +349,27 @@ FS_Is_Target_A_MSI() {
 
 
 
-FS::is_target_a_nupkg() {
-        # __target="$1"
+FS_Is_Target_A_Nupkg() {
+        #___target="$1"
 
 
         # execute
-        if [ "${1#*.nupkg}" == "$1" ]; then
-                printf -- "1"
-                return 1
+        if [ "${1#*.nupkg}" != "$1" ]; then
+                printf -- "0"
+                return 0
         fi
 
 
         # report status
-        printf -- "0"
-        return 0
+        printf -- "1"
+        return 1
 }
 
 
 
 
-FS::is_target_a_source() {
-        # __target="$1"
+FS_Is_Target_A_Source() {
+        #___target="$1"
 
 
         # execute
@@ -379,8 +387,8 @@ FS::is_target_a_source() {
 
 
 
-FS::is_target_a_wasm() {
-        # __target="$1"
+FS_Is_Target_A_WASM() {
+        #___target="$1"
 
 
         # execute
@@ -398,8 +406,8 @@ FS::is_target_a_wasm() {
 
 
 
-FS::is_target_a_wasm_js() {
-        # __target="$1"
+FS_Is_Target_A_WASM_JS() {
+        #___subject="$1"
 
 
         # execute
@@ -422,8 +430,8 @@ FS::is_target_a_wasm_js() {
 
 
 
-FS::is_target_exist() {
-        # __target="$1"
+FS_Is_Target_Exist() {
+        #___target="$1"
 
 
         # validate input
@@ -433,7 +441,7 @@ FS::is_target_exist() {
 
 
         # perform checking
-        if [ -f "$1" ]; then
+        if [ -e "$1" ]; then
                 return 0
         fi
 
@@ -445,8 +453,8 @@ FS::is_target_exist() {
 
 
 
-FS::list_all() {
-        # __target="$1"
+FS_List_All() {
+        #___target="$1"
 
 
         # validate input
@@ -454,7 +462,7 @@ FS::list_all() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -465,15 +473,14 @@ FS::list_all() {
         if [ $? -eq 0 ]; then
                 return 0
         fi
-
         return 1
 }
 
 
 
 
-FS::make_directory() {
-        # __target="$1"
+FS_Make_Directory() {
+        #___target="$1"
 
 
         # validate input
@@ -481,12 +488,12 @@ FS::make_directory() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
-        FS::is_target_exist "$1"
+        FS_Is_Target_Exist "$1"
         if [ $? -eq 0 ]; then
                 return 1
         fi
@@ -494,21 +501,20 @@ FS::make_directory() {
 
         # execute
         mkdir -p "$1"
-
-
-        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-FS::make_housing_directory() {
-        # __target="$1"
+FS_Make_Housing_Directory() {
+        #___target="$1"
 
 
         # validate input
@@ -516,14 +522,14 @@ FS::make_housing_directory() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
 
         # perform create
-        FS::make_directory "${1%/*}"
+        FS_Make_Directory "${1%/*}"
 
 
         # report status
@@ -533,9 +539,9 @@ FS::make_housing_directory() {
 
 
 
-FS::move() {
-        # __source="$1"
-        # __destination="$2"
+FS_Move() {
+        #___source="$1"
+        #___destination="$2"
 
 
         # validate input
@@ -546,40 +552,39 @@ FS::move() {
 
         # execute
         mv "$1" "$2"
-
-
-        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-FS::remake_directory() {
-        # __target="$1"
+FS_Remake_Directory() {
+        #___target="$1"
 
 
         # execute
-        FS::remove_silently "$1"
-        FS::make_directory "$1"
-
-
-        # report status
+        FS_Remove_Silently "$1"
+        FS_Make_Directory "$1"
         if [ $? -eq 0 ]; then
                 return 0
         fi
+
+
+        # report status
         return 1
 }
 
 
 
 
-FS::remove() {
-        # __target="$1"
+FS_Remove() {
+        #___target="$1"
 
 
         # validate input
@@ -590,21 +595,20 @@ FS::remove() {
 
         # execute
         rm -rf "$1"
-
-
-        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-FS::remove_silently() {
-        # __target="$1"
+FS_Remove_Silently() {
+        #___target="$1"
 
 
         # validate input
@@ -624,21 +628,21 @@ FS::remove_silently() {
 
 
 
-FS::rename() {
-        #__source="$1"
-        #__target="$2"
+FS_Rename() {
+        #___source="$1"
+        #___target="$2"
 
 
         # execute
-        FS::move "$1" "$2"
+        FS_Move "$1" "$2"
         return $?
 }
 
 
 
 
-FS::touch_file() {
-        # __target="$1"
+FS_Touch_File() {
+        #___target="$1"
 
 
         # validate input
@@ -646,7 +650,7 @@ FS::touch_file() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -654,22 +658,21 @@ FS::touch_file() {
 
         # execute
         touch "$1"
-
-
-        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }
 
 
 
 
-FS::write_file() {
-        # __target="$1"
-        # __content="$2"
+FS_Write_File() {
+        #___target="$1"
+        #___content="$2"
 
 
         # validate input
@@ -677,7 +680,7 @@ FS::write_file() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -eq 0 ]; then
                 return 1
         fi
@@ -685,12 +688,11 @@ FS::write_file() {
 
         # perform file write
         printf -- "%b" "$2" >> "$1"
-
-
-        # report status
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
+
+        # report status
         return 1
 }

@@ -35,7 +35,7 @@ if [ $? -ne 0 ]; then
         return 1
 fi
 
-FS::make_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 
 SETTINGS_BIN="\
 -Wall \
@@ -360,7 +360,7 @@ if [ $? -eq 0 ]; then
                         EXIT_CODE=1
                 fi
 
-                FS::remove_silently "$TARGET"
+                FS_Remove_Silently "$TARGET"
         fi
 fi
 

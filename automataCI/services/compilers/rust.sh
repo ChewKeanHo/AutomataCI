@@ -27,7 +27,7 @@ RUST_Activate_Local_Environment() {
 
         # execute
         ___location="$(RUST_Get_Activator_Path)"
-        FS::is_file "$___location"
+        FS_Is_File "$___location"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -75,7 +75,7 @@ RUST_Cargo_Logout() {
                 return 1
         fi
 
-        FS::remove_silently "~/.cargo/credentials.toml"
+        FS_Remove_Silently "~/.cargo/credentials.toml"
 
 
         # report status
@@ -94,7 +94,7 @@ RUST_Cargo_Release_Crate() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -127,7 +127,7 @@ RUST_Crate_Is_Valid() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -174,12 +174,12 @@ RUST_Create_Archive() {
                 return 1
         fi
 
-        FS::is_directory "$___source_directory"
+        FS_Is_Directory "$___source_directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$___target_directory"
+        FS_Is_Directory "$___target_directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -191,7 +191,7 @@ RUST_Create_Archive() {
 
 
         # execute
-        FS::remove_silently "${___source_directory}/Cargo.lock"
+        FS_Remove_Silently "${___source_directory}/Cargo.lock"
 
         ___current_path="$PWD" && cd "$___source_directory"
 
@@ -209,9 +209,9 @@ RUST_Create_Archive() {
 
         cd "$___current_path" && unset ___current_path
 
-        FS::remove_silently "${___source_directory}/target"
-        FS::remake_directory "${___target_directory}"
-        FS::copy_all "${___source_directory}/" "${___target_directory}"
+        FS_Remove_Silently "${___source_directory}/target"
+        FS_Remake_Directory "${___target_directory}"
+        FS_Copy_All "${___source_directory}/" "${___target_directory}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -257,15 +257,15 @@ RUST_Create_CARGO_TOML() {
                 return 1
         fi
 
-        FS::is_file "$___template"
+        FS_Is_File "$___template"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        FS::remove_silently "$___filepath"
-        FS::write_file "$___filepath" "\
+        FS_Remove_Silently "$___filepath"
+        FS_Write_File "$___filepath" "\
 [package]
 name = '$___sku'
 version = '$___version'
@@ -299,7 +299,7 @@ authors = [ '$___contact_name <$___contact_email>' ]
                         continue
                 fi
 
-                FS::append_file "$___filepath" "$___line\n"
+                FS_Append_File "$___filepath" "$___line\n"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -581,8 +581,8 @@ RUST_Setup_Local_Environment() {
                 --no-modify-path
 
         ## it's a clean repo. Start setting up localized environment...
-        FS::make_housing_directory "$___location"
-        FS::write_file "${___location}" "\
+        FS_Make_Housing_Directory "$___location"
+        FS_Write_File "${___location}" "\
 #!/bin/sh
 deactivate() {
         PATH=:\${PATH}:
@@ -611,7 +611,7 @@ fi
 
 return 0
 "
-        FS::is_file "$___location"
+        FS_Is_File "$___location"
         if [ $? -ne 0 ]; then
                 return 1
         fi

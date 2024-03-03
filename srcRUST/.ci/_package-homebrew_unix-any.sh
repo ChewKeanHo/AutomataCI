@@ -37,45 +37,45 @@ PACKAGE::assemble_homebrew_content() {
 
 
         # validate project
-        if [ $(FS::is_target_a_homebrew "$_target") -ne 0 ]; then
+        if [ $(FS_Is_Target_A_Homebrew "$_target") -ne 0 ]; then
                 return 10 # not applicable
         fi
 
 
         # assemble the package
-        FS::make_directory "${_directory}/${PROJECT_PATH_SOURCE}"
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/" \
+        FS_Make_Directory "${_directory}/${PROJECT_PATH_SOURCE}"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/" \
                         "${_directory}/${PROJECT_PATH_SOURCE}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::make_directory "${_directory}/${PROJECT_PATH_SOURCE}/.ci"
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/" \
+        FS_Make_Directory "${_directory}/${PROJECT_PATH_SOURCE}/.ci"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/" \
                         "${_directory}/${PROJECT_PATH_SOURCE}/.ci"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::make_directory "${_directory}/${PROJECT_RUST}"
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/" "${_directory}/${PROJECT_RUST}"
+        FS_Make_Directory "${_directory}/${PROJECT_RUST}"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/" "${_directory}/${PROJECT_RUST}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::make_directory "${_directory}/${PROJECT_RUST}/.ci"
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/.ci/" \
+        FS_Make_Directory "${_directory}/${PROJECT_RUST}/.ci"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/.ci/" \
                         "${_directory}/${PROJECT_RUST}/.ci"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_all "${PROJECT_PATH_ROOT}/automataCI" "$_directory"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/automataCI" "$_directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_file "${PROJECT_PATH_ROOT}/CONFIG.toml" "$_directory"
+        FS_Copy_File "${PROJECT_PATH_ROOT}/CONFIG.toml" "$_directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -101,7 +101,7 @@ PACKAGE::assemble_homebrew_content() {
 
         # script formula.rb
         OS::print_status info "scripting formula.rb...\n"
-        FS::write_file "${_directory}/formula.rb" "\
+        FS_Write_File "${_directory}/formula.rb" "\
 class ${PROJECT_SKU_TITLECASE} < Formula
   desc \"${PROJECT_PITCH}\"
   homepage \"${PROJECT_CONTACT_WEBSITE}\"

@@ -46,7 +46,7 @@ __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rust-test-${__filename}"
 
 
 OS::print_status info "preparing report vault: ${__report_location}\n"
-FS::remake_directory "$__report_location"
+FS_Remake_Directory "$__report_location"
 if [ $? -ne 0 ]; then
         OS::print_status error "preparation failed.\n"
         return 1
@@ -62,7 +62,7 @@ for __file in *.profraw; do
                 continue
         fi
 
-        FS::move "$__file" "$__workspace"
+        FS_Move "$__file" "$__workspace"
 done
 
 if [ $__exit_code -ne 0 ]; then

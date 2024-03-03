@@ -63,7 +63,7 @@ RELEASE_Conclude_CHOCOLATEY() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -ne 0 ]; then
                 I18N_Commit_Failed
                 return 1
@@ -106,12 +106,12 @@ RELEASE_Conclude_CHOCOLATEY() {
 RELEASE_Setup_CHOCOLATEY() {
         # clean up base directory
         I18N_Check "CHOCOLATEY"
-        FS::is_file "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+        FS_Is_File "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
         if [ $? -eq 0 ]; then
                 I18N_Check_Failed
                 return 1
         fi
-        FS::make_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+        FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
 
 
         # execute

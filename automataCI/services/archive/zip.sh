@@ -53,19 +53,19 @@ ZIP_Extract() {
                 return 1
         fi
 
-        FS::is_file "$___source"
+        FS_Is_File "$___source"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "$___destination"
+        FS_Is_File "$___destination"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
 
         # extract
-        FS::make_directory "$___destination"
+        FS_Make_Directory "$___destination"
         unzip "$___source" -d "$___destination"
         if [ $? -ne 0 ]; then
                 return 1

@@ -42,15 +42,15 @@ fi
 
 # parallel build executables
 __output_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
-FS::make_directory "$__output_directory"
+FS_Make_Directory "$__output_directory"
 
 
 __log_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/rust-build"
-FS::make_directory "$__log_directory"
+FS_Make_Directory "$__log_directory"
 
 
 __parallel_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rust-parallel"
-FS::remake_directory "$__parallel_directory"
+FS_Remake_Directory "$__parallel_directory"
 
 
 SUBROUTINE::build() {
@@ -86,7 +86,7 @@ SUBROUTINE::build() {
 
         # building target
         I18N_Status_Print info "building ${__subject} in parallel...\n"
-        FS::remove_silently "$__workspace"
+        FS_Remove_Silently "$__workspace"
         __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_RUST}"
 
         if [ ! -z "$__linker" ]; then
@@ -111,33 +111,33 @@ SUBROUTINE::build() {
 
 
         # export target
-        FS::make_housing_directory "$__dest"
+        FS_Make_Housing_Directory "$__dest"
         if [ -f "${__source}.wasm" ]; then
-                FS::remove_silently "${__dest%.*}.wasm"
-                FS::move "${__source}.wasm" "${__dest%.*}.wasm"
+                FS_Remove_Silently "${__dest%.*}.wasm"
+                FS_Move "${__source}.wasm" "${__dest%.*}.wasm"
                 if [ $? -ne 0 ]; then
                         I18N_Status_Print error "build failed - ${__subject}\n"
                         return 1
                 fi
 
                 if [ -f "${__source}.js" ]; then
-                        FS::remove_silently "${__dest%.*}.js"
-                        FS::move "${__source}.js" "${__dest%.*}.js"
+                        FS_Remove_Silently "${__dest%.*}.js"
+                        FS_Move "${__source}.js" "${__dest%.*}.js"
                         if [ $? -ne 0 ]; then
                                 I18N_Status_Print error "build failed - ${__subject}\n"
                                 return 1
                         fi
                 fi
         elif [ -f "${__source}.exe" ]; then
-                FS::remove_silently "${__dest%.*}.exe"
-                FS::move "${__source}.exe" "${__dest%.*}.exe"
+                FS_Remove_Silently "${__dest%.*}.exe"
+                FS_Move "${__source}.exe" "${__dest%.*}.exe"
                 if [ $? -ne 0 ]; then
                         I18N_Status_Print error "build failed - ${__subject}\n"
                         return 1
                 fi
         else
-                FS::remove_silently "$__dest"
-                FS::move "$__source" "$__dest"
+                FS_Remove_Silently "$__dest"
+                FS_Move "$__source" "$__dest"
                 if [ $? -ne 0 ]; then
                         I18N_Status_Print error "build failed - ${__subject}\n"
                         return 1
@@ -222,7 +222,7 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
                 return 1
         fi
 
-        FS::append_file "${__parallel_directory}/parallel.txt" "\
+        FS_Append_File "${__parallel_directory}/parallel.txt" "\
 |${__target}|${__filename}|${__workspace}|${__source}|${__dest}|${__linker}|${__log}|
 "
 done <<EOF

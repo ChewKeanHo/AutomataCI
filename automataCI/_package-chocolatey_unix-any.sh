@@ -66,7 +66,7 @@ PACKAGE_Run_CHOCOLATEY() {
         _target_path="${_dest}/${_src}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/choco_${_src}"
         I18N_Remake "$_src"
-        FS::remake_directory "$_src"
+        FS_Remake_Directory "$_src"
         if [ $? -ne 0 ]; then
                 I18N_Remake_Failed
                 return 1
@@ -87,7 +87,7 @@ PACKAGE_Run_CHOCOLATEY() {
         case $? in
         10)
                 I18N_Assemble_Skipped
-                FS::remove_silently "$_src"
+                FS_Remove_Silently "$_src"
                 return 0
                 ;;
         0)
@@ -103,7 +103,7 @@ PACKAGE_Run_CHOCOLATEY() {
         I18N_Check ".nuspec metadata"
         __name=""
         for __file in "${_src}/"*.nuspec; do
-                FS::is_file "${__file}"
+                FS_Is_File "${__file}"
                 if [ $? -eq 0 ]; then
                         if [ $(STRINGS_Is_Empty "$__name") -ne 0 ]; then
                                 I18N_Check_Failed

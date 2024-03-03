@@ -160,8 +160,8 @@ NIM::setup_local_environment() {
                 __brew=""
         fi
 
-        FS::make_housing_directory "$__location"
-        FS::write_file "${__location}" "\
+        FS_Make_Housing_Directory "$__location"
+        FS_Write_File "${__location}" "\
 #!/bin/sh
 if [ -z \"\$(type -t 'nim')\" ]; then
         1>&2 printf -- '[ ERROR ] missing nim compiler.\\\\n'

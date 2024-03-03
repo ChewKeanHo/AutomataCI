@@ -82,7 +82,7 @@ SETTINGS_NIM="\
 --panics:on \
 "
 
-FS::make_directory "$__build"
+FS_Make_Directory "$__build"
 
 
 

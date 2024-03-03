@@ -34,20 +34,20 @@ MANUAL_Create() {
                 return 1
         fi
 
-        FS::is_directory "$___location"
+        FS_Is_Directory "$___location"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
 
         # prepare workspace
-        FS::make_housing_directory "$___location"
-        FS::remove_silently "$___location"
-        FS::remove_silently "${___location}.gz"
+        FS_Make_Housing_Directory "$___location"
+        FS_Remove_Silently "$___location"
+        FS_Remove_Silently "${___location}.gz"
 
 
         # create basic level 1 man page that instruct users to seek --help
-        FS::write_file "${___location}" "\
+        FS_Write_File "${___location}" "\
 .\" ${___sku} - Lv1 Manpage
 .TH man 1 \"${___sku} man page\"
 

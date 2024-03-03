@@ -53,7 +53,7 @@ BUILD::__validate_config_file() {
 
 
         # execute
-        FS::is_file "${PROJECT_PATH_ROOT}/${2}/${1}"
+        FS:_Is_File "${PROJECT_PATH_ROOT}/${2}/${1}"
         if [ $? -eq 0 ]; then
                 printf -- "%b" "${PROJECT_PATH_ROOT}/${2}/${1}"
                 return 0
@@ -95,7 +95,7 @@ BUILD::__validate_source_files() {
                 # check source code existence
                 __path="${PROJECT_PATH_ROOT}/${_target_source}/${__line##* }"
                 OS::print_status info "validating source file: ${__path}\n"
-                FS::is_file "${__path}"
+                FS_Is_File "${__path}"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "validation failed.\n\n"
                         return 1
@@ -119,9 +119,9 @@ BUILD::__validate_source_files() {
                 # properly process path
                 __path="${__line##* }"
                 if [ "${__path%/*}" = "$__path" ]; then
-                        FS::make_directory "${_target_directory}"
+                        FS_Make_Directory "${_target_directory}"
                 else
-                        FS::make_directory "${_target_directory}/${__path%/*}"
+                        FS_Make_Directory "${_target_directory}/${__path%/*}"
                 fi
 
 
@@ -139,7 +139,7 @@ BUILD::__validate_source_files() {
                                 return 1
                         fi
 
-                        FS::append_file "$_linker_control" "\
+                        FS_Append_File "$_linker_control" "\
 ${_target_directory}/${__path%.c*}.o
 "
                         if [ $? -ne 0 ]; then
@@ -159,7 +159,7 @@ ${_target_directory}/${__path%.c*}.o
                                 return 1
                         fi
 
-                        FS::append_file "$_linker_control" "\
+                        FS_Append_File "$_linker_control" "\
 ${_target_directory}/${__path%.nim*}
 "
                         if [ $? -ne 0 ]; then
@@ -169,8 +169,8 @@ ${_target_directory}/${__path%.nim*}
                 elif [ ! "${__path%.o*}" = "$__path"  ]; then
                         OS::print_status info "registering .o file...\n"
                         __target_path="${_target_directory}/${__path}"
-                        FS::make_housing_directory "$__target_path"
-                        FS::copy_file \
+                        FS_Make_Housing_Directory "$__target_path"
+                        FS_Copy_File \
                                 "${PROJECT_PATH_ROOT}/${_target_source}/${__path}" \
                                 "${__target_path%/*}"
                         if [ $? -ne 0 ]; then
@@ -178,7 +178,7 @@ ${_target_directory}/${__path%.nim*}
                                 return 1
                         fi
 
-                        FS::append_file "$_linker_control" "\
+                        FS_Append_File "$_linker_control" "\
 ${_target_directory}/${__path}
 "
                         if [ $? -ne 0 ]; then
@@ -352,8 +352,8 @@ BUILD::_exec_build() {
 
 
         OS::print_status info "preparing ${_target} parallel build workspace...\n"
-        FS::remove_silently "${_parallel_control}"
-        FS::remove_silently "${_linker_control}"
+        FS_Remove_Silently "${_parallel_control}"
+        FS_Remove_Silently "${_linker_control}"
 
 
         # validating each source files
@@ -410,7 +410,7 @@ BUILD::_exec_link() {
 
         # validate input
         OS::print_status info "checking linking control file (${_linker_control})...\n"
-        FS::is_file "$_linker_control"
+        FS_Is_File "$_linker_control"
         if [ $? -ne 0 ]; then
                 OS::print_status error "check failed.\n\n"
                 return 1
@@ -427,7 +427,7 @@ BUILD::_exec_link() {
                 old_IFS="$IFS"
                 while IFS="" read -r __line || [ -n "$__line" ]; do
                         _target="${__line%.*}"
-                        FS::remove_silently "$_target"
+                        FS_Remove_Silently "$_target"
                         if [ $? -ne 0 ]; then
                                 OS::print_status error "link failed.\n\n"
                                 return 1
@@ -439,7 +439,7 @@ BUILD::_exec_link() {
                                 return 1
                         fi
 
-                        FS::remove_silently "$__line"
+                        FS_Remove_Silently "$__line"
                         if [ $? -ne 0 ]; then
                                 OS::print_status error "link failed.\n\n"
                                 return 1
@@ -449,7 +449,7 @@ BUILD::_exec_link() {
                 ;;
         bin)
                 OS::print_status info "linking all object files into executable...\n"
-                FS::remove_silently "$_target"
+                FS_Remove_Silently "$_target"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "link failed.\n\n"
                         return 1
@@ -462,7 +462,7 @@ BUILD::_exec_link() {
                 fi
                 ;;
         lib)
-                FS::remove_silently "$_target"
+                FS_Remove_Silently "$_target"
                 if [ $? -ne 0 ]; then
                         OS::print_status error "link failed.\n\n"
                         return 1
@@ -502,7 +502,7 @@ BUILD::compile() {
 
 
         # execute
-        FS::make_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+        FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
         BUILD::_exec_build "$1" "$2" "$3" "$4" "$5" "$6"
         case $? in
         0)
@@ -546,7 +546,7 @@ BUILD::test() {
                 _target_directory="${_target_directory}/${_target_code}_${_target}"
                 _target_build_list="${_target_directory}/build-list.txt"
 
-                FS::remake_directory "$_target_directory"
+                FS_Remake_Directory "$_target_directory"
 
                 __old_IFS="$IFS"
                 find "${PROJECT_PATH_ROOT}/${PROJECT_NIM}" -name '*_test.nim' -print0 \
@@ -554,7 +554,7 @@ BUILD::test() {
                         __line="${__line#*${PROJECT_PATH_ROOT}/${PROJECT_NIM}/}"
 
                         OS::print_status info "registering ${__line}\n"
-                        FS::append_file \
+                        FS_Append_File \
                                 "$_target_build_list" \
                                 "${_target_os}-${_target_arch} ${__line}\n"
                 done
@@ -566,7 +566,7 @@ BUILD::test() {
                 _target_directory="${_target_directory}/${_target_code}_${_target}"
                 _target_build_list="${_target_directory}/build-list.txt"
 
-                FS::remake_directory "$_target_directory"
+                FS_Remake_Directory "$_target_directory"
 
                 __old_IFS="$IFS"
                 find "${PROJECT_PATH_ROOT}/${PROJECT_C}" -name '*_test.c' -print0 \
@@ -574,7 +574,7 @@ BUILD::test() {
                         __line="${__line#*${PROJECT_PATH_ROOT}/${PROJECT_C}/}"
 
                         OS::print_status info "registering ${__line}\n"
-                        FS::append_file \
+                        FS_Append_File \
                                 "$_target_build_list" \
                                 "${_target_os}-${_target_arch} ${__line}\n"
                 done
@@ -615,7 +615,7 @@ BUILD::test() {
         _target_config="${_target_config}/o-list.txt"
 
         OS::print_status info "checking test execution workspace...\n"
-        FS::is_file "$_target_config"
+        FS_Is_File "$_target_config"
         if [ $? -ne 0 ]; then
                 OS::print_status error "check failed - missing compatible workspace.\n"
         fi

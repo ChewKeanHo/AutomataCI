@@ -35,28 +35,28 @@ COPYRIGHT_Create() {
                 return 1
         fi
 
-        FS::is_directory "${___location}"
+        FS_Is_Directory "${___location}"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___manual_file}"
+        FS_Is_File "${___manual_file}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___location}"
+        FS_Is_File "${___location}"
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
 
         # create housing directory path
-        FS::make_housing_directory "$___location"
+        FS_Make_Housing_Directory "$___location"
 
 
         # create copyright stanza header
-        FS::write_file "$___location" "\
+        FS_Write_File "$___location" "\
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: ${___sku}
 Upstream-Contact: ${___name} <${___email}>
@@ -71,7 +71,7 @@ Source: ${___website}
         # append manually facilitated copyright contents
         ___old_IFS="$IFS"
         while IFS= read -r ___line || [ -n "$___line" ]; do
-                FS::append_file "$___location" "$___line\n"
+                FS_Append_File "$___location" "$___line\n"
         done < "$___manual_file"
         IFS="$___old_IFS" && unset ___old_IFS ___line
 

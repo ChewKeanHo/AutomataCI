@@ -46,12 +46,12 @@ TAR_Create() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -eq 0 ]; then
                 return 1
         fi
@@ -95,12 +95,12 @@ TAR_Create_GZ() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -eq 0 ]; then
                 return 1
         fi
@@ -139,12 +139,12 @@ TAR_Create_XZ() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -eq 0 ]; then
                 return 1
         fi

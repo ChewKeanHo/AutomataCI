@@ -20,17 +20,17 @@
 RELEASE_Conclude_DOCS() {
         # validate input
         I18N_Check "DOCS"
-        FS::is_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+        FS_Is_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
         if [ $? -ne 0 ]; then
                 return 0
         fi
 
-        FS::is_file "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+        FS_Is_File "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
         if [ $? -eq 0 ]; then
                 I18N_Check_Failed
                 return 1
         fi
-        FS::make_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+        FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
 
 
         # execute
@@ -54,7 +54,7 @@ RELEASE_Conclude_DOCS() {
         __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_DOCS_REPO_DIRECTORY}"
 
         I18N_Export "$__staging"
-        FS::copy_all "${__staging}/" "$__dest"
+        FS_Copy_All "${__staging}/" "$__dest"
         if [ $? -ne 0 ]; then
                 I18N_Export_Failed
                 return 1

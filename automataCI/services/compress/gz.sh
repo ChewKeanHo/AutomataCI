@@ -31,7 +31,7 @@ GZ_Create() {
                 return 1
         fi
 
-        FS::is_directory "$___source"
+        FS_Is_Directory "$___source"
         if [ $? -eq 0 ]; then
                 return 1
         fi

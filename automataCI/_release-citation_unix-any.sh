@@ -28,7 +28,7 @@ RELEASE_Run_CITATION_CFF() {
 
         # execute
         I18N_Export "CITATION.cff"
-        FS::copy_file "$_target" "${PROJECT_PATH_ROOT}/CITATION.cff"
+        FS_Copy_File "$_target" "${PROJECT_PATH_ROOT}/CITATION.cff"
         if [ $? -ne 0 ]; then
                 I18N_Export_Failed
                 return 1

@@ -43,21 +43,21 @@ PACKAGE_Assemble_Flatpak_Content() {
                 ;;
         esac
 
-        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
+        if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_chocolatey "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Chocolatey "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Homebrew "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_cargo "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Cargo "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_MSI "$_target") -eq 0 ]; then
                 return 10 # not applicable
@@ -70,7 +70,7 @@ PACKAGE_Assemble_Flatpak_Content() {
         _target="$1"
         _filepath="${_directory}/${PROJECT_SKU}"
         OS::print_status info "copying ${_target} to ${_filepath}\n"
-        FS::copy_file "$_target" "$_filepath"
+        FS_Copy_File "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -80,7 +80,7 @@ PACKAGE_Assemble_Flatpak_Content() {
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon.svg"
         _filepath="${_directory}/icon.svg"
         OS::print_status info "copying ${_target} to ${_filepath}\n"
-        FS::copy_file "$_target" "$_filepath"
+        FS_Copy_File "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -90,7 +90,7 @@ PACKAGE_Assemble_Flatpak_Content() {
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon-48x48.png"
         _filepath="${_directory}/icon-48x48.png"
         OS::print_status info "copying ${_target} to ${_filepath}\n"
-        FS::copy_file "$_target" "$_filepath"
+        FS_Copy_File "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -100,14 +100,14 @@ PACKAGE_Assemble_Flatpak_Content() {
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon-128x128.png"
         _filepath="${_directory}/icon-128x128.png"
         OS::print_status info "copying ${_target} to ${_filepath}\n"
-        FS::copy_file "$_target" "$_filepath"
+        FS_Copy_File "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # [ COMPULSORY ] script manifest.yml
-        FS::write_file "${_directory}/manifest.yml" "\
+        FS_Write_File "${_directory}/manifest.yml" "\
 app-id: ${PROJECT_APP_ID}
 branch: ${_target_arch}
 default-branch: any
@@ -163,7 +163,7 @@ modules:
 
 
         # [ COMPULSORY ] script appdata.xml
-        FS::write_file "${_directory}/appdata.xml" "\
+        FS_Write_File "${_directory}/appdata.xml" "\
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- refer: https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html -->
 <component>

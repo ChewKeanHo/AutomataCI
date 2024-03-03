@@ -73,7 +73,7 @@ PACKAGE_Run_CHANGELOG() {
         fi
 
         I18N_Create "$__changelog_deb"
-        FS::make_directory "${__changelog_deb%/*}"
+        FS_Make_Directory "${__changelog_deb%/*}"
         CHANGELOG_Assemble_DEB \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog" \
                 "$__changelog_deb" \

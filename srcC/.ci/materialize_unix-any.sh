@@ -35,7 +35,7 @@ if [ $? -ne 0 ]; then
         return 1
 fi
 
-FS::make_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 
 SETTINGS_BIN="\
 -Wall \
@@ -111,9 +111,9 @@ __source="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}.elf"
 __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
 OS::print_status info "exporting ${__source} to ${__dest}\n"
-FS::make_housing_directory "$__dest"
-FS::remove_silently "$__dest"
-FS::move "$__source" "$__dest"
+FS_Make_Housing_Directory "$__dest"
+FS_Remove_Silently "$__dest"
+FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
         OS::print_status error "export failed.\n"
         return 1
@@ -127,9 +127,9 @@ __source="${PROJECT_SKU}-lib_${PROJECT_OS}-${PROJECT_ARCH}.a"
 __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}/lib${PROJECT_SKU}.a"
 OS::print_status info "exporting ${__source} to ${__dest}\n"
-FS::make_housing_directory "$__dest"
-FS::remove_silently "$__dest"
-FS::move "$__source" "$__dest"
+FS_Make_Housing_Directory "$__dest"
+FS_Remove_Silently "$__dest"
+FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
         OS::print_status error "export failed.\n"
         return 1

@@ -101,7 +101,7 @@ arm|zh-hans
                 ## execute
                 I18N_Assemble "$__target" "$__dest"
                 if [ -e "$__target" ]; then
-                        FS::copy_file "$__target" "$__dest" &> /dev/null
+                        FS_Copy_File "$__target" "$__dest" &> /dev/null
                 fi
         done
         IFS="$__old_IFS" && unset __old_IFS
@@ -196,7 +196,7 @@ Unfortunately, you can only install this package on a 32-bit Windows."
                 # check required executables for packaging
                 __var_MAIN_EXE_SOURCE="${_directory}/${PROJECT_SKU}_windows-${__arch}.exe"
                 I18N_Check "${__var_MAIN_EXE_SOURCE}"
-                FS::is_file "$__var_MAIN_EXE_SOURCE"
+                FS_Is_File "$__var_MAIN_EXE_SOURCE"
                 if [ $? -ne 0 ]; then
                         I18N_Check_Failed_Skipped
                         continue
@@ -306,21 +306,21 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
                 # check required files for packaging
                 I18N_Check "$__var_MAIN_LICENSE_SOURCE"
-                FS::is_file "$__var_MAIN_LICENSE_SOURCE"
+                FS_Is_File "$__var_MAIN_LICENSE_SOURCE"
                 if [ $? -ne 0 ]; then
                         I18N_Check_Failed_Skipped
                         continue
                 fi
 
                 I18N_Check "$__var_USER_GUIDE_SOURCE"
-                FS::is_file "$__var_USER_GUIDE_SOURCE"
+                FS_Is_File "$__var_USER_GUIDE_SOURCE"
                 if [ $? -ne 0 ]; then
                         I18N_Check_Failed_Skipped
                         continue
                 fi
 
                 I18N_Check "$_wxs"
-                FS::is_file "$_wxs"
+                FS_Is_File "$_wxs"
                 if [ $? -eq 0 ]; then
                         I18N_Check_Failed
                         return 1
@@ -330,7 +330,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 # creating wxs recipe
                 I18N_Status_Print_MSI_WXS_Script_Start "$_wxs"
                 I18N_Status_Print_MSI_WXS_Script_Compulsory_Headers
-                FS::write_file "$_wxs" "\
+                FS_Write_File "$_wxs" "\
 <?xml version='1.0' encoding='UTF-8'?>
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
         <Product Id='*'
@@ -415,7 +415,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
                 # Assemble Components
                 I18N_Status_Print_MSI_WXS_Script_Filesystem
-                FS::append_file "$_wxs" "\
+                FS_Append_File "$_wxs" "\
                 <Directory Id='TARGETDIR' Name='SourceDir'>
                 <Directory Id='${__var_DIR_PROGRAM_FILES}'
                 ><Directory Id='${__tag_DIR_INSTALL}' Name='${PROJECT_NAME}'
@@ -427,7 +427,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 fi
 
                 if [ "$__packager_type" = "full" ]; then
-                        FS::append_file "$_wxs" "\
+                        FS_Append_File "$_wxs" "\
                         <!-- Uninstallation component -->
                         <Component Id='${__tag_COMPONENT_INSTALLER}'
                                 Guid='${__uuid_COMPONENT_INSTALLER}'
@@ -445,7 +445,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 fi
 
 
-                FS::append_file "$_wxs" "\
+                FS_Append_File "$_wxs" "\
                         <Directory Id='FolderBin' Name='bin'>
                                 <!-- Compulsory Executable Here -->
                                 <Component Id='${__tag_COMPONENT_BIN}'
@@ -517,7 +517,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 fi
 
                 I18N_Status_Print_MSI_WXS_Script_Filesystem_Program_Files_Close
-                FS::append_file "$_wxs" "\
+                FS_Append_File "$_wxs" "\
                 </Directory></Directory>
 "
                 if [ $? -ne 0 ]; then
@@ -526,7 +526,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 fi
 
                 I18N_Status_Print_MSI_WXS_Script_Registries
-                FS::append_file "$_wxs" "\
+                FS_Append_File "$_wxs" "\
                         <Component Id='${__tag_COMPONENT_REGISTRIES}'
                                 Guid='${__uuid_COMPONENT_REGISTRIES}'
                         >
@@ -556,7 +556,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
                 # Define all feature components
                 I18N_Status_Print_MSI_WXS_Script_Features
-                FS::append_file "$_wxs" "\
+                FS_Append_File "$_wxs" "\
                 <Feature Id='${__tag_FEATURE_ID}'
                         Title='${__var_FEATURE_TITLE}'
                         Description='${__var_FEATURE_DESCRIPTION}'
@@ -612,7 +612,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
                 # conclude the wxs write-up
                 I18N_Status_Print_MSI_WXS_Script_Close
-                FS::append_file "$_wxs" "\
+                FS_Append_File "$_wxs" "\
         </Product>
 </Wix>
 "

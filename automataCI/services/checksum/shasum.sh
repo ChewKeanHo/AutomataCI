@@ -27,7 +27,7 @@ SHASUM_Create_From_File() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi

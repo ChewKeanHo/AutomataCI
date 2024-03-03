@@ -35,7 +35,7 @@ PACKAGE::assemble_homebrew_content() {
 
 
         # validate project
-        if [ $(FS::is_target_a_homebrew "$_target") -ne 0 ]; then
+        if [ $(FS_Is_Target_A_Homebrew "$_target") -ne 0 ]; then
                 return 10 # not applicable
         fi
 

@@ -41,7 +41,7 @@ RELEASE_Run_DEB() {
         # execute
         __conf="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb"
         __file="${__conf}/conf/distributions"
-        FS::is_file "$__file"
+        FS_Is_File "$__file"
         if [ $? -ne 0 ]; then
                 I18N_Create "$__file"
                 REPREPRO_Create_Conf \
@@ -59,7 +59,7 @@ RELEASE_Run_DEB() {
 
         __dest="${2}/deb"
         I18N_Create "$__dest"
-        FS::make_directory "${__dest}"
+        FS_Make_Directory "${__dest}"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
                 return 1

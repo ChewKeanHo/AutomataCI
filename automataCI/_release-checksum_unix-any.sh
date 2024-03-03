@@ -25,18 +25,18 @@ RELEASE_Run_CHECKSUM() {
 
         # execute
         __sha256_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha256.txt"
-        FS::remove_silently "$__sha256_file"
+        FS_Remove_Silently "$__sha256_file"
 
         __sha256_target="${PROJECT_SKU}-sha256_${PROJECT_VERSION}.txt"
         __sha256_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${__sha256_target}"
-        FS::remove_silently "$__sha256_target"
+        FS_Remove_Silently "$__sha256_target"
 
         __sha512_file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/sha512.txt"
-        FS::remove_silently "$__sha512_file"
+        FS_Remove_Silently "$__sha512_file"
 
         __sha512_target="${PROJECT_SKU}-sha512_${PROJECT_VERSION}.txt"
         __sha512_target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${__sha512_target}"
-        FS::remove_silently "$__sha512_target"
+        FS_Remove_Silently "$__sha512_target"
 
 
         # gpg sign all packages
@@ -45,7 +45,7 @@ RELEASE_Run_CHECKSUM() {
                 __keyfile="${PROJECT_SKU}-gpg_${PROJECT_VERSION}.keyfile"
                 I18N_Export "$__keyfile"
                 __keyfile="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${__keyfile}"
-                FS::remove_silently "${__keyfile}"
+                FS_Remove_Silently "${__keyfile}"
 
                 GPG_Export_Public_Key "$__keyfile" "$PROJECT_GPG_ID"
                 if [ $? -ne 0 ]; then
@@ -53,7 +53,7 @@ RELEASE_Run_CHECKSUM() {
                         return 1
                 fi
 
-                FS::copy_file "$__keyfile" "${1}/${__keyfile##*/}"
+                FS_Copy_File "$__keyfile" "${1}/${__keyfile##*/}"
                 if [ $? -ne 0 ]; then
                         I18N_Export_Failed
                         return 1
@@ -66,7 +66,7 @@ RELEASE_Run_CHECKSUM() {
                         fi
 
                         I18N_Sign "$TARGET" "GPG"
-                        FS::remove_silently "${TARGET}.asc"
+                        FS_Remove_Silently "${TARGET}.asc"
                         GPG_Detach_Sign_File "$TARGET" "$PROJECT_GPG_ID"
                         if [ $? -ne 0 ]; then
                                 I18N_Sign_Failed
@@ -78,7 +78,7 @@ RELEASE_Run_CHECKSUM() {
 
         # shasum all files
         for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
-                FS::is_directory "$TARGET"
+                FS_Is_Directory "$TARGET"
                 if [ $? -eq 0 ]; then
                         I18N_Is_Directory_Skipped "$TARGET"
                         continue
@@ -92,7 +92,7 @@ RELEASE_Run_CHECKSUM() {
                                 return 1
                         fi
 
-                        FS::append_file "${__sha256_file}" "\
+                        FS_Append_File "${__sha256_file}" "\
 ${__value}  ${TARGET##*/}
 "
                         if [ $? -ne 0 ]; then
@@ -110,7 +110,7 @@ ${__value}  ${TARGET##*/}
                                 return 1
                         fi
 
-                        FS::append_file "${__sha512_file}" "\
+                        FS_Append_File "${__sha512_file}" "\
 ${__value}  ${TARGET##*/}
 "
                         if [ $? -ne 0 ]; then
@@ -121,10 +121,10 @@ ${__value}  ${TARGET##*/}
         done
 
 
-        FS::is_file "$__sha256_file"
+        FS_Is_File "$__sha256_file"
         if [ $? -eq 0 ]; then
                 I18N_Export "$__sha256_target"
-                FS::move "${__sha256_file}" "$__sha256_target"
+                FS_Move "${__sha256_file}" "$__sha256_target"
                 if [ $? -ne 0 ]; then
                         I18N_Export_Failed
                         return 1
@@ -132,10 +132,10 @@ ${__value}  ${TARGET##*/}
         fi
 
 
-        FS::is_file "$__sha512_file"
+        FS_Is_File "$__sha512_file"
         if [ $? -eq 0 ]; then
                 I18N_Export "$__sha512_target"
-                FS::move "${__sha512_file}" "$__sha512_target"
+                FS_Move "${__sha512_file}" "$__sha512_target"
                 if [ $? -ne 0 ]; then
                         I18N_Export_Failed
                         return 1

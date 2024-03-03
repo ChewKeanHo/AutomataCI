@@ -34,7 +34,7 @@ FLATPAK_Create_Archive() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -43,7 +43,7 @@ FLATPAK_Create_Archive() {
         ___path_export="./export"
         ___path_package="./out.flatpak"
         ___path_manifest="./manifest.yml"
-        FS::make_directory "$___repo"
+        FS_Make_Directory "$___repo"
 
 
         # change location into the workspace
@@ -52,7 +52,7 @@ FLATPAK_Create_Archive() {
 
 
         # build archive
-        FS::is_file "$___path_manifest"
+        FS_Is_File "$___path_manifest"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -83,13 +83,13 @@ FLATPAK_Create_Archive() {
 
 
         # export output
-        FS::is_file "$___path_package"
+        FS_Is_File "$___path_package"
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
                 return 1
         fi
 
-        FS::move "$___path_package" "$___destination"
+        FS_Move "$___path_package" "$___destination"
         ___process=$?
 
 

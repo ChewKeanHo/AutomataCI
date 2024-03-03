@@ -46,38 +46,38 @@ PACKAGE_Assemble_IPK_Content() {
 
         _gpg_keyring="$PROJECT_SKU"
         _package="$PROJECT_SKU"
-        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
+        if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
                 # copy main libary
                 # TIP: (1) usually is: usr/local/lib
                 #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
                 _filepath="${_directory}/data/usr/local/lib/${PROJECT_SKU}"
                 _filepath="${_filepath}/lib${PROJECT_SKU}.a"
                 OS::print_status info "copying ${_target} to ${_filepath}\n"
-                FS::make_housing_directory "$_filepath"
+                FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                FS::copy_file "$_target" "$_filepath"
+                FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
                 _gpg_keyring="lib$PROJECT_SKU"
                 _package="lib$PROJECT_SKU"
-        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_chocolatey "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Chocolatey "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Homebrew "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_cargo "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Cargo "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_MSI "$_target") -eq 0 ]; then
                 return 10 # not applicable
@@ -88,12 +88,12 @@ PACKAGE_Assemble_IPK_Content() {
                 _filepath="${_directory}/data/usr/local/bin/${PROJECT_SKU}"
 
                 OS::print_status info "copying $_target to ${_filepath}/\n"
-                FS::make_housing_directory "$_filepath"
+                FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                FS::copy_file "$_target" "$_filepath"
+                FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi

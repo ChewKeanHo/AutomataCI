@@ -34,7 +34,7 @@ RELEASE_Conclude_STATIC_REPO() {
 
         ___file="Home.md"
         I18N_Create "$___file"
-        FS::write_file "$___file" "\
+        FS_Write_File "$___file" "\
 # ${PROJECT_NAME} Static Distribution Repository
 
 This is a re-purposed repository for housing various distribution ecosystem
@@ -68,12 +68,12 @@ to \`apt-get install\`, \`yum install\`, or \`flatpak install\`.
 RELEASE_Setup_STATIC_REPO() {
         # clean up base directory
         I18N_Check "STATIC REPO"
-        FS::is_file "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+        FS_Is_File "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
         if [ $? -eq 0 ]; then
                 I18N_Check_Failed
                 return 1
         fi
-        FS::make_directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
+        FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}"
 
 
         # execute
@@ -94,10 +94,10 @@ RELEASE_Setup_STATIC_REPO() {
         # move existing items to static repo
         __staging="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${PROJECT_PATH_RELEASE}"
         __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_STATIC_REPO_DIRECTORY}"
-        FS::is_directory "$__staging"
+        FS_Is_Directory "$__staging"
         if [ $? -eq 0 ]; then
                 I18N_Export "STATIC REPO"
-                FS::copy_all "${__staging}/" "$__dest"
+                FS_Copy_All "${__staging}/" "$__dest"
                 if [ $? -ne 0 ]; then
                         I18N_Export_Failed
                         return 1

@@ -30,22 +30,22 @@ IPK_Create_Archive() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "${___directory}/control"
+        FS_Is_Directory "${___directory}/control"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "${___directory}/data"
+        FS_Is_Directory "${___directory}/data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___directory}/control/control"
+        FS_Is_File "${___directory}/control/control"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -75,7 +75,7 @@ IPK_Create_Archive() {
 
         # generate debian-binary
         cd "${___directory}"
-        FS::write_file "${___directory}/debian-binary" "2.0\n"
+        FS_Write_File "${___directory}/debian-binary" "2.0\n"
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
                 return 1
@@ -92,8 +92,8 @@ IPK_Create_Archive() {
 
 
         # move to destination
-        FS::remove_silently "$___destination"
-        FS::move "${___file}.gz" "$___destination"
+        FS_Remove_Silently "$___destination"
+        FS_Move "${___file}.gz" "$___destination"
         ___process=$?
 
 
@@ -227,7 +227,7 @@ IPK_Is_Valid() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi

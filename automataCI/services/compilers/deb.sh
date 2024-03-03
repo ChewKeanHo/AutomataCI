@@ -32,22 +32,22 @@ DEB_Create_Archive() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "${___directory}/control"
+        FS_Is_Directory "${___directory}/control"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "${___directory}/data"
+        FS_Is_Directory "${___directory}/data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___directory}/control/control"
+        FS_Is_File "${___directory}/control/control"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -77,7 +77,7 @@ DEB_Create_Archive() {
 
         # generate debian-binary
         cd "${___directory}"
-        FS::write_file "${___directory}/debian-binary" "2.0\n"
+        FS_Write_File "${___directory}/debian-binary" "2.0\n"
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
                 return 1
@@ -94,8 +94,8 @@ DEB_Create_Archive() {
 
 
         # move to destination
-        FS::remove_silently "$___destination"
-        FS::move "$___file" "$___destination"
+        FS_Remove_Silently "$___destination"
+        FS_Move "$___file" "$___destination"
         ___process=$?
 
 
@@ -127,24 +127,24 @@ DEB_Create_Changelog() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "$___filepath"
+        FS_Is_File "$___filepath"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # create housing directory path
-        FS::make_housing_directory "$___location"
-        FS::remove_silently "$___location"
+        FS_Make_Housing_Directory "$___location"
+        FS_Remove_Silently "$___location"
 
 
         # copy processed file to target location
-        FS::copy_file "$___filepath" "$___location"
+        FS_Copy_File "$___filepath" "$___location"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -166,7 +166,7 @@ DEB_Create_Checksum() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -174,14 +174,14 @@ DEB_Create_Checksum() {
 
         # prepare workspace
         ___location="${1}/control/md5sums"
-        FS::remove_silently "$___location"
-        FS::make_housing_directory "$___location"
+        FS_Remove_Silently "$___location"
+        FS_Make_Housing_Directory "$___location"
 
 
         # checksum every items
         for ___line in $(find "${1}/data" -type f); do
                 ___checksum="$(MD5_Checksum_From_File "$___line")"
-                FS::append_file "$___location" \
+                FS_Append_File "$___location" \
                         "${___checksum%% *} ${___line##*${1}/data/}\n"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -228,12 +228,12 @@ DEB_Create_Control() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$___resources"
+        FS_Is_Directory "$___resources"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -250,8 +250,8 @@ DEB_Create_Control() {
         # prepare workspace
         ___arch="$(DEB_Get_Architecture "$___os" "$___arch")"
         ___location="${___directory}/control/control"
-        FS::make_housing_directory "${___location}"
-        FS::remove_silently "${___location}"
+        FS_Make_Housing_Directory "${___location}"
+        FS_Remove_Silently "${___location}"
 
 
         # generate control file
@@ -260,7 +260,7 @@ DEB_Create_Control() {
                 return 1
         fi
 
-        FS::write_file "$___location" "\
+        FS_Write_File "$___location" "\
 Package: $___sku
 Version: $___version
 Architecture: $___arch
@@ -274,7 +274,7 @@ Description: $___pitch
 
 
         # append description data file
-        if [ ! "$(FS::is_file "$___description_filepath")" = "0" ]; then
+        if [ ! "$(FS_Is_File "$___description_filepath")" = "0" ]; then
                 return 0 # report status early
         fi
 
@@ -291,7 +291,7 @@ Description: $___pitch
                         ___line=" ${___line}"
                 fi
 
-                FS::append_file "$___location" "${___line}\n"
+                FS_Append_File "$___location" "${___line}\n"
         done < "${___description_filepath}"
         IFS="$___old_IFS" && unset ___old_IFS ___line
 
@@ -327,7 +327,7 @@ DEB_Create_Source_List() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -339,19 +339,19 @@ DEB_Create_Source_List() {
         ___key="usr/local/share/keyrings/${___sku}-keyring.gpg"
         ___filename="${___directory}/data/etc/apt/sources.list.d/${___sku}.list"
 
-        FS::is_file "$___filename"
+        FS_Is_File "$___filename"
         if [ $? -eq 0 ]; then
                 return 10
         fi
 
-        FS::is_file "${___directory}/data/${___key}"
+        FS_Is_File "${___directory}/data/${___key}"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
 
-        FS::make_housing_directory "$___filename"
-        FS::write_file "$___filename" "\
+        FS_Make_Housing_Directory "$___filename"
+        FS_Write_File "$___filename" "\
 # WARNING: AUTO-GENERATED - DO NOT EDIT!
 deb [signed-by=/${___key}] ${___url} ${___codename} ${___distribution}
 "
@@ -359,9 +359,9 @@ deb [signed-by=/${___key}] ${___url} ${___codename} ${___distribution}
                 return 1
         fi
 
-        FS::make_housing_directory "${___directory}/data/${___key}"
+        FS_Make_Housing_Directory "${___directory}/data/${___key}"
         if [ $(STRINGS_Is_Empty "$___is_simulated") -ne 0 ]; then
-                FS::write_file "${___directory}/data/${___key}" ""
+                FS_Write_File "${___directory}/data/${___key}" ""
         else
                 GPG_Export_Public_Keyring "${___directory}/data/${___key}" "$___gpg_id"
         fi
@@ -519,7 +519,7 @@ DEB_Is_Valid() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi

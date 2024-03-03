@@ -75,14 +75,14 @@ PACKAGE_Run_FLATPAK() {
         _target_path="${_dest}/${_src}.flatpak"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/flatpak_${_src}"
         I18N_Remake "$_src"
-        FS::remake_directory "${_src}"
+        FS_Remake_Directory "${_src}"
         if [ $? -ne 0 ]; then
                 I18N_Remake_Failed
                 return 1
         fi
 
         I18N_Check "$_target_path"
-        FS::is_file "$_target_path"
+        FS_Is_File "$_target_path"
         if [ $? -eq 0 ]; then
                 I18N_Check_Failed
                 return 1
@@ -103,7 +103,7 @@ PACKAGE_Run_FLATPAK() {
         case $? in
         10)
                 I18N_Assemble_Skipped
-                FS::remove_silently "$_src"
+                FS_Remove_Silently "$_src"
                 return 0
                 ;;
         0)
@@ -118,14 +118,14 @@ PACKAGE_Run_FLATPAK() {
 
         # generate required files
         I18N_Check "${_src}/manifest.yml"
-        FS::is_file "${_src}/manifest.yml"
+        FS_Is_File "${_src}/manifest.yml"
         if [ $? -ne 0 ]; then
                 I18N_Check_Failed
                 return 1
         fi
 
         I18N_Check "${_src}/appdata.xml"
-        FS::is_file "${_src}/appdata.xml"
+        FS_Is_File "${_src}/appdata.xml"
         if [ $? -ne 0 ]; then
                 I18N_Check_Failed
                 return 1

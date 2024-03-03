@@ -31,7 +31,7 @@ fi
 # source locally provided functions
 __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
 __recipe="${__recipe}/notarize_unix-any.sh"
-FS::is_file "$__recipe"
+FS_Is_File "$__recipe"
 if [ $? -eq 0 ]; then
         I18N_Run "$__recipe"
         . "$__recipe"
@@ -46,7 +46,7 @@ fi
 
 # begin notarize
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
-        FS::is_file "$i"
+        FS_Is_File "$i"
         if [ $? -ne 0 ]; then
                 continue
         fi

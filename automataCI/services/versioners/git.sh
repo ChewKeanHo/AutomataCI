@@ -26,14 +26,14 @@ GIT_At_Root_Repo() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        FS::is_file "${1}/.git/config"
+        FS_Is_File "${1}/.git/config"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -167,12 +167,12 @@ GIT_Clone() {
         fi
 
         if [ $(STRINGS_Is_Empty "$2") -ne 0 ]; then
-                FS::is_file "$2"
+                FS_Is_File "$2"
                 if [ $? -eq 0 ]; then
                         return 1
                 fi
 
-                FS::is_directory "$2"
+                FS_Is_Directory "$2"
                 if [ $? -eq 0 ]; then
                         return 2
                 fi
@@ -228,23 +228,23 @@ GIT_Clone_Repo() {
 
         # execute
         ___path="${___root}/${___relative_path}"
-        FS::make_directory "$___path"
+        FS_Make_Directory "$___path"
         ___path="${___path}/${___label}"
 
-        FS::is_directory "$___path"
+        FS_Is_Directory "$___path"
         if [ $? -eq 0 ]; then
                 cd "${___path}"
                 ___directory="$(GIT_Get_Root_Directory)"
                 cd "$___current"
 
                 if [ "$___directory" = "$___root" ]; then
-                        FS::remove_silently "${___path}"
+                        FS_Remove_Silently "${___path}"
                 fi
         fi
 
 
         if [ $(STRINGS_Is_Empty "$___simulate") -ne 0 ]; then
-                FS::make_directory "${___path}"
+                FS_Make_Directory "${___path}"
                 cd "${___path}"
                 git init --initial-branch=main
                 git commit --allow-empty -m "Initial Commit"
@@ -496,7 +496,7 @@ GIT_Remove_Worktree() {
                 return 1
         fi
 
-        FS::remove_silently "$1"
+        FS_Remove_Silently "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -526,7 +526,7 @@ GIT_Setup_Worktree() {
 
 
         # execute
-        FS::make_directory "$2"
+        FS_Make_Directory "$2"
         git worktree add "$2" "$1"
         if [ $? -ne 0 ]; then
                 return 1

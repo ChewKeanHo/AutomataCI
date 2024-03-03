@@ -48,19 +48,19 @@ CREATEREPO_Publish() {
                 return 1
         fi
 
-        FS::is_directory "$___target"
+        FS_Is_Directory "$___target"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        FS::copy_file "$__target" "$__directory"
+        FS_Copy_File "$__target" "$__directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi

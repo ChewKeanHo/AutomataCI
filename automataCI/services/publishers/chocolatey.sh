@@ -49,11 +49,11 @@ CHOCOLATEY_Is_Valid_Nupkg() {
 
 
         # execute
-        if [ $(FS::is_target_a_chocolatey "$1") -ne 0 ]; then
+        if [ $(FS_Is_Target_A_Chocolatey "$1") -ne 0 ]; then
                 return 1
         fi
 
-        if [ $(FS::is_target_a_nupkg "$1") -ne 0 ]; then
+        if [ $(FS_Is_Target_A_Nupkg "$1") -ne 0 ]; then
                 return 1
         fi
 
@@ -110,8 +110,8 @@ CHOCOLATEY_Publish() {
 
 
         # execute
-        FS::make_housing_directory "$2"
-        FS::copy_file "$1" "$2"
+        FS_Make_Housing_Directory "$2"
+        FS_Copy_File "$1" "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -140,7 +140,7 @@ CHOCOLATEY_Test() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi

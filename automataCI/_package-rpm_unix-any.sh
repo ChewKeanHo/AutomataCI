@@ -82,13 +82,13 @@ PACKAGE_Run_RPM() {
         _src="${_target_filename}_${_target_os}-${_target_arch}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rpm_${_src}"
         I18N_Remake "$_src"
-        FS::remake_directory "$_src"
+        FS_Remake_Directory "$_src"
         if [ $? -ne 0 ]; then
                 I18N_Remake_Failed
                 return 1
         fi
-        FS::make_directory "${_src}/BUILD"
-        FS::make_directory "${_src}/SPECS"
+        FS_Make_Directory "${_src}/BUILD"
+        FS_Make_Directory "${_src}/SPECS"
 
 
         # copy all complimentary files to the workspace
@@ -105,7 +105,7 @@ PACKAGE_Run_RPM() {
         case $? in
         10)
                 I18N_Assemble_Skipped
-                FS::remove_silently "$_src"
+                FS_Remove_Silently "$_src"
                 return 0
                 ;;
         0)

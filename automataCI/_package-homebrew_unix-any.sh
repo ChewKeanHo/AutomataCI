@@ -67,7 +67,7 @@ PACKAGE_Run_HOMEBREW() {
         _target_path="${_dest}/${_src}"
         _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/homebrew_${_src}"
         I18N_Remake "$_src"
-        FS::remake_directory "$_src"
+        FS_Remake_Directory "$_src"
         if [ $? -ne 0 ]; then
                 I18N_Remake_Failed
                 return 1
@@ -76,7 +76,7 @@ PACKAGE_Run_HOMEBREW() {
 
         # check formula.rb is available
         I18N_Check "formula.rb"
-        FS::is_file "${_src}/formula.rb"
+        FS_Is_File "${_src}/formula.rb"
         if [ $? -eq 0 ]; then
                 I18N_Check_Failed
                 return 1
@@ -97,7 +97,7 @@ PACKAGE_Run_HOMEBREW() {
         case $? in
         10)
                 I18N_Assemble_Skipped
-                FS::remove_silently "$_src"
+                FS_Remove_Silently "$_src"
                 return 0
                 ;;
         0)
@@ -133,7 +133,7 @@ PACKAGE_Run_HOMEBREW() {
 
         # update the formula.rb script
         I18N_Subject_Update "formula.rb"
-        FS::remove_silently "${_target_path}.rb"
+        FS_Remove_Silently "${_target_path}.rb"
         __old_IFS="$IFS"
         while IFS= read -r __line || [ -n "$__line" ]; do
                 __line="$(STRINGS_Replace_All \
@@ -148,7 +148,7 @@ PACKAGE_Run_HOMEBREW() {
                         "${__shasum}" \
                 )"
 
-                FS::append_file "${_target_path}.rb" "${__line}\n"
+                FS_Append_File "${_target_path}.rb" "${__line}\n"
                 if [ $? -ne 0 ]; then
                         IFS="$__old_IFS" && unset __line __old_IFS
                         I18N_Update_Failed

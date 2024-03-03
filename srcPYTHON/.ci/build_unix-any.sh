@@ -128,7 +128,7 @@ fi
 # compose documentations
 OS::print_status info "printing html documentations...\n"
 __output="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/python"
-FS::remake_directory "${__output}/${PROJECT_OS}-${PROJECT_ARCH}"
+FS_Remake_Directory "${__output}/${PROJECT_OS}-${PROJECT_ARCH}"
 pdoc --html \
         --output-dir "${__output}/${PROJECT_OS}-${PROJECT_ARCH}" \
         "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/"

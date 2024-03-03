@@ -54,7 +54,7 @@ fi
 
 # building target
 OS::print_status info "building ${__filename}...\n"
-FS::remove_silently "${__workspace}"
+FS_Remove_Silently "${__workspace}"
 
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_RUST}"
 cargo build --release --target-dir "$__workspace" --target="$__target"
@@ -72,9 +72,9 @@ fi
 __source="${__workspace}/${__target}/release/${PROJECT_SKU}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
 OS::print_status info "exporting ${__source} to ${__dest}\n"
-FS::make_housing_directory "$__dest"
-FS::remove_silently "$__dest"
-FS::move "$__source" "$__dest"
+FS_Make_Housing_Directory "$__dest"
+FS_Remove_Silently "$__dest"
+FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
         OS::print_status error "export failed.\n"
         return 1

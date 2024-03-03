@@ -43,12 +43,12 @@ cd "$__current_path" && unset __current_path
 
 # export report
 OS::print_status info "exporting coverage report...\n"
-FS::is_directory "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/coverage"
+FS_Is_Directory "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/coverage"
 if [ $? -eq 0 ]; then
         LOG_PATH="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/angular-test-report"
-        FS::remove_silently "$LOG_PATH"
-        FS::make_housing_directory "$LOG_PATH"
-        FS::move "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/coverage" "$LOG_PATH"
+        FS_Remove_Silently "$LOG_PATH"
+        FS_Make_Housing_Directory "$LOG_PATH"
+        FS_Move "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/coverage" "$LOG_PATH"
 fi
 
 

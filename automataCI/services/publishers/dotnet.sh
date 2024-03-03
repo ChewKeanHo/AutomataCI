@@ -41,33 +41,33 @@ DOTNET_Add() {
         ___pkg="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_NUPKG}"
         ___pkg="${___pkg}/${___order}_${___version}"
         if [ "$___version" = "latest" ]; then
-                FS::remove_silently "$___pkg"
+                FS_Remove_Silently "$___pkg"
         fi
 
         ## begin sourcing nupkg
-        FS::is_file "${___pkg}/nupkg.zip"
+        FS_Is_File "${___pkg}/nupkg.zip"
         if [ $? -ne 0 ]; then
                 ___order="https://www.nuget.org/api/v2/package/${___order}"
                 if [ ! "$___version" = "latest" ]; then
                         ___order="${___order}/${___version}"
                 fi
 
-                FS::make_directory "$___pkg"
+                FS_Make_Directory "$___pkg"
                 HTTP_Download "GET" "$___order" "${___pkg}/nupkg.zip"
                 if [ $? -ne 0 ]; then
-                        FS::remove_silently "$___pkg"
+                        FS_Remove_Silently "$___pkg"
                         return 1
                 fi
 
-                FS::is_file "${___pkg}/nupkg.zip"
+                FS_Is_File "${___pkg}/nupkg.zip"
                 if [ $? -ne 0 ]; then
-                        FS::remove_silently "$___pkg"
+                        FS_Remove_Silently "$___pkg"
                         return 1
                 fi
 
                 ZIP_Extract "$___pkg" "${___pkg}/nupkg.zip"
                 if [ $? -ne 0 ]; then
-                        FS::remove_silently "$___pkg"
+                        FS_Remove_Silently "$___pkg"
                         return 1
                 fi
         fi
@@ -81,24 +81,24 @@ DOTNET_Add() {
                 return 1
         fi
 
-        FS::is_file "$___destination"
+        FS_Is_File "$___destination"
         if [ $? -eq 0 ]; then
                 return 1
         fi
-        FS::make_directory "$___destination"
+        FS_Make_Directory "$___destination"
 
         while [ $(STRINGS_Is_Empty "$___extractions") -ne 0 ]; do
                 ___target="${___extractions%%|*}"
                 ___src="${___pkg}/${___target}"
                 ___dest="${___destination}/${___target##*/}"
 
-                FS::is_file "$___src"
+                FS_Is_File "$___src"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
 
-                FS::remove_silently "$___dest"
-                FS::copy_file "$___src" "$___dest"
+                FS_Remove_Silently "$___dest"
+                FS_Copy_File "$___src" "$___dest"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -228,7 +228,7 @@ DOTNET_Is_Activated() {
 
 DOTNET_Is_Available() {
         # execute
-        FS::is_file "$(DOTNET_Get_Path_Root)/dotnet"
+        FS_Is_File "$(DOTNET_Get_Path_Root)/dotnet"
         if [ $? -eq 0 ]; then
                 return 0
         fi

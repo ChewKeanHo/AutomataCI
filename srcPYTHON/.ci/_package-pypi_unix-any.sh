@@ -35,7 +35,7 @@ PACKAGE_Assemble_PYPI_content() {
 
 
         # validate project
-        FS::is_target_a_source "$_target"
+        FS_Is_Target_A_Source "$_target"
         if [ $? -ne 0 ]; then
                 return 10
         fi
@@ -47,12 +47,12 @@ PACKAGE_Assemble_PYPI_content() {
 
         # assemble the python package
         PYTHON_Clean_Artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/"
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/" "${_directory}"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/" "${_directory}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_file \
+        FS_Copy_File \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PYPI_README}" \
                 "${_directory}/${PROJECT_PYPI_README}"
         if [ $? -ne 0 ]; then
@@ -61,7 +61,7 @@ PACKAGE_Assemble_PYPI_content() {
 
 
         # generate the pyproject.toml
-        FS::write_file "${_directory}/pyproject.toml" "\
+        FS_Write_File "${_directory}/pyproject.toml" "\
 [build-system]
 requires = [ 'setuptools' ]
 build-backend = 'setuptools.build_meta'

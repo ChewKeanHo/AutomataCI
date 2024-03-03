@@ -35,19 +35,19 @@ PACKAGE::assemble_chocolatey_content() {
 
 
         # validate project
-        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
+        if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_docs "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_chocolatey "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Chocolatey "$_target") -eq 0 ]; then
                 : # accepted
-        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Homebrew "$_target") -eq 0 ]; then
                 return 10 # not applicable
         else
                 return 10 # not applicable
@@ -55,42 +55,42 @@ PACKAGE::assemble_chocolatey_content() {
 
 
         # assemble the package
-        FS::make_directory "${_directory}/Data/${PROJECT_PATH_SOURCE}"
-        FS::copy_all \
+        FS_Make_Directory "${_directory}/Data/${PROJECT_PATH_SOURCE}"
+        FS_Copy_All \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/" \
                 "${_directory}/Data/${PROJECT_PATH_SOURCE}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_all "${PROJECT_PATH_ROOT}/${PROJECT_NIM}" "${_directory}/Data"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_NIM}" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_all "${PROJECT_PATH_ROOT}/automataCI" "${_directory}/Data"
+        FS_Copy_All "${PROJECT_PATH_ROOT}/automataCI" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_file "${PROJECT_PATH_ROOT}/CONFIG.toml" "${_directory}/Data"
+        FS_Copy_File "${PROJECT_PATH_ROOT}/CONFIG.toml" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_file "${PROJECT_PATH_ROOT}/ci.cmd" "${_directory}/Data"
+        FS_Copy_File "${PROJECT_PATH_ROOT}/ci.cmd" "${_directory}/Data"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_file \
+        FS_Copy_File \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon-128x128.png" \
                 "${_directory}/icon.png"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::copy_file \
+        FS_Copy_File \
                 "${PROJECT_PATH_ROOT}/README.md" \
                 "${_directory}/README.md"
         if [ $? -ne 0 ]; then
@@ -99,7 +99,7 @@ PACKAGE::assemble_chocolatey_content() {
 
 
         # REQUIRED: chocolatey required tools\ directory
-        FS::make_directory "${_directory}/tools"
+        FS_Make_Directory "${_directory}/tools"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -107,7 +107,7 @@ PACKAGE::assemble_chocolatey_content() {
 
         # OPTIONAL: chocolatey tools\chocolateyBeforeModify.ps1
         OS::print_status info "scripting tools/chocolateyBeforeModify.ps1...\n"
-        FS::write_file "${_directory}/tools/chocolateyBeforeModify.ps1" "\
+        FS_Write_File "${_directory}/tools/chocolateyBeforeModify.ps1" "\
 # REQUIRED - BEGIN EXECUTION
 Write-Host \"Performing pre-configurations...\"
 "
@@ -118,7 +118,7 @@ Write-Host \"Performing pre-configurations...\"
 
         # REQUIRED: chocolatey tools\chocolateyinstall.ps1
         OS::print_status info "scripting tools/chocolateyinstall.ps1...\n"
-        FS::write_file "${_directory}/tools/chocolateyinstall.ps1" "\
+        FS_Write_File "${_directory}/tools/chocolateyinstall.ps1" "\
 # REQUIRED - PREPARING INSTALLATION
 \$tools_dir = \"\$(Split-Path -Parent -Path \$MyInvocation.MyCommand.Definition)\"
 \$data_dir = \"\$(Split-Path -Parent -Path \$tools_dir)\\\\Data\"
@@ -175,7 +175,7 @@ Remove-Item \$data_dir -Force -Recurse -ErrorAction SilentlyContinue
 
         # REQUIRED: chocolatey tools\chocolateyuninstall.ps1
         OS::print_status info "scripting tools/chocolateyuninstall.ps1...\n"
-        FS::write_file "${_directory}/tools/chocolateyuninstall.ps1" "\
+        FS_Write_File "${_directory}/tools/chocolateyuninstall.ps1" "\
 # REQUIRED - PREPARING UNINSTALLATION
 Write-Host \"Uninstalling ${PROJECT_SKU} (${PROJECT_VERSION})...\"
 "
@@ -186,7 +186,7 @@ Write-Host \"Uninstalling ${PROJECT_SKU} (${PROJECT_VERSION})...\"
 
         # REQUIRED: chocolatey xml.nuspec file
         OS::print_status info "scripting ${PROJECT_SKU}.nuspec...\n"
-        FS::write_file "${_directory}/${PROJECT_SKU}.nuspec" "\
+        FS_Write_File "${_directory}/${PROJECT_SKU}.nuspec" "\
 <?xml version=\"1.0\" encoding=\"utf-8\"?>
 <package xmlns=\"http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd\">
         <metadata>

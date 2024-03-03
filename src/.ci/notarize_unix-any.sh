@@ -36,17 +36,17 @@ NOTARIZE_Certify() {
 
 
         # validate project
-        if [ $(FS::is_target_a_source "$_target") -eq 0 ]; then
+        if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_library "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm_js "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_wasm "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_chocolatey "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Chocolatey "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS::is_target_a_homebrew "$_target") -eq 0 ]; then
+        elif [ $(FS_Is_Target_A_Homebrew "$_target") -eq 0 ]; then
                 return 10 # not applicable
         fi
 

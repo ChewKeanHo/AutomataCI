@@ -69,7 +69,7 @@ while IFS= read -r tech || [ -n "$tech" ]; do
         # execute
         ci_job="$(STRINGS_To_Lowercase "${PROJECT_CI_JOB}")_unix-any.sh"
         ci_job="${PROJECT_PATH_ROOT}/${tech#*|}/${PROJECT_PATH_CI}/${ci_job}"
-        FS::is_file "$ci_job"
+        FS_Is_File "$ci_job"
         if [ $? -eq 0 ]; then
                 I18N_Run "${tech%|*}"
                 . "$ci_job"

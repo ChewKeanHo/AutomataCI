@@ -27,7 +27,7 @@ GPG_Detach_Sign_File() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -69,7 +69,7 @@ GPG_Export_Public_Key() {
 
 
         # execute
-        FS::remove_silently "$1"
+        FS_Remove_Silently "$1"
         gpg --armor --export "$2" > "$1"
         if [ $? -ne 0 ]; then
                 return 1
@@ -100,7 +100,7 @@ GPG_Export_Public_Keyring() {
 
 
         # execute
-        FS::remove_silently "$1"
+        FS_Remove_Silently "$1"
         gpg --export "$2" > "$1"
         if [ $? -ne 0 ]; then
                 return 1

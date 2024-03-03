@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,26 +11,25 @@
 # under the License.
 function FS-Append-File {
 	param (
-		[string]$__target,
-		[string]$__content
+		[string]$___target,
+		[string]$___content
 	)
 
 
 	# validate target
-	if ([string]::IsNullOrEmpty($__target)) {
+	if ([string]::IsNullOrEmpty($___target)) {
 		return 1
 	}
 
 
 	# perform file write
-	$null = Add-Content -Path $__target -Value $__content
-
-
-	# report status
+	$null = Add-Content -Path $___target -Value $___content
 	if ($?) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -39,25 +38,25 @@ function FS-Append-File {
 
 function FS-Copy-All {
 	param (
-		[string]$__source,
-		[string]$__destination
+		[string]$___source,
+		[string]$___destination
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
+	if ([string]::IsNullOrEmpty($___source) -or [string]::IsNullOrEmpty($___destination)) {
 		return 1
 	}
 
 
 	# execute
-	$null = Copy-Item -Path "${__source}\*" -Destination "${__destination}" -Recurse
-
-
-	# report status
+	$null = Copy-Item -Path "${___source}\*" -Destination "${___destination}" -Recurse
 	if ($?) {
 		return 0
 	}
+
+
+	# report status
 	return 1
 }
 
@@ -66,26 +65,25 @@ function FS-Copy-All {
 
 function FS-Copy-File {
 	param (
-		[string]$__source,
-		[string]$__destination
+		[string]$___source,
+		[string]$___destination
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
+	if ([string]::IsNullOrEmpty($___source) -or [string]::IsNullOrEmpty($___destination)) {
 		return 1
 	}
 
 
 	# execute
-	$null = Copy-Item -Path "${__source}" -Destination "${__destination}"
-
-
-	# report status
+	$null = Copy-Item -Path "${___source}" -Destination "${___destination}"
 	if ($?) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -94,13 +92,13 @@ function FS-Copy-File {
 
 function FS-Extension-Remove {
 	param (
-		[string]$__target,
-		[string]$__extension
+		[string]$___target,
+		[string]$___extension
 	)
 
 
 	# execute
-	return FS-Extension-Replace "${__target}" "${__extension}" ""
+	return FS-Extension-Replace "${___target}" "${___extension}" ""
 }
 
 
@@ -109,8 +107,8 @@ function FS-Extension-Remove {
 function FS-Extension-Replace {
 	param (
 		[string]$__target,
-		[string]$__extension,
-		[string]$__candidate
+		[string]$___extension,
+		[string]$___candidate
 	)
 
 
@@ -121,26 +119,26 @@ function FS-Extension-Replace {
 
 
 	# execute
-	if ($__extension -eq "*") {
+	if ($___extension -eq "*") {
 		$___target = Split-Path -Leaf "${__target}"
 		$___target = $___target -replace '(\.\w+)+$'
 
 		if (-not [string]::IsNullOrEmpty($(Split-Path -Parent "${__target}"))) {
 			$___target = $(Split-Path -Parent "${__target}") + "\" + "${___target}"
 		}
-	} elseif (-not [string]::IsNullOrEmpty($__extension)) {
-		if ($__extension.Substring(0,1) -eq ".") {
-			$__extension = $__extension.Substring(1)
+	} elseif (-not [string]::IsNullOrEmpty($___extension)) {
+		if ($___extension.Substring(0,1) -eq ".") {
+			$___extension = $___extension.Substring(1)
 		}
 
 		$___target = Split-Path -Leaf "${__target}"
-		$___target = $___target -replace "\.${__extension}$"
+		$___target = $___target -replace "\.${___extension}$"
 
-		if (-not [string]::IsNullOrEmpty($__candidate)) {
-			if ($__candidate.Substring(0,1) -eq ".") {
-				$___target += "." + $__candidate.Substring(1)
+		if (-not [string]::IsNullOrEmpty($___candidate)) {
+			if ($___candidate.Substring(0,1) -eq ".") {
+				$___target += "." + $___candidate.Substring(1)
 			} else {
-				$___target += "." + $__candidate
+				$___target += "." + $___candidate
 			}
 		}
 
@@ -151,6 +149,8 @@ function FS-Extension-Replace {
 		$___target = $__target
 	}
 
+
+	# report status
 	return $___target
 }
 
@@ -159,19 +159,23 @@ function FS-Extension-Replace {
 
 function FS-Is-Directory {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
-	# execute
-	if ([string]::IsNullOrEmpty($__target)) {
+	# validate input
+	if ([string]::IsNullOrEmpty($___target)) {
 		return 1
 	}
 
-	if (Test-Path -Path "${__target}" -PathType Container -ErrorAction SilentlyContinue) {
+
+	# execute
+	if (Test-Path -Path "${___target}" -PathType Container -ErrorAction SilentlyContinue) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -180,24 +184,28 @@ function FS-Is-Directory {
 
 function FS-Is-File {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
+	# validate input
+	if ([string]::IsNullOrEmpty($___target)) {
+		return 1
+	}
+
+
 	# execute
-	if ([string]::IsNullOrEmpty($__target)) {
+	$___process = FS-Is-Directory "${___target}"
+	if ($___process -eq 0) {
 		return 1
 	}
 
-	$__process = FS-Is-Directory "${__target}"
-	if ($__process -eq 0) {
-		return 1
-	}
-
-	if (Test-Path -Path "${__target}" -ErrorAction SilentlyContinue) {
+	if (Test-Path -Path "${___target}" -ErrorAction SilentlyContinue) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -206,12 +214,12 @@ function FS-Is-File {
 
 function FS-Is-Target-A-Cargo {
 	param (
-		[string]$__subject
+		[string]$___target
 	)
 
 
 	# execute
-	if (($("${__subject}" -replace '^.*-cargo') -ne "${__subject}")) {
+	if (($("${___target}" -replace '^.*-cargo') -ne "${___target}")) {
 		return 0
 	}
 
@@ -225,13 +233,13 @@ function FS-Is-Target-A-Cargo {
 
 function FS-Is-Target-A-Chocolatey {
 	param (
-		[string]$__subject
+		[string]$___target
 	)
 
 
 	# execute
-	if (($("${__subject}" -replace '^.*-chocolatey') -ne "${__subject}") -or
-		($("${__subject}" -replace '^.*-choco') -ne "${__subject}")) {
+	if (($("${___target}" -replace '^.*-chocolatey') -ne "${___target}") -or
+		($("${___target}" -replace '^.*-choco') -ne "${___target}")) {
 		return 0
 	}
 
@@ -245,12 +253,12 @@ function FS-Is-Target-A-Chocolatey {
 
 function FS-Is-Target-A-Citation-CFF {
 	param (
-		[string]$___subject
+		[string]$___target
 	)
 
 
 	# execute
-	if ($("${___subject}" -replace '^.*.cff') -ne "${___subject}") {
+	if ($("${___target}" -replace '^.*.cff') -ne "${___target}") {
 		return 0
 	}
 
@@ -264,13 +272,13 @@ function FS-Is-Target-A-Citation-CFF {
 
 function FS-Is-Target-A-Docs {
 	param (
-		[string]$__subject
+		[string]$___target
 	)
 
 
 	# execute
-	if (($("${__subject}" -replace '^.*-doc') -ne "${__subject}") -or
-		($("${__subject}" -replace '^.*-docs') -ne "${__subject}")) {
+	if (($("${___target}" -replace '^.*-doc') -ne "${___target}") -or
+		($("${___target}" -replace '^.*-docs') -ne "${___target}")) {
 		return 0
 	}
 
@@ -284,13 +292,13 @@ function FS-Is-Target-A-Docs {
 
 function FS-Is-Target-A-Homebrew {
 	param (
-		[string]$__subject
+		[string]$___target
 	)
 
 
 	# execute
-	if (($("${__subject}" -replace '^.*-homebrew') -ne "${__subject}") -or
-		($("${__subject}" -replace '^.*-brew') -ne "${__subject}")) {
+	if (($("${___target}" -replace '^.*-homebrew') -ne "${___target}") -or
+		($("${___target}" -replace '^.*-brew') -ne "${___target}")) {
 		return 0
 	}
 
@@ -304,15 +312,15 @@ function FS-Is-Target-A-Homebrew {
 
 function FS-Is-Target-A-Library {
 	param (
-		[string]$__subject
+		[string]$___subject
 	)
 
 
 	# execute
-	if (($("${__subject}" -replace '^.*-lib') -ne "${__subject}") -or
-		($("${__subject}" -replace '^.*-libs') -ne "${__subject}") -or
-		($("${__subject}" -replace '^.*-library') -ne "${__subject}") -or
-		($("${__subject}" -replace '^.*-libraries') -ne "${__subject}")) {
+	if (($("${___subject}" -replace '^.*-lib') -ne "${___subject}") -or
+		($("${___subject}" -replace '^.*-libs') -ne "${___subject}") -or
+		($("${___subject}" -replace '^.*-library') -ne "${___subject}") -or
+		($("${___subject}" -replace '^.*-libraries') -ne "${___subject}")) {
 		return 0
 	}
 
@@ -326,13 +334,13 @@ function FS-Is-Target-A-Library {
 
 function FS-Is-Target-A-MSI {
 	param (
-		[string]$__subject
+		[string]$___target
 	)
 
 
 	# execute
-	if (($("${__subject}" -replace '^.*-msi') -ne "${__subject}") -or
-		($("${__subject}" -replace '^.*.msi') -ne "${__subject}")) {
+	if (($("${___target}" -replace '^.*-msi') -ne "${___target}") -or
+		($("${___target}" -replace '^.*.msi') -ne "${___target}")) {
 		return 0
 	}
 
@@ -346,12 +354,12 @@ function FS-Is-Target-A-MSI {
 
 function FS-Is-Target-A-Nupkg {
 	param (
-		[string]$__subject
+		[string]$___target
 	)
 
 
 	# execute
-	if ($("${__subject}" -replace '^.*.nupkg') -ne "${__subject}") {
+	if ($("${___target}" -replace '^.*.nupkg') -ne "${___target}") {
 		return 0
 	}
 
@@ -365,13 +373,13 @@ function FS-Is-Target-A-Nupkg {
 
 function FS-Is-Target-A-Source {
 	param (
-		[string]$__subject
+		[string]$___target
 	)
 
 
 	# execute
-	if (($("${__subject}" -replace '^.*-src') -ne "${__subject}") -or
-		($("${__subject}" -replace '^.*-source') -ne "${__subject}")) {
+	if (($("${___target}" -replace '^.*-src') -ne "${___target}") -or
+		($("${___target}" -replace '^.*-source') -ne "${___target}")) {
 		return 0
 	}
 
@@ -385,12 +393,12 @@ function FS-Is-Target-A-Source {
 
 function FS-Is-Target-A-WASM {
 	param (
-		[string]$__subject
+		[string]$___target
 	)
 
 
 	# execute
-	if ($("${__subject}" -replace '^.*-wasm') -ne "${__subject}") {
+	if ($("${___target}" -replace '^.*-wasm') -ne "${___target}") {
 		return 0
 	}
 
@@ -404,16 +412,16 @@ function FS-Is-Target-A-WASM {
 
 function FS-Is-Target-A-WASM-JS {
 	param (
-		[string]$__subject
+		[string]$___target
 	)
 
 
 	# execute
-	if ($("${__subject}" -replace '^.*-wasm') -eq "${__subject}") {
+	if ($("${___target}" -replace '^.*-wasm') -eq "${___target}") {
 		return 1
 	}
 
-	if ($("${__subject}" -replace '^.*.js') -eq "${__subject}") {
+	if ($("${___target}" -replace '^.*.js') -eq "${___target}") {
 		return 1
 	}
 
@@ -427,24 +435,24 @@ function FS-Is-Target-A-WASM-JS {
 
 function FS-Is-Target-Exist {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty("${__target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
 		return 1
 	}
 
 
 	# perform checking
-	$__process = Test-Path -Path "${__target}" -ErrorAction SilentlyContinue
+	$___process = Test-Path -Path "${___target}" -PathType Any -ErrorAction SilentlyContinue
+	if ($___process) {
+		return 0
+	}
 
 
 	# report status
-	if ($__process) {
-		return 0
-	}
 	return 1
 }
 
@@ -453,24 +461,24 @@ function FS-Is-Target-Exist {
 
 function FS-List-All {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty("${__target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
 		return 1
 	}
 
 
 	# execute
-	if ((FS-Is-Directory "${__target}") -ne 0) {
+	if ((FS-Is-Directory "${___target}") -ne 0) {
 		return 1
 	}
 
 	try {
-		foreach ($__item in (Get-ChildItem -Path "${__target}" -Recurse)) {
-			Write-Host $__item.FullName
+		foreach ($___item in (Get-ChildItem -Path "${___target}" -Recurse)) {
+			Write-Host $___item.FullName
 		}
 
 		return 0
@@ -484,35 +492,34 @@ function FS-List-All {
 
 function FS-Make-Directory {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty("${__target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
 		return 1
 	}
 
-	$__process = FS-Is-Directory "${__target}"
-	if ($__process -eq 0) {
+	$___process = FS-Is-Directory "${___target}"
+	if ($___process -eq 0) {
 		return 0
 	}
 
-	$__process = FS-Is-Target-Exist "${__target}"
-	if ($__process -eq 0) {
+	$___process = FS-Is-Target-Exist "${___target}"
+	if ($___process -eq 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = New-Item -ItemType Directory -Force -Path "${__target}"
-
-
-	# report status
-	if ($__process) {
+	$___process = New-Item -ItemType Directory -Force -Path "${___target}"
+	if ($___process) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -521,23 +528,23 @@ function FS-Make-Directory {
 
 function FS-Make-Housing-Directory {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target)) {
+	if ([string]::IsNullOrEmpty($___target)) {
 		return 1
 	}
 
-	$__process = FS-Is-Directory $__target
-	if ($__process -eq 0) {
+	$___process = FS-Is-Directory $___target
+	if ($___process -eq 0) {
 		return 0
 	}
 
 
 	# perform create
-	$__process = FS-Make-Directory (Split-Path -Path $__target)
+	$___process = FS-Make-Directory (Split-Path -Path $___target)
 
 
 	# report status
@@ -549,20 +556,20 @@ function FS-Make-Housing-Directory {
 
 function FS-Move {
 	param (
-		[string]$__source,
-		[string]$__destination
+		[string]$___source,
+		[string]$___destination
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__source) -or [string]::IsNullOrEmpty($__destination)) {
+	if ([string]::IsNullOrEmpty($___source) -or [string]::IsNullOrEmpty($___destination)) {
 		return 1
 	}
 
 
 	# execute
 	try {
-		Move-Item -Path $__source -Destination $__destination -Force
+		Move-Item -Path $___source -Destination $___destination -Force
 		if (!$?) {
 			return 1
 		}
@@ -580,20 +587,19 @@ function FS-Move {
 
 function FS-Remake-Directory {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# execute
-	$null = FS-Remove-Silently "${__target}"
-	$__process = FS-Make-Directory "${__target}"
-
-
-	# report status
-	if ($__process -eq 0) {
+	$null = FS-Remove-Silently "${___target}"
+	$___process = FS-Make-Directory "${___target}"
+	if ($___process -eq 0) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -602,25 +608,24 @@ function FS-Remake-Directory {
 
 function FS-Remove {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target)) {
+	if ([string]::IsNullOrEmpty($___target)) {
 		return 1
 	}
 
 
 	# execute
-	$__process = Remove-Item $__target -Force -Recurse
-
-
-	# report status
-	if ($__process -eq $null) {
+	$___process = Remove-Item $___target -Force -Recurse
+	if ($___process -eq $null) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -629,18 +634,18 @@ function FS-Remove {
 
 function FS-Remove-Silently {
 	param (
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target)) {
+	if ([string]::IsNullOrEmpty($___target)) {
 		return 0
 	}
 
 
 	# execute
-	$null = Remove-Item $__target -Force -Recurse -ErrorAction SilentlyContinue
+	$null = Remove-Item $___target -Force -Recurse -ErrorAction SilentlyContinue
 
 
 	# report status
@@ -652,13 +657,13 @@ function FS-Remove-Silently {
 
 function FS-Rename {
 	param (
-		[string]$__source,
-		[string]$__target
+		[string]$___source,
+		[string]$___target
 	)
 
 
 	# execute
-	return FS-Move "${__source}" "${__target}"
+	return FS-Move "${___source}" "${___target}"
 }
 
 
@@ -666,30 +671,29 @@ function FS-Rename {
 
 function FS-Touch-File {
 	param(
-		[string]$__target
+		[string]$___target
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target)) {
+	if ([string]::IsNullOrEmpty($___target)) {
 		return 1
 	}
 
-	$__process = FS-Is-File "${__target}"
-	if ($__process -eq 0) {
+	$___process = FS-Is-File "${___target}"
+	if ($___process -eq 0) {
 		return 0
 	}
 
 
 	# execute
-	$__process = New-Item -Path "${__target}"
-
-
-	# report status
-	if ($__process) {
+	$___process = New-Item -Path "${___target}"
+	if ($___process) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -698,30 +702,29 @@ function FS-Touch-File {
 
 function FS-Write-File {
 	param (
-		[string]$__target,
-		[string]$__content
+		[string]$___target,
+		[string]$___content
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target)) {
+	if ([string]::IsNullOrEmpty($___target)) {
 		return 1
 	}
 
-	$__process = FS-Is-File "${__target}"
-	if ($__process -eq 0) {
+	$___process = FS-Is-File "${___target}"
+	if ($___process -eq 0) {
 		return 1
 	}
 
 
 	# perform file write
-	$null = Set-Content -Path $__target -Value $__content
-
-
-	# report status
+	$null = Set-Content -Path $___target -Value $___content
 	if ($?) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }

@@ -109,8 +109,8 @@ for __platform in $(go tool dist list); do
                 ;;
         js/wasm)
                 __filename="${__output_directory}/${PROJECT_SKU}_${__os}-${__arch}.js"
-                FS::remove_silently "$__filename"
-                FS::copy_file "$(go env GOROOT)/misc/wasm/wasm_exec.js" "$__filename"
+                FS_Remove_Silently "$__filename"
+                FS_Copy_File "$(go env GOROOT)/misc/wasm/wasm_exec.js" "$__filename"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -174,7 +174,7 @@ for __platform in $(go tool dist list); do
 
         # building target
         OS::print_status info "building ${__filename}...\n"
-        FS::remove_silently "${__output_directory}/${__filename}"
+        FS_Remove_Silently "${__output_directory}/${__filename}"
         CGO_ENABLED=0 GOOS="$__os" GOARCH="$__arch" go build \
                 -C "${PROJECT_PATH_ROOT}/${PROJECT_GO}" \
                 $__arguments \

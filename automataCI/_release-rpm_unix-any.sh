@@ -40,7 +40,7 @@ RELEASE_Run_RPM() {
         # execute
         __dest="${2}/rpm"
         I18N_Create "$__dest"
-        FS::make_directory "${__dest}"
+        FS_Make_Directory "${__dest}"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
                 return 1

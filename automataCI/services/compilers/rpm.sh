@@ -31,12 +31,12 @@ RPM_Create_Archive() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$___destination"
+        FS_Is_Directory "$___destination"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -45,7 +45,7 @@ RPM_Create_Archive() {
         # scan for spec file
         ___spec=""
         for ___file in "${___directory}/SPECS/"*; do
-                FS::is_file "$___file"
+                FS_Is_File "$___file"
                 if [ $? -ne 0 ]; then
                         continue
                 fi
@@ -54,7 +54,7 @@ RPM_Create_Archive() {
                 break
         done
 
-        FS::is_file "$___spec"
+        FS_Is_File "$___spec"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -62,13 +62,13 @@ RPM_Create_Archive() {
 
         # archive into rpm
         ___current_path="$PWD" && cd "${___directory}"
-        FS::make_directory "./BUILD"
-        FS::make_directory "./BUILDROOT"
-        FS::make_directory "./RPMS"
-        FS::make_directory "./SOURCES"
-        FS::make_directory "./SPECS"
-        FS::make_directory "./SRPMCS"
-        FS::make_directory "./tmp"
+        FS_Make_Directory "./BUILD"
+        FS_Make_Directory "./BUILDROOT"
+        FS_Make_Directory "./RPMS"
+        FS_Make_Directory "./SOURCES"
+        FS_Make_Directory "./SPECS"
+        FS_Make_Directory "./SRPMCS"
+        FS_Make_Directory "./tmp"
         rpmbuild --define "_topdir ${___directory}" \
                 --define "debug_package %{nil}" \
                 --define "__strip /bin/true" \
@@ -84,13 +84,13 @@ RPM_Create_Archive() {
 
         # move to destination
         for ___package in "${___directory}/RPMS/${___arch}/"*; do
-                FS::is_file "$___package"
+                FS_Is_File "$___package"
                 if [ $? -ne 0 ]; then
                         continue
                 fi
 
-                FS::remove_silently "${___destination}/${___package##*/}"
-                FS::move "$___package" "$___destination"
+                FS_Remove_Silently "${___destination}/${___package##*/}"
+                FS_Move "$___package" "$___destination"
         done
 
 
@@ -123,17 +123,17 @@ RPM_Create_Source_Repo() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___directory}/SPEC_INSTALL"
+        FS_Is_File "${___directory}/SPEC_INSTALL"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___directory}/SPEC_FILES"
+        FS_Is_File "${___directory}/SPEC_FILES"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -145,18 +145,18 @@ RPM_Create_Source_Repo() {
         ___key="usr/local/share/keyrings/${___sku}-keyring.gpg"
         ___filename="etc/yum.repos.d/${___sku}.repo"
 
-        FS::is_file "${___directory}/BUILD/${___filename##*/}"
+        FS_Is_File "${___directory}/BUILD/${___filename##*/}"
         if [ $? -eq 0 ]; then
                 return 10
         fi
 
-        FS::is_file "${___directory}/BUILD/${___key##*/}"
+        FS_Is_File "${___directory}/BUILD/${___key##*/}"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
-        FS::make_directory "${___directory}/BUILD"
-        FS::write_file "${___directory}/BUILD/${___filename##*/}" "\
+        FS_Make_Directory "${___directory}/BUILD"
+        FS_Write_File "${___directory}/BUILD/${___filename##*/}" "\
 # WARNING: AUTO-GENERATED - DO NOT EDIT!
 [${___sku}]
 name=${___name}
@@ -173,7 +173,7 @@ gpgkey=file:///${___key}
                 return 1
         fi
 
-        FS::append_file "${___directory}/SPEC_INSTALL" "
+        FS_Append_File "${___directory}/SPEC_INSTALL" "
 install --directory %{buildroot}/${___filename%/*}
 install -m 0644 ${___filename##*/} %{buildroot}/${___filename%/*}
 
@@ -184,7 +184,7 @@ install -m 0644 ${___key##*/} %{buildroot}/${___key%/*}
                 return 1
         fi
 
-        FS::append_file "${___directory}/SPEC_FILES" "\
+        FS_Append_File "${___directory}/SPEC_FILES" "\
 /${___filename}
 /${___key}
 "
@@ -228,12 +228,12 @@ RPM_Create_Spec() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$___resources"
+        FS_Is_Directory "$___resources"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -241,18 +241,18 @@ RPM_Create_Spec() {
 
         # check if is the document already injected
         ___location="${___directory}/SPECS/${___sku}.spec"
-        FS::is_file "$___location"
+        FS_Is_File "$___location"
         if [ $? -eq 0 ]; then
                 return 2
         fi
 
 
         # create housing directory path
-        FS::make_housing_directory "$___location"
+        FS_Make_Housing_Directory "$___location"
 
 
         # generate spec file's header
-        FS::write_file "$___location" "\
+        FS_Write_File "$___location" "\
 Name: ${___sku}
 Version: ${___version}
 Summary: ${___pitch}
@@ -264,10 +264,10 @@ URL: ${___website}
 
 
         # generate spec file's description field
-        FS::append_file "$___location" "%%description\n"
+        FS_Append_File "$___location" "%%description\n"
 
         ___written=1
-        FS::is_file "${___directory}/SPEC_DESCRIPTION"
+        FS_Is_File "${___directory}/SPEC_DESCRIPTION"
         if [ $? -eq 0 ]; then
                 ___old_IFS="$IFS"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
@@ -276,15 +276,15 @@ URL: ${___website}
                                 continue
                         fi
 
-                        FS::append_file "$___location" "${___line%%#*}\n"
+                        FS_Append_File "$___location" "${___line%%#*}\n"
                 done < "${___directory}/SPEC_DESCRIPTION"
                 IFS="$___old_IFS" && unset ___old_IFS ___line
 
-                FS::remove_silently "${___directory}/SPEC_DESCRIPTION"
+                FS_Remove_Silently "${___directory}/SPEC_DESCRIPTION"
                 ___written=0
         fi
 
-        FS::is_file "$___description_filepath"
+        FS_Is_File "$___description_filepath"
         if [ $? -eq 0 ] && [ $___written -ne 0 ]; then
                 ___old_IFS="$IFS"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
@@ -293,22 +293,22 @@ URL: ${___website}
                                 continue
                         fi
 
-                        FS::append_file "$___location" "${___line%%#*}\n"
+                        FS_Append_File "$___location" "${___line%%#*}\n"
                 done < "$___description_filepath"
                 IFS="$___old_IFS" && unset ___old_IFS ___line
                 ___written=0
         fi
 
         if [ $___written -ne 0 ]; then
-                FS::append_file "$___location" "\n"
+                FS_Append_File "$___location" "\n"
         fi
 
-        FS::append_file "$___location" "\n"
+        FS_Append_File "$___location" "\n"
 
 
         # generate spec file's prep field
-        FS::append_file "$___location" "%%prep\n"
-        FS::is_file "${___directory}/SPEC_PREPARE"
+        FS_Append_File "$___location" "%%prep\n"
+        FS_Is_File "${___directory}/SPEC_PREPARE"
         if [ $? -eq 0 ]; then
                 ___old_IFS="$IFS"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
@@ -317,20 +317,20 @@ URL: ${___website}
                                 continue
                         fi
 
-                        FS::append_file "$___location" "${___line}\n"
+                        FS_Append_File "$___location" "${___line}\n"
                 done < "${___directory}/SPEC_PREPARE"
                 IFS="$___old_IFS" && unset ___old_IFS ___line
 
-                FS::remove_silently "${___directory}/SPEC_PREPARE"
+                FS_Remove_Silently "${___directory}/SPEC_PREPARE"
         else
-                FS::append_file "$___location" "\n"
+                FS_Append_File "$___location" "\n"
         fi
-        FS::append_file "$___location" "\n"
+        FS_Append_File "$___location" "\n"
 
 
         # generate spec file's build field
-        FS::append_file "$___location" "%%build\n"
-        FS::is_file "${___directory}/SPEC_BUILD"
+        FS_Append_File "$___location" "%%build\n"
+        FS_Is_File "${___directory}/SPEC_BUILD"
         if [ $? -eq 0 ]; then
                 ___old_IFS="$IFS"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
@@ -339,20 +339,20 @@ URL: ${___website}
                                 continue
                         fi
 
-                        FS::append_file "$___location" "${___line}\n"
+                        FS_Append_File "$___location" "${___line}\n"
                 done < "${___directory}/SPEC_BUILD"
                 IFS="$___old_IFS" && unset ___old_IFS ___line
 
-                FS::remove_silently "${___directory}/SPEC_BUILD"
+                FS_Remove_Silently "${___directory}/SPEC_BUILD"
         else
-                FS::append_file "$___location" "\n"
+                FS_Append_File "$___location" "\n"
         fi
-        FS::append_file "$___location" "\n"
+        FS_Append_File "$___location" "\n"
 
 
         # generate spec file's install field
-        FS::append_file "$___location" "%%install\n"
-        FS::is_file "${___directory}/SPEC_INSTALL"
+        FS_Append_File "$___location" "%%install\n"
+        FS_Is_File "${___directory}/SPEC_INSTALL"
         if [ $? -eq 0 ]; then
                 ___old_IFS="$IFS"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
@@ -361,20 +361,20 @@ URL: ${___website}
                                 continue
                         fi
 
-                        FS::append_file "$___location" "${___line}\n"
+                        FS_Append_File "$___location" "${___line}\n"
                 done < "${___directory}/SPEC_INSTALL"
                 IFS="$___old_IFS" && unset ___old_IFS ___line
 
-                FS::remove_silently "${___directory}/SPEC_INSTALL"
+                FS_Remove_Silently "${___directory}/SPEC_INSTALL"
         else
-                FS::append_file "$___location" "\n"
+                FS_Append_File "$___location" "\n"
         fi
-        FS::append_file "$___location" "\n"
+        FS_Append_File "$___location" "\n"
 
 
         # generate spec file's clean field
-        FS::append_file "$___location" "%%clean\n"
-        FS::is_file "${___directory}/SPEC_CLEAN"
+        FS_Append_File "$___location" "%%clean\n"
+        FS_Is_File "${___directory}/SPEC_CLEAN"
         if [ $? -eq 0 ]; then
                 ___old_IFS="$IFS"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
@@ -383,20 +383,20 @@ URL: ${___website}
                                 continue
                         fi
 
-                        FS::append_file "$___location" "${___line}\n"
+                        FS_Append_File "$___location" "${___line}\n"
                 done < "${___directory}/SPEC_CLEAN"
                 IFS="$___old_IFS" && unset ___old_IFS ___line
 
-                FS::remove_silently "${___directory}/SPEC_CLEAN"
+                FS_Remove_Silently "${___directory}/SPEC_CLEAN"
         else
-                FS::append_file "$___location" "\n"
+                FS_Append_File "$___location" "\n"
         fi
-        FS::append_file "$___location" "\n"
+        FS_Append_File "$___location" "\n"
 
 
         # generate spec file's files field
-        FS::append_file "$___location" "%%files\n"
-        FS::is_file "${___directory}/SPEC_FILES"
+        FS_Append_File "$___location" "%%files\n"
+        FS_Is_File "${___directory}/SPEC_FILES"
         if [ $? -eq 0 ]; then
                 ___old_IFS="$IFS"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
@@ -405,21 +405,21 @@ URL: ${___website}
                                 continue
                         fi
 
-                        FS::append_file "$___location" "${___line}\n"
+                        FS_Append_File "$___location" "${___line}\n"
                 done < "${___directory}/SPEC_FILES"
                 IFS="$___old_IFS" && unset ___old_IFS ___line
 
-                FS::remove_silently "${___directory}/SPEC_FILES"
+                FS_Remove_Silently "${___directory}/SPEC_FILES"
         else
-                FS::append_file "$___location" "\n"
+                FS_Append_File "$___location" "\n"
         fi
-        FS::append_file "$___location" "\n"
+        FS_Append_File "$___location" "\n"
 
 
         # generate spec file's changelog field
-        FS::is_file "${___directory}/SPEC_CHANGELOG"
+        FS_Is_File "${___directory}/SPEC_CHANGELOG"
         if [ $? -eq 0 ]; then
-                FS::append_file "$___location" "%%changelog\n"
+                FS_Append_File "$___location" "%%changelog\n"
 
                 ___old_IFS="$IFS"
                 while IFS= read -r ___line || [ -n "$___line" ]; do
@@ -428,11 +428,11 @@ URL: ${___website}
                                 continue
                         fi
 
-                        FS::append_file "$___location" "${___line}\n"
+                        FS_Append_File "$___location" "${___line}\n"
                 done < "${___directory}/SPEC_CHANGELOG"
                 IFS="$___old_IFS" && unset ___old_IFS ___line
 
-                FS::remove_silently "${___directory}/SPEC_CHANGELOG"
+                FS_Remove_Silently "${___directory}/SPEC_CHANGELOG"
         else
                 ___date="$(date "+%a %b %d %Y")"
                 CHANGELOG_Assemble_RPM \
@@ -509,7 +509,7 @@ RPM_Is_Valid() {
                 return 1
         fi
 
-        FS::is_file "$1"
+        FS_Is_File "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi

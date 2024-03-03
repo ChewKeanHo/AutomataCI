@@ -27,7 +27,7 @@ PYTHON_Activate_VENV() {
 
         # execute
         ___location="$(PYTHON_Get_Activator_Path)"
-        FS::is_file "$___location"
+        FS_Is_File "$___location"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -70,7 +70,7 @@ PYTHON_Clean_Artifact() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -103,17 +103,17 @@ PYTHON_Create_PYPI_Archive() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___directory}/pyproject.toml"
+        FS_Is_File "${___directory}/pyproject.toml"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_directory "$___destination"
+        FS_Is_Directory "$___destination"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -142,7 +142,7 @@ PYTHON_Create_PYPI_Archive() {
 
         # export to destination
         for ___file in "${___directory}/dist/"*; do
-                FS::move "$___file" "$___destination"
+                FS_Move "$___file" "$___destination"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -183,26 +183,26 @@ PYTHON_Create_PYPI_Config() {
                 return 1
         fi
 
-        FS::is_directory "$___directory"
+        FS_Is_Directory "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        FS::is_file "${___directory}/${___readme_path}"
+        FS_Is_File "${___directory}/${___readme_path}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # check existing overriding file
-        FS::is_file "${___directory}/pyproject.toml"
+        FS_Is_File "${___directory}/pyproject.toml"
         if [ $? -ne 0 ]; then
                 return 2
         fi
 
 
         # create default file
-        FS::write_file "${___directory}/pyproject.toml" "\
+        FS_Write_File "${___directory}/pyproject.toml" "\
 [build-system]
 requires = [ 'setuptools' ]
 build-backend = 'setuptools.build_meta'
@@ -289,7 +289,7 @@ PYTHON_Is_Valid_PYPI() {
                 return 1
         fi
 
-        FS::is_directory "$1"
+        FS_Is_Directory "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -371,7 +371,7 @@ PYTHON_Release_PYPI() {
                 return 1
         fi
 
-        FS::is_directory "$___target"
+        FS_Is_Directory "$___target"
         if [ $? -ne 0 ]; then
                 return 1
         fi
