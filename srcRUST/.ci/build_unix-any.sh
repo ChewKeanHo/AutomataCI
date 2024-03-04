@@ -200,6 +200,9 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
         esac
 
         case "$__os" in ### adjust by OS
+        js)
+                continue
+                ;;
         darwin)
                 if [ ! "$PROJECT_OS" = "darwin" ]; then
                         I18N_Status_Print warning "register skipped - ${__dest##*/} unsupported.\n"

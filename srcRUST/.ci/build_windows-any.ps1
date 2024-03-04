@@ -222,6 +222,8 @@ foreach ($__line in $__build_targets) {
 			OS-Print-Status warning "register skipped - ${__subject} unsupported."
 			continue
 		}
+	} js {
+		continue
 	} windows {
 		$__linker = "none"
 	} fuchsia {
