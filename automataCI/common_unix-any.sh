@@ -38,50 +38,89 @@ fi
 
 
 # execute
-technologies="\
-ANGULAR|${PROJECT_ANGULAR:-none}
-C|${PROJECT_C:-none}
-GO|${PROJECT_GO:-none}
-NIM|${PROJECT_NIM:-none}
-PYTHON|${PROJECT_PYTHON:-none}
-RUST|${PROJECT_RUST:-none}
-BASELINE|${PROJECT_PATH_SOURCE:-none}
-"
+Run_Subroutine_Exec() {
+        __job="$1"
+        __directory="$2"
+        __name="$3"
 
-old_IFS="$IFS"
-while IFS= read -r tech || [ -n "$tech" ]; do
-        if [ $(STRINGS_Is_Empty "${tech#*|}") -eq 0 ] ||
-                [ "$(STRINGS_To_Uppercase "${tech#*|}")" = "NONE" ]; then
-                continue
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$__directory") -eq 0 ] ||
+                [ "$(STRINGS_To_Uppercase "$__directory")" = "NONE" ]; then
+                return 0
         fi
 
-        if [ ! "$(STRINGS_To_Uppercase "${tech%|*}")" = "BASELINE" ]; then
-                case "$1" in
+        if [ ! "$(STRINGS_To_Uppercase "$__name")" = "BASELINE" ]; then
+                case "$__job" in
                 deploy)
-                        continue # skipped
+                        return 0 # skipped
                         ;;
                 *)
+                        # accepted
                         ;;
                 esac
         fi
 
 
         # execute
-        ci_job="$(STRINGS_To_Lowercase "${PROJECT_CI_JOB}")_unix-any.sh"
-        ci_job="${PROJECT_PATH_ROOT}/${tech#*|}/${PROJECT_PATH_CI}/${ci_job}"
+        ci_job="$(STRINGS_To_Lowercase "${__job}_unix-any.sh")"
+        ci_job="${PROJECT_PATH_ROOT}/${__directory}/${PROJECT_PATH_CI}/${ci_job}"
         FS_Is_File "$ci_job"
         if [ $? -eq 0 ]; then
-                I18N_Run "${tech%|*}"
+                I18N_Run "$__name"
                 . "$ci_job"
                 if [ $? -ne 0 ]; then
                         I18N_Run_Failed
-                        continue
+                        return 1
                 fi
         fi
-done <<EOF
-$technologies
-EOF
-IFS="$old_IFS" && unset old_IFS
+
+
+        # report status
+        return 0
+}
+
+
+Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_ANGULAR:-none}" "ANGULAR"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_C:-none}" "C"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_GO:-none}" "GO"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_NIM:-none}" "NIM"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_PYTHON:-none}" "PYTHON"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_RUST:-none}" "RUST"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_BASELINE:-none}" "BASELINE"
+if [ $? -ne 0 ]; then
+        return 1
+fi
 
 
 
