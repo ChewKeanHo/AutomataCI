@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,22 +15,23 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\changelog.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\changelog.ps1"
 
 
 
 
 # safety checking control surfaces
-OS-Print-Status info "checking changelog availability..."
-$__process = CHANGELOG-Is-Available
-if ($__process -ne 0) {
-	OS-Print-Status error "changelog builder is unavailable."
+$null = I18N-Check-Availability "CHANGELOG"
+$___process = CHANGELOG-Is-Available
+if ($___process -ne 0) {
+	$null = I18N-Check-Failed
 	return 1
 }
 
@@ -39,16 +40,16 @@ if ($__process -ne 0) {
 
 # execute
 $__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog"
-OS-Print-Status info "building ${env:PROJECT_VERSION} data changelog entry..."
-$__process = CHANGELOG-Build-DATA-Entry $__file
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
+$null = I18N-Create "${env:PROJECT_VERSION} DATA CHANGELOG"
+$___process = CHANGELOG-Build-DATA-Entry $__file
+if ($___process -ne 0) {
+	$null = I18N-Create-Failed
 	return 1
 }
 
 
-OS-Print-Status info "building ${env:PROJECT_VERSION} deb changelog entry..."
-$__process = CHANGELOG-Build-DEB-Entry `
+$null = I18N-Create "${env:PROJECT_VERSION} DEB CHANGELOG"
+$___process = CHANGELOG-Build-DEB-Entry `
 	"${__file}" `
 	"$env:PROJECT_VERSION" `
 	"$env:PROJECT_SKU" `
@@ -57,8 +58,8 @@ $__process = CHANGELOG-Build-DEB-Entry `
 	"$env:PROJECT_CONTACT_NAME" `
 	"$env:PROJECT_CONTACT_EMAIL" `
 	(Get-Date -Format 'R')
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
+if ($___process -ne 0) {
+	$null = I18N-Create-Failed
 	return 1
 }
 

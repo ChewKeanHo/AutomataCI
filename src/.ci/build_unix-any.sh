@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,23 +15,24 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/changelog.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/changelog.sh"
 
 
 
 
 # safety checking control surfaces
-OS_Print_Status info "checking changelog availability...\n"
+I18N_Check_Availability 'CHANGELOG'
 CHANGELOG_Is_Available
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "changelog builder is unavailable.\n"
+        I18N_Check_Failed
         return 1
 fi
 
@@ -40,15 +41,15 @@ fi
 
 # execute
 __file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog"
-OS_Print_Status info "building ${PROJECT_VERSION} data changelog entry...\n"
+I18N_Create "${PROJECT_VERSION} DATA CHANGELOG"
 CHANGELOG_Build_Data_Entry "$__file"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
+        I18N_Create_Failed
         return 1
 fi
 
 
-OS_Print_Status info "building ${PROJECT_VERSION} deb changelog entry...\n"
+I18N_Create "${PROJECT_VERSION} DEB CHANGELOG"
 CHANGELOG_Build_DEB_Entry \
         "$__file" \
         "$PROJECT_VERSION" \
@@ -59,7 +60,7 @@ CHANGELOG_Build_DEB_Entry \
         "$PROJECT_CONTACT_EMAIL" \
         "$(date -R)"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
+        I18N_Create_Failed
         return 1
 fi
 
