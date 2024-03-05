@@ -162,7 +162,7 @@ if [ $? -eq 0 ]; then
 fi
 
 
-if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
         I18N_Simulate_Conclude "STATIC REPO"
         I18N_Simulate_Conclude "CHANGELOG"
 else

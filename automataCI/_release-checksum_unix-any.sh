@@ -10,8 +10,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/crypto/gpg.sh"
 . "${LIBS_AUTOMATACI}/services/checksum/shasum.sh"
@@ -160,7 +160,7 @@ RELEASE_Initiate_CHECKSUM() {
         fi
 
         I18N_Check_Availability "GPG"
-        if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
+        if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
                 I18N_Simulate_Available "GPG"
         else
                 GPG_Is_Available "$PROJECT_GPG_ID"

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,14 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/crypto/notary.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/crypto/notary.sh"
 
 
 
@@ -54,7 +54,7 @@ NOTARIZE_Certify() {
         # notarize
         case "$_target_os" in
         darwin)
-                if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+                if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
                         return 12
                 fi
 
@@ -63,14 +63,15 @@ NOTARIZE_Certify() {
                         return 11
                 fi
 
-                _dest="${_target%/*}/${_target_name}-signed_${_target_os}-${_target_arch}"
+                _dest="$(FS_Get_Directory "$_target")"
+                _dest="${_dest}/${_target_name}-signed_${_target_os}-${_target_arch}"
                 NOTARY_Sign_Apple "$_dest" "$_target"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
                 ;;
         windows)
-                if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+                if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
                         return 12
                 fi
 
@@ -79,7 +80,8 @@ NOTARIZE_Certify() {
                         return 11
                 fi
 
-                _dest="${_target%/*}/${_target_name}-signed_${_target_os}-${_target_arch}.exe"
+                _dest="$(FS_Get_Directory "$_target")"
+                _dest="${_dest}/${_target_name}-signed_${_target_os}-${_target_arch}.exe"
                 NOTARY_Sign_Microsoft \
                         "$_dest" \
                         "$_target" \

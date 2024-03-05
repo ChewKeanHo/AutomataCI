@@ -157,6 +157,25 @@ function FS-Extension-Replace {
 
 
 
+function FS-Get-Directory {
+	param (
+		[string]$___target
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($___target)) {
+		return ""
+	}
+
+
+	# execute
+	return "$(Split-Path -Parent -Path "${___target}")"
+}
+
+
+
+
 function FS-Is-Directory {
 	param (
 		[string]$___target

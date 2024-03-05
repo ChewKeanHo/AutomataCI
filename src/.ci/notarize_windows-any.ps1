@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,13 +15,14 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	exit 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\crypto\notary.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\crypto\notary.ps1"
 
 
 
@@ -55,7 +56,7 @@ function NOTARIZE-Certify {
 	# notarize
 	switch ($_target_os) {
 	darwin {
-		if (-not [string]::IsNullOrEmpty("${env:PROJECT_SIMULATE_RELEASE_REPO}")) {
+		if ($(OS-Is-Run-Simulated) -eq 0) {
 			return 12
 		}
 
@@ -64,14 +65,14 @@ function NOTARIZE-Certify {
 			return 11
 		}
 
-		$_dest = "$(Split-Path -Parent -Path "${_target}")"
+		$_dest = "$(FS-Get-Directory "${_target}")"
 		$_dest = "${_dest}\${_target_name}-signed_${_target_os}-${_target_arch}"
 		$___process = NOTARY-Sign-Apple "${_dest}" "${_target}"
 		if ($___process -ne 0) {
 			return 1
 		}
 	} windows {
-		if (-not [string]::IsNullOrEmpty("${env:PROJECT_SIMULATE_RELEASE_REPO}")) {
+		if ($(OS-Is-Run-Simulated) -eq 0) {
 			return 12
 		}
 
@@ -80,7 +81,7 @@ function NOTARIZE-Certify {
 			return 11
 		}
 
-		$_dest = "$(Split-Path -Parent -Path "${_target}")"
+		$_dest = "$(FS-Get-Directory "${_target}")"
 		$_dest = "${_dest}\${_target_name}-signed_${_target_os}-${_target_arch}.exe"
 		$___process = NOTARY-Sign-Microsoft `
 			"${_dest}" `

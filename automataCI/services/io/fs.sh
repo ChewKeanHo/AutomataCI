@@ -162,6 +162,28 @@ FS_Extension_Replace() {
 
 
 
+FS_Get_Directory() {
+        #___target="$1"
+
+
+        # validate input
+        if [ -z "$1" ]; then
+                printf -- ""
+                return 1
+        fi
+
+
+        # execute
+        printf -- "%b" "${1%/*}"
+
+
+        # report status
+        return 0
+}
+
+
+
+
 FS_Is_Directory() {
         #___target="$1"
 

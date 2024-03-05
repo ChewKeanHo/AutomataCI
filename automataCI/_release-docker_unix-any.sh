@@ -11,6 +11,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
 
@@ -38,7 +39,7 @@ RELEASE_Run_DOCKER() {
 
         # execute
         I18N_Publish "DOCKER"
-        if [ $(STRINGS_Is_Empty "$PROJECT_SIMULATE_RELEASE_REPO") -ne 0 ]; then
+        if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
                 I18N_Simulate_Publish "DOCKER"
         else
                 DOCKER_Release "$_target" "$PROJECT_VERSION"

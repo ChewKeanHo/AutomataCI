@@ -28,7 +28,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 # execute
 OS-Print-Status info "executing test..."
 $__current_path = Get-Location
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
+if ($(OS-Is-Run-Simulated) -eq 0) {
 	OS-Print-Status warning "simulating release repo conclusion..."
 	$__exit_code = 0
 } else {

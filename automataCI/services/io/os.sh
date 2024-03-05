@@ -33,6 +33,22 @@ OS_Is_Command_Available() {
 
 
 
+OS_Is_Run_Simulated() {
+        # execute
+        if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
 OS_Print_Status() {
         # NOTE: to be scrapped soon!
         __status_mode="$1" && shift 1

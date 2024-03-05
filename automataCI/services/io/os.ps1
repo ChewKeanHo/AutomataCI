@@ -73,6 +73,20 @@ function OS-Exec {
 
 
 
+function OS-Is-Run-Simulated {
+	# execute
+	if (-not ([string]::IsNullOrEmpty("${env:PROJECT_SIMULATE_RELEASE_REPO}"))) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function OS-Print-Status {
 	# NOTE: to be scrapped soon!
 	param (

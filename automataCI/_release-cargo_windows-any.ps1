@@ -39,7 +39,7 @@ function RELEASE-Run-CARGO {
 
 	# execute
 	$null = I18N-Publish "CARGO"
-	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
+	if ($(OS-Is-Run-Simulated) -eq 0) {
 		$null = I18N-Simulate-Publish "CARGO"
 	} else {
 		$null = I18N-Check-Login "CARGO"

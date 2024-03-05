@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
 
@@ -39,7 +40,7 @@ function RELEASE-Run-DOCKER {
 
 	# execute
 	$null = I18N-Publish "DOCKER"
-	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
+	if ($(OS-Is-Run-Simulated) -eq 0) {
 		$null = I18N-Simulate-Publish "DOCKER"
 	} else {
 		$___process = DOCKER-Release "${_target}" "${env:PROJECT_VERSION}"

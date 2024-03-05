@@ -29,7 +29,7 @@ fi
 # execute
 OS_Print_Status info "executing tests...\n"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
-if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
+if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
         OS_Print_Status warning "simulating on-screen unit testing...\n"
         EXIT_CODE=0
 else

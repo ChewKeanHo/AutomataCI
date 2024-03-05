@@ -166,7 +166,7 @@ if ($__process -eq 0) {
 }
 
 
-if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SIMULATE_RELEASE_REPO}))) {
+if ($(OS-Is-Run-Simulated) -eq 0) {
 	$null = I18N-Simulate-Conclusion "STATIC REPO"
 	$null = I18N-Simulate-Conclusion "CHANGELOG"
 } else {

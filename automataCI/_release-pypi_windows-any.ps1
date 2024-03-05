@@ -46,7 +46,7 @@ function RELEASE-Run-PYPI {
 
 	# execute
 	$null = I18N-Publish "PYPI"
-	if ($(STRINGS-Is-Empty "${env:PROJECT_SIMULATE_RELEASE_REPO}") -ne 0) {
+	if ($(OS-Is-Run-Simulated) -ne 0) {
 		$null = I18N-Simulate-Publish "PYPI"
 	} else {
 		$null = I18N-Check-Login "PYPI"
