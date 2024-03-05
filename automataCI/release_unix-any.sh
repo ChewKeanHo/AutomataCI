@@ -61,9 +61,9 @@ if [ $? -eq 0 ]; then
 fi
 
 
-OS_Is_Command_Available "RELEASE::run_pre_processor"
+OS_Is_Command_Available "RELEASE_Run_Pre_Processor"
 if [ $? -eq 0 ]; then
-        RELEASE::run_pre_processor
+        RELEASE_Run_Pre_Processor
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -137,9 +137,9 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 
-        OS_Is_Command_Available "RELEASE::run_package_processor"
+        OS_Is_Command_Available "RELEASE_Run_Package_Processor"
         if [ $? -eq 0 ]; then
-                RELEASE::run_package_processor "$TARGET"
+                RELEASE_Run_Package_Processor "$TARGET"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
@@ -153,9 +153,9 @@ if [ $? -ne 0 ]; then
 fi
 
 
-OS_Is_Command_Available "RELEASE::run_post_processor"
+OS_Is_Command_Available "RELEASE_Run_Post_Processor"
 if [ $? -eq 0 ]; then
-        RELEASE::run_post_processor
+        RELEASE_Run_Post_Processor
         if [ $? -ne 0 ]; then
                 return 1
         fi
