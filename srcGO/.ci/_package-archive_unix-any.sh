@@ -37,23 +37,23 @@ PACKAGE::assemble_archive_content() {
         # package based on target's nature
         if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 _target="${PROJECT_PATH_ROOT}/${PROJECT_GO}/libs"
-                OS::print_status info "copying ${_target} to ${_directory}\n"
+                OS_Print_Status info "copying ${_target} to ${_directory}\n"
                 FS_Copy_All "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed."
+                        OS_Print_Status error "copy failed."
                         return 1
                 fi
 
                 FS_Is_File "${_directory}/go.mod"
                 if [ $? -ne 0 ]; then
-                        OS::print_status info "creating localized go.mod file...\n"
+                        OS_Print_Status info "creating localized go.mod file...\n"
                         FS_Write_File "${_directory}/go.mod" "\
 module ${PROJECT_SKU}
 
 replace ${PROJECT_SKU} => ./
 "
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "create failed."
+                                OS_Print_Status error "create failed."
                                 return 1
                         fi
                 fi
@@ -72,7 +72,7 @@ replace ${PROJECT_SKU} => ./
         elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
         elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                OS::print_status info "copying ${_target} to ${_directory}\n"
+                OS_Print_Status info "copying ${_target} to ${_directory}\n"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -80,7 +80,7 @@ replace ${PROJECT_SKU} => ./
 
                 FS_Is_File "${_target%.wasm*}.js"
                 if [ $? -eq 0 ]; then
-                        OS::print_status info "copying ${_target%.wasm*}.js to ${_directory}\n"
+                        OS_Print_Status info "copying ${_target%.wasm*}.js to ${_directory}\n"
                         FS_Copy_File "${_target%.wasm*}.js" "$_directory"
                         if [ $? -ne 0 ]; then
                                 return 1
@@ -100,10 +100,10 @@ replace ${PROJECT_SKU} => ./
                         ;;
                 esac
 
-                OS::print_status info "copying ${_target} to ${_dest}\n"
+                OS_Print_Status info "copying ${_target} to ${_dest}\n"
                 FS_Copy_File "$_target" "$_dest"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed."
+                        OS_Print_Status error "copy failed."
                         return 1
                 fi
         fi
@@ -111,20 +111,20 @@ replace ${PROJECT_SKU} => ./
 
         # copy user guide
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        OS::print_status info "copying ${_target} to ${_directory}\n"
+        OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS::print_status error "copy failed."
+                OS_Print_Status error "copy failed."
                 return 1
         fi
 
 
         # copy license file
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        OS::print_status info "copying ${_target} to ${_directory}\n"
+        OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS::print_status error "copy failed."
+                OS_Print_Status error "copy failed."
                 return 1
         fi
 

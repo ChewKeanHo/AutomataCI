@@ -27,18 +27,18 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking python|python3 availability...\n"
+OS_Print_Status info "checking python|python3 availability...\n"
 PYTHON_Is_Available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing python|python3 intepreter.\n"
+        OS_Print_Status error "missing python|python3 intepreter.\n"
         return 1
 fi
 
 
-OS::print_status info "activating python venv...\n"
+OS_Print_Status info "activating python venv...\n"
 PYTHON_Activate_VENV
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -46,11 +46,11 @@ fi
 
 
 # execute
-OS::print_status info "\n"
-OS::print_status note "IMPORTANT NOTICE\n"
-OS::print_status note "please perform the following command at your terminal manually:\n"
-OS::print_status note "    $ . ${VIRTUAL_ENV}/bin/activate\n"
-OS::print_status info "\n"
+OS_Print_Status info "\n"
+OS_Print_Status note "IMPORTANT NOTICE\n"
+OS_Print_Status note "please perform the following command at your terminal manually:\n"
+OS_Print_Status note "    $ . ${VIRTUAL_ENV}/bin/activate\n"
+OS_Print_Status info "\n"
 
 
 

@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,21 +11,24 @@
 # under the License.
 function OS-Is-Command-Available {
 	param (
-		[string]$__command
+		[string]$___command
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__command)) {
+	if ([string]::IsNullOrEmpty($___command)) {
 		return 1
 	}
 
 
 	# execute
-	$__program = Get-Command $__command -ErrorAction SilentlyContinue
+	$__program = Get-Command $___command -ErrorAction SilentlyContinue
 	if ($__program) {
 		return 0
 	}
+
+
+	# report status
 	return 1
 }
 
@@ -34,33 +37,36 @@ function OS-Is-Command-Available {
 
 function OS-Exec {
 	param (
-		[string]$__command,
-		[string]$__arguments
+		[string]$___command,
+		[string]$___arguments
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__command) -or [string]::IsNullOrEmpty($__arguments)) {
+	if ([string]::IsNullOrEmpty($___command) -or [string]::IsNullOrEmpty($___arguments)) {
 		return 1
 	}
 
 
 	# get program
-	$__program = Get-Command $__command -ErrorAction SilentlyContinue
-	if (-not ($__program)) {
+	$___program = Get-Command $___command -ErrorAction SilentlyContinue
+	if (-not ($___program)) {
 		return 1
 	}
 
 
 	# execute command
-	$__process = Start-Process -Wait `
-				-FilePath "$__program" `
+	$___process = Start-Process -Wait `
+				-FilePath "${___program}" `
 				-NoNewWindow `
-				-ArgumentList "$__arguments" `
+				-ArgumentList "${___arguments}" `
 				-PassThru
-	if ($__process.ExitCode -ne 0) {
+	if ($___process.ExitCode -ne 0) {
 		return 1
 	}
+
+
+	# report status
 	return 0
 }
 
@@ -68,6 +74,7 @@ function OS-Exec {
 
 
 function OS-Print-Status {
+	# NOTE: to be scrapped soon!
 	param (
 		[string]$__mode,
 		[string]$__message

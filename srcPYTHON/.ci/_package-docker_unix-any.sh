@@ -59,7 +59,7 @@ PACKAGE::assemble_docker_content() {
                 ;;
         esac
 
-        OS::print_status info "running python specific content assembling function...\n"
+        OS_Print_Status info "running python specific content assembling function...\n"
 
 
         # assemble the package

@@ -38,10 +38,10 @@ PACKAGE_Assemble_ARCHIVE_Content() {
         # package based on target's nature
         if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 _target="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/"
-                OS::print_status info "copying ${_target} to ${_directory}\n"
+                OS_Print_Status info "copying ${_target} to ${_directory}\n"
                 FS_Copy_All "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed."
+                        OS_Print_Status error "copy failed."
                         return 1
                 fi
                 FS_Remove_Silently "${_directory}/.ci"
@@ -78,7 +78,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
         elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
         elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                OS::print_status info "copying ${_target} to ${_directory}\n"
+                OS_Print_Status info "copying ${_target} to ${_directory}\n"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -86,7 +86,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
                 FS_Is_File "${_target%.wasm*}.js"
                 if [ $? -eq 0 ]; then
-                        OS::print_status info "copying ${_target%.wasm*}.js to ${_directory}\n"
+                        OS_Print_Status info "copying ${_target%.wasm*}.js to ${_directory}\n"
                         FS_Copy_File "${_target%.wasm*}.js" "$_directory"
                         if [ $? -ne 0 ]; then
                                 return 1
@@ -110,10 +110,10 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         ;;
                 esac
 
-                OS::print_status info "copying ${_target} to ${_dest}\n"
+                OS_Print_Status info "copying ${_target} to ${_dest}\n"
                 FS_Copy_File "$_target" "$_dest"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed."
+                        OS_Print_Status error "copy failed."
                         return 1
                 fi
         fi
@@ -121,20 +121,20 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
         # copy user guide
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        OS::print_status info "copying ${_target} to ${_directory}\n"
+        OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS::print_status error "copy failed."
+                OS_Print_Status error "copy failed."
                 return 1
         fi
 
 
         # copy license file
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        OS::print_status info "copying ${_target} to ${_directory}\n"
+        OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS::print_status error "copy failed."
+                OS_Print_Status error "copy failed."
                 return 1
         fi
 

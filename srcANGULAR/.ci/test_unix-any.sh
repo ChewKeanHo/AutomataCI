@@ -27,10 +27,10 @@ fi
 
 
 # execute
-OS::print_status info "executing tests...\n"
+OS_Print_Status info "executing tests...\n"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
 if [ ! -z "$PROJECT_SIMULATE_RELEASE_REPO" ]; then
-        OS::print_status warning "simulating on-screen unit testing...\n"
+        OS_Print_Status warning "simulating on-screen unit testing...\n"
         EXIT_CODE=0
 else
         CHROME_BIN='/usr/bin/vivaldi' ng test --no-watch --code-coverage
@@ -42,7 +42,7 @@ cd "$__current_path" && unset __current_path
 
 
 # export report
-OS::print_status info "exporting coverage report...\n"
+OS_Print_Status info "exporting coverage report...\n"
 FS_Is_Directory "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/coverage"
 if [ $? -eq 0 ]; then
         LOG_PATH="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/angular-test-report"
@@ -56,7 +56,7 @@ fi
 
 # return status
 if [ $EXIT_CODE -ne 0 ]; then
-        OS::print_status error "test failed.\n"
+        OS_Print_Status error "test failed.\n"
         return 1
 fi
 

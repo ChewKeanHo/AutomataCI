@@ -75,7 +75,7 @@ PYTHON_Clean_Artifact() {
                 return 1
         fi
 
-        OS::is_command_available "find"
+        OS_Is_Command_Available "find"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -253,7 +253,7 @@ PYTHON_Get_Activator_Path() {
 
 
 PYTHON_Has_PIP() {
-        OS::is_command_available "pip"
+        OS_Is_Command_Available "pip"
         return $?
 }
 
@@ -262,12 +262,12 @@ PYTHON_Has_PIP() {
 
 PYTHON_Is_Available() {
         # execute
-        OS::is_command_available "python3"
+        OS_Is_Command_Available "python3"
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
-        OS::is_command_available "python"
+        OS_Is_Command_Available "python"
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -407,17 +407,17 @@ PYTHON_Release_PYPI() {
 
 PYTHON_Setup() {
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "python"
+        OS_Is_Command_Available "python"
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
-        OS::is_command_available "python3"
+        OS_Is_Command_Available "python3"
         if [ $? -eq 0 ]; then
                 return 0
         fi

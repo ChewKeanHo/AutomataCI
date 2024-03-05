@@ -27,26 +27,26 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking python|python3 availability...\n"
+OS_Print_Status info "checking python|python3 availability...\n"
 PYTHON_Is_Available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing python|python3 intepreter.\n"
+        OS_Print_Status error "missing python|python3 intepreter.\n"
         return 1
 fi
 
 
-OS::print_status info "activating python venv...\n"
+OS_Print_Status info "activating python venv...\n"
 PYTHON_Activate_VENV
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
 
-OS::print_status info "checking pip availability...\n"
+OS_Print_Status info "checking pip availability...\n"
 PYTHON_Has_PIP
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing pip module manager.\n"
+        OS_Print_Status error "missing pip module manager.\n"
         return 1
 fi
 
@@ -54,19 +54,19 @@ fi
 
 
 # execute
-OS::print_status info "updating pip to the latest...\n"
+OS_Print_Status info "updating pip to the latest...\n"
 python -m pip install --upgrade pip
 if [ $? -ne 0 ]; then
-        OS::print_status error "pip update failed.\n"
+        OS_Print_Status error "pip update failed.\n"
         return 1
 fi
 
 
 file="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/requirements.txt"
-OS::print_status info "executing pip install against ${file}\n"
+OS_Print_Status info "executing pip install against ${file}\n"
 pip install -r "$file"
 if [ $? -ne 0 ]; then
-        OS::print_status error "pip install failed.\n"
+        OS_Print_Status error "pip install failed.\n"
         return 1
 fi
 

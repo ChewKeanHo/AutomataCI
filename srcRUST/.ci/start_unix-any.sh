@@ -27,10 +27,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "activating localized environment...\n"
+OS_Print_Status info "activating localized environment...\n"
 RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -38,11 +38,11 @@ fi
 
 
 # execute
-OS::print_status info "\n"
-OS::print_status note "IMPORTANT NOTICE\n"
-OS::print_status note "please perform the following command at your terminal manually:\n"
-OS::print_status note "    $ . ${PROJECT_RUST_LOCALIZED}\n"
-OS::print_status info "\n"
+OS_Print_Status info "\n"
+OS_Print_Status note "IMPORTANT NOTICE\n"
+OS_Print_Status note "please perform the following command at your terminal manually:\n"
+OS_Print_Status note "    $ . ${PROJECT_RUST_LOCALIZED}\n"
+OS_Print_Status info "\n"
 
 
 

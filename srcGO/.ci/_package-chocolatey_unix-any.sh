@@ -106,7 +106,7 @@ PACKAGE::assemble_chocolatey_content() {
 
 
         # OPTIONAL: chocolatey tools\chocolateyBeforeModify.ps1
-        OS::print_status info "scripting tools/chocolateyBeforeModify.ps1...\n"
+        OS_Print_Status info "scripting tools/chocolateyBeforeModify.ps1...\n"
         FS_Write_File "${_directory}/tools/chocolateyBeforeModify.ps1" "\
 # REQUIRED - BEGIN EXECUTION
 Write-Host \"Performing pre-configurations...\"
@@ -117,7 +117,7 @@ Write-Host \"Performing pre-configurations...\"
 
 
         # REQUIRED: chocolatey tools\chocolateyinstall.ps1
-        OS::print_status info "scripting tools/chocolateyinstall.ps1...\n"
+        OS_Print_Status info "scripting tools/chocolateyinstall.ps1...\n"
         FS_Write_File "${_directory}/tools/chocolateyinstall.ps1" "\
 # REQUIRED - PREPARING INSTALLATION
 \$tools_dir = \"\$(Split-Path -Parent -Path \$MyInvocation.MyCommand.Definition)\"
@@ -174,7 +174,7 @@ Remove-Item \$data_dir -Force -Recurse -ErrorAction SilentlyContinue
 
 
         # REQUIRED: chocolatey tools\chocolateyuninstall.ps1
-        OS::print_status info "scripting tools/chocolateyuninstall.ps1...\n"
+        OS_Print_Status info "scripting tools/chocolateyuninstall.ps1...\n"
         FS_Write_File "${_directory}/tools/chocolateyuninstall.ps1" "\
 # REQUIRED - PREPARING UNINSTALLATION
 Write-Host \"Uninstalling ${PROJECT_SKU} (${PROJECT_VERSION})...\"
@@ -185,7 +185,7 @@ Write-Host \"Uninstalling ${PROJECT_SKU} (${PROJECT_VERSION})...\"
 
 
         # REQUIRED: chocolatey xml.nuspec file
-        OS::print_status info "scripting ${PROJECT_SKU}.nuspec...\n"
+        OS_Print_Status info "scripting ${PROJECT_SKU}.nuspec...\n"
         FS_Write_File "${_directory}/${PROJECT_SKU}.nuspec" "\
 <?xml version=\"1.0\" encoding=\"utf-8\"?>
 <package xmlns=\"http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd\">

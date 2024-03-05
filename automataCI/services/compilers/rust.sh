@@ -500,17 +500,17 @@ RUST_Get_Build_Target() {
 
 RUST_Is_Available() {
         # execute
-        OS::is_command_available "rustup"
+        OS_Is_Command_Available "rustup"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "rustc"
+        OS_Is_Command_Available "rustc"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "cargo"
+        OS_Is_Command_Available "cargo"
         if [ $? -ne 0 ]; then
                 return 1
         fi

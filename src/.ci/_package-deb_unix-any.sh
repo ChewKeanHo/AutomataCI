@@ -70,7 +70,7 @@ PACKAGE_Assemble_DEB_Content() {
                 #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
                 _filepath="${_directory}/data/usr/local/lib/${PROJECT_SKU}"
                 _filepath="${_filepath}/lib${PROJECT_SKU}.a"
-                OS::print_status info "copying ${_target} to ${_filepath}\n"
+                OS_Print_Status info "copying ${_target} to ${_filepath}\n"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -101,7 +101,7 @@ PACKAGE_Assemble_DEB_Content() {
                 #      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
                 _filepath="${_directory}/data/usr/local/bin/${PROJECT_SKU}"
 
-                OS::print_status info "copying $_target to ${_filepath}/\n"
+                OS_Print_Status info "copying $_target to ${_filepath}/\n"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -115,7 +115,7 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        OS::print_status info "creating changelog.gz files...\n"
+        OS_Print_Status info "creating changelog.gz files...\n"
         _changelog_path="${_directory}/data/usr/local/share/doc/${PROJECT_SKU}/changelog.gz"
         if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
                 _changelog_path="${_directory}/data/usr/share/doc/${PROJECT_SKU}/changelog.gz"
@@ -128,7 +128,7 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        OS::print_status info "creating copyright.gz file...\n"
+        OS_Print_Status info "creating copyright.gz file...\n"
         _copyright="${_directory}/data/usr/local/share/doc/${PROJECT_SKU}/copyright"
         if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
                 _copyright="${_directory}/data/usr/share/doc/${PROJECT_SKU}/copyright"
@@ -147,7 +147,7 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        OS::print_status info "creating man(page) files...\n"
+        OS_Print_Status info "creating man(page) files...\n"
         _manual="${_directory}/data/usr/local/share/man/man1/${PROJECT_SKU}.1"
         if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
                 _manual="${_directory}/data/usr/share/man/man1/${PROJECT_SKU}.1"
@@ -165,7 +165,7 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        OS::print_status info "creating control/md5sum files...\n"
+        OS_Print_Status info "creating control/md5sum files...\n"
         DEB_Create_Checksum "$_directory"
         if [ $? -ne 0 ]; then
                 return 1
@@ -173,7 +173,7 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: OPTIONAL (Comment to turn it off)
-        OS::print_status info "creating source.list files...\n"
+        OS_Print_Status info "creating source.list files...\n"
         DEB_Create_Source_List \
                 "$PROJECT_SIMULATE_RELEASE_REPO" \
                 "$_directory" \
@@ -188,7 +188,7 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-        OS::print_status info "creating control/control file...\n"
+        OS_Print_Status info "creating control/control file...\n"
         DEB_Create_Control \
                 "$_directory" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \

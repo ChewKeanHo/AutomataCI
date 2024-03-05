@@ -474,7 +474,7 @@ DEB_Is_Available() {
                 return 1
         fi
 
-        OS::is_command_available "find"
+        OS_Is_Command_Available "find"
         if [ $? -ne 0 ]; then
                 return 1
         fi

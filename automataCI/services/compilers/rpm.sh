@@ -467,7 +467,7 @@ RPM_Is_Available() {
                 return 1
         fi
 
-        OS::is_command_available "rpmbuild"
+        OS_Is_Command_Available "rpmbuild"
         if [ $? -ne 0 ]; then
                 return 1
         fi

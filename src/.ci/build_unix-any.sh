@@ -28,10 +28,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking changelog availability...\n"
+OS_Print_Status info "checking changelog availability...\n"
 CHANGELOG_Is_Available
 if [ $? -ne 0 ]; then
-        OS::print_status error "changelog builder is unavailable.\n"
+        OS_Print_Status error "changelog builder is unavailable.\n"
         return 1
 fi
 
@@ -40,15 +40,15 @@ fi
 
 # execute
 __file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog"
-OS::print_status info "building ${PROJECT_VERSION} data changelog entry...\n"
+OS_Print_Status info "building ${PROJECT_VERSION} data changelog entry...\n"
 CHANGELOG_Build_Data_Entry "$__file"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
 
-OS::print_status info "building ${PROJECT_VERSION} deb changelog entry...\n"
+OS_Print_Status info "building ${PROJECT_VERSION} deb changelog entry...\n"
 CHANGELOG_Build_DEB_Entry \
         "$__file" \
         "$PROJECT_VERSION" \
@@ -59,7 +59,7 @@ CHANGELOG_Build_DEB_Entry \
         "$PROJECT_CONTACT_EMAIL" \
         "$(date -R)"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 

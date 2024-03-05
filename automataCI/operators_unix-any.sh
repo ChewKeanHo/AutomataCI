@@ -32,10 +32,10 @@ fi
 
 BUILD::__exec_compile_source_code() {
         # execute
-        OS::print_status info "executing ${@}\n"
+        OS_Print_Status info "executing ${@}\n"
         $@
         if [ $? -ne 0 ]; then
-                OS::print_status error "build failed.\n\n"
+                OS_Print_Status error "build failed.\n\n"
                 return 1
         fi
 
@@ -94,10 +94,10 @@ BUILD::__validate_source_files() {
 
                 # check source code existence
                 __path="${PROJECT_PATH_ROOT}/${_target_source}/${__line##* }"
-                OS::print_status info "validating source file: ${__path}\n"
+                OS_Print_Status info "validating source file: ${__path}\n"
                 FS_Is_File "${__path}"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "validation failed.\n\n"
+                        OS_Print_Status error "validation failed.\n\n"
                         return 1
                 fi
 
@@ -127,7 +127,7 @@ BUILD::__validate_source_files() {
 
                 # create command for parallel execution
                 if [ ! "${__path%.c*}" = "$__path"  ]; then
-                        OS::print_status info "registering .c file...\n"
+                        OS_Print_Status info "registering .c file...\n"
                         printf -- "%b -o %b -c %b %b\n" \
                                 "$_target_compiler" \
                                 "${_target_directory}/${__path%.c*}.o" \
@@ -135,7 +135,7 @@ BUILD::__validate_source_files() {
                                 "$_target_args" \
                                 >> "$_parallel_control"
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "register failed.\n\n"
+                                OS_Print_Status error "register failed.\n\n"
                                 return 1
                         fi
 
@@ -143,11 +143,11 @@ BUILD::__validate_source_files() {
 ${_target_directory}/${__path%.c*}.o
 "
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "register failed.\n\n"
+                                OS_Print_Status error "register failed.\n\n"
                                 return 1
                         fi
                 elif [ ! "${__path%.nim*}" = "$__path"  ]; then
-                        OS::print_status info "registering .nim file...\n"
+                        OS_Print_Status info "registering .nim file...\n"
                         printf -- "%b %b --out:%b %b\n" \
                                 "$_target_compiler" \
                                 "$_target_args" \
@@ -155,7 +155,7 @@ ${_target_directory}/${__path%.c*}.o
                                 "${PROJECT_PATH_ROOT}/${_target_source}/${__path}" \
                                 >> "$_parallel_control"
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "register failed.\n\n"
+                                OS_Print_Status error "register failed.\n\n"
                                 return 1
                         fi
 
@@ -163,18 +163,18 @@ ${_target_directory}/${__path%.c*}.o
 ${_target_directory}/${__path%.nim*}
 "
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "register failed.\n\n"
+                                OS_Print_Status error "register failed.\n\n"
                                 return 1
                         fi
                 elif [ ! "${__path%.o*}" = "$__path"  ]; then
-                        OS::print_status info "registering .o file...\n"
+                        OS_Print_Status info "registering .o file...\n"
                         __target_path="${_target_directory}/${__path}"
                         FS_Make_Housing_Directory "$__target_path"
                         FS_Copy_File \
                                 "${PROJECT_PATH_ROOT}/${_target_source}/${__path}" \
                                 "${__target_path%/*}"
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "register failed.\n\n"
+                                OS_Print_Status error "register failed.\n\n"
                                 return 1
                         fi
 
@@ -182,11 +182,11 @@ ${_target_directory}/${__path%.nim*}
 ${_target_directory}/${__path}
 "
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "register failed.\n\n"
+                                OS_Print_Status error "register failed.\n\n"
                                 return 1
                         fi
                 else
-                        OS::print_status error "unsupported file: ${__path}\n\n"
+                        OS_Print_Status error "unsupported file: ${__path}\n\n"
                         return 1
                 fi
 
@@ -220,14 +220,14 @@ BUILD::_exec_compile() {
                 _parallel_available=1
         fi
 
-        OS::print_status info "begin parallel building with ${_parallel_available} threads...\n"
+        OS_Print_Status info "begin parallel building with ${_parallel_available} threads...\n"
         SYNC_Exec_Parallel \
                 "BUILD::__exec_compile_source_code" \
                 "$1" \
                 "$2" \
                 "$_parallel_available"
         if [ $? -ne 0 ]; then
-                OS::print_status error "Build failed.\n\n"
+                OS_Print_Status error "Build failed.\n\n"
                 return 1
         fi
 
@@ -248,7 +248,7 @@ BUILD::_exec_build() {
         _target_compiler="$6"
 
 
-        OS::print_status info "validating ${_target_os}-${_target_arch} ${_target_type}...\n"
+        OS_Print_Status info "validating ${_target_os}-${_target_arch} ${_target_type}...\n"
         _target="${PROJECT_SKU}_${_target_os}-${_target_arch}"
         _target_arch="$(STRINGS_To_Lowercase "$_target_arch")"
         _target_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}"
@@ -288,10 +288,10 @@ BUILD::_exec_build() {
                         "$_target_compiler" \
                 )"
                 if [ $? -ne 0 ]; then
-                        OS::print_status warning "No available compiler. Skipping...\n\n"
+                        OS_Print_Status warning "No available compiler. Skipping...\n\n"
                         return 10
                 else
-                        OS::print_status info "selected ${_target_compiler} compiler...\n"
+                        OS_Print_Status info "selected ${_target_compiler} compiler...\n"
                 fi
                 ;;
         c-library)
@@ -308,10 +308,10 @@ BUILD::_exec_build() {
                         "$_target_compiler" \
                 )"
                 if [ $? -ne 0 ]; then
-                        OS::print_status warning "No available compiler. Skipping...\n\n"
+                        OS_Print_Status warning "No available compiler. Skipping...\n\n"
                         return 10
                 else
-                        OS::print_status info "selected ${_target_compiler} compiler...\n"
+                        OS_Print_Status info "selected ${_target_compiler} compiler...\n"
                 fi
                 ;;
         c-test)
@@ -327,14 +327,14 @@ BUILD::_exec_build() {
                         "$_target_compiler" \
                 )"
                 if [ $? -ne 0 ]; then
-                        OS::print_status warning "No available compiler. Skipping...\n\n"
+                        OS_Print_Status warning "No available compiler. Skipping...\n\n"
                         return 10
                 else
-                        OS::print_status info "selected ${_target_compiler} compiler...\n"
+                        OS_Print_Status info "selected ${_target_compiler} compiler...\n"
                 fi
                 ;;
         *)
-                OS::print_status error "validation failed.\n\n"
+                OS_Print_Status error "validation failed.\n\n"
                 return 1
                 ;;
         esac
@@ -343,15 +343,15 @@ BUILD::_exec_build() {
         _parallel_total=0
 
 
-        OS::print_status info "validating config file (${_target_config##*/}) existence...\n"
+        OS_Print_Status info "validating config file (${_target_config##*/}) existence...\n"
         _target_config="$(BUILD::__validate_config_file "$_target_config" "$_target_source")"
         if [ "$_target_config" = "" ]; then
-                OS::print_status error "validation failed.\n\n"
+                OS_Print_Status error "validation failed.\n\n"
                 return 1
         fi
 
 
-        OS::print_status info "preparing ${_target} parallel build workspace...\n"
+        OS_Print_Status info "preparing ${_target} parallel build workspace...\n"
         FS_Remove_Silently "${_parallel_control}"
         FS_Remove_Silently "${_linker_control}"
 
@@ -409,10 +409,10 @@ BUILD::_exec_link() {
 
 
         # validate input
-        OS::print_status info "checking linking control file (${_linker_control})...\n"
+        OS_Print_Status info "checking linking control file (${_linker_control})...\n"
         FS_Is_File "$_linker_control"
         if [ $? -ne 0 ]; then
-                OS::print_status error "check failed.\n\n"
+                OS_Print_Status error "check failed.\n\n"
                 return 1
         fi
 
@@ -420,60 +420,60 @@ BUILD::_exec_link() {
         # link all objects
         case "$_target_type" in
         none)
-                OS::print_status info "linking object file into executable...\n"
+                OS_Print_Status info "linking object file into executable...\n"
                 ;;
         test-bin)
-                OS::print_status info "linking object file into executable...\n"
+                OS_Print_Status info "linking object file into executable...\n"
                 old_IFS="$IFS"
                 while IFS="" read -r __line || [ -n "$__line" ]; do
                         _target="${__line%.*}"
                         FS_Remove_Silently "$_target"
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "link failed.\n\n"
+                                OS_Print_Status error "link failed.\n\n"
                                 return 1
                         fi
 
                         "$_target_compiler" -o "${_target}" "$__line"
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "link failed.\n\n"
+                                OS_Print_Status error "link failed.\n\n"
                                 return 1
                         fi
 
                         FS_Remove_Silently "$__line"
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "link failed.\n\n"
+                                OS_Print_Status error "link failed.\n\n"
                                 return 1
                         fi
                 done < "$_linker_control"
                 IFS="$old_IFS" && unset old_IFS
                 ;;
         bin)
-                OS::print_status info "linking all object files into executable...\n"
+                OS_Print_Status info "linking all object files into executable...\n"
                 FS_Remove_Silently "$_target"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "link failed.\n\n"
+                        OS_Print_Status error "link failed.\n\n"
                         return 1
                 fi
 
                 "$_target_compiler" -o "$_target" @"$_linker_control"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "link failed.\n\n"
+                        OS_Print_Status error "link failed.\n\n"
                         return 1
                 fi
                 ;;
         lib)
                 FS_Remove_Silently "$_target"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "link failed.\n\n"
+                        OS_Print_Status error "link failed.\n\n"
                         return 1
                 fi
 
                 old_IFS="$IFS"
                 while IFS="" read -r __line || [ -n "$__line" ]; do
-                        OS::print_status info "linking into library ${__line}\n"
+                        OS_Print_Status info "linking into library ${__line}\n"
                         ar -cr "$_target" "$__line"
                         if [ $? -ne 0 ]; then
-                                OS::print_status error "link failed.\n\n"
+                                OS_Print_Status error "link failed.\n\n"
                                 return 1
                         fi
                 done < "$_linker_control"
@@ -517,7 +517,7 @@ BUILD::compile() {
 
 
         # report status
-        OS::print_status success "\n\n"
+        OS_Print_Status success "\n\n"
         return 0
 }
 
@@ -538,10 +538,10 @@ BUILD::test() {
 
 
         # scan for all test source codes
-        OS::print_status info "setup test workspace...\n"
+        OS_Print_Status info "setup test workspace...\n"
         case "$1" in
         "$PROJECT_NIM")
-                OS::print_status info "scanning all nim test codes...\n"
+                OS_Print_Status info "scanning all nim test codes...\n"
                 _target_code="nim-test"
                 _target_directory="${_target_directory}/${_target_code}_${_target}"
                 _target_build_list="${_target_directory}/build-list.txt"
@@ -553,7 +553,7 @@ BUILD::test() {
                 | while IFS="" read -r __line || [ -n "$__line" ]; do
                         __line="${__line#*${PROJECT_PATH_ROOT}/${PROJECT_NIM}/}"
 
-                        OS::print_status info "registering ${__line}\n"
+                        OS_Print_Status info "registering ${__line}\n"
                         FS_Append_File \
                                 "$_target_build_list" \
                                 "${_target_os}-${_target_arch} ${__line}\n"
@@ -561,7 +561,7 @@ BUILD::test() {
                 IFS="$__old_IFS" && unset __old_IFS
                 ;;
         "$PROJECT_C")
-                OS::print_status info "scanning all C test codes...\n"
+                OS_Print_Status info "scanning all C test codes...\n"
                 _target_code="c-test"
                 _target_directory="${_target_directory}/${_target_code}_${_target}"
                 _target_build_list="${_target_directory}/build-list.txt"
@@ -573,7 +573,7 @@ BUILD::test() {
                 | while IFS="" read -r __line || [ -n "$__line" ]; do
                         __line="${__line#*${PROJECT_PATH_ROOT}/${PROJECT_C}/}"
 
-                        OS::print_status info "registering ${__line}\n"
+                        OS_Print_Status info "registering ${__line}\n"
                         FS_Append_File \
                                 "$_target_build_list" \
                                 "${_target_os}-${_target_arch} ${__line}\n"
@@ -581,7 +581,7 @@ BUILD::test() {
                 IFS="$__old_IFS" && unset __old_IFS
                 ;;
         *)
-                OS::print_status error "unsupported tech.\n"
+                OS_Print_Status error "unsupported tech.\n"
                 return 1
                 ;;
         esac
@@ -589,7 +589,7 @@ BUILD::test() {
 
         # check if no test is available, get out early.
         if [ ! -f "$_target_build_list" ]; then
-                OS::print_status success "\n\n"
+                OS_Print_Status success "\n\n"
                 return 0
         fi
 
@@ -614,17 +614,17 @@ BUILD::test() {
         _target_config="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_target_config}"
         _target_config="${_target_config}/o-list.txt"
 
-        OS::print_status info "checking test execution workspace...\n"
+        OS_Print_Status info "checking test execution workspace...\n"
         FS_Is_File "$_target_config"
         if [ $? -ne 0 ]; then
-                OS::print_status error "check failed - missing compatible workspace.\n"
+                OS_Print_Status error "check failed - missing compatible workspace.\n"
         fi
 
         EXIT_CODE=0
         __old_IFS="$IFS"
         while IFS="" read -r __line || [ -n "$__line" ]; do
                 __line="${__line%.*}"
-                OS::print_status info "testing ${__line}\n"
+                OS_Print_Status info "testing ${__line}\n"
 
                 $__line
                 if [ $? -ne 0 ]; then
@@ -636,11 +636,11 @@ BUILD::test() {
 
         # report status
         if [ $EXIT_CODE -ne 0 ]; then
-                OS::print_status error "test failed.\n\n"
+                OS_Print_Status error "test failed.\n\n"
                 return 1
         fi
 
-        OS::print_status success "\n\n"
+        OS_Print_Status success "\n\n"
         return 0
 }
 

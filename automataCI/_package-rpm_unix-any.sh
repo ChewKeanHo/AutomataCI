@@ -94,7 +94,7 @@ PACKAGE_Run_RPM() {
         # copy all complimentary files to the workspace
         cmd="PACKAGE_Assemble_RPM_Content"
         I18N_Check_Function "$cmd"
-        OS::is_command_available "$cmd"
+        OS_Is_Command_Available "$cmd"
         if [ $? -ne 0 ]; then
                 I18N_Check_Failed
                 return 1

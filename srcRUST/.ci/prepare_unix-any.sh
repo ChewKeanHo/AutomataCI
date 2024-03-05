@@ -27,10 +27,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "activating local environment...\n"
+OS_Print_Status info "activating local environment...\n"
 RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -38,12 +38,12 @@ fi
 
 
 # execute
-OS::print_status info "fetching all dependencies...\n"
+OS_Print_Status info "fetching all dependencies...\n"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_RUST}"
 cargo fetch
 if [ $? -ne 0 ]; then
         cd "$__current_path" && unset __current_path
-        OS::print_status error "cargo fetch failed.\n"
+        OS_Print_Status error "cargo fetch failed.\n"
         return 1
 fi
 cd "$__current_path" && unset __current_path

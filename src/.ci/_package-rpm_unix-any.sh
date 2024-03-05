@@ -53,16 +53,16 @@ PACKAGE_Assemble_RPM_Content() {
                 # TIP: (1) usually is: usr/local/lib
                 #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
                 _filepath="${_directory}/BUILD/lib${PROJECT_SKU}.a"
-                OS::print_status info "copying ${_target} to ${_filepath}\n"
+                OS_Print_Status info "copying ${_target} to ${_filepath}\n"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed."
+                        OS_Print_Status error "copy failed."
                         return 1
                 fi
 
                 FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed."
+                        OS_Print_Status error "copy failed."
                         return 1
                 fi
 
@@ -107,16 +107,16 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
                 # copy main program
                 # TIP: (1) copy all files into "${__directory}/BUILD" directory.
                 _filepath="${_directory}/BUILD/${PROJECT_SKU}"
-                OS::print_status info "copying $_target to ${_filepath}\n"
+                OS_Print_Status info "copying $_target to ${_filepath}\n"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed.\n"
+                        OS_Print_Status error "copy failed.\n"
                         return 1
                 fi
 
                 FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed.\n"
+                        OS_Print_Status error "copy failed.\n"
                         return 1
                 fi
 
@@ -152,7 +152,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 
         # NOTE: REQUIRED file
-        OS::print_status info "creating copyright.gz file...\n"
+        OS_Print_Status info "creating copyright.gz file...\n"
         COPYRIGHT_Create \
                 "${_directory}/BUILD/copyright" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
@@ -166,7 +166,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 
         # NOTE: REQUIRED file
-        OS::print_status info "creating man pages file...\n"
+        OS_Print_Status info "creating man pages file...\n"
         MANUAL_Create \
                 "${_directory}/BUILD/${PROJECT_SKU}.1" \
                 "$PROJECT_SKU" \
@@ -179,7 +179,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 
         # NOTE: OPTIONAL (Comment to turn it off)
-        OS::print_status info "creating source.repo files...\n"
+        OS_Print_Status info "creating source.repo files...\n"
         RPM_Create_Source_Repo \
                 "$PROJECT_SIMULATE_RELEASE_REPO" \
                 "$_directory" \
@@ -193,7 +193,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-        OS::print_status info "creating spec file...\n"
+        OS_Print_Status info "creating spec file...\n"
         RPM_Create_Spec \
                 "$_directory" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \

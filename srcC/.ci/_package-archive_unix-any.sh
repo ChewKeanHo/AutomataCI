@@ -37,7 +37,7 @@ PACKAGE::assemble_archive_content() {
         # package based on target's nature
         if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 _target="${PROJECT_PATH_ROOT}/${PROJECT_C}/libs"
-                OS::print_status info "copying ${_target} to ${_directory}\n"
+                OS_Print_Status info "copying ${_target} to ${_directory}\n"
                 FS_Copy_All "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -53,7 +53,7 @@ PACKAGE::assemble_archive_content() {
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
-                OS::print_status info "copying ${_target} to ${_directory}\n"
+                OS_Print_Status info "copying ${_target} to ${_directory}\n"
                 FS_Copy_File "$_target" "${_directory}/lib${PROJECT_SKU}.a"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -61,7 +61,7 @@ PACKAGE::assemble_archive_content() {
         elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
         elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                OS::print_status info "copying ${_target} to ${_directory}\n"
+                OS_Print_Status info "copying ${_target} to ${_directory}\n"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -69,7 +69,7 @@ PACKAGE::assemble_archive_content() {
 
                 FS_Is_File "${_target%.wasm*}.js"
                 if [ $? -eq 0 ]; then
-                        OS::print_status info "copying ${_target%.wasm*}.js to ${_directory}\n"
+                        OS_Print_Status info "copying ${_target%.wasm*}.js to ${_directory}\n"
                         FS_Copy_File "${_target%.wasm*}.js" "$_directory"
                         if [ $? -ne 0 ]; then
                                 return 1
@@ -89,7 +89,7 @@ PACKAGE::assemble_archive_content() {
                         ;;
                 esac
 
-                OS::print_status info "copying ${_target} to ${_dest}\n"
+                OS_Print_Status info "copying ${_target} to ${_dest}\n"
                 FS_Copy_File "$_target" "$_dest"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -99,7 +99,7 @@ PACKAGE::assemble_archive_content() {
 
         # copy user guide
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        OS::print_status info "copying ${_target} to ${_directory}\n"
+        OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
                 return 1
@@ -108,7 +108,7 @@ PACKAGE::assemble_archive_content() {
 
         # copy license file
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        OS::print_status info "copying ${_target} to ${_directory}\n"
+        OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
                 return 1

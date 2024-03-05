@@ -27,10 +27,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking angular availability...\n"
+OS_Print_Status info "checking angular availability...\n"
 ANGULAR::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing angular engines.\n"
+        OS_Print_Status error "missing angular engines.\n"
         return 1
 fi
 
@@ -38,7 +38,7 @@ fi
 
 
 # execute
-OS::print_status info "installing all npm dependencies...\n"
+OS_Print_Status info "installing all npm dependencies...\n"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
 npm install
 EXIT_CODE=$?

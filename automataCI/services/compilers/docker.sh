@@ -200,7 +200,7 @@ DOCKER_Get_ID() {
 
 DOCKER_Is_Available() {
         # execute
-        OS::is_command_available "docker"
+        OS_Is_Command_Available "docker"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -371,7 +371,7 @@ DOCKER_Release() {
 
 DOCKER_Setup() {
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi

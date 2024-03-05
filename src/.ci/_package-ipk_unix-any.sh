@@ -56,7 +56,7 @@ PACKAGE_Assemble_IPK_Content() {
                 #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
                 _filepath="${_directory}/data/usr/local/lib/${PROJECT_SKU}"
                 _filepath="${_filepath}/lib${PROJECT_SKU}.a"
-                OS::print_status info "copying ${_target} to ${_filepath}\n"
+                OS_Print_Status info "copying ${_target} to ${_filepath}\n"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -87,7 +87,7 @@ PACKAGE_Assemble_IPK_Content() {
                 #      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
                 _filepath="${_directory}/data/usr/local/bin/${PROJECT_SKU}"
 
-                OS::print_status info "copying $_target to ${_filepath}/\n"
+                OS_Print_Status info "copying $_target to ${_filepath}/\n"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -101,7 +101,7 @@ PACKAGE_Assemble_IPK_Content() {
 
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-        OS::print_status info "creating control/control file...\n"
+        OS_Print_Status info "creating control/control file...\n"
         IPK_Create_Control \
                 "$_directory" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \

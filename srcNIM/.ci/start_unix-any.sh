@@ -27,18 +27,18 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking nim availability...\n"
+OS_Print_Status info "checking nim availability...\n"
 NIM::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing nim compiler.\n"
+        OS_Print_Status error "missing nim compiler.\n"
         return 1
 fi
 
 
-OS::print_status info "activating localized environment...\n"
+OS_Print_Status info "activating localized environment...\n"
 NIM::activate_local_environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -46,11 +46,11 @@ fi
 
 
 # execute
-OS::print_status info "\n"
-OS::print_status note "IMPORTANT NOTICE\n"
-OS::print_status note "please perform the following command at your terminal manually:\n"
-OS::print_status note "    $ . ${PROJECT_NIM_LOCALIZED}\n"
-OS::print_status info "\n"
+OS_Print_Status info "\n"
+OS_Print_Status note "IMPORTANT NOTICE\n"
+OS_Print_Status note "please perform the following command at your terminal manually:\n"
+OS_Print_Status note "    $ . ${PROJECT_NIM_LOCALIZED}\n"
+OS_Print_Status info "\n"
 
 
 

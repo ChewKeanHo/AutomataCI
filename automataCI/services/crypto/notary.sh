@@ -19,17 +19,17 @@
 
 NOTARY_Apple_Is_Available() {
         # execute
-        OS::is_command_available "codesign"
+        OS_Is_Command_Available "codesign"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "ditto"
+        OS_Is_Command_Available "ditto"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "xcrun"
+        OS_Is_Command_Available "xcrun"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -52,7 +52,7 @@ NOTARY_Apple_Is_Available() {
 
 NOTARY_Microsoft_Is_Available() {
         # execute
-        OS::is_command_available "osslsigncode"
+        OS_Is_Command_Available "osslsigncode"
         if [ $? -ne 0 ]; then
                 return 1
         fi

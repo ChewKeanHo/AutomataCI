@@ -28,10 +28,10 @@ fi
 
 
 # safety check control surfaces
-OS::print_status info "checking BUILD::compile function availability...\n"
-OS::is_command_available "BUILD::compile"
+OS_Print_Status info "checking BUILD::compile function availability...\n"
+OS_Is_Command_Available "BUILD::compile"
 if [ $? -ne 0 ]; then
-        OS::print_status error "check failed.\n"
+        OS_Print_Status error "check failed.\n"
         return 1
 fi
 
@@ -324,7 +324,7 @@ fi
 
 
 # compile for linux-avr (ATMEL microcontroller)
-OS::is_command_available "avr-objcopy"
+OS_Is_Command_Available "avr-objcopy"
 if [ $? -eq 0 ]; then
         BUILD::compile "c-binary" "linux" "avr" "automataCI.txt" "\
 -Wall \
@@ -382,10 +382,10 @@ fi
 
 # placeholding source code flag
 __file="${PROJECT_SKU}-src_any-any"
-OS::print_status info "building output file: ${__file}\n"
+OS_Print_Status info "building output file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -394,10 +394,10 @@ fi
 
 # placeholding homebrew flag
 __file="${PROJECT_SKU}-homebrew_any-any"
-OS::print_status info "building output file: ${__file}\n"
+OS_Print_Status info "building output file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -406,10 +406,10 @@ fi
 
 # placeholding chocolatey flag
 __file="${PROJECT_SKU}-chocolatey_any-any"
-OS::print_status info "building output file: ${__file}\n"
+OS_Print_Status info "building output file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 

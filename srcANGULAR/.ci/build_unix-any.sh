@@ -28,14 +28,14 @@ fi
 
 
 # execute
-OS::print_status info "executing build...\n"
+OS_Print_Status info "executing build...\n"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
 ANGULAR::build
 EXIT_CODE=$?
 cd "$__current_path" && unset __current_path
 
 if [ $EXIT_CODE -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -44,11 +44,11 @@ fi
 
 # placeholding docs flag
 __file="${PROJECT_SKU}-docs_any-any"
-OS::print_status info "building output file: ${__file}\n"
+OS_Print_Status info "building output file: ${__file}\n"
 FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 

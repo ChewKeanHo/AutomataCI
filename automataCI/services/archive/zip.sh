@@ -48,7 +48,7 @@ ZIP_Extract() {
 
 
         # validate input
-        OS::is_command_available "unzip"
+        OS_Is_Command_Available "unzip"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -81,7 +81,7 @@ ZIP_Extract() {
 
 ZIP_Is_Available() {
         # execute
-        OS::is_command_available "zip"
+        OS_Is_Command_Available "zip"
         if [ $? -eq 0 ]; then
                 return 0
         fi

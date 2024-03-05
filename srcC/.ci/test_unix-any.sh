@@ -28,10 +28,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking BUILD::test function availability...\n"
-OS::is_command_available "BUILD::test"
+OS_Print_Status info "checking BUILD::test function availability...\n"
+OS_Is_Command_Available "BUILD::test"
 if [ $? -ne 0 ]; then
-        OS::print_status error "check failed.\n"
+        OS_Print_Status error "check failed.\n"
         return 1
 fi
 

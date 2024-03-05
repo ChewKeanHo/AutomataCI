@@ -108,13 +108,11 @@ HTTP_Download() {
 
 HTTP_Setup() {
         # validate input
-        OS::is_command_available "brew"
-        if [ $? -ne 0 ]; then
+        if [ -z "$(type -t "brew")" ]; then
                 return 1
         fi
 
-        OS::is_command_available "curl"
-        if [ $? -eq 0 ]; then
+        if [ ! -z "$(type -t "curl")" ]; then
                 return 0
         fi
 

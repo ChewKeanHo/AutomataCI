@@ -28,32 +28,32 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking python|python3 availability...\n"
+OS_Print_Status info "checking python|python3 availability...\n"
 PYTHON_Is_Available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing python|python3 intepreter.\n"
+        OS_Print_Status error "missing python|python3 intepreter.\n"
         return 1
 fi
 
 
-OS::print_status info "activating python venv...\n"
+OS_Print_Status info "activating python venv...\n"
 PYTHON_Activate_VENV
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
 
-OS::print_status info "checking pyinstaller availability...\n"
+OS_Print_Status info "checking pyinstaller availability...\n"
 if [ -z "$(type -t "pyinstaller")" ]; then
-        OS::print_status error "missing pyintaller command.\n"
+        OS_Print_Status error "missing pyintaller command.\n"
         return 1
 fi
 
 
-OS::print_status info "checking pdoc availability...\n"
+OS_Print_Status info "checking pdoc availability...\n"
 if [ -z "$(type -t "pdoc")" ]; then
-        OS::print_status error "missing pdoc command.\n"
+        OS_Print_Status error "missing pdoc command.\n"
         return 1
 fi
 
@@ -71,7 +71,7 @@ windows)
 esac
 
 __file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
-OS::print_status info "building output file: ${__file}\n"
+OS_Print_Status info "building output file: ${__file}\n"
 pyinstaller --noconfirm \
         --onefile \
         --clean \
@@ -82,7 +82,7 @@ pyinstaller --noconfirm \
         --hidden-import=main \
         "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/main.py"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -91,10 +91,10 @@ fi
 
 # placeholding source code flag
 __file="${PROJECT_SKU}-src_${PROJECT_OS}-${PROJECT_ARCH}"
-OS::print_status info "building output file: ${__file}\n"
+OS_Print_Status info "building output file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -103,10 +103,10 @@ fi
 
 # placeholding homebrew code flag
 __file="${PROJECT_SKU}-homebrew_any-any"
-OS::print_status info "building output file: ${__file}\n"
+OS_Print_Status info "building output file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -115,10 +115,10 @@ fi
 
 # placeholding chocolatey code flag
 __file="${PROJECT_SKU}-chocolatey_any-any"
-OS::print_status info "building output file: ${__file}\n"
+OS_Print_Status info "building output file: ${__file}\n"
 touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -126,14 +126,14 @@ fi
 
 
 # compose documentations
-OS::print_status info "printing html documentations...\n"
+OS_Print_Status info "printing html documentations...\n"
 __output="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/python"
 FS_Remake_Directory "${__output}/${PROJECT_OS}-${PROJECT_ARCH}"
 pdoc --html \
         --output-dir "${__output}/${PROJECT_OS}-${PROJECT_ARCH}" \
         "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/"
 if [ $? -ne 0 ]; then
-        OS::print_status error "compose failed.\n"
+        OS_Print_Status error "compose failed.\n"
         return 1
 fi
 

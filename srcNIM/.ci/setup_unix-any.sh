@@ -27,10 +27,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking nim availability...\n"
+OS_Print_Status info "checking nim availability...\n"
 NIM::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing nim compiler.\n"
+        OS_Print_Status error "missing nim compiler.\n"
         return 1
 fi
 
@@ -38,10 +38,10 @@ fi
 
 
 # execute
-OS::print_status info "setup localized environment...\n"
+OS_Print_Status info "setup localized environment...\n"
 NIM::setup_local_environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "setup failed.\n"
+        OS_Print_Status error "setup failed.\n"
         return 1
 fi
 

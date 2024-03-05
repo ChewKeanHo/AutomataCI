@@ -27,18 +27,18 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking nim availability...\n"
+OS_Print_Status info "checking nim availability...\n"
 NIM::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing nim compiler.\n"
+        OS_Print_Status error "missing nim compiler.\n"
         return 1
 fi
 
 
-OS::print_status info "activating local environment...\n"
+OS_Print_Status info "activating local environment...\n"
 NIM::activate_local_environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -46,12 +46,12 @@ fi
 
 
 # execute
-OS::print_status info "refreshing nimble repo list...\n"
+OS_Print_Status info "refreshing nimble repo list...\n"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_NIM}"
 nimble refresh
 if [ $? -ne 0 ]; then
         cd "$__current_path" && unset __current_path
-        OS::print_status error "refresh failed.\n"
+        OS_Print_Status error "refresh failed.\n"
         return 1
 fi
 cd "$__current_path" && unset __current_path

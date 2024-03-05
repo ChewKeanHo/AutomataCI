@@ -55,7 +55,7 @@ XZ_Create() {
 
 XZ_Is_Available() {
         # execute
-        OS::is_command_available "xz"
+        OS_Is_Command_Available "xz"
         if [ $? -eq 0 ]; then
                 return 0
         fi

@@ -27,10 +27,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking python|python3 availability...\n"
+OS_Print_Status info "checking python|python3 availability...\n"
 PYTHON_Is_Available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing python|python3 intepreter.\n"
+        OS_Print_Status error "missing python|python3 intepreter.\n"
         return 1
 fi
 
@@ -38,10 +38,10 @@ fi
 
 
 # execute
-OS::print_status info "setup python venv...\n"
+OS_Print_Status info "setup python venv...\n"
 PYTHON_Setup_VENV
 if [ $? -ne 0 ]; then
-        OS::print_status error "setup failed.\n"
+        OS_Print_Status error "setup failed.\n"
         return 1
 fi
 

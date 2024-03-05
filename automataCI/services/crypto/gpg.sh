@@ -119,7 +119,7 @@ GPG_Is_Available() {
 
 
         # execute
-        OS::is_command_available "gpg"
+        OS_Is_Command_Available "gpg"
         if [ $? -ne 0 ]; then
                 return 1
         fi

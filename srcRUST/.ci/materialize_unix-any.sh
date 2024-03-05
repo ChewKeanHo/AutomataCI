@@ -28,10 +28,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "activating local environment...\n"
+OS_Print_Status info "activating local environment...\n"
 RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -39,13 +39,13 @@ fi
 
 
 # build output binary file
-OS::print_status info "configuring build settings...\n"
+OS_Print_Status info "configuring build settings...\n"
 __target="$(RUST_Get_Build_Target "$PROJECT_OS" "$PROJECT_ARCH")"
 __filename="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
 __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rust-${__filename}"
 
 if [ -z "$__target" ]; then
-        OS::print_status error "configure failed.\n"
+        OS_Print_Status error "configure failed.\n"
         return 1
 fi
 
@@ -53,7 +53,7 @@ fi
 
 
 # building target
-OS::print_status info "building ${__filename}...\n"
+OS_Print_Status info "building ${__filename}...\n"
 FS_Remove_Silently "${__workspace}"
 
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_RUST}"
@@ -61,7 +61,7 @@ cargo build --release --target-dir "$__workspace" --target="$__target"
 __exit_code=$?
 cd "$__current_path" && unset __current_path
 if [ $__exit_code -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -71,12 +71,12 @@ fi
 # exporting executable
 __source="${__workspace}/${__target}/release/${PROJECT_SKU}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS::print_status info "exporting ${__source} to ${__dest}\n"
+OS_Print_Status info "exporting ${__source} to ${__dest}\n"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
-        OS::print_status error "export failed.\n"
+        OS_Print_Status error "export failed.\n"
         return 1
 fi
 

@@ -28,7 +28,7 @@ fi
 
 # execute
 __target="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}"
-OS::print_status info "cleaning ${__target}...\n"
+OS_Print_Status info "cleaning ${__target}...\n"
 PYTHON_Clean_Artifact "$__target"
 
 

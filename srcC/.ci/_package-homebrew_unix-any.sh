@@ -85,7 +85,7 @@ PACKAGE::assemble_homebrew_content() {
 
 
         # script formula.rb
-        OS::print_status info "scripting formula.rb...\n"
+        OS_Print_Status info "scripting formula.rb...\n"
         FS_Write_File "${_directory}/formula.rb" "\
 class ${PROJECT_SKU_TITLECASE} < Formula
   desc \"${PROJECT_PITCH}\"

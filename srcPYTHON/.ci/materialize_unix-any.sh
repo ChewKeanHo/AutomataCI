@@ -28,32 +28,32 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking python|python3 availability...\n"
+OS_Print_Status info "checking python|python3 availability...\n"
 PYTHON_Is_Available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing python|python3 intepreter.\n"
+        OS_Print_Status error "missing python|python3 intepreter.\n"
         return 1
 fi
 
 
-OS::print_status info "activating python venv...\n"
+OS_Print_Status info "activating python venv...\n"
 PYTHON_Activate_VENV
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
 
-OS::print_status info "checking pyinstaller availability...\n"
+OS_Print_Status info "checking pyinstaller availability...\n"
 if [ -z "$(type -t "pyinstaller")" ]; then
-        OS::print_status error "missing pyintaller command.\n"
+        OS_Print_Status error "missing pyintaller command.\n"
         return 1
 fi
 
 
-OS::print_status info "checking pdoc availability...\n"
+OS_Print_Status info "checking pdoc availability...\n"
 if [ -z "$(type -t "pdoc")" ]; then
-        OS::print_status error "missing pdoc command.\n"
+        OS_Print_Status error "missing pdoc command.\n"
         return 1
 fi
 
@@ -70,7 +70,7 @@ windows)
         ;;
 esac
 
-OS::print_status info "building output file: ${__file}\n"
+OS_Print_Status info "building output file: ${__file}\n"
 pyinstaller --noconfirm \
         --onefile \
         --clean \
@@ -81,7 +81,7 @@ pyinstaller --noconfirm \
         --hidden-import=main \
         "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/main.py"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -91,12 +91,12 @@ fi
 # shipping executable
 __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS::print_status info "exporting ${__source} to ${__dest}\n"
+OS_Print_Status info "exporting ${__source} to ${__dest}\n"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
-        OS::print_status error "export failed.\n"
+        OS_Print_Status error "export failed.\n"
         return 1
 fi
 

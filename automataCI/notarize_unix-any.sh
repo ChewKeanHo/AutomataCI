@@ -78,7 +78,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         # execute
         cmd="NOTARIZE_Certify"
         I18N_Check_Availability "$cmd"
-        OS::is_command_available "$cmd"
+        OS_Is_Command_Available "$cmd"
         if [ $? -ne 0 ]; then
                 I18N_Check_Failed
                 continue

@@ -27,18 +27,18 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking go availability...\n"
+OS_Print_Status info "checking go availability...\n"
 GO::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing go compiler.\n"
+        OS_Print_Status error "missing go compiler.\n"
         return 1
 fi
 
 
-OS::print_status info "activating local environment...\n"
+OS_Print_Status info "activating local environment...\n"
 GO::activate_local_environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -46,12 +46,12 @@ fi
 
 
 # execute
-OS::print_status info "go get modules...\n"
+OS_Print_Status info "go get modules...\n"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_GO}"
 go get .
 if [ $? -ne 0 ]; then
         cd "$__current_path" && unset __current_path
-        OS::print_status error "go get failed.\n"
+        OS_Print_Status error "go get failed.\n"
         return 1
 fi
 cd "$__current_path" && unset __current_path

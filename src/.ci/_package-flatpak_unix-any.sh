@@ -69,7 +69,7 @@ PACKAGE_Assemble_Flatpak_Content() {
         # copy main program
         _target="$1"
         _filepath="${_directory}/${PROJECT_SKU}"
-        OS::print_status info "copying ${_target} to ${_filepath}\n"
+        OS_Print_Status info "copying ${_target} to ${_filepath}\n"
         FS_Copy_File "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
@@ -79,7 +79,7 @@ PACKAGE_Assemble_Flatpak_Content() {
         # copy icon.svg
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon.svg"
         _filepath="${_directory}/icon.svg"
-        OS::print_status info "copying ${_target} to ${_filepath}\n"
+        OS_Print_Status info "copying ${_target} to ${_filepath}\n"
         FS_Copy_File "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
@@ -89,7 +89,7 @@ PACKAGE_Assemble_Flatpak_Content() {
         # copy icon-48x48.png
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon-48x48.png"
         _filepath="${_directory}/icon-48x48.png"
-        OS::print_status info "copying ${_target} to ${_filepath}\n"
+        OS_Print_Status info "copying ${_target} to ${_filepath}\n"
         FS_Copy_File "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1
@@ -99,7 +99,7 @@ PACKAGE_Assemble_Flatpak_Content() {
         # copy icon-128x128.png
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon-128x128.png"
         _filepath="${_directory}/icon-128x128.png"
-        OS::print_status info "copying ${_target} to ${_filepath}\n"
+        OS_Print_Status info "copying ${_target} to ${_filepath}\n"
         FS_Copy_File "$_target" "$_filepath"
         if [ $? -ne 0 ]; then
                 return 1

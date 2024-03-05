@@ -18,7 +18,7 @@
 
 AR_Is_Available() {
         # execute
-        OS::is_command_available "ar"
+        OS_Is_Command_Available "ar"
         if [ $? -ne 0 ]; then
                 return 1
         fi

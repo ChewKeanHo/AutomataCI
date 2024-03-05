@@ -33,7 +33,7 @@ MD5_Checksum_From_File() {
 
 
         # execute
-        OS::is_command_available "md5sum"
+        OS_Is_Command_Available "md5sum"
         if [ $? -eq 0 ]; then
                 md5sum "$1"
                 if [ $? -ne 0 ]; then
@@ -43,7 +43,7 @@ MD5_Checksum_From_File() {
                 return 0
         fi
 
-        OS::is_command_available "md5"
+        OS_Is_Command_Available "md5"
         if [ $? -eq 0 ]; then
                 md5 "$1"
                 if [ $? -ne 0 ]; then
@@ -63,12 +63,12 @@ MD5_Checksum_From_File() {
 
 MD5_Is_Available() {
         # execute
-        OS::is_command_available "md5sum"
+        OS_Is_Command_Available "md5sum"
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
-        OS::is_command_available "md5"
+        OS_Is_Command_Available "md5"
         if [ $? -eq 0 ]; then
                 return 0
         fi

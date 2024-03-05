@@ -40,7 +40,7 @@ GZ_Create() {
         # create .gz compressed target
         ___source="${___source%.gz}"
 
-        OS::is_command_available "gzip"
+        OS_Is_Command_Available "gzip"
         if [ $? -eq 0 ]; then
                 gzip -9 "$___source"
                 if [ $? -ne 0 ]; then
@@ -50,7 +50,7 @@ GZ_Create() {
                 return 0
         fi
 
-        OS::is_command_available "gunzip"
+        OS_Is_Command_Available "gunzip"
         if [ $? -eq 0 ]; then
                 gunzip -9 "$___source"
                 if [ $? -ne 0 ]; then
@@ -70,12 +70,12 @@ GZ_Create() {
 
 GZ_Is_Available() {
         # execute
-        OS::is_command_available "gzip"
+        OS_Is_Command_Available "gzip"
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
-        OS::is_command_available "gunzip"
+        OS_Is_Command_Available "gunzip"
         if [ $? -eq 0 ]; then
                 return 0
         fi

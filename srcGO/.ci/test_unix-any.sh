@@ -28,18 +28,18 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking go availability...\n"
+OS_Print_Status info "checking go availability...\n"
 GO::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing go compiler.\n"
+        OS_Print_Status error "missing go compiler.\n"
         return 1
 fi
 
 
-OS::print_status info "activating local environment...\n"
+OS_Print_Status info "activating local environment...\n"
 GO::activate_local_environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -52,16 +52,16 @@ __profile_location="${__report_location}/test-profile.txt"
 __coverage_filepath="${__report_location}/test-coverage.html"
 
 
-OS::print_status info "preparing report vault: ${__report_location}\n"
+OS_Print_Status info "preparing report vault: ${__report_location}\n"
 FS_Remake_Directory "$__report_location"
 if [ $? -ne 0 ]; then
-        OS::print_status error "preparation failed.\n"
+        OS_Print_Status error "preparation failed.\n"
         return 1
 fi
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_GO}"
 
 
-OS::print_status info "executing all tests with coverage...\n"
+OS_Print_Status info "executing all tests with coverage...\n"
 go test -timeout 14400s \
         -coverprofile "${__profile_location}" \
         -race \
@@ -69,16 +69,16 @@ go test -timeout 14400s \
         ./...
 if [ $? -ne 0 ]; then
         cd "$__current_path" && unset __current_path
-        OS::print_status error "test executions failed.\n"
+        OS_Print_Status error "test executions failed.\n"
         return 1
 fi
 
 
-OS::print_status info "processing test coverage data to html...\n"
+OS_Print_Status info "processing test coverage data to html...\n"
 go tool cover -html="${__profile_location}" -o "${__coverage_filepath}"
 if [ $? -ne 0 ]; then
         cd "$__current_path" && unset __current_path
-        OS::print_status error "data processing failed.\n"
+        OS_Print_Status error "data processing failed.\n"
         return 1
 fi
 

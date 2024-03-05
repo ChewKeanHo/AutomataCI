@@ -145,7 +145,7 @@ EOF
 
 REPREPRO_Is_Available() {
         # execute
-        OS::is_command_available "reprepro"
+        OS_Is_Command_Available "reprepro"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -203,12 +203,12 @@ REPREPRO_Publish() {
 
 REPREPRO_Setup() {
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "reprepro"
+        OS_Is_Command_Available "reprepro"
         if [ $? -eq 0 ]; then
                 return 0
         fi

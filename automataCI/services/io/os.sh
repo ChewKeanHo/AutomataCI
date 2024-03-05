@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -10,8 +10,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-OS::is_command_available() {
-        # __command="$1"
+OS_Is_Command_Available() {
+        #___command="$1"
 
 
         # validate input
@@ -24,13 +24,17 @@ OS::is_command_available() {
         if [ ! -z "$(type -t "$1")" ]; then
                 return 0
         fi
+
+
+        # report status
         return 1
 }
 
 
 
 
-OS::print_status() {
+OS_Print_Status() {
+        # NOTE: to be scrapped soon!
         __status_mode="$1" && shift 1
         __msg=""
         __color=""

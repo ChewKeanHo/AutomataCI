@@ -40,10 +40,10 @@ PACKAGE::assemble_archive_content() {
                 # it's a source target
                 _target="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs"
                 PYTHON_Clean_Artifact "$_target"
-                OS::print_status info "copying ${_target} to ${_directory}\n"
+                OS_Print_Status info "copying ${_target} to ${_directory}\n"
                 FS_Copy_All "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed."
+                        OS_Print_Status error "copy failed."
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
@@ -51,7 +51,7 @@ PACKAGE::assemble_archive_content() {
         elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
         elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                OS::print_status info "copying ${_target} to ${_directory}\n"
+                OS_Print_Status info "copying ${_target} to ${_directory}\n"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
                         return 1
@@ -59,7 +59,7 @@ PACKAGE::assemble_archive_content() {
 
                 FS_Is_File "${_target%.wasm*}.js"
                 if [ $? -eq 0 ]; then
-                        OS::print_status info "copying ${_target%.wasm*}.js to ${_directory}\n"
+                        OS_Print_Status info "copying ${_target%.wasm*}.js to ${_directory}\n"
                         FS_Copy_File "${_target%.wasm*}.js" "$_directory"
                         if [ $? -ne 0 ]; then
                                 return 1
@@ -80,10 +80,10 @@ PACKAGE::assemble_archive_content() {
                         ;;
                 esac
 
-                OS::print_status info "copying ${_target} to ${_dest}\n"
+                OS_Print_Status info "copying ${_target} to ${_dest}\n"
                 FS_Copy_File "$_target" "$_dest"
                 if [ $? -ne 0 ]; then
-                        OS::print_status error "copy failed."
+                        OS_Print_Status error "copy failed."
                         return 1
                 fi
         fi
@@ -91,20 +91,20 @@ PACKAGE::assemble_archive_content() {
 
         # copy user guide
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        OS::print_status info "copying ${_target} to ${_directory}\n"
+        OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS::print_status error "copy failed."
+                OS_Print_Status error "copy failed."
                 return 1
         fi
 
 
         # copy license file
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        OS::print_status info "copying ${_target} to ${_directory}\n"
+        OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS::print_status error "copy failed."
+                OS_Print_Status error "copy failed."
                 return 1
         fi
 

@@ -28,18 +28,18 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking go availability...\n"
+OS_Print_Status info "checking go availability...\n"
 GO::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing go compiler.\n"
+        OS_Print_Status error "missing go compiler.\n"
         return 1
 fi
 
 
-OS::print_status info "activating local environment...\n"
+OS_Print_Status info "activating local environment...\n"
 GO::activate_local_environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -47,7 +47,7 @@ fi
 
 
 # build output binary file
-OS::print_status info "configuring build settings...\n"
+OS_Print_Status info "configuring build settings...\n"
 __output_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 __arguments=""
 __os="$PROJECT_OS"
@@ -174,7 +174,7 @@ esac
 
 
 # building target
-OS::print_status info "building ${__filename}...\n"
+OS_Print_Status info "building ${__filename}...\n"
 FS_Remove_Silently "${__output_directory}/${__filename}"
 CGO_ENABLED=0 GOOS="$__os" GOARCH="$__arch" go build \
         -C "${PROJECT_PATH_ROOT}/${PROJECT_GO}" \
@@ -185,7 +185,7 @@ CGO_ENABLED=0 GOOS="$__os" GOARCH="$__arch" go build \
         -asmflags "-trimpath=${GOPATH}" \
         -o "${__output_directory}/${__filename}"
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -195,12 +195,12 @@ fi
 # shipping executable
 __source="${__output_directory}/${__filename}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS::print_status info "exporting ${__source} to ${__dest}\n"
+OS_Print_Status info "exporting ${__source} to ${__dest}\n"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
-        OS::print_status error "export failed.\n"
+        OS_Print_Status error "export failed.\n"
         return 1
 fi
 

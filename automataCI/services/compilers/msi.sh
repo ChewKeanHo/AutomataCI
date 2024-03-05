@@ -60,12 +60,12 @@ MSI_Compile() {
 
 MSI_Is_Available() {
         # execute
-        OS::is_command_available "wixl"
+        OS_Is_Command_Available "wixl"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "wixl-heat"
+        OS_Is_Command_Available "wixl-heat"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -80,7 +80,7 @@ MSI_Is_Available() {
 
 MSI_Setup() {
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi

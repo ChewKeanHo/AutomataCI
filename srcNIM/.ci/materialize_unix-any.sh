@@ -28,23 +28,23 @@ fi
 
 
 # safety check control surfaces
-OS::print_status info "checking nim availability...\n"
+OS_Print_Status info "checking nim availability...\n"
 NIM::is_available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing nim compiler.\n"
+        OS_Print_Status error "missing nim compiler.\n"
         return 1
 fi
 
 
-OS::print_status info "activating local environment...\n"
+OS_Print_Status info "activating local environment...\n"
 NIM::activate_local_environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
 
-OS::print_status info "prepare nim workspace...\n"
+OS_Print_Status info "prepare nim workspace...\n"
 __target="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
 __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 __source="${PROJECT_PATH_ROOT}/${PROJECT_NIM}"
@@ -115,17 +115,17 @@ FS_Make_Directory "$__workspace"
 
 
 # execute
-OS::print_status info "checking nim package health...\n"
+OS_Print_Status info "checking nim package health...\n"
 NIM::check_package "$__source"
 if [ $? -ne 0 ]; then
-        OS::print_status error "check failed.\n"
+        OS_Print_Status error "check failed.\n"
 fi
 
 
-OS::print_status info "building nim application...\n"
+OS_Print_Status info "building nim application...\n"
 nim $__arguments
 if [ $? -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 
@@ -135,12 +135,12 @@ fi
 # exporting executable
 __source="${__workspace}/${__target}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS::print_status info "exporting ${__source} to ${__dest}\n"
+OS_Print_Status info "exporting ${__source} to ${__dest}\n"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
-        OS::print_status error "export failed.\n"
+        OS_Print_Status error "export failed.\n"
         return 1
 fi
 

@@ -27,7 +27,7 @@ C::get_compiler() {
 
         # execute
         if [ ! -z "$5" ]; then
-                OS::is_command_available "$5"
+                OS_Is_Command_Available "$5"
                 if [ $? -eq 0 ]; then
                         printf -- "%b" "$5"
                         return 0
@@ -72,14 +72,14 @@ C::get_compiler_by_arch() {
                         ;;
                 darwin)
                         __compiler="clang-17"
-                        OS::is_command_available "$__compiler"
+                        OS_Is_Command_Available "$__compiler"
                         if [ $? -eq 0 ]; then
                                 printf -- "%b" "$__compiler"
                                 return 0
                         fi
 
                         __compiler="clang-15"
-                        OS::is_command_available "$__compiler"
+                        OS_Is_Command_Available "$__compiler"
                         if [ $? -eq 0 ]; then
                                 printf -- "%b" "$__compiler"
                                 return 0
@@ -89,7 +89,7 @@ C::get_compiler_by_arch() {
                         ;;
                 *)
                         __compiler="x86_64-linux-gnu-gcc"
-                        OS::is_command_available "$__compiler"
+                        OS_Is_Command_Available "$__compiler"
                         if [ $? -eq 0 ]; then
                                 printf -- "%b" "$__compiler"
                                 return 0
@@ -101,7 +101,7 @@ C::get_compiler_by_arch() {
                 ;;
         arm|armel)
                 __compiler="arm-linux-gnueabi-gcc"
-                OS::is_command_available "$__compiler"
+                OS_Is_Command_Available "$__compiler"
                 if [ $? -eq 0 ]; then
                         printf -- "%b" "$__compiler"
                         return 0
@@ -119,14 +119,14 @@ C::get_compiler_by_arch() {
                         ;;
                 darwin)
                         __compiler="clang-17"
-                        OS::is_command_available "$__compiler"
+                        OS_Is_Command_Available "$__compiler"
                         if [ $? -eq 0 ]; then
                                 printf -- "%b" "$__compiler"
                                 return 0
                         fi
 
                         __compiler="clang-15"
-                        OS::is_command_available "$__compiler"
+                        OS_Is_Command_Available "$__compiler"
                         if [ $? -eq 0 ]; then
                                 printf -- "%b" "$__compiler"
                                 return 0
@@ -141,21 +141,21 @@ C::get_compiler_by_arch() {
                 ;;
         avr)
                 __compiler="avr-gcc"
-                OS::is_command_available "$__compiler"
+                OS_Is_Command_Available "$__compiler"
                 if [ $? -eq 0 ]; then
                         printf -- "%b" "$__compiler"
                         return 0
                 fi
 
                 __compiler="clang-17"
-                OS::is_command_available "$__compiler"
+                OS_Is_Command_Available "$__compiler"
                 if [ $? -eq 0 ]; then
                         printf -- "%b" "$__compiler"
                         return 0
                 fi
 
                 __compiler="clang-15"
-                OS::is_command_available "$__compiler"
+                OS_Is_Command_Available "$__compiler"
                 if [ $? -eq 0 ]; then
                         printf -- "%b" "$__compiler"
                         return 0
@@ -170,14 +170,14 @@ C::get_compiler_by_arch() {
                         ;;
                 darwin)
                         __compiler="clang-17"
-                        OS::is_command_available "$__compiler"
+                        OS_Is_Command_Available "$__compiler"
                         if [ $? -eq 0 ]; then
                                 printf -- "%b" "$__compiler"
                                 return 0
                         fi
 
                         __compiler="clang-15"
-                        OS::is_command_available "$__compiler"
+                        OS_Is_Command_Available "$__compiler"
                         if [ $? -eq 0 ]; then
                                 printf -- "%b" "$__compiler"
                                 return 0
@@ -187,7 +187,7 @@ C::get_compiler_by_arch() {
                         ;;
                 *)
                         __compiler="i686-linux-gnu-gcc"
-                        OS::is_command_available "$__compiler"
+                        OS_Is_Command_Available "$__compiler"
                         if [ $? -eq 0 ]; then
                                 printf -- "%b" "$__compiler"
                                 return 0
@@ -240,7 +240,7 @@ C::get_compiler_by_arch() {
                 ;;
         esac
 
-        OS::is_command_available "$__compiler"
+        OS_Is_Command_Available "$__compiler"
         if [ $? -eq 0 ]; then
                 printf -- "%b" "$__compiler"
                 return 0
@@ -270,42 +270,42 @@ C::get_compiler_common() {
         fi
 
         __compiler="gcc"
-        OS::is_command_available "$__compiler"
+        OS_Is_Command_Available "$__compiler"
         if [ $? -eq 0 ]; then
                 printf -- "%b" "$__compiler"
                 return 0
         fi
 
         __compiler="cc"
-        OS::is_command_available "$__compiler"
+        OS_Is_Command_Available "$__compiler"
         if [ $? -eq 0 ]; then
                 printf -- "%b" "$__compiler"
                 return 0
         fi
 
         __compiler="clang17"
-        OS::is_command_available "$__compiler"
+        OS_Is_Command_Available "$__compiler"
         if [ $? -eq 0 ]; then
                 printf -- "%b" "$__compiler"
                 return 0
         fi
 
         __compiler="clang15"
-        OS::is_command_available "$__compiler"
+        OS_Is_Command_Available "$__compiler"
         if [ $? -eq 0 ]; then
                 printf -- "%b" "$__compiler"
                 return 0
         fi
 
         __compiler="clang14"
-        OS::is_command_available "$__compiler"
+        OS_Is_Command_Available "$__compiler"
         if [ $? -eq 0 ]; then
                 printf -- "%b" "$__compiler"
                 return 0
         fi
 
         __compiler="clang"
-        OS::is_command_available "$__compiler"
+        OS_Is_Command_Available "$__compiler"
         if [ $? -eq 0 ]; then
                 printf -- "%b" "$__compiler"
                 return 0

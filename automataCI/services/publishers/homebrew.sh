@@ -76,12 +76,12 @@ HOMEBREW_Publish() {
 
 HOMEBREW_Setup() {
         # validate input
-        OS::is_command_available "curl"
+        OS_Is_Command_Available "curl"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -120,7 +120,7 @@ HOMEBREW_Setup() {
         fi
         eval "$(${___location} shellenv)"
 
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -eq 0 ]; then
                 return 0
         fi

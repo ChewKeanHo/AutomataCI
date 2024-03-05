@@ -21,7 +21,7 @@
 
 TAR_Is_Available() {
         # execute
-        OS::is_command_available "tar"
+        OS_Is_Command_Available "tar"
         if [ $? -ne 0 ]; then
                 return 1
         fi

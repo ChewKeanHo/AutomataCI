@@ -28,10 +28,10 @@ fi
 
 
 # safety check control surfaces
-OS::print_status info "checking BUILD::compile function availability...\n"
-OS::is_command_available "BUILD::compile"
+OS_Print_Status info "checking BUILD::compile function availability...\n"
+OS_Is_Command_Available "BUILD::compile"
 if [ $? -ne 0 ]; then
-        OS::print_status error "check failed.\n"
+        OS_Print_Status error "check failed.\n"
         return 1
 fi
 
@@ -110,12 +110,12 @@ fi
 __source="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}.elf"
 __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS::print_status info "exporting ${__source} to ${__dest}\n"
+OS_Print_Status info "exporting ${__source} to ${__dest}\n"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
-        OS::print_status error "export failed.\n"
+        OS_Print_Status error "export failed.\n"
         return 1
 fi
 
@@ -126,12 +126,12 @@ fi
 __source="${PROJECT_SKU}-lib_${PROJECT_OS}-${PROJECT_ARCH}.a"
 __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}/lib${PROJECT_SKU}.a"
-OS::print_status info "exporting ${__source} to ${__dest}\n"
+OS_Print_Status info "exporting ${__source} to ${__dest}\n"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
-        OS::print_status error "export failed.\n"
+        OS_Print_Status error "export failed.\n"
         return 1
 fi
 

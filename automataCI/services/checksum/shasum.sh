@@ -42,7 +42,7 @@ SHASUM_Create_From_File() {
 
 
         # execute
-        OS::is_command_available "shasum"
+        OS_Is_Command_Available "shasum"
         if [ $? -eq 0 ]; then
                 ___ret="$(shasum -a "$2" "$1")"
                 if [ -z "$___ret" ]; then
@@ -63,7 +63,7 @@ SHASUM_Create_From_File() {
 
 SHASUM_Is_Available() {
         # execute
-        OS::is_command_available "shasum"
+        OS_Is_Command_Available "shasum"
         if [ $? -eq 0 ]; then
                 return 0
         fi

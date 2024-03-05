@@ -28,7 +28,7 @@ fi
 
 
 # execute
-OS::print_status info "executing build...\n"
+OS_Print_Status info "executing build...\n"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
 ANGULAR::build
 EXIT_CODE=$?
@@ -39,7 +39,7 @@ cd "$__current_path" && unset __current_path
 
 # return status
 if [ $EXIT_CODE -ne 0 ]; then
-        OS::print_status error "build failed.\n"
+        OS_Print_Status error "build failed.\n"
         return 1
 fi
 

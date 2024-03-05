@@ -51,7 +51,7 @@ PACKAGE::assemble_docker_content() {
                 return 10 # not applicable
         fi
 
-        OS::print_status info "Running Go specific content assembling function...\n"
+        OS_Print_Status info "Running Go specific content assembling function...\n"
 
 
         # assemble the package

@@ -21,7 +21,7 @@
 
 CHOCOLATEY_Is_Available() {
         # execute
-        OS::is_command_available "choco"
+        OS_Is_Command_Available "choco"
         if [ $? -eq 0 ]; then
                 return 0
         fi

@@ -28,10 +28,10 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "activating local environment...\n"
+OS_Print_Status info "activating local environment...\n"
 RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -45,16 +45,16 @@ __filename="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
 __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rust-test-${__filename}"
 
 
-OS::print_status info "preparing report vault: ${__report_location}\n"
+OS_Print_Status info "preparing report vault: ${__report_location}\n"
 FS_Remake_Directory "$__report_location"
 if [ $? -ne 0 ]; then
-        OS::print_status error "preparation failed.\n"
+        OS_Print_Status error "preparation failed.\n"
         return 1
 fi
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_RUST}"
 
 
-OS::print_status info "executing all tests with coverage...\n"
+OS_Print_Status info "executing all tests with coverage...\n"
 RUSTFLAGS="-C instrument-coverage=all" cargo test --verbose --target-dir "$__workspace"
 __exit_code=$?
 for __file in *.profraw; do
@@ -67,12 +67,12 @@ done
 
 if [ $__exit_code -ne 0 ]; then
         cd "$__current_path" && unset __current_path
-        OS::print_status error "test executions failed.\n"
+        OS_Print_Status error "test executions failed.\n"
         return 1
 fi
 
 
-OS::print_status info "processing all coverage profile data...\n"
+OS_Print_Status info "processing all coverage profile data...\n"
 grcov "$__workspace" \
         --source-dir "${PROJECT_PATH_ROOT}/${PROJECT_RUST}" \
         --binary-path "${__workspace}/debug" \
@@ -82,7 +82,7 @@ grcov "$__workspace" \
         --output-path "$__report_location"
 if [ $? -ne 0 ]; then
         cd "$__current_path" && unset __current_path
-        OS::print_status error "process failed.\n"
+        OS_Print_Status error "process failed.\n"
         return 1
 fi
 

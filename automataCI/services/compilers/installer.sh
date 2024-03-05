@@ -19,12 +19,12 @@
 
 INSTALLER::setup_angular() {
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "ng"
+        OS_Is_Command_Available "ng"
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -55,7 +55,7 @@ INSTALLER::setup_c() {
 
 
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -102,12 +102,12 @@ INSTALLER::setup_c() {
 
 INSTALLER::setup_go() {
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "go"
+        OS_Is_Command_Available "go"
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -130,12 +130,12 @@ INSTALLER::setup_go() {
 
 INSTALLER::setup_nim() {
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "nim"
+        OS_Is_Command_Available "nim"
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -158,12 +158,12 @@ INSTALLER::setup_nim() {
 
 INSTALLER::setup_node() {
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "npm"
+        OS_Is_Command_Available "npm"
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -185,12 +185,12 @@ INSTALLER::setup_node() {
 
 INSTALLER::setup_osslsigncode() {
         # validate input
-        OS::is_command_available "brew"
+        OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS::is_command_available "osslsigncode"
+        OS_Is_Command_Available "osslsigncode"
         if [ $? -eq 0 ]; then
                 return 0
         fi

@@ -27,18 +27,18 @@ fi
 
 
 # safety checking control surfaces
-OS::print_status info "checking python|python3 availability...\n"
+OS_Print_Status info "checking python|python3 availability...\n"
 PYTHON_Is_Available
 if [ $? -ne 0 ]; then
-        OS::print_status error "missing python|python3 intepreter.\n"
+        OS_Print_Status error "missing python|python3 intepreter.\n"
         return 1
 fi
 
 
-OS::print_status info "activating python venv...\n"
+OS_Print_Status info "activating python venv...\n"
 PYTHON_Activate_VENV
 if [ $? -ne 0 ]; then
-        OS::print_status error "activation failed.\n"
+        OS_Print_Status error "activation failed.\n"
         return 1
 fi
 
@@ -47,28 +47,28 @@ fi
 
 # execute
 report_location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/python-test-report"
-OS::print_status info "preparing report vault: ${report_location}\n"
+OS_Print_Status info "preparing report vault: ${report_location}\n"
 mkdir -p "$report_location"
 
 
-OS::print_status info "executing all tests with coverage...\n"
+OS_Print_Status info "executing all tests with coverage...\n"
 python -m coverage run \
         --data-file="${report_location}/.coverage" \
         -m unittest discover \
         -s "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}" \
         -p '*_test.py'
 if [ $? -ne 0 ]; then
-        OS::print_status error "test executions failed.\n"
+        OS_Print_Status error "test executions failed.\n"
         return 1
 fi
 
 
-OS::print_status info "processing test coverage data to html...\n"
+OS_Print_Status info "processing test coverage data to html...\n"
 python -m coverage html \
         --data-file="${report_location}/.coverage" \
         --directory="$report_location"
 if [ $? -ne 0 ]; then
-        OS::print_status error "data processing failed.\n"
+        OS_Print_Status error "data processing failed.\n"
         return 1
 fi
 

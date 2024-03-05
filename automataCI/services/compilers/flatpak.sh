@@ -142,7 +142,7 @@ FLATPAK_Is_Available() {
 
 
         # validate dependencies
-        OS::is_command_available "flatpak-builder"
+        OS_Is_Command_Available "flatpak-builder"
         if [ $? -ne 0 ]; then
                 return 1
         fi

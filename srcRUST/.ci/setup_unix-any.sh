@@ -27,10 +27,10 @@ fi
 
 
 # execute
-OS::print_status info "setup localized environment...\n"
+OS_Print_Status info "setup localized environment...\n"
 RUST_Setup_Local_Environment
 if [ $? -ne 0 ]; then
-        OS::print_status error "setup failed.\n"
+        OS_Print_Status error "setup failed.\n"
         return 1
 fi
 

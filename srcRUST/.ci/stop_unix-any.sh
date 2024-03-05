@@ -26,11 +26,11 @@ fi
 
 
 # execute
-OS::print_status info "\n"
-OS::print_status note "IMPORTANT NOTICE\n"
-OS::print_status note "please perform the following command at your terminal manually:\n"
-OS::print_status note "    $ deactivate\n"
-OS::print_status info "\n"
+OS_Print_Status info "\n"
+OS_Print_Status note "IMPORTANT NOTICE\n"
+OS_Print_Status note "please perform the following command at your terminal manually:\n"
+OS_Print_Status note "    $ deactivate\n"
+OS_Print_Status info "\n"
 
 
 

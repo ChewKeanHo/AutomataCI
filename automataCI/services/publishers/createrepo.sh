@@ -19,12 +19,12 @@
 
 CREATEREPO_Is_Available() {
         # execute
-        OS::is_command_available "createrepo"
+        OS_Is_Command_Available "createrepo"
         if [ $? -eq 0 ]; then
                 return 0
         fi
 
-        OS::is_command_available "createrepo_c"
+        OS_Is_Command_Available "createrepo_c"
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -65,7 +65,7 @@ CREATEREPO_Publish() {
                 return 1
         fi
 
-        OS::is_command_available "createrepo"
+        OS_Is_Command_Available "createrepo"
         if [ $? -eq 0 ]; then
                 createrepo --update "$__directory"
                 if [ $? -eq 0 ]; then
@@ -73,7 +73,7 @@ CREATEREPO_Publish() {
                 fi
         fi
 
-        OS::is_command_available "createrepo_c"
+        OS_Is_Command_Available "createrepo_c"
         if [ $? -eq 0 ]; then
                 createrepo_c --update "$__directory"
                 if [ $? -eq 0 ]; then
