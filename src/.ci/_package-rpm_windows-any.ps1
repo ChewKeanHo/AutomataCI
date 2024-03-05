@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,12 +15,13 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 
 
@@ -54,39 +55,45 @@ function PACKAGE-Assemble-RPM-Content {
 		# TIP: (1) usually is: usr/local/lib
 		#      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
 		$_filepath = "${_directory}\BUILD\lib${env:PROJECT_SKU}.a"
-		OS-Print-Status info "copying ${_target} to ${_filepath}"
-		$__process = FS-Make-Housing-Directory "${_filepath}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "copy failed."
+		$null = I18N-Copy "${_target}" "${_filepath}"
+		$___process = FS-Make-Housing-Directory "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
-		$__process = FS-Copy-File "${_target}" "${_filepath}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "copy failed."
+		$___process = FS-Copy-File "${_target}" "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
 
 		# generate AutomataCI's required RPM spec instructions (INSTALL)
-		$__process = FS-Write-File "${_directory}\SPEC_INSTALL" @"
+		$__file = "${_directory}\SPEC_INSTALL"
+		$null = I18N-Create "${__file}"
+		$___process = FS-Write-File "${__file}" @"
 install --directory %{buildroot}/usr/local/lib/${env:PROJECT_SKU}
 install -m 0644 lib${env:PROJECT_SKU}.a %{buildroot}/usr/local/lib/${env:PROJECT_SKU}
 
 install --directory %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}/
 install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}/
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
+			$null = I18N-Create-Failed
 			return 1
 		}
 
 
 		# generate AutomataCI's required RPM spec instructions (FILES)
-		$__process = FS-Write-File "${_directory}\SPEC_FILES" @"
+		$__file = "${_directory}\SPEC_FILES"
+		$null = I18N-Create "${__file}"
+		$___process = FS-Write-File "${__file}" @"
 /usr/local/lib/${env:PROJECT_SKU}/lib${env:PROJECT_SKU}.a
 /usr/local/share/doc/lib${env:PROJECT_SKU}/copyright
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
+			$null = I18N-Create-Failed
 			return 1
 		}
 
@@ -109,22 +116,24 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 		# TIP: (1) usually is: usr/local/bin or usr/local/sbin
 		#      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
 		$_filepath = "${_directory}\BUILD\${env:PROJECT_SKU}"
-		OS-Print-Status info "copying ${_target} to ${_filepath}"
-		$__process = FS-Make-Housing-Directory "${_filepath}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "copy failed."
+		$null = I18N-Copy "${_target}" "${_filepath}"
+		$___process = FS-Make-Housing-Directory "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
-		$__process = FS-Copy-File "${_target}" "${_filepath}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "copy failed."
+		$___process = FS-Copy-File "${_target}" "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
 
 		# generate AutomataCI's required RPM spec instructions (INSTALL)
-		$__process = FS-Write-File "${_directory}\SPEC_INSTALL" @"
+		$__file = "${_directory}\SPEC_INSTALL"
+		$null = I18N-Create "${__file}"
+		$___process = FS-Write-File "${__file}" @"
 install --directory %{buildroot}/usr/local/bin
 install -m 0755 ${env:PROJECT_SKU} %{buildroot}/usr/local/bin
 
@@ -134,18 +143,22 @@ install -m 644 copyright %{buildroot}/usr/local/share/doc/${env:PROJECT_SKU}/
 install --directory %{buildroot}/usr/local/share/man/man1/
 install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
+			$null = I18N-Create-Failed
 			return 1
 		}
 
 
 		# generate AutomataCI's required RPM spec instructions (FILES)
-		$__process = FS-Write-File "${_directory}\SPEC_FILES" @"
+		$__file = "${_directory}\SPEC_FILES"
+		$null = I18N-Create "${__file}"
+		$___process = FS-Write-File "${__file}" @"
 /usr/local/bin/${env:PROJECT_SKU}
 /usr/local/share/doc/${env:PROJECT_SKU}/copyright
 /usr/local/share/man/man1/${env:PROJECT_SKU}.1.gz
 "@
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
+			$null = I18N-Create-Failed
 			return 1
 		}
 
@@ -154,35 +167,37 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 
 	# NOTE: REQUIRED file
-	OS-Print-Status info "creating copyright.gz file..."
-	$__process = COPYRIGHT-Create `
+	$null = I18N-Create "copyright.gz"
+	$___process = COPYRIGHT-Create `
 		"${_directory}\BUILD\copyright" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
 		${env:PROJECT_SKU} `
 		${env:PROJECT_CONTACT_NAME} `
 		${env:PROJECT_CONTACT_EMAIL} `
 		${env:PROJECT_CONTACT_WEBSITE}
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# NOTE: REQUIRED file
-	OS-Print-Status info "creating man pages file..."
-	$__process = MANUAL-Create `
+	$null = I18N-Create "MAN PAGES"
+	$___process = MANUAL-Create `
 		"${_directory}\BUILD\${env:PROJECT_SKU}.1" `
 		${env:PROJECT_SKU} `
 		${env:PROJECT_CONTACT_NAME} `
 		${env:PROJECT_CONTACT_EMAIL} `
 		${env:PROJECT_CONTACT_WEBSITE}
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# NOTE: OPTIONAL (Comment to turn it off)
-	OS-Print-Status info "creating source.repo files..."
-	$__process = RPM-Create-Source-Repo `
+	$null = I18N-Create "source.repo"
+	$___process = RPM-Create-Source-Repo `
 		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
 		"${_directory}" `
 		"${env:PROJECT_GPG_ID}" `
@@ -190,14 +205,15 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 		"${env:PROJECT_REPREPRO_CODENAME}" `
 		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
 		"${_gpg_keyring}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-	OS-Print-Status info "creating spec file..."
-	RPM-Create-Spec `
+	$null = I18N-Create "spec"
+	$___process = RPM-Create-Spec `
 		"${_directory}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
 		"${_package}" `
@@ -209,7 +225,8 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 		"${env:PROJECT_CONTACT_WEBSITE}" `
 		"${env:PROJECT_LICENSE}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\ABSTRACTS.txt"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 

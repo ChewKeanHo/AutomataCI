@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,14 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
@@ -53,22 +54,24 @@ PACKAGE_Assemble_RPM_Content() {
                 # TIP: (1) usually is: usr/local/lib
                 #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
                 _filepath="${_directory}/BUILD/lib${PROJECT_SKU}.a"
-                OS_Print_Status info "copying ${_target} to ${_filepath}\n"
+                I18N_Copy "$_target" "$_filepath"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
-                        OS_Print_Status error "copy failed."
+                        I18N_Copy_Failed
                         return 1
                 fi
 
                 FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
-                        OS_Print_Status error "copy failed."
+                        I18N_Copy_Failed
                         return 1
                 fi
 
 
                 # generate AutomataCI's required RPM spec instructions (INSTALL)
-                FS_Write_File "${_directory}/SPEC_INSTALL" "\
+                __file="${_directory}/SPEC_INSTALL"
+                I18N_Create "$__file"
+                FS_Write_File "$__file" "\
 install --directory %{buildroot}/usr/local/lib/${PROJECT_SKU}
 install -m 0644 lib${PROJECT_SKU}.a %{buildroot}/usr/local/lib/${PROJECT_SKU}
 
@@ -76,16 +79,20 @@ install --directory %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
 install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
 "
                 if [ $? -ne 0 ]; then
+                        I18N_Create_Failed
                         return 1
                 fi
 
 
                 # generate AutomataCI's required RPM spec instructions (FILES)
-                FS_Write_File "${_directory}/SPEC_FILES" "\
+                __file="${_directory}/SPEC_FILES"
+                I18N_Create "$__file"
+                FS_Write_File "$__file" "\
 /usr/local/lib/${PROJECT_SKU}/lib${PROJECT_SKU}.a
 /usr/local/share/doc/lib${PROJECT_SKU}/copyright
 "
                 if [ $? -ne 0 ]; then
+                        I18N_Create_Failed
                         return 1
                 fi
 
@@ -107,22 +114,24 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
                 # copy main program
                 # TIP: (1) copy all files into "${__directory}/BUILD" directory.
                 _filepath="${_directory}/BUILD/${PROJECT_SKU}"
-                OS_Print_Status info "copying $_target to ${_filepath}\n"
+                I18N_Copy "$_target" "$_filepath"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
-                        OS_Print_Status error "copy failed.\n"
+                        I18N_Copy_Failed
                         return 1
                 fi
 
                 FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
-                        OS_Print_Status error "copy failed.\n"
+                        I18N_Copy_Failed
                         return 1
                 fi
 
 
                 # generate AutomataCI's required RPM spec instructions (INSTALL)
-                FS_Write_File "${_directory}/SPEC_INSTALL" "\
+                __file="${_directory}/SPEC_INSTALL"
+                I18N_Create "$__file"
+                FS_Write_File "$__file" "\
 install --directory %{buildroot}/usr/local/bin
 install -m 0755 ${PROJECT_SKU} %{buildroot}/usr/local/bin
 
@@ -133,17 +142,21 @@ install --directory %{buildroot}/usr/local/share/man/man1/
 install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 "
                 if [ $? -ne 0 ]; then
+                        I18N_Create_Failed
                         return 1
                 fi
 
 
                 # generate AutomataCI's required RPM spec instructions (FILES)
-                FS_Write_File "${_directory}/SPEC_FILES" "\
+                __file="${_directory}/SPEC_FILES"
+                I18N_Create "$__file"
+                FS_Write_File "$__file" "\
 /usr/local/bin/${PROJECT_SKU}
 /usr/local/share/doc/${PROJECT_SKU}/copyright
 /usr/local/share/man/man1/${PROJECT_SKU}.1.gz
 "
                 if [ $? -ne 0 ]; then
+                        I18N_Create_Failed
                         return 1
                 fi
 
@@ -152,7 +165,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 
         # NOTE: REQUIRED file
-        OS_Print_Status info "creating copyright.gz file...\n"
+        I18N_Create "copyright.gz"
         COPYRIGHT_Create \
                 "${_directory}/BUILD/copyright" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
@@ -161,12 +174,13 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE"
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
 
         # NOTE: REQUIRED file
-        OS_Print_Status info "creating man pages file...\n"
+        I18N_Create "MAN PAGES"
         MANUAL_Create \
                 "${_directory}/BUILD/${PROJECT_SKU}.1" \
                 "$PROJECT_SKU" \
@@ -174,12 +188,13 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE"
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
 
         # NOTE: OPTIONAL (Comment to turn it off)
-        OS_Print_Status info "creating source.repo files...\n"
+        I18N_Create "source.repo"
         RPM_Create_Source_Repo \
                 "$PROJECT_SIMULATE_RELEASE_REPO" \
                 "$_directory" \
@@ -188,12 +203,13 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
                 "$PROJECT_NAME" \
                 "$_gpg_keyring"
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-        OS_Print_Status info "creating spec file...\n"
+        I18N_Create "spec"
         RPM_Create_Spec \
                 "$_directory" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
@@ -207,6 +223,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
                 "$PROJECT_LICENSE" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/ABSTRACTS.txt"
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
