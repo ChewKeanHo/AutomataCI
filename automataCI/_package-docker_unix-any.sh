@@ -89,7 +89,7 @@ PACKAGE_Run_DOCKER() {
 
 
         # copy all complimentary files to the workspace
-        cmd="PACKAGE::assemble_docker_content"
+        cmd="PACKAGE_Assemble_DOCKER_Content"
         I18N_Check_Function "$cmd"
         OS_Is_Command_Available "$cmd"
         if [ $? -ne 0 ]; then

@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,12 +15,12 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	exit 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
@@ -65,32 +65,32 @@ function PACKAGE-Assemble-DOCKER-Content {
 
 
 	# assemble the package
-	$__process = FS-Copy-File "${_target}" "${_directory}\${env:PROJECT_SKU}"
-	if ($__process -ne 0) {
+	$___process = FS-Copy-File "${_target}" "${_directory}\${env:PROJECT_SKU}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = FS-Touch-File "${_directory}\.blank"
-	if ($__process -ne 0) {
+	$___process = FS-Touch-File "${_directory}\.blank"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# generate the Dockerfile
-	$__process = FS-Write-File "${_directory}\Dockerfile" @"
+	$___process = FS-Write-File "${_directory}\Dockerfile" @"
 # Defining baseline image
 "@
 	if (${_target_os} == "windows") {
-		$__process = FS-Append-File "${_directory}\Dockerfile" @"
+		$___process = FS-Append-File "${_directory}\Dockerfile" @"
 FROM --platform=${_target_os}/${_target_arch} mcr.microsoft.com/windows/nanoserver:ltsc2022
 "@
 	} else {
-		$__process = FS-Append-File "${_directory}\Dockerfile" @"
+		$___process = FS-Append-File "${_directory}\Dockerfile" @"
 FROM --platform=${_target_os}/${_target_arch} busybox:latest
 "@
 	}
 
-	$__process = FS-Append-File "${_directory}\Dockerfile" @"
+	$___process = FS-Append-File "${_directory}\Dockerfile" @"
 LABEL org.opencontainers.image.title=`"${env:PROJECT_NAME}`"
 LABEL org.opencontainers.image.description=`"${env:PROJECT_PITCH}`"
 LABEL org.opencontainers.image.authors=`"${env:PROJECT_CONTACT_NAME} <${env:PROJECT_CONTACT_EMAIL}>`"
@@ -99,19 +99,19 @@ LABEL org.opencontainers.image.revision=`"${env:PROJECT_CADENCE}`"
 LABEL org.opencontainers.image.licenses=`"${env:PROJECT_LICENSE}`"
 "@
 
-	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_CONTACT_WEBSITE}))) {
-		$__process = FS-Append-File "${_directory}\Dockerfile" @"
+	if ($(STRINGS-Is-Empty "${env:PROJECT_CONTACT_WEBSITE}") -ne 0) {
+		$___process = FS-Append-File "${_directory}\Dockerfile" @"
 LABEL org.opencontainers.image.url=`"${env:PROJECT_CONTACT_WEBSITE}`"
 "@
 	}
 
-	if (-not ([string]::IsNullOrEmpty(${env:PROJECT_SOURCE_URL}))) {
-		$__process = FS-Append-File "${_directory}\Dockerfile" @"
+	if ($(STRINGS-Is-Empty "${env:PROJECT_SOURCE_URL}") -ne 0) {
+		$___process = FS-Append-File "${_directory}\Dockerfile" @"
 LABEL org.opencontainers.image.source=`"${env:PROJECT_SOURCE_URL}`"
 "@
 	}
 
-	$__process = FS-Append-File "${_directory}\Dockerfile" @"
+	$___process = FS-Append-File "${_directory}\Dockerfile" @"
 # Defining environment variables
 ENV ARCH ${_target_arch}
 ENV OS ${_target_os}
@@ -127,7 +127,7 @@ EXPOSE 80
 # Set entry point
 ENTRYPOINT ["/app/bin/${PROJECT_SKU}"]
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 

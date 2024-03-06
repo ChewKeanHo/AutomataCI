@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +15,18 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-PACKAGE::assemble_docker_content() {
+PACKAGE_Assemble_DOCKER_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -99,13 +99,13 @@ LABEL org.opencontainers.image.revision=\"${PROJECT_CADENCE}\"
 LABEL org.opencontainers.image.licenses=\"${PROJECT_LICENSE}\"
 "
 
-        if [ ! -z "$PROJECT_CONTACT_WEBSITE" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_CONTACT_WEBSITE") -ne 0 ]; then
                 FS_Append_File "${_directory}/Dockerfile" "\
 LABEL org.opencontainers.image.url=\"${PROJECT_CONTACT_WEBSITE}\"
 "
         fi
 
-        if [ ! -z "$PROJECT_SOURCE_URL" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_SOURCE_URL") -ne 0 ]; then
                 FS_Append_File "${_directory}/Dockerfile" "\
 LABEL org.opencontainers.image.source=\"${PROJECT_SOURCE_URL}\"
 "
