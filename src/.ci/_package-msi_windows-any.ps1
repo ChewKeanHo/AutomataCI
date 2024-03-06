@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -16,19 +16,15 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	exit 1
 }
 
-. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\crypto\random.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
-
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci\i18n\status-msi.ps1"
-
 
 
 
@@ -341,8 +337,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 
 		# creating wxs recipe
-		$null = I18N-Status-Print-MSI-WXS-Script-Start "${_wxs}"
-		$null = I18N-Status-Print-MSI-WXS-Script-Compulsory-Headers
+		$null = I18N-Create "${_wxs}"
 		$___process = FS-Write-File "${_wxs}" @"
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
 	xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
@@ -496,13 +491,12 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Write-Failed
+			$null = I18N-Create-Failed
 			return 1
 		}
 
 
 		# Define filesystem
-		$null = I18N-Status-Print-MSI-WXS-Script-Filesystem
 		$___process = FS-Append-File "${_wxs}" @"
 		<StandardDirectory Id='${__const_DIR_PROGRAM_FILES}'>
 			<Directory Id='${__tag_DIR_INSTALL}' Name='${env:PROJECT_NAME}'>
@@ -520,7 +514,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Write-Failed
+			$null = I18N-Create-Failed
 			return 1
 		}
 
@@ -599,13 +593,12 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Write-Failed
+			$null = I18N-Create-Failed
 			return 1
 		}
 
 
 		# create registry key
-		$null = I18N-Status-Print-MSI-WXS-Script-Registries
 		$___process = FS-Append-File "${_wxs}" @"
 		<Component Id='${__tag_COMPONENT_REGISTRIES}'
 			Guid='${__uuid_COMPONENT_REGISTRIES}'
@@ -628,13 +621,12 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Write-Failed
+			$null = I18N-Create-Failed
 			return 1
 		}
 
 
 		# Define all feature components
-		$null = I18N-Status-Print-MSI-WXS-Script-Features
 		$___process = FS-Append-File "${_wxs}" @"
 		<Feature Id='${__tag_FEATURE_ID}'
 			Title='${__var_FEATURE_TITLE}'
@@ -686,13 +678,12 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 		</Feature>
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Write-Failed
+			$null = I18N-Create-Failed
 			return 1
 		}
 
 
 		# Add standard UI support
-		$null = I18N-Status-Print-MSI-WXS-Script-UI
 		$___process = FS-Append-File "${_wxs}" @"
 		<!-- UI Customization -->
 		<ui:WixUI Id='WixUI_FeatureTree' InstallDirectory='${__tag_DIR_INSTALL}' />
@@ -701,19 +692,18 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 		<WixVariable Id="WixUILicenseRtf" Value='${__var_UI_LICENSE_SOURCE}' />
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Write-Failed
+			$null = I18N-Create-Failed
 			return 1
 		}
 
 
 		# conclude the wxs write-up
-		$null = I18N-Status-Print-MSI-WXS-Script-Close
 		$___process = FS-Append-File "${_wxs}" @"
 	</Package>
 </Wix>
 "@
 		if ($___process -ne 0) {
-			$null = I18N-Write-Failed
+			$null = I18N-Create-Failed
 			return 1
 		}
 	}

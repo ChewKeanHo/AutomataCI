@@ -93,4 +93,3 @@
 . "${env:LIBS_AUTOMATACI}\services\i18n\_validate.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_validate-failed.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_validate-job.ps1"
-. "${env:LIBS_AUTOMATACI}\services\i18n\_write-failed.ps1"

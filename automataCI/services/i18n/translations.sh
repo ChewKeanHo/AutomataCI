@@ -93,4 +93,3 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_validate.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_validate-failed.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_validate-job.sh"
-. "${LIBS_AUTOMATACI}/services/i18n/_write-failed.sh"

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,8 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
@@ -24,8 +24,6 @@ fi
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/crypto/random.sh"
-
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/i18n/status-msi.sh"
 
 
 
@@ -328,8 +326,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
 
                 # creating wxs recipe
-                I18N_Status_Print_MSI_WXS_Script_Start "$_wxs"
-                I18N_Status_Print_MSI_WXS_Script_Compulsory_Headers
+                I18N_Create "$_wxs"
                 FS_Write_File "$_wxs" "\
 <?xml version='1.0' encoding='UTF-8'?>
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
@@ -408,13 +405,12 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Write_Failed
+                        I18N_Create_Failed
                         return 1
                 fi
 
 
                 # Assemble Components
-                I18N_Status_Print_MSI_WXS_Script_Filesystem
                 FS_Append_File "$_wxs" "\
                 <Directory Id='TARGETDIR' Name='SourceDir'>
                 <Directory Id='${__var_DIR_PROGRAM_FILES}'
@@ -422,7 +418,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 >
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Write_Failed
+                        I18N_Create_Failed
                         return 1
                 fi
 
@@ -439,7 +435,7 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                         </Component>
 "
                         if [ $? -ne 0 ]; then
-                                I18N_Write_Failed
+                                I18N_Create_Failed
                                 return 1
                         fi
                 fi
@@ -512,20 +508,18 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                         </Directory>
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Write_Failed
+                        I18N_Create_Failed
                         return 1
                 fi
 
-                I18N_Status_Print_MSI_WXS_Script_Filesystem_Program_Files_Close
                 FS_Append_File "$_wxs" "\
                 </Directory></Directory>
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Write_Failed
+                        I18N_Create_Failed
                         return 1
                 fi
 
-                I18N_Status_Print_MSI_WXS_Script_Registries
                 FS_Append_File "$_wxs" "\
                         <Component Id='${__tag_COMPONENT_REGISTRIES}'
                                 Guid='${__uuid_COMPONENT_REGISTRIES}'
@@ -549,13 +543,12 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
 
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Write_Failed
+                        I18N_Create_Failed
                         return 1
                 fi
 
 
                 # Define all feature components
-                I18N_Status_Print_MSI_WXS_Script_Features
                 FS_Append_File "$_wxs" "\
                 <Feature Id='${__tag_FEATURE_ID}'
                         Title='${__var_FEATURE_TITLE}'
@@ -605,19 +598,18 @@ Your ${PROJECT_NAME} is the same/later version. No further action is required. T
                 </Feature>
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Write_Failed
+                        I18N_Create_Failed
                         return 1
                 fi
 
 
                 # conclude the wxs write-up
-                I18N_Status_Print_MSI_WXS_Script_Close
                 FS_Append_File "$_wxs" "\
         </Product>
 </Wix>
 "
                 if [ $? -ne 0 ]; then
-                        I18N_Write_Failed
+                        I18N_Create_Failed
                         return 1
                 fi
         done
