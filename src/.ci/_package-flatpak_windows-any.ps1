@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,12 +15,13 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 
 
@@ -68,9 +69,10 @@ function PACKAGE-Assemble-FLATPAK-Content {
 
 	# copy main program
 	$_filepath = "${_directory}\${env:PROJECT_SKU}"
-	OS-Print-Status info "copying ${_target} to ${_filepath}"
-	$__process = FS-Copy-File "${_target}" "${_filepath}"
-	if ($__process -ne 0) {
+	$null = I18N-Copy "${_target}" "${_filepath}"
+	$___process = FS-Copy-File "${_target}" "${_filepath}"
+	if ($___process -ne 0) {
+		$null = I18N-Copy-Failed
 		return 1
 	}
 
@@ -79,9 +81,10 @@ function PACKAGE-Assemble-FLATPAK-Content {
 	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
 	$_target = "${_target}\icons\icon.svg"
 	$_filepath = "${_directory}\icon.svg"
-	OS-Print-Status info "copying ${_target} to ${_filepath}"
-	$__process = FS-Copy-File "${_target}" "${_filepath}"
-	if ($__process -ne 0) {
+	$null = I18N-Copy "${_target}" "${_filepath}"
+	$___process = FS-Copy-File "${_target}" "${_filepath}"
+	if ($___process -ne 0) {
+		$null = I18N-Copy-Failed
 		return 1
 	}
 
@@ -90,9 +93,10 @@ function PACKAGE-Assemble-FLATPAK-Content {
 	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
 	$_target = "${_target}\icons\icon-48x48.png"
 	$_filepath = "${_directory}\icon-48x48.png"
-	OS-Print-Status info "copying ${_target} to ${_filepath}"
-	$__process = FS-Copy-File "${_target}" "${_filepath}"
-	if ($__process -ne 0) {
+	$null = I18N-Copy "${_target}" "${_filepath}"
+	$___process = FS-Copy-File "${_target}" "${_filepath}"
+	if ($___process -ne 0) {
+		$null = I18N-Copy-Failed
 		return 1
 	}
 
@@ -101,15 +105,18 @@ function PACKAGE-Assemble-FLATPAK-Content {
 	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
 	$_target = "${_target}\icons\icon-128x128.png"
 	$_filepath = "${_directory}\icon-128x128.png"
-	OS-Print-Status info "copying ${_target} to ${_filepath}"
-	$__process = FS-Copy-File "${_target}" "${_filepath}"
-	if ($__process -ne 0) {
+	$null = I18N-Copy "${_target}" "${_filepath}"
+	$___process = FS-Copy-File "${_target}" "${_filepath}"
+	if ($___process -ne 0) {
+		$null = I18N-Copy-Failed
 		return 1
 	}
 
 
 	# [ COMPULSORY ] script manifest.yml
-	$___process = FS-Write-File "${_directory}\manifest.yml" @"
+	$__file = "${_directory}\manifest.yml"
+	$null = I18N-Create "${__file}"
+	$___process = FS-Write-File "${__file}" @"
 app-id: ${env:PROJECT_APP_ID}
 branch: ${_target_arch}
 default-branch: any
@@ -160,12 +167,15 @@ modules:
         path: icon-128x128.png
 "@
 	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# [ COMPULSORY ] script appdata.xml
-	$___process = FS-Write-File "${_directory}/appdata.xml" "\
+	$__file = "${_directory}\appdata.xml"
+	$null = I18N-Create "${__file}"
+	$___process = FS-Write-File "${__file}" @"
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- refer: https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html -->
 <component>
@@ -199,8 +209,9 @@ modules:
 		<binary>${env:PROJECT_SKU}</binary>
 	</provides>
 </component>
-"
+"@
 	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 

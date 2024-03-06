@@ -90,7 +90,7 @@ PACKAGE_Run_FLATPAK() {
 
 
         # copy all complimentary files to the workspace
-        cmd="PACKAGE_Assemble_Flatpak_Content"
+        cmd="PACKAGE_Assemble_FLATPAK_Content"
         I18N_Check_Function "$cmd"
         OS_Is_Command_Available "$cmd"
         if [ $? -ne 0 ]; then
