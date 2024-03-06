@@ -27,7 +27,7 @@ fi
 
 
 
-PACKAGE::assemble_homebrew_content() {
+PACKAGE_Assemble_HOMEBREW_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"

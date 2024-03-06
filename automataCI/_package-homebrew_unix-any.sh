@@ -84,7 +84,7 @@ PACKAGE_Run_HOMEBREW() {
 
 
         # copy all complimentary files to the workspace
-        cmd="PACKAGE::assemble_homebrew_content"
+        cmd="PACKAGE_Assemble_HOMEBREW_Content"
         I18N_Check_Function "$cmd"
         OS_Is_Command_Available "$cmd"
         if [ $? -ne 0 ]; then
