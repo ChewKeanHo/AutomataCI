@@ -30,6 +30,8 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_clean-failed.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_commit.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_commit-failed.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_copy.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_copy-failed.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_create.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_create-failed.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_create-package.sh"

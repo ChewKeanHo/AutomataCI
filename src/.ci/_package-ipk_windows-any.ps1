@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,13 +15,14 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\deb.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\deb.ps1"
 
 
 
@@ -56,14 +57,16 @@ function PACKAGE-Assemble-IPK-Content {
 		#      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
 		$_filepath = "${_directory}\data\usr\local\lib\${env:PROJECT_SKU}"
 		$_filepath = "${_filepath}\lib${env:PROJECT_SKU}.a"
-		OS-Print-Status info "copying ${_target} to ${_filepath}"
-		$__process = FS-Make-Housing-Directory "${_filepath}"
-		if ($__process -ne 0) {
+		$null = I18N-Copy "${_target}" "${_filepath}"
+		$___process = FS-Make-Housing-Directory "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
-		$__process = FS-Copy-File "${_target}" "${_filepath}"
-		if ($__process -ne 0) {
+		$___process = FS-Copy-File "${_target}" "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
@@ -85,22 +88,24 @@ function PACKAGE-Assemble-IPK-Content {
 		#      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
 		$_filepath = "${_directory}\data\usr\local\bin\${env:PROJECT_SKU}"
 
-		OS-Print-Status info "copying ${_target} to ${_filepath}"
-		$__process = FS-Make-Housing-Directory "${_filepath}"
-		if ($__process -ne 0) {
+		$null = I18N-Copy "${_target}" "${_filepath}"
+		$___process = FS-Make-Housing-Directory "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
-		$__process = FS-Copy-File "${_target}" "${_filepath}"
-		if ($__process -ne 0) {
+		$___process = FS-Copy-File "${_target}" "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 	}
 
 
 	# WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-	OS-Print-Status info "creating control\control file..."
-	$__process = IPK-Create-Control `
+	$null = I18N-Create "control\control"
+	$___process = IPK-Create-Control `
 		"${_directory}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
 		"${_package}" `
@@ -114,7 +119,8 @@ function PACKAGE-Assemble-IPK-Content {
 		"${env:PROJECT_DEBIAN_PRIORITY}" `
 		"${env:PROJECT_DEBIAN_SECTION}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\ABSTRACTS.txt"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 

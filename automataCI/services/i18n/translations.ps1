@@ -30,6 +30,8 @@
 . "${env:LIBS_AUTOMATACI}\services\i18n\_clean-failed.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_commit.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_commit-failed.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_copy.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_copy-failed.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_create.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_create-failed.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_create-package.ps1"

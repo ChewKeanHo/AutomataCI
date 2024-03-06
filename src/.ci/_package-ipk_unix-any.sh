@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,15 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/ipk.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/ipk.sh"
 
 
 
@@ -56,14 +57,16 @@ PACKAGE_Assemble_IPK_Content() {
                 #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
                 _filepath="${_directory}/data/usr/local/lib/${PROJECT_SKU}"
                 _filepath="${_filepath}/lib${PROJECT_SKU}.a"
-                OS_Print_Status info "copying ${_target} to ${_filepath}\n"
+                I18N_Copy "$_target" "$_filepath"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
+                        I18N_Copy_Failed
                         return 1
                 fi
 
                 FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
+                        I18N_Copy_Failed
                         return 1
                 fi
 
@@ -87,21 +90,23 @@ PACKAGE_Assemble_IPK_Content() {
                 #      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
                 _filepath="${_directory}/data/usr/local/bin/${PROJECT_SKU}"
 
-                OS_Print_Status info "copying $_target to ${_filepath}/\n"
+                I18N_Copy "$_target" "$_filepath"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
+                        I18N_Copy_Failed
                         return 1
                 fi
 
                 FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
+                        I18N_Copy_Failed
                         return 1
                 fi
         fi
 
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-        OS_Print_Status info "creating control/control file...\n"
+        I18N_Create "control/control"
         IPK_Create_Control \
                 "$_directory" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
@@ -117,6 +122,7 @@ PACKAGE_Assemble_IPK_Content() {
                 "$PROJECT_DEBIAN_SECTION" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/ABSTRACTS.txt"
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
