@@ -19,7 +19,6 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 	return 1
 }
 
-. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 

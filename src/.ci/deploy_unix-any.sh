@@ -20,9 +20,6 @@ if [ "$PROJECT_PATH_ROOT" = "" ]; then
         return 1
 fi
 
-. "${LIBS_AUTOMATACI}/services/io/os.sh"
-. "${LIBS_AUTOMATACI}/services/io/fs.sh"
-
 
 
 

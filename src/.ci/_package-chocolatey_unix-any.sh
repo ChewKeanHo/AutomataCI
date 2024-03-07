@@ -20,9 +20,6 @@ if [ "$PROJECT_PATH_ROOT" == "" ]; then
         return 1
 fi
 
-. "${LIBS_AUTOMATACI}/services/io/os.sh"
-. "${LIBS_AUTOMATACI}/services/io/fs.sh"
-
 
 
 
@@ -34,6 +31,6 @@ PACKAGE_Assemble_CHOCOLATEY_Content() {
         _target_arch="$5"
 
 
-        # report status
+        # execute
         return 10 # not applicable - should be tech-oriented.
 }

@@ -20,9 +20,6 @@ if [ "$PROJECT_PATH_ROOT" = "" ]; then
         return 1
 fi
 
-. "${LIBS_AUTOMATACI}/services/io/os.sh"
-. "${LIBS_AUTOMATACI}/services/io/fs.sh"
-
 
 
 
@@ -33,5 +30,7 @@ PACKAGE_Assemble_CARGO_Content() {
         _target_os="$4"
         _target_arch="$5"
 
+
+        # execute
         return 10 # IMPORTANT: please do it inside rust source instead.
 }

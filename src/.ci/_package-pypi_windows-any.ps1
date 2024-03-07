@@ -19,9 +19,6 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 	return 1
 }
 
-. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-
 
 
 
@@ -34,5 +31,7 @@ function PACKAGE-Assemble-PYPI-Content {
 		[string]$_target_arch
 	)
 
+
+	# execute
 	return 10 # IMPORTANT: please do it inside python source instead.
 }

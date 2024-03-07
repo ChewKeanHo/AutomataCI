@@ -19,9 +19,6 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 	exit 1
 }
 
-. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-
 
 
 
@@ -35,6 +32,6 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 	)
 
 
-	# report status
+	# execute
 	return 1 # not applicable - should be tech-oriented.
 }
