@@ -42,6 +42,7 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_export-failed.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_export-missing.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_file-bad-stat-skipped.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_guide-stop-deactivate.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_help.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_injection-manual-detected.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_install.sh"

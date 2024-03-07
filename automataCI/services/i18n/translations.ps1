@@ -42,6 +42,7 @@
 . "${env:LIBS_AUTOMATACI}\services\i18n\_export-failed.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_export-missing.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_file-bad-stat-skipped.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_guide-stop-deactivate.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_help.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_injection-manual-detected.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_install.ps1"

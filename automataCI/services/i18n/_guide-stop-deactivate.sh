@@ -3,32 +3,35 @@
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
 # of the License at:
-#               http://www.apache.org/licenses/LICENSE-2.0
+#                 http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+. "${LIBS_AUTOMATACI}/services/i18n/__printer.sh"
 
 
 
 
-# initialize
-if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
-	exit 1
+I18N_Guide_Stop_Deactivate() {
+        # execute
+        case "$AUTOMATACI_LANG" in
+        *)
+                # fallback to default english
+                I18N_Status_Print note "
+
+
+IMPORTANT NOTICE
+please perfrom the following command at your terminal manually:
+        $ deactivate
+
+
+"
+                ;;
+        esac
+
+
+        # report status
+        return 0
 }
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
-
-
-
-
-# execute
-$null = I18N-Guide-Stop-Deactivate
-
-
-
-
-# report status
-return 0
