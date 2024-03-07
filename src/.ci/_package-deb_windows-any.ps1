@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,15 +15,15 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\copyright.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\deb.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\manual.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\copyright.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\deb.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\manual.ps1"
 
 
 
@@ -68,14 +68,16 @@ function PACKAGE-Assemble-DEB-Content {
 		#      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
 		$_filepath = "${_directory}\data\usr\local\lib\${env:PROJECT_SKU}"
 		$_filepath = "${_filepath}\lib${env:PROJECT_SKU}.a"
-		OS-Print-Status info "copying ${_target} to ${_filepath}"
-		$__process = FS-Make-Housing-Directory "${_filepath}"
-		if ($__process -ne 0) {
+		$null = I18N-Copy "${_target}" "${_filepath}"
+		$___process = FS-Make-Housing-Directory "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
-		$__process = FS-Copy-File "${_target}" "${_filepath}"
-		if ($__process -ne 0) {
+		$___process = FS-Copy-File "${_target}" "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
@@ -99,76 +101,81 @@ function PACKAGE-Assemble-DEB-Content {
 		#      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
 		$_filepath = "${_directory}\data\usr\local\bin\${env:PROJECT_SKU}"
 
-		OS-Print-Status info "copying ${_target} to ${_filepath}"
-		$__process = FS-Make-Housing-Directory "${_filepath}"
-		if ($__process -ne 0) {
+		$null = I18N-Copy "${_target}" "${_filepath}"
+		$___process = FS-Make-Housing-Directory "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 
-		$__process = FS-Copy-File "${_target}" "${_filepath}"
-		if ($__process -ne 0) {
+		$___process = FS-Copy-File "${_target}" "${_filepath}"
+		if ($___process -ne 0) {
+			$null = I18N-Copy-Failed
 			return 1
 		}
 	}
 
 
 	# NOTE: REQUIRED file
-	OS-Print-Status info "creating changelog.gz files..."
+	$null = I18N-Create "changelog.gz"
 	$_changelog_path = "${_directory}\data\usr\local\share\doc\${env:PROJECT_SKU}\changelog.gz"
 	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
 		$_changelog_path = "${_directory}\data\usr\share\doc\${env:PROJECT_SKU}\changelog.gz"
 	}
 
-	$__process = DEB-Create-Changelog `
+	$___process = DEB-Create-Changelog `
 		"${_changelog_path}" `
 		"${_changelog}" `
 		"${env:PROJECT_SKU}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# NOTE: REQUIRED file
-	OS-Print-Status info "creating copyright.gz files..."
+	$null = I18N-Create "copyright.gz"
 	$_copyright = "${_directory}\data\usr\local\share\doc\${env:PROJECT_SKU}\copyright"
 	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
 		$_copyright = "${_directory}\data\usr\share\doc\${env:PROJECT_SKU}\copyright"
 	}
 
-	$__process = COPYRIGHT-Create `
+	$___process = COPYRIGHT-Create `
 		"${_copyright}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}" `
 		"${env:PROJECT_CONTACT_WEBSITE}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# NOTE: REQUIRED file
-	OS-Print-Status info "creating man(page) files..."
+	$null = I18N-Create "MANPAGE"
 	$_manual = "${_directory}\data\usr\local\share\man\man1\${env:PROJECT_SKU}.1"
 	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
 		$_manual = "${_directory}\data\usr\share\man\man1\${env:PROJECT_SKU}.1"
 	}
 
-	$__process = MANUAL-Create `
+	$___process = MANUAL-Create `
 		"${_manual}" `
 		"${env:PROJECT_DEBIAN_IS_NATIVE}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}" `
 		"${env:PROJECT_CONTACT_WEBSITE}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# NOTE: OPTIONAL (Comment to turn it off)
-	OS-Print-Status info "creating source.list files..."
-	$__process = DEB-Create-Source-List `
+	$null = I18N-Create "source.list"
+	$___process = DEB-Create-Source-List `
 		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
 		"${_directory}" `
 		"${env:PROJECT_GPG_ID}" `
@@ -176,22 +183,24 @@ function PACKAGE-Assemble-DEB-Content {
 		"${env:PROJECT_REPREPRO_CODENAME}" `
 		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
 		"${_gpg_keyring}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# NOTE: REQUIRED file
-	OS-Print-Status info "creating control\md5sum files..."
-	$__process = DEB-Create-Checksum "${_directory}"
-	if ($__process -ne 0) {
+	$null = I18N-Create "control\md5sum"
+	$___process = DEB-Create-Checksum "${_directory}"
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-	OS-Print-Status info "creating control\control file..."
-	$__process = DEB-Create-Control `
+	$null = I18N-Create "control\control"
+	$___process = DEB-Create-Control `
 		"${_directory}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
 		"${_package}" `
@@ -205,7 +214,8 @@ function PACKAGE-Assemble-DEB-Content {
 		"${env:PROJECT_DEBIAN_PRIORITY}" `
 		"${env:PROJECT_DEBIAN_SECTION}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\ABSTRACTS.txt"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
