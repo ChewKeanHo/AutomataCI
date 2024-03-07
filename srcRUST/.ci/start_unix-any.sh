@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,22 +15,22 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
 
 
 
 
 # safety checking control surfaces
-OS_Print_Status info "activating localized environment...\n"
+I18N_Activate_Environment
 RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "activation failed.\n"
+        I18N_Activate_Failed
         return 1
 fi
 
@@ -38,11 +38,7 @@ fi
 
 
 # execute
-OS_Print_Status info "\n"
-OS_Print_Status note "IMPORTANT NOTICE\n"
-OS_Print_Status note "please perform the following command at your terminal manually:\n"
-OS_Print_Status note "    $ . ${PROJECT_RUST_LOCALIZED}\n"
-OS_Print_Status info "\n"
+I18N_Guide_Start_Source "$PROJECT_RUST_LOCALIZED"
 
 
 
