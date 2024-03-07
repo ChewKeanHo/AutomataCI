@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,13 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
@@ -43,31 +43,37 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         return 10 # not applicable
                 fi
 
-                FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/" "$_directory"
+                __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/"
+                I18N_Copy "${__source}/*" "$_directory"
+                FS_Copy_All "$__source" "$_directory"
                 if [ $? -ne 0 ]; then
+                        I18N_Copy_Failed
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
-                OS_Print_Status info "copying ${_target} to ${_directory}\n"
+                I18N_Copy "$_target" "$_directory"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
+                        I18N_Copy_Failed
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
         elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                OS_Print_Status info "copying ${_target} to ${_directory}\n"
+                I18N_Copy "$_target" "$_directory"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
+                        I18N_Copy_Failed
                         return 1
                 fi
 
-                FS_Is_File "${_target%.wasm*}.js"
+                __source="${_target%.wasm*}.js"
+                FS_Is_File "$__source"
                 if [ $? -eq 0 ]; then
-                        OS_Print_Status info \
-                                "copying ${_target%.wasm*}.js to ${_directory}\n"
-                        FS_Copy_File "${_target%.wasm*}.js" "$_directory"
+                        I18N_Copy "$__source" "$_directory"
+                        FS_Copy_File "$__source" "$_directory"
                         if [ $? -ne 0 ]; then
+                                I18N_Copy_Failed
                                 return 1
                         fi
                 fi
@@ -89,9 +95,10 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         ;;
                 esac
 
-                OS_Print_Status info "copying ${_target} to ${_dest}\n"
+                I18N_Copy "$_target" "$_dest"
                 FS_Copy_File "$_target" "$_dest"
                 if [ $? -ne 0 ]; then
+                        I18N_Copy_Failed
                         return 1
                 fi
         fi
@@ -99,20 +106,20 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
         # copy user guide
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        OS_Print_Status info "copying ${_target} to ${_directory}\n"
+        I18N_Copy "$_target" "$_directory"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS_Print_Status error "copy failed.\n"
+                I18N_Copy_Failed
                 return 1
         fi
 
 
         # copy license file
         _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        OS_Print_Status info "copying $_target to $_directory\n"
+        I18N_Copy "$_target" "$_directory"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS_Print_Status error "copy failed.\n"
+                I18N_Copy_Failed
                 return 1
         fi
 
