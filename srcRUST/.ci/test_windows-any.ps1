@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,22 +15,22 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
 
 
 
 
 # safety checking control surfaces
-OS-Print-Status info "activating local environment..."
-$__process = RUST-Activate-Local-Environment
-if ($__process -ne 0) {
-	OS-Print-Status error "activation failed."
+$null = I18N-Activate-Environment
+$___process = RUST-Activate-Local-Environment
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
 	return 1
 }
 
@@ -44,32 +44,32 @@ $__filename = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 $__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\rust-test-${__filename}"
 
 
-OS-Print-Status info "preparing report vault: ${__report_location}"
-$__process = FS-Remake-Directory "${__report_location}"
-if ($__process -ne 0) {
-	OS-Print-Status error "preparation failed."
+$null = I18N-Prepare "${__report_location}"
+$___process = FS-Remake-Directory "${__report_location}"
+if ($___process -ne 0) {
+	$null = I18N-Prepare-Failed
 	return 1
 }
 $__current_path = Get-Location
 $null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
 
 
-OS-Print-Status info "executing all tests with coverage..."
+$null = I18N-Run-Test-Coverage
 $env:RUSTFLAGS = "-C instrument-coverage=all"
-$__process = OS-Exec "cargo" "test --verbose --target-dir `"${__workspace}`""
+$___process = OS-Exec "cargo" "test --verbose --target-dir `"${__workspace}`""
 foreach ($__file in (Get-ChildItem -Filter "*.profraw")) {
 	$null = FS-Move $__file.FullName "${__workspace}"
 }
 
-if ($__process -ne 0) {
+if ($___process -ne 0) {
 	$null = Set-Location "${__current_path}"
 	$null = Remove-Variable -Name __current_path
-	OS-Print-Status error "test executions failed."
+	$null = I18N-Run-Failed
 	return 1
 }
 
 
-OS-Print-Status info "processing all coverage profile data..."
+$null = I18N-Processing-Test-Coverage
 $__arguments = "${__workspace} " `
 	+ "--source-dir `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}`" " `
 	+ "--binary-path `"${__workspace}\debug`" " `
@@ -77,11 +77,11 @@ $__arguments = "${__workspace} " `
 	+ "--branch " `
 	+ "--ignore-not-existing " `
 	+ "--output-path `"${__report_location}`" "
-$__process = OS-Exec "grcov" "${__arguments}"
-if ($__process -ne 0) {
+$___process = OS-Exec "grcov" "${__arguments}"
+if ($___process -ne 0) {
 	$null = Set-Location "${__current_path}"
 	$null = Remove-Variable -Name __current_path
-	OS-Print-Status error "test executions failed."
+	$null = I18N-Processing-Failed
 	return 1
 }
 
