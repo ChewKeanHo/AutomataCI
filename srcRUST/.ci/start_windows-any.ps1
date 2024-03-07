@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,21 +15,21 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
 
 
 
 
 # safety checking control surfaces
-OS-Print-Status info "activating localized environment..."
-$__process = RUST-Activate-Local-Environment
-if ($__process -ne 0) {
-	OS-Print-Status error "activation failed."
+$null = I18N-Activate-Environment
+$___process = RUST-Activate-Local-Environment
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
 	return 1
 }
 
@@ -37,11 +37,7 @@ if ($__process -ne 0) {
 
 
 # execute
-OS-Print-Status info ""
-OS-Print-Status note "IMPORTANT NOTE - PowerShell ONLY"
-OS-Print-Status note "please perform the following command at your terminal manually:"
-OS-Print-Status note "    $ . ${env:PROJECT_RUST_LOCALIZED}"
-OS-Print-Status info ""
+$null = I18N-Guide-Start-Source "${env:PROJECT_RUST_LOCALIZED}"
 
 
 
