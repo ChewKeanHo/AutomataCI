@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,7 +15,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
@@ -34,5 +34,5 @@ function PACKAGE-Assemble-CARGO-Content {
 		[string]$_target_arch
 	)
 
-	return 10 # IMPORTANT: please do it inside python source instead.
+	return 10 # IMPORTANT: please do it inside rust source instead.
 }
