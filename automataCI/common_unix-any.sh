@@ -16,7 +16,7 @@
 
 # initialize
 if [ "$PROJECT_PATH_ROOT" = "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from autoamtaCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
@@ -39,9 +39,8 @@ fi
 
 # execute
 Run_Subroutine_Exec() {
-        __job="$1"
-        __directory="$2"
-        __name="$3"
+        __directory="$1"
+        __name="$2"
 
 
         # validate input
@@ -63,7 +62,7 @@ Run_Subroutine_Exec() {
 
 
         # execute
-        ci_job="$(STRINGS_To_Lowercase "${__job}_unix-any.sh")"
+        ci_job="$(STRINGS_To_Lowercase "${PROJECT_CI_JOB}_unix-any.sh")"
         ci_job="${PROJECT_PATH_ROOT}/${__directory}/${PROJECT_PATH_CI}/${ci_job}"
         FS_Is_File "$ci_job"
         if [ $? -eq 0 ]; then
@@ -81,43 +80,43 @@ Run_Subroutine_Exec() {
 }
 
 
-Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_ANGULAR:-none}" "ANGULAR"
+Run_Subroutine_Exec "$PROJECT_ANGULAR" "ANGULAR"
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_C:-none}" "C"
+Run_Subroutine_Exec "$PROJECT_C" "C"
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_GO:-none}" "GO"
+Run_Subroutine_Exec "$PROJECT_GO" "GO"
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_NIM:-none}" "NIM"
+Run_Subroutine_Exec "$PROJECT_NIM" "NIM"
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_PYTHON:-none}" "PYTHON"
+Run_Subroutine_Exec "$PROJECT_PYTHON" "PYTHON"
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_RUST:-none}" "RUST"
+Run_Subroutine_Exec "$PROJECT_RUST" "RUST"
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-Run_Subroutine_Exec "$PROJECT_CI_JOB" "${PROJECT_BASELINE:-none}" "BASELINE"
+Run_Subroutine_Exec "$PROJECT_PATH_SOURCE" "BASELINE"
 if [ $? -ne 0 ]; then
         return 1
 fi

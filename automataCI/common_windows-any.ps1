@@ -15,7 +15,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
@@ -39,7 +39,6 @@ if ($(STRINGS-Is-Empty "${env:PROJECT_CI_JOB}") -eq 0) {
 # execute
 function RUN-Subroutine-Exec {
 	param(
-		[string]$__job,
 		[string]$__directory,
 		[string]$__name
 	)
@@ -62,7 +61,7 @@ function RUN-Subroutine-Exec {
 
 
 	# execute
-	$ci_job = STRINGS-To-Lowercase "${__job}_windows-any.ps1"
+	$ci_job = STRINGS-To-Lowercase "${env:PROJECT_CI_JOB}_windows-any.ps1"
 	$ci_job = "${env:PROJECT_PATH_ROOT}\${__directory}\${env:PROJECT_PATH_CI}\${ci_job}"
 	if ($(FS-Is-File "$ci_job") -eq 0) {
 		$null = I18N-Run "${__name}"
@@ -79,37 +78,37 @@ function RUN-Subroutine-Exec {
 }
 
 
-$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_ANGULAR}" "ANGULAR"
+$___process = RUN-Subroutine-Exec "${env:PROJECT_ANGULAR}" "ANGULAR"
 if ($___process -ne 0) {
 	return 1
 }
 
-$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_C}" "C"
+$___process = RUN-Subroutine-Exec "${env:PROJECT_C}" "C"
 if ($___process -ne 0) {
 	return 1
 }
 
-$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_GO}" "GO"
+$___process = RUN-Subroutine-Exec "${env:PROJECT_GO}" "GO"
 if ($___process -ne 0) {
 	return 1
 }
 
-$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_NIM}" "NIM"
+$___process = RUN-Subroutine-Exec "${env:PROJECT_NIM}" "NIM"
 if ($___process -ne 0) {
 	return 1
 }
 
-$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_PYTHON}" "PYTHON"
+$___process = RUN-Subroutine-Exec "${env:PROJECT_PYTHON}" "PYTHON"
 if ($___process -ne 0) {
 	return 1
 }
 
-$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_RUST}" "RUST"
+$___process = RUN-Subroutine-Exec "${env:PROJECT_RUST}" "RUST"
 if ($___process -ne 0) {
 	return 1
 }
 
-$___process = RUN-Subroutine-Exec "${env:PROJECT_CI_JOB}" "${env:PROJECT_PATH_SOURCE}" "BASELINE"
+$___process = RUN-Subroutine-Exec "${env:PROJECT_PATH_SOURCE}" "BASELINE"
 if ($___process -ne 0) {
 	return 1
 }
