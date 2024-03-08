@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,15 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
 
 
 
@@ -40,28 +41,35 @@ PACKAGE_Assemble_CARGO_Content() {
                 return 10
         fi
 
-        if [ -z "$PROJECT_RUST" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_RUST") -eq 0 ]; then
                 return 10
         fi
 
 
         # assemble the cargo package
-        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/" "${_directory}"
+        _source="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/"
+        I18N_Assemble "$_source" "$_directory"
+        FS_Copy_All "$_source" "$_directory"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_File \
-                "${PROJECT_PATH_ROOT}/${PROJECT_CARGO_README}" \
-                "${_directory}/README.md"
+        _source="${PROJECT_PATH_ROOT}/${PROJECT_CARGO_README}"
+        _dest="${_directory}/README.md"
+        I18N_Assemble "$_source" "$_dest"
+        FS_Copy_File "$_source" "$_dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
+        _dest="${_directory}/Cargo.toml"
+        I18N_Create "$_dest"
         FS_Remove_Silently "${_directory}/Cargo.lock"
         FS_Remove_Silently "${_directory}/.ci"
         RUST_Create_CARGO_TOML \
-                "${_directory}/Cargo.toml" \
+                "$_dest" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                 "$PROJECT_SKU" \
                 "$PROJECT_VERSION" \
@@ -75,6 +83,7 @@ PACKAGE_Assemble_CARGO_Content() {
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL"
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 

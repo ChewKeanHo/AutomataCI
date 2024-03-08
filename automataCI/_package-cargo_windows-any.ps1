@@ -48,8 +48,8 @@ function PACKAGE-Run-CARGO {
 
 	$null = I18N-Check-Availability "RUST"
 	$null = RUST-Activate-Local-Environment
-	$__process = RUST-Is-Available
-	if ($__process -ne 0) {
+	$___process = RUST-Is-Available
+	if ($___process -ne 0) {
 		$null = I18N-Check-Failed
 		return 0
 	}
@@ -61,15 +61,15 @@ function PACKAGE-Run-CARGO {
 	$_target_path = "${_dest}\cargo_${_src}"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\cargo_${_src}"
 	$null = I18N-Remake "${_src}"
-	$__process = FS-Remake-Directory "${_src}"
-	if ($__process -ne 0) {
+	$___process = FS-Remake-Directory "${_src}"
+	if ($___process -ne 0) {
 		$null = I18N-Remake-Failed
 		return 1
 	}
 
 	$null = I18N-Check "${_target_path}"
-	$__process = FS-Is-Directory "${_target_path}"
-	if ($__process -eq 0) {
+	$___process = FS-Is-Directory "${_target_path}"
+	if ($___process -eq 0) {
 		$null = I18N-Check-Failed
 		return 1
 	}
@@ -78,24 +78,24 @@ function PACKAGE-Run-CARGO {
 	# copy all complimentary files to the workspace
 	$cmd = "PACKAGE-Assemble-CARGO-Content"
 	$null = I18N-Check-Function "${cmd}"
-	$__process = OS-Is-Command-Available "${cmd}"
-	if ($__process -ne 0) {
+	$___process = OS-Is-Command-Available "${cmd}"
+	if ($___process -ne 0) {
 		$null = I18N-Check-Failed
 		return 1
 	}
 
 	$null = I18N-Assemble-Package
-	$__process = PACKAGE-Assemble-CARGO-Content `
+	$___process = PACKAGE-Assemble-CARGO-Content `
 			${_target} `
 			${_src} `
 			${_target_filename} `
 			${_target_os} `
 			${_target_arch}
-	if ($__process -eq 10) {
+	if ($___process -eq 10) {
 		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
 		return 0
-	} elseif ($__process -ne 0) {
+	} elseif ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
 	}
@@ -104,8 +104,8 @@ function PACKAGE-Run-CARGO {
 	# archive the assembled payload
 	$null = I18N-Package "${_target_path}"
 	$null = FS-Make-Directory "${_target_path}"
-	$__process = RUST-Create-Archive "${_src}" "${_target_path}"
-	if ($__process -ne 0) {
+	$___process = RUST-Create-Archive "${_src}" "${_target_path}"
+	if ($___process -ne 0) {
 		$null = I18N-Package-Failed
 		return 1
 	}

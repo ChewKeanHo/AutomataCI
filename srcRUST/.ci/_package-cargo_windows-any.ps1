@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,13 +15,14 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
 
 
 
@@ -37,32 +38,40 @@ function PACKAGE-Assemble-CARGO-Content {
 
 
 	# validate project
-	$__process = FS-Is-Target-A-Cargo "${_target}"
-	if ($__process -ne 0) {
+	$___process = FS-Is-Target-A-Cargo "${_target}"
+	if ($___process -ne 0) {
 		return 10
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_RUST)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_RUST}") -eq 0) {
 		return 10
 	}
 
 
 	# assemble the cargo package
-	$__process = FS-Copy-All "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\" "${_directory}"
-	if ($__process -ne 0) {
+	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\"
+	$null = I18N-Assemble "${_source}" "${_directory}"
+	$___process = FS-Copy-All "${_source}" "${_directory}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_CARGO_README}" `
-		"${_directory}\README.md"
-	if ($__process -ne 0) {
+	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_CARGO_README}"
+	$_dest = "${_directory}\README.md"
+	$null = I18N-Assemble "${_source}" "${_dest}"
+	$___process = FS-Copy-File "${_source}" "${_dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
+	$_dest = "${_directory}\Cargo.toml"
 	$null = FS-Remove-Silently "${_directory}\Cargo.lock"
 	$null = FS-Remove-Silently "${_directory}\.ci"
-	$__process = RUST-Create-CARGO-TOML `
-		"${_directory}\Cargo.toml" `
+	$null = I18N-Create "${_dest}"
+	$___process = RUST-Create-CARGO-TOML `
+		"${_dest}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}" `
@@ -75,7 +84,8 @@ function PACKAGE-Assemble-CARGO-Content {
 		"README.md" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
