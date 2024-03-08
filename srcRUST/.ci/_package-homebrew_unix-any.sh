@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,14 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
 
 
 
@@ -43,45 +42,70 @@ PACKAGE_Assemble_HOMEBREW_Content() {
 
 
         # assemble the package
-        FS_Make_Directory "${_directory}/${PROJECT_PATH_SOURCE}"
-        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/" \
-                        "${_directory}/${PROJECT_PATH_SOURCE}"
+        __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/"
+        __dest="${_directory}/${PROJECT_PATH_SOURCE}"
+        I18N_Assemble "$__source" "$__dest"
+        FS_Make_Directory "$__dest"
+        FS_Copy_All "$__source" "$__dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Make_Directory "${_directory}/${PROJECT_PATH_SOURCE}/.ci"
-        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/" \
-                        "${_directory}/${PROJECT_PATH_SOURCE}/.ci"
+        __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/"
+        __dest="${_directory}/${PROJECT_PATH_SOURCE}/.ci"
+        I18N_Assemble "$__source" "$__dest"
+        FS_Make_Directory "$__dest"
+        FS_Copy_All "$__source" "$__dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Make_Directory "${_directory}/${PROJECT_RUST}"
-        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/" "${_directory}/${PROJECT_RUST}"
+        __source="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/"
+        __dest="${_directory}/${PROJECT_RUST}"
+        I18N_Assemble "$__source" "$__dest"
+        FS_Make_Directory "$__dest"
+        FS_Copy_All "$__source" "$__dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Make_Directory "${_directory}/${PROJECT_RUST}/.ci"
-        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/.ci/" \
-                        "${_directory}/${PROJECT_RUST}/.ci"
+        __source="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/.ci/"
+        __dest="${_directory}/${PROJECT_RUST}/.ci"
+        I18N_Assemble "$__source" "$__dest"
+        FS_Make_Directory "$__dest"
+        FS_Copy_All "$__source" "$__dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_All "${PROJECT_PATH_ROOT}/automataCI" "$_directory"
+        __source="${PROJECT_PATH_ROOT}/automataCI"
+        __dest="$_directory"
+        I18N_Assemble "$__source" "$__dest"
+        FS_Make_Directory "$__dest"
+        FS_Copy_All "$__source" "$__dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_File "${PROJECT_PATH_ROOT}/CONFIG.toml" "$_directory"
+        __source="${PROJECT_PATH_ROOT}/CONFIG.toml"
+        __dest="$_directory"
+        I18N_Assemble "$__source" "$__dest"
+        FS_Make_Directory "$__dest"
+        FS_Copy_File "$__source" "$__dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
+        __dest="${_directory}/${PROJECT_RUST}/Cargo.toml"
+        I18N_Create "$__dest"
         RUST_Create_CARGO_TOML \
-                "${_directory}/${PROJECT_RUST}/Cargo.toml" \
+                "$__dest" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                 "$PROJECT_SKU" \
                 "$PROJECT_VERSION" \
@@ -95,13 +119,15 @@ PACKAGE_Assemble_HOMEBREW_Content() {
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL"
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
 
         # script formula.rb
-        OS_Print_Status info "scripting formula.rb...\n"
-        FS_Write_File "${_directory}/formula.rb" "\
+        __dest="${_directory}/formula.rb"
+        I18N_Create "$__dest"
+        FS_Write_File "$__dest" "\
 class ${PROJECT_SKU_TITLECASE} < Formula
   desc \"${PROJECT_PITCH}\"
   homepage \"${PROJECT_CONTACT_WEBSITE}\"
@@ -127,6 +153,7 @@ class ${PROJECT_SKU_TITLECASE} < Formula
 end
 "
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 

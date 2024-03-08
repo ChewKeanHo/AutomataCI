@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,14 +15,13 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	exit 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
 
 
 
@@ -44,38 +43,70 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 
 
 	# assemble the package
-	$null = FS-Make-Directory "${_directory}\${env:PROJECT_PATH_SOURCE}"
-	$null = FS-Make-Directory "${_directory}\${env:PROJECT_RUST}"
-	$null = FS-Make-Directory "${_directory}\automataCI"
-
-	$__process = FS-Copy-All `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}" `
-		"${_directory}\${env:PROJECT_PATH_SOURCE}"
-	if ($__process -ne 0) {
+	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
+	$__dest = "${_directory}\${env:PROJECT_PATH_SOURCE}"
+	$null = I18N-Assemble "${__source}" "${__dest}"
+	$null = FS-Make-Directory "${__dest}"
+	$___process = FS-Copy-All "${__source}" "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__process = FS-Copy-All `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}" `
-		"${_directory}\${env:PROJECT_RUST}"
-	if ($__process -ne 0) {
+	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci"
+	$__dest = "${_directory}\${env:PROJECT_PATH_SOURCE}\.ci"
+	$null = I18N-Assemble "${__source}" "${__dest}"
+	$null = FS-Make-Directory "${__dest}"
+	$___process = FS-Copy-All "${__source}" "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__process = FS-Copy-All `
-		"${env:PROJECT_PATH_ROOT}\automataCI" `
-		"${_directory}\automataCI"
-	if ($__process -ne 0) {
+	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
+	$__dest = "${_directory}\${env:PROJECT_RUST}"
+	$null = I18N-Assemble "${__source}" "${__dest}"
+	$null = FS-Make-Directory "${__dest}"
+	$___process = FS-Copy-All "${__source}" "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\CONFIG.toml" "${_directory}"
-	if ($__process -ne 0) {
+	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\.ci"
+	$__dest = "${_directory}\${env:PROJECT_RUST}\.ci"
+	$null = I18N-Assemble "${__source}" "${__dest}"
+	$null = FS-Make-Directory "${__dest}"
+	$___process = FS-Copy-All "${__source}" "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__process = RUST-Create-CARGO-TOML `
-		"${_directory}\${env:PROJECT_RUST}\Cargo.toml" `
+	$__source = "${env:PROJECT_PATH_ROOT}\automataCI"
+	$__dest = "${_directory}"
+	$null = I18N-Assemble "${__source}" "${__dest}"
+	$null = FS-Make-Directory "${__dest}"
+	$___process = FS-Copy-All "${__source}" "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
+		return 1
+	}
+
+	$__source = "${env:PROJECT_PATH_ROOT}\CONFIG.toml"
+	$__dest = "${_directory}"
+	$null = I18N-Assemble "${__source}" "${__dest}"
+	$null = FS-Make-Directory "${__dest}"
+	$___process = FS-Copy-File "${__source}" "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
+		return 1
+	}
+
+	$__dest = "${_directory}\${env:PROJECT_RUST}\Cargo.toml"
+	$null = I18N-Create "${__dest}"
+	$___process = RUST-Create-CARGO-TOML `
+		"${__dest}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}" `
@@ -88,14 +119,16 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 		"README.md" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# script formula.rb
-	OS-Print-Status info "scripting formula.rb..."
-	$__process = FS-Write-File "${_directory}\formula.rb" @"
+	$__dest = "${_directory}\formula.rb"
+	$null = I18N-Create "${__dest}"
+	$___process = FS-Write-File "${__dest}" @"
 class ${env:PROJECT_SKU_TITLECASE} < Formula
   desc "${env:PROJECT_PITCH}"
   homepage "${env:PROJECT_CONTACT_WEBSITE}"
@@ -120,7 +153,8 @@ class ${env:PROJECT_SKU_TITLECASE} < Formula
   end
 end
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
