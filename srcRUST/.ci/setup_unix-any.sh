@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -16,21 +16,21 @@
 
 # initialize
 if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
 
 
 
 
 # execute
-OS_Print_Status info "setup localized environment...\n"
+I18N_Setup_Environment
 RUST_Setup_Local_Environment
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "setup failed.\n"
+        I18N_Setup_Failed
         return 1
 fi
 

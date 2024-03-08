@@ -76,6 +76,7 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_run-successful.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_run-test-coverage.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_setup.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_setup-environment.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_setup-failed.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_shasum.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_shasum-failed.sh"

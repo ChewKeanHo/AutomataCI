@@ -76,6 +76,7 @@
 . "${env:LIBS_AUTOMATACI}\services\i18n\_run-successful.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_run-test-coverage.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_setup.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_setup-environment.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_setup-failed.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_shasum.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_shasum-failed.ps1"

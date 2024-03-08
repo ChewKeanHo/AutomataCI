@@ -9,32 +9,25 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+. "${env:LIBS_AUTOMATACI}\services\i18n\__printer.ps1"
 
 
 
 
-# initialize
-if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
-	return 1
+function I18N-Setup-Environment {
+	param(
+		[string]$___subject
+	)
+
+
+	# execute
+	switch (${env:AUTOMATACI_LANG}) {
+	default {
+		# fallback to default english
+		$null = I18N-Status-Print info "setting up localized environment...`n"
+	}}
+
+
+	# report status
+	return 0
 }
-
-. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
-. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
-
-
-
-
-# execute
-$null = I18N-Setup-Environment
-$___process = RUST-Setup-Local-Environment
-if ($___process -ne 0) {
-	$null = I18N-Setup-Failed
-	return 1
-}
-
-
-
-
-# report status
-return 0
