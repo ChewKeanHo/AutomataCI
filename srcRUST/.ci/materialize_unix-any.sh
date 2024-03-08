@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,23 +15,24 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
 
 
 
 
-# safety checking control surfaces
-OS_Print_Status info "activating local environment...\n"
+# execute
+I18N_Activate_Environment
 RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "activation failed.\n"
+        I18N_Activate_Failed
         return 1
 fi
 
@@ -39,13 +40,12 @@ fi
 
 
 # build output binary file
-OS_Print_Status info "configuring build settings...\n"
+I18N_Configure_Build_Settings
 __target="$(RUST_Get_Build_Target "$PROJECT_OS" "$PROJECT_ARCH")"
 __filename="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
 __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/rust-${__filename}"
-
-if [ -z "$__target" ]; then
-        OS_Print_Status error "configure failed.\n"
+if [ $(STRINGS_Is_Empty "$__target") -eq 0 ]; then
+        I18N_Configure_Failed
         return 1
 fi
 
@@ -53,15 +53,16 @@ fi
 
 
 # building target
-OS_Print_Status info "building ${__filename}...\n"
-FS_Remove_Silently "${__workspace}"
+I18N_Build "$__filename"
+FS_Remove_Silently "$__workspace"
+
 
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_RUST}"
 cargo build --release --target-dir "$__workspace" --target="$__target"
 __exit_code=$?
 cd "$__current_path" && unset __current_path
 if [ $__exit_code -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
+        I18N_Build_Failed
         return 1
 fi
 
@@ -71,12 +72,12 @@ fi
 # exporting executable
 __source="${__workspace}/${__target}/release/${PROJECT_SKU}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS_Print_Status info "exporting ${__source} to ${__dest}\n"
+I18N_Export "$__source" "$__dest"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "export failed.\n"
+        I18N_Export_Failed
         return 1
 fi
 
