@@ -45,6 +45,8 @@
 . "${env:LIBS_AUTOMATACI}\services\i18n\_guide-start-activate.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_guide-stop-deactivate.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_help.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_import-dependencies.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_import-failed.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_injection-manual-detected.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_install.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_install-failed.ps1"

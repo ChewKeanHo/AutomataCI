@@ -45,6 +45,8 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_guide-start-activate.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_guide-stop-deactivate.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_help.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_import-dependencies.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_import-failed.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_injection-manual-detected.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_install.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_install-failed.sh"
