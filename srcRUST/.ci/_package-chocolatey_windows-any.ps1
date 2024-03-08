@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,13 +15,13 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	exit 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
 
 
 
@@ -43,49 +43,87 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 
 
 	# assemble the package
-	$null = FS-Make-Directory "${_directory}\Data\${env:PROJECT_PATH_SOURCE}"
-	$__process = FS-Copy-All `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}" `
-		"${_directory}\Data\${env:PROJECT_PATH_SOURCE}"
-	if ($__process -ne 0) {
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
+	$___dest = "${_directory}\Data\${env:PROJECT_PATH_SOURCE}"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$null = FS-Make-Directory "${_directory}\Data\${env:PROJECT_RUST}"
-	$__process = FS-Copy-All `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}" `
-		"${_directory}\Data\${env:PROJECT_RUST}"
-	if ($__process -ne 0) {
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci"
+	$___dest = "${_directory}\Data\${env:PROJECT_PATH_SOURCE}\.ci"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$null = FS-Make-Directory "${_directory}\Data\automataCI"
-	$__process = FS-Copy-All `
-		"${env:PROJECT_PATH_ROOT}\automataCI" `
-		"${_directory}\Data\automataCI"
-	if ($__process -ne 0) {
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
+	$___dest = "${_directory}\Data\${env:PROJECT_RUST}"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\CONFIG.toml" "${_directory}\Data"
-	if ($__process -ne 0) {
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\.ci"
+	$___dest = "${_directory}\Data\${env:PROJECT_RUST}\.ci"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__process = FS-Copy-File `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\icons\icon-128x128.png" `
-		"${_directory}\icon.png"
-	if ($__process -ne 0) {
+	$___source = "${env:PROJECT_PATH_ROOT}\automataCI"
+	$___dest = "${_directory}\Data\automataCI"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__process = FS-Copy-File "${env:PROJECT_PATH_ROOT}\README.md" "${_directory}\README.md"
-	if ($__process -ne 0) {
+	$___source = "${env:PROJECT_PATH_ROOT}\CONFIG.toml"
+	$___dest = "${_directory}\Data"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$___process = FS-Copy-File "${___source}" "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__process = RUST-Create-CARGO-TOML `
-		"${_directory}\Data\${env:PROJECT_RUST}\Cargo.toml" `
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\icons\icon-128x128.png"
+	$___dest = "${_directory}\icon.png"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$___process = FS-Copy-File "${___source}" "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
+		return 1
+	}
+
+	$___source = "${env:PROJECT_PATH_ROOT}\README.md"
+	$___dest = "${_directory}\README.md"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$___process = FS-Copy-File "${___source}" "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
+		return 1
+	}
+
+	$___dest = "${_directory}\Data\${env:PROJECT_RUST}\Cargo.toml"
+	$null = I18N-Create "${___dest}"
+	$___process = RUST-Create-CARGO-TOML `
+		"${___dest}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}" `
@@ -98,32 +136,39 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		"README.md" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# REQUIRED: chocolatey required tools\ directory
-	$__process = FS-Make-Directory "${_directory}\tools"
-	if ($__process -ne 0) {
+	$___dest = "${_directory}\tools"
+	$null = I18N-Create "${___dest}"
+	$___process = FS-Make-Directory "${___dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# OPTIONAL: chocolatey tools\chocolateyBeforeModify.ps1
-	OS-Print-Status info "scripting tools\chocolateyBeforeModify.ps1..."
-	$__process = FS-Write-File "${_directory}\tools\chocolateyBeforeModify.ps1" @"
+	$___dest = "${_directory}\tools\chocolateyBeforeModify.ps1"
+	$null = I18N-Create "${___dest}"
+	$___process = FS-Write-File "${___dest}" @"
 # REQUIRED - BEGIN EXECUTION
 Write-Host "Performing pre-configurations..."
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# REQUIRED: chocolatey tools\chocolateyinstall.ps1
-	OS-Print-Status info "scripting tools\chocolateyinstall.ps1..."
-	$__process = FS-Write-File "${_directory}\tools\chocolateyinstall.ps1" @"
+	$___dest = "${_directory}\tools\chocolateyinstall.ps1"
+	$null = I18N-Create "${___dest}"
+	$___process = FS-Write-File "${___dest}" @"
 # REQUIRED - PREPARING INSTALLATION
 `$tools_dir = "`$(Split-Path -Parent -Path `$MyInvocation.MyCommand.Definition)"
 `$data_dir = "`$(Split-Path -Parent -Path `$tools_dir)\Data"
@@ -176,25 +221,29 @@ if (Test-Path -PathType Container -Path "`${data_dir}\lib") {
 Set-Location "`$current_dir"
 Remove-Item `$data_dir -Force -Recurse -ErrorAction SilentlyContinue
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# REQUIRED: chocolatey tools\chocolateyuninstall.ps1
-	OS-Print-Status info "scripting tools\chocolateyuninstall.ps1..."
-	$__process = FS-Write-File "${_directory}\tools\chocolateyuninstall.ps1" @"
+	$___dest = "${_directory}\tools\chocolateyuninstall.ps1"
+	$null = I18N-Create "${___dest}"
+	$___process = FS-Write-File "${___dest}" @"
 # REQUIRED - PREPARING UNINSTALLATION
 Write-Host "Uninstalling ${env:PROJECT_SKU} (${env:PROJECT_VERSION})..."
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
 
 	# REQUIRED: chocolatey xml.nuspec file
-	OS-Print-Status info "scripting ${env:PROJECT_SKU}.nuspec..."
-	$__process = FS-Write-File "${_directory}\${env:PROJECT_SKU}.nuspec" @"
+	$___dest = "${_directory}\${env:PROJECT_SKU}.nuspec"
+	$null = I18N-Create "${___dest}"
+	$___process = FS-Write-File "${___dest}" @"
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
 	<metadata>
@@ -220,7 +269,8 @@ Write-Host "Uninstalling ${env:PROJECT_SKU} (${env:PROJECT_VERSION})..."
 	</files>
 </package>
 "@
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
 		return 1
 	}
 
