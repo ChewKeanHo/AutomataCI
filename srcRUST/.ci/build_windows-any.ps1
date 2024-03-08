@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,24 +15,26 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\sync.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\c.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\c.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
 
 
 
 
-# safety checking control surfaces
-OS-Print-Status info "activating local environment..."
-$__process = RUST-Activate-Local-Environment
-if ($__process -ne 0) {
-	OS-Print-Status error "activation failed."
+# execute
+$null = I18N-Activate-Environment
+$___process = RUST-Activate-Local-Environment
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
 	return 1
 }
 
@@ -52,14 +54,12 @@ $__parallel_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\rust-
 $null = FS-Make-Directory "${__parallel_directory}"
 
 
-
-
-# configure build
 $__build_targets = @(
 	"windows|amd64|.exe"
 	"windows|arm64|.exe"
 	"wasip1|wasm|.wasm"
 )
+
 
 $__placeholders = @(
 	"${env:PROJECT_SKU}-src_any-any"
@@ -70,22 +70,26 @@ $__placeholders = @(
 )
 
 
-
-
-## register targets and execute parallel build
 function SUBROUTINE-Build {
 	param(
 		[string]$__line
 	)
 
+
 	# initialize
-	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\sync.ps1"
-	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\c.ps1"
-	. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
+	. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+	. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+	. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+	. "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
+	. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+	. "${env:LIBS_AUTOMATACI}\services\compilers\c.ps1"
+	. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
+
 
 	# generate input
+	if ($(STRINGS-Is-Empty "${__line}") -eq 0) {
+		return 0
+	}
 	$__list = $__line -split "\|"
 	$__log = $__list[6]
 	$__linker = $__list[5]
@@ -104,7 +108,7 @@ function SUBROUTINE-Build {
 	$null = FS-Make-Housing-Directory "${__log}"
 
 	# building target
-	OS-Print-Status info "building ${__subject} in parallel..."
+	$null = I18N-Build-Parallel "${__subject}"
 	$null = FS-Remake-Directory "${__workspace}"
 	$__current_path = Get-Location
 	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
@@ -113,14 +117,14 @@ function SUBROUTINE-Build {
 		+ "--release " `
 		+ "--target-dir `"${__workspace}`" " `
 		+ "--target `"${__target}`" "
-	if (-not [string]::IsNullOrEmpty($__linker)) {
+	if ($(STRINGS-Is-Empty "${__linker}") -ne 0) {
 		$__arguments = $__arguments `
 			+ "--config `"target.${__target}.linker='${__linker}'`" "
 	}
 
 	$__err_log = [IO.Path]::ChangeExtension("${__log}", '').TrimEnd('.') + "-error.txt"
 	$__out_log = [IO.Path]::ChangeExtension("${__log}", '').TrimEnd('.') + "-output.txt"
-	$__process = Start-Process -Wait `
+	$___process = Start-Process -Wait `
 		-Filepath "$(Get-Command "cargo" -ErrorAction SilentlyContinue)" `
 		-RedirectStandardError "${__err_log}" `
 		-RedirectStandardOutput "${__out_log}" `
@@ -129,48 +133,54 @@ function SUBROUTINE-Build {
 		-PassThru
 	$null = Set-Location "${__current_path}"
 	$null = Remove-Variable __current_path
-	if ($__process.ExitCode -ne 0) {
-		OS-Print-Status error "build failed - ${__subject}"
+	if ($___process.ExitCode -ne 0) {
+		$null = I18N-Build-Failed-Parallel "${__subject}"
 		return 1
 	}
 
+
 	# export target
 	$null = FS-Make-Housing-Directory "${__dest}"
-	$null = FS-Remove-Silently "${__dest}"
-	if (Test-Path -Path "${__source}.wasm") {
-		$__process = FS-Move "${__source}.wasm" "${__dest}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "build failed - ${__subject}"
+	if ($(FS-Is-File "${__source}.wasm") -eq 0) {
+		$__dest = "$(FS-Extension-Remove "${__dest}" ".wasm").wasm"
+		$null = FS-Remove-Silently "${__dest}"
+		$___process = FS-Move "${__source}.wasm" "${__dest}"
+		if ($___process -ne 0) {
+			$null = I18N-Build-Failed-Parallel "${__subject}"
 			return 1
 		}
 
-
-		if (Test-Path -Path "${__source}.js") {
-			$__dest = [System.IO.Path]::GetFileNameWithoutExtension($__dest) + ".js"
+		if ($(FS-Is-File "${__source}.js") -eq 0) {
+			$__dest = "$(FS-Extension-Remove "${__dest}" ".js").js"
 			$null = FS-Remove-Silently "${__dest}"
-			$__process = FS-Move "${__source}.js" "${__dest}"
-			if ($__process -ne 0) {
-				OS-Print-Status error "build failed - ${__subject}"
+			$___process = FS-Move "${__source}.js" "${__dest}"
+			if ($___process -ne 0) {
+				$null = I18N-Build-Failed-Parallel "${__subject}"
 				return 1
 			}
 		}
-	} elseif (Test-Path -Path "${__source}.exe") {
-		$__process = FS-Move "${__source}.exe" "${__dest}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "build failed - ${__subject}"
+	} elseif ($(FS-Is-File "${__source}.exe") -eq 0) {
+		$__dest = "$(FS-Extension-Remove "${__dest}" ".exe").exe"
+		$null = FS-Remove-Silently "${__dest}"
+		$___process = FS-Move "${__source}.exe" "${__dest}"
+		if ($___process -ne 0) {
+			$null = I18N-Build-Failed-Parallel "${__subject}"
 			return 1
 		}
 	} else {
-		$__process = FS-Move "${__source}" "${__dest}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "build failed - ${__subject}"
+		$___process = FS-Move "${__source}" "${__dest}"
+		if ($___process -ne 0) {
+			$null = I18N-Build-Failed-Parallel "${__subject}"
 			return 1
 		}
 	}
+
 
 	# report status
 	return 0
 }
+
+
 
 
 foreach ($__line in $__build_targets) {
@@ -180,6 +190,7 @@ foreach ($__line in $__build_targets) {
 	$__arch = $__list[1]
 	$__os = $__list[0]
 
+
 	# generate input
 	$__target = RUST-Get-Build-Target "${__os}" "${__arch}"
 	$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
@@ -188,38 +199,40 @@ foreach ($__line in $__build_targets) {
 	$__dest = "${__output_directory}\${__filename}${__extension}"
 	$__subject = "${__filename}${__extension}"
 	$__log = "${__log_directory}\rust-${__filename}.txt"
-	$__linker = C-Get-Compiler `
+	$__linker = "$(C-Get-Compiler `
 		"${__os}" `
 		"${__arch}" `
 		"${env:PROJECT_OS}" `
-		"${env:PROJECT_ARCH}"
+		"${env:PROJECT_ARCH}" `
+	)"
+
 
 	# validate input
-	OS-Print-Status info "registering ${__subject} build..."
-	if ([string]::IsNullOrEmpty($__target)) {
-		OS-Print-Status warning "register skipped - missing target."
+	$null = I18N-Sync-Register "${__subject}"
+	if ($(STRINGS-Is-Empty "${__target}") -eq 0) {
+		$null = I18N-Sync-Register-Skipped-Missing-Target
 		continue
 	}
 
 	## NOTE: perform any hard-coded host system restrictions or gatekeeping
 	##       customization adjustments here.
-	switch ($__arch) { ### adjust by CPU Architecture
+	switch ($__arch) { ### filter by CPU Architecture
 	{ $_ -in "ppc64", "riscv64" } {
-		OS-Print-Status warning "register skipped - ${__subject} unsupported."
+		$null = I18N-Sync-Register-Skipped-Unsupported
 		continue
 	} wasm {
 		$__linker = "none"
 	} default {
-		if ([string]::IsNullOrEmpty($__linker)) {
-			OS-Print-Status warning "register skipped - missing linker."
+		if ($(STRINGS-Is-Empty "${__linker}") -eq 0) {
+			$null = I18N-Sync-Register-Skipped-Missing-Linker
 			continue
 		}
 	}}
 
-	switch ($__os) { ### adjust by OS
+	switch ($__os) { ### filter by OS
 	darwin {
 		if ("${env:PROJECT_OS}" -ne "darwin") {
-			OS-Print-Status warning "register skipped - ${__subject} unsupported."
+			$null = I18N-Sync-Register-Skipped-Unsupported
 			continue
 		}
 	} js {
@@ -232,10 +245,10 @@ foreach ($__line in $__build_targets) {
 	}}
 
 	# execute
-	OS-Print-Status info "adding rust cross-compiler (${__target})..."
-	$__process = OS-Exec "rustup" "target add `"${__target}`""
-	if ($__process -ne 0) {
-		OS-Print-Status error "addition failed."
+	$null = I18N-Import-Compiler "(RUST) ${__target}"
+	$___process = OS-Exec "rustup" "target add `"${__target}`""
+	if ($___process -ne 0) {
+		$null = I18N-Import-Failed
 		return 1
 	}
 
@@ -244,13 +257,11 @@ ${__target}|${__filename}|${__workspace}|${__source}|${__dest}|${__linker}|${__l
 "@
 }
 
-OS-Print-Status info "begin parallel building..."
-$__process = SYNC-Exec-Parallel `
+$___process = SYNC-Exec-Parallel `
 	${function:SUBROUTINE-Build}.ToString() `
 	"${__parallel_directory}\parallel.txt" `
-	"${__parallel_directory}" `
-	"$([System.Environment]::ProcessorCount)"
-if ($__process -ne 0) {
+	"${__parallel_directory}"
+if ($___process -ne 0) {
 	return 1
 }
 
@@ -258,12 +269,12 @@ if ($__process -ne 0) {
 
 
 # placeholding flag files
-foreach ($__file in $__placeholders) {
-	OS-Print-Status info "building output file: ${__file}"
-	$__process = FS-Touch-File `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "build failed."
+foreach ($__line in $__placeholders) {
+	$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__line}"
+	$null = I18N-Build "${__file}"
+	$___process = FS-Touch-File "${__file}"
+	if ($___process -ne 0) {
+		$null = I18N-Build-Failed
 		return 1
 	}
 }

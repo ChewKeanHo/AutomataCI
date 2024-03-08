@@ -17,7 +17,7 @@
 
 
 
-C::get_compiler() {
+C_Get_Compiler() {
         #__os="$1"
         #__arch="$2"
         #__base_os="$3"

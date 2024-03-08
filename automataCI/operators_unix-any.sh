@@ -280,7 +280,7 @@ BUILD::_exec_build() {
                         ;;
                 esac
                 _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${_target}"
-                _target_compiler="$(C::get_compiler \
+                _target_compiler="$(C_Get_Compiler \
                         "$_target_os" \
                         "$_target_arch" \
                         "$PROJECT_OS" \
@@ -300,7 +300,7 @@ BUILD::_exec_build() {
                 _target="${PROJECT_SKU}-lib_${_target_os}-${_target_arch}"
                 _target_directory="${_target_directory}/c-lib_${_target}"
                 _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${_target}.a"
-                _target_compiler="$(C::get_compiler \
+                _target_compiler="$(C_Get_Compiler \
                         "$_target_os" \
                         "$_target_arch" \
                         "$PROJECT_OS" \
@@ -319,7 +319,7 @@ BUILD::_exec_build() {
                 _target_type="test-bin"
                 _target_directory="${_target_directory}/c-test_${_target}"
                 _target="${_target_directory}"
-                _target_compiler="$(C::get_compiler \
+                _target_compiler="$(C_Get_Compiler \
                         "$_target_os" \
                         "$_target_arch" \
                         "$PROJECT_OS" \
