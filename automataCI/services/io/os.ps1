@@ -9,6 +9,59 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+function OS-Get-Arch {
+	# execute
+	switch ((Get-ComputerInfo).CsProcessors.Architecture) {
+	"Alpha" {
+		return "alpha"
+	} "ARM" {
+		return "arm"
+	} "ARM64" {
+		return "arm64"
+	} "ia64" {
+		return "ia64"
+	} "MIPs" {
+		return "mips"
+	} "PowerPC" {
+		return "powerpc"
+	} "x86" {
+		return "i386"
+	} "x64" {
+		return "amd64"
+	} Default {
+		return ""
+	}}
+}
+
+
+
+
+function OS-Get-CPU {
+	$___output = [System.Environment]::ProcessorCount
+	if (([string]::IsNullOrEmpty($___output)) -or (${___output} -eq 0)) {
+		$___output = 1
+	}
+
+
+	# report status
+	return $___output
+}
+
+
+
+
+function OS-Get {
+	$___output = (Get-ComputerInfo).OsName.ToLower()
+	if (-not ($___output -match "microsoft" -or $___output -match "windows")) {
+		return ""
+	}
+
+	return "windows"
+}
+
+
+
+
 function OS-Is-Command-Available {
 	param (
 		[string]$___command

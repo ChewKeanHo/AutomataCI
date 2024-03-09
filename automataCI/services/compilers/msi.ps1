@@ -41,7 +41,7 @@ function MSI-Compile {
 		return 1
 	}
 
-	$___arch = MICROSOFT-Arch-Get "${___arch}"
+	$___arch = MICROSOFT-Get-Arch "${___arch}"
 	if ($(STRINGS-Is-Empty "${___arch}") -eq 0) {
 		return 1
 	}

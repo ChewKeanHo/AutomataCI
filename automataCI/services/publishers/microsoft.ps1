@@ -15,7 +15,7 @@
 
 
 
-function MICROSOFT-Arch-Get {
+function MICROSOFT-Get-Arch {
 	param(
 		[string]$___arch
 	)
@@ -40,38 +40,6 @@ function MICROSOFT-Arch-Get {
 	} arm64 {
 		return "ARM64"
 	} default {
-		return ""
-	}}
-}
-
-
-
-
-function MICROSOFT-Arch-Interpret {
-	param(
-		[string]$___arch
-	)
-
-
-	# execute
-	switch ($___arch) {
-	"Alpha" {
-		return "alpha"
-	} "ARM" {
-		return "arm"
-	} "ARM64" {
-		return "arm64"
-	} "ia64" {
-		return "ia64"
-	} "MIPs" {
-		return "mips"
-	} "PowerPC" {
-		return "powerpc"
-	} "x86" {
-		return "i386"
-	} "x64" {
-		return "amd64"
-	} Default {
 		return ""
 	}}
 }

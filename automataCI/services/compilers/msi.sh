@@ -38,7 +38,7 @@ MSI_Compile() {
                 return 1
         fi
 
-        ___arch="$(MICROSOFT_Arch_Get "$2")"
+        ___arch="$(MICROSOFT_Get_Arch "$2")"
         if [ -z "$___arch" ]; then
                 return 1
         fi

@@ -10,7 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-MICROSOFT_Arch_Get() {
+MICROSOFT_Get_Arch() {
         # execute
         case "$1" in
         alpha)
@@ -36,47 +36,6 @@ MICROSOFT_Arch_Get() {
                 ;;
         powerpc)
                 ___value="PowerPC"
-                ;;
-        *)
-                ___value=""
-                ;;
-        esac
-        printf -- "%s" "$___value"
-
-
-        # report status
-        return 0
-}
-
-
-
-
-MICROSOFT_Arch_Interpret() {
-        # execute
-        case "$1" in
-        Alpha)
-                ___value="alpha"
-                ;;
-        ARM)
-                ___value="arm"
-                ;;
-        ARM64)
-                ___value="arm64"
-                ;;
-        ia64)
-                ___value="ia64"
-                ;;
-        MIPs)
-                ___value="mips"
-                ;;
-        PowerPC)
-                ___value="powerpc"
-                ;;
-        x86)
-                ___value="i386"
-                ;;
-        x64)
-                ___value="amd64"
                 ;;
         *)
                 ___value=""

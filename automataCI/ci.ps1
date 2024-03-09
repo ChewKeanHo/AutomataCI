@@ -75,28 +75,22 @@ ${env:LIBS_AUTOMATACI} = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}"
 
 
 # import fundamental libraries
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
-. "${env:LIBS_AUTOMATACI}\services\publishers\microsoft.ps1"
 
 
 
 
-# determine os
-$env:PROJECT_OS = (Get-ComputerInfo).OsName.ToLower()
-if (-not ($env:PROJECT_OS -match "microsoft" -or $env:PROJECT_OS -match "windows")) {
+# determine host system parameters
+$env:PROJECT_OS = "$(OS-Get)"
+if ($(STRINGS-Is-Empty "$env:PROJECT_OS") -eq 0) {
 	$null = I18N-Unsupported-OS
 	return 1
 }
-$env:PROJECT_OS = "windows"
 
-
-
-
-# determine arch
-${env:PROJECT_ARCH} = MICROSOFT-Arch-Interpret (Get-ComputerInfo).CsProcessors.Architecture
-$__process = STRINGS-Is-Empty "${env:PROJECT_ARCH}"
-if ($__process -eq 0) {
+${env:PROJECT_ARCH} = "$(OS-Get-Arch)"
+if($(STRINGS-Is-Empty "${env:PROJECT_ARCH}") -eq 0) {
 	$null = I18N-Unsupported-ARCH
 	return 1
 }

@@ -64,62 +64,19 @@ export LIBS_AUTOMATACI="${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}"
 
 
 # import fundamental libraries
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
-# determine os
-PROJECT_OS="$(uname)"
-export PROJECT_OS="$(echo "$PROJECT_OS" | tr '[:upper:]' '[:lower:]')"
-case "${PROJECT_OS}" in
-windows*|ms-dos*)
-        export PROJECT_OS='windows'
-        ;;
-cygwin*|mingw*|mingw32*|msys*)
-        export PROJECT_OS='windows'
-        ;;
-*freebsd)
-        export PROJECT_OS='freebsd'
-        ;;
-dragonfly*)
-        export PROJECT_OS='dragonfly'
-        ;;
-*)
-        ;;
-esac
+# determine host system parameters
+export PROJECT_OS="$(OS_Get)"
 if [ "$(STRINGS_Is_Empty "$PROJECT_OS")" -eq 0 ]; then
         I18N_Unsupported_OS
         return 1
 fi
 
-
-
-
-# determine arch
-PROJECT_ARCH="$(uname -m)"
-export PROJECT_ARCH="$(echo "$PROJECT_ARCH" | tr '[:upper:]' '[:lower:]')"
-case "${PROJECT_ARCH}" in
-i686-64)
-        export PROJECT_ARCH='ia64' # Intel Itanium.
-        ;;
-i386|i486|i586|i686)
-        export PROJECT_ARCH='i386'
-        ;;
-x86_64)
-        export PROJECT_ARCH="amd64"
-        ;;
-sun4u)
-        export PROJECT_ARCH='sparc'
-        ;;
-"power macintosh")
-        export PROJECT_ARCH='powerpc'
-        ;;
-ip*)
-        export PROJECT_ARCH='mips'
-        ;;
-*)
-        ;;
-esac
+export PROJECT_ARCH="$(OS_Get_Arch)"
 if [ "$(STRINGS_Is_Empty "$PROJECT_ARCH")" -eq 0 ]; then
         I18N_Unsupported_ARCH
         return 1
@@ -193,24 +150,6 @@ if [ -f "${PROJECT_PATH_ROOT}/SECRETS.toml" ]; then
                 export "$key"="$value"
         done < "${PROJECT_PATH_ROOT}/SECRETS.toml"
         IFS="$__old_IFS" && unset __old_IFS
-fi
-
-
-
-
-# update environment variables
-case "$PROJECT_OS" in
-linux)
-        __location="/home/linuxbrew/.linuxbrew/bin/brew"
-        ;;
-darwin)
-        __location="/usr/local/bin/brew"
-        ;;
-*)
-        ;;
-esac
-if [ -f "$__location" ]; then
-        eval "$("${__location}" shellenv)"
 fi
 
 
