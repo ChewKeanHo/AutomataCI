@@ -19,7 +19,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return
 }
 
@@ -34,8 +34,8 @@ function PACKAGE-Run-CHANGELOG {
 
 
 	$null = I18N-Check-Availability "CHANGELOG"
-	$__process = CHANGELOG-Is-Available
-	if ($__process -ne 0) {
+	$___process = CHANGELOG-Is-Available
+	if ($___process -ne 0) {
 		$null = I18N-Check-Failed
 		return 1
 	}
@@ -43,19 +43,19 @@ function PACKAGE-Run-CHANGELOG {
 
 	# validate input
 	$null = I18N-Validate "${env:PROJECT_VERSION} CHANGELOG"
-	$__process = CHANGELOG-Compatible-DATA-Version `
+	$___process = CHANGELOG-Compatible-DATA-Version `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog" `
 		"${env:PROJECT_VERSION}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Validate-Failed
 		return 1
 	}
 
 	$null = I18N-Validate "${env:PROJECT_VERSION} DEB CHANGELOG"
-	$__process = CHANGELOG-Compatible-DEB-Version `
+	$___process = CHANGELOG-Compatible-DEB-Version `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog" `
 		"${env:PROJECT_VERSION}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Validate-Failed
 		return 1
 	}
@@ -63,23 +63,23 @@ function PACKAGE-Run-CHANGELOG {
 
 	# assemble changelog
 	$null = I18N-Create "${__changelog_md}"
-	$__process = CHANGELOG-Assemble-MD `
+	$___process = CHANGELOG-Assemble-MD `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog" `
 		"${__changelog_md}" `
 		"${env:PROJECT_VERSION}" `
 		"${env:PROJECT_CHANGELOG_TITLE}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
 	}
 
 	$null = I18N-Create "${__changelog_deb}"
 	$null = FS-Make-Housing-Directory "${__changelog_deb}"
-	$__process = CHANGELOG-Assemble-DEB `
+	$___process = CHANGELOG-Assemble-DEB `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog" `
 		"${__changelog_deb}" `
 		"${env:PROJECT_VERSION}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
 	}
