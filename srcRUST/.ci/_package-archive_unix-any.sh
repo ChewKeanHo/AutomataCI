@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,14 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
 
 
 
@@ -38,16 +38,18 @@ PACKAGE_Assemble_ARCHIVE_Content() {
         # package based on target's nature
         if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 _target="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/"
-                OS_Print_Status info "copying ${_target} to ${_directory}\n"
+                I18N_Assemble "$_target" "$_directory"
                 FS_Copy_All "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
-                        OS_Print_Status error "copy failed."
+                        I18N_Assemble_Failed
                         return 1
                 fi
                 FS_Remove_Silently "${_directory}/.ci"
 
+                _source="${_directory}/Cargo.toml"
+                I18N_Create "$_target" "$_directory"
                 RUST_Create_CARGO_TOML \
-                        "${_directory}/Cargo.toml" \
+                        "$_source" \
                         "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                         "$PROJECT_SKU" \
                         "$PROJECT_VERSION" \
@@ -61,16 +63,20 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         "$PROJECT_CONTACT_NAME" \
                         "$PROJECT_CONTACT_EMAIL"
                 if [ $? -ne 0 ]; then
+                        I18N_Create_Failed
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
-                FS_Is_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+                _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+                FS_Is_Directory "$_source"
                 if [ $? -ne 0 ]; then
                         return 10 # not applicable
                 fi
 
-                FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/" "$_directory"
+                I18N_Assemble "$_source" "$_directory"
+                FS_Copy_All "${_source}/" "$_directory"
                 if [ $? -ne 0 ]; then
+                        I18N_Assemble_Failed
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
@@ -78,17 +84,20 @@ PACKAGE_Assemble_ARCHIVE_Content() {
         elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
         elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                OS_Print_Status info "copying ${_target} to ${_directory}\n"
+                I18N_Assemble "$_target" "$_directory"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
+                        I18N_Assemble_Failed
                         return 1
                 fi
 
-                FS_Is_File "${_target%.wasm*}.js"
+                _source="$(FS_Extension_Remove "$_target" ".wasm").js"
+                FS_Is_File "$_source"
                 if [ $? -eq 0 ]; then
-                        OS_Print_Status info "copying ${_target%.wasm*}.js to ${_directory}\n"
-                        FS_Copy_File "${_target%.wasm*}.js" "$_directory"
+                        I18N_Assemble "$_source" "$_directory"
+                        FS_Copy_File "$_source" "$_directory"
                         if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
                                 return 1
                         fi
                 fi
@@ -110,31 +119,31 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         ;;
                 esac
 
-                OS_Print_Status info "copying ${_target} to ${_dest}\n"
+                I18N_Assemble "$_target" "$_dest"
                 FS_Copy_File "$_target" "$_dest"
                 if [ $? -ne 0 ]; then
-                        OS_Print_Status error "copy failed."
+                        I18N_Assemble_Failed
                         return 1
                 fi
         fi
 
 
         # copy user guide
-        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        OS_Print_Status info "copying ${_target} to ${_directory}\n"
-        FS_Copy_File "$_target" "${_directory}/."
+        _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
+        I18N_Assemble "$_source" "$_directory"
+        FS_Copy_File "$_source" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS_Print_Status error "copy failed."
+                I18N_Assemble_Failed
                 return 1
         fi
 
 
         # copy license file
-        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        OS_Print_Status info "copying ${_target} to ${_directory}\n"
-        FS_Copy_File "$_target" "${_directory}/."
+        _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
+        I18N_Assemble "$_source" "$_directory"
+        FS_Copy_File "$_source" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS_Print_Status error "copy failed."
+                I18N_Assemble_Failed
                 return 1
         fi
 

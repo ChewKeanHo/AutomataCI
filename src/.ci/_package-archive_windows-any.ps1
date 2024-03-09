@@ -44,37 +44,37 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			return 10 # not applicable
 		}
 
-		$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
-		$null = I18N-Copy "${__source}\*" "${_directory}"
+		$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
+		$null = I18N-Assemble "${_source}\*" "${_directory}"
 		$___process = FS-Copy-All "${__source}" "${_directory}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
+			$null = I18N-Assemble-Failed
 			return 1
 		}
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		$null = I18N-Copy "${_target}" "${_directory}"
-		$___process = Fs-Copy-File "${_target}" "${_directory}"
+		$null = I18N-Assemble "${_target}" "${_directory}"
+		$___process = FS-Copy-File "${_target}" "${_directory}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
+			$null = I18N-Assemble-Failed
 			return 1
 		}
 	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
 		return 10 # handled by wasm instead
 	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
-		$null = I18N-Copy "${_target}" "${_directory}"
-		$___process = Fs-Copy-File "${_target}" "${_directory}"
+		$null = I18N-Assemble "${_target}" "${_directory}"
+		$___process = FS-Copy-File "${_target}" "${_directory}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
+			$null = I18N-Assemble-Failed
 			return 1
 		}
 
-		$__source = "$($_target -replace '\.wasm.*$', '.js')"
-		$___process = FS-Is-File "${__source}"
+		$_source = "$(FS-Extension-Remove "${_target}" ".wasm").js"
+		$___process = FS-Is-File "${_source}"
 		if ($___process -eq 0) {
-			$null = I18N-Copy "${__source}" "${_directory}"
-			$___process = Fs-Copy-File "${__source}" "${_directory}"
+			$null = I18N-Assemble "${_source}" "${_directory}"
+			$___process = FS-Copy-File "${_source}" "${_directory}"
 			if ($___process -ne 0) {
-				$null = I18N-Copy-Failed
+				$null = I18N-Assemble-Failed
 				return 1
 			}
 		}
@@ -94,31 +94,31 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			$_dest = "${_directory}\${env:PROJECT_SKU}"
 		}}
 
-		$null = I18N-Copy "${_target}" "${_dest}"
+		$null = I18N-Assemble "${_target}" "${_dest}"
 		$___process = Fs-Copy-File "${_target}" "${_dest}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
+			$null = I18N-Assemble-Failed
 			return 1
 		}
 	}
 
 
 	# copy user guide
-	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
-	$null = I18N-Copy "${_target}" "${_directory}"
-	$___process = FS-Copy-File "${_target}" "${_directory}"
+	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
+	$null = I18N-Assemble "${_source}" "${_directory}"
+	$___process = FS-Copy-File "${_source}" "${_directory}"
 	if ($___process -ne 0) {
-		$null = I18N-Copy-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
 
 	# copy license file
-	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
-	$null = I18N-Copy "${_target}" "${_directory}"
-	$___process = FS-Copy-File "${_target}" "${_directory}"
+	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
+	$null = I18N-Assemble "${_source}" "${_directory}"
+	$___process = FS-Copy-File "${_source}" "${_directory}"
 	if ($___process -ne 0) {
-		$null = I18N-Copy-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 

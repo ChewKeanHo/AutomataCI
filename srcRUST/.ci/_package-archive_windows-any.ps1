@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,13 +15,13 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rust.ps1"
 
 
 
@@ -39,16 +39,18 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 	# package based on target's nature
 	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
 		$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
-		OS-Print-Status info "copying ${_target} to ${_directory}"
-		$__process = FS-Copy-All "${_target}" "${_directory}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "copy failed."
+		$null = I18N-Assemble "${_target}" "${_directory}"
+		$___process = FS-Copy-All "${_target}" "${_directory}"
+		if ($___process -ne 0) {
+			$null = I18N-Assemble-Failed
 			return 1
 		}
 		$null = FS-Remove-Silently "${_directory}\.ci"
 
-		$__process = RUST-Create-CARGO-TOML `
-			"${_directory}\Cargo.toml" `
+		$_source = "${_directory}\Cargo.toml"
+		$null = I18N-Create "${_source}"
+		$___process = RUST-Create-CARGO-TOML `
+			"${_source}" `
 			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 			"${env:PROJECT_SKU}" `
 			"${env:PROJECT_VERSION}" `
@@ -61,37 +63,42 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			"README.md" `
 			"${env:PROJECT_CONTACT_NAME}" `
 			"${env:PROJECT_CONTACT_EMAIL}"
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
+			$null = I18N-Create-Failed
 			return 1
 		}
 	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
-		$__process = FS-Is-Target-A-Docs "${_target}"
-		if ($__process -ne 0) {
+		$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
+		$___process = FS-Is-Directory "${_source}"
+		if ($___process -ne 0) {
 			return 10 # not applicable
 		}
 
-		$__process = FS-Copy-All `
-			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}" `
-			"${_directory}"
+		$null = I18N-Assemble "${_source}" "${_directory}"
+		$___process = FS-Copy-All "${_source}" "${_directory}"
+		if ($___process -ne 0) {
+			$null = I18N-Assemble-Failed
+			return 1
+		}
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
 		return 10 # handled by wasm instead
 	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
-		OS-Print-Status info "copying ${_target} to ${_directory}"
-		$__process = Fs-Copy-File "${_target}" "${_directory}"
-		if ($__process -ne 0) {
+		$null = I18N-Assemble "${_target}" "${_directory}"
+		$___process = FS-Copy-File "${_target}" "${_directory}"
+		if ($___process -ne 0) {
+			$null = I18N-Assemble-Failed
 			return 1
 		}
 
-		$__process = FS-Is-File "$($_target -replace '\.wasm.*$', '.js')"
-		if ($__process -eq 0) {
-			OS-Print-Status info `
-				"copying $($_target -replace '\.wasm.*$', '.js') to ${_directory}"
-			$__process = Fs-Copy-File `
-					"$($_target -replace '\.wasm.*$', '.js')" `
-					"${_directory}"
-			if ($__process -ne 0) {
+		$_source = "$(FS-Extension-Remove "${_target}" ".wasm").js"
+		$___process = FS-Is-File "${_source}"
+		if ($___process -eq 0) {
+			$null = I18N-Assemble "${_source}" "${_directory}"
+			$___process = Fs-Copy-File "${_source}" "${_directory}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
 				return 1
 			}
 		}
@@ -111,31 +118,31 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			$_dest = "${_directory}\${env:PROJECT_SKU}"
 		}}
 
-		OS-Print-Status info "copying ${_target} to ${_dest}"
-		$__process = FS-Copy-File "${_target}" "${_dest}"
-		if ($__process -ne 0) {
-			OS-Print-Status error "copy failed."
+		$null = I18N-Assemble "${_target}" "${_dest}"
+		$___process = FS-Copy-File "${_target}" "${_dest}"
+		if ($___process -ne 0) {
+			$null = I18N-Assemble-Failed
 			return 1
 		}
 	}
 
 
 	# copy user guide
-	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
-	OS-Print-Status info "copying ${_target} to ${_directory}"
-	$__process = FS-Copy-File "${_target}" "${_directory}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "copy failed."
+	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
+	$null = I18N-Assemble "${_source}" "${_directory}"
+	$___process = FS-Copy-File "${_source}" "${_directory}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
 
 	# copy license file
-	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
-	OS-Print-Status info "copying ${_target} to ${_directory}"
-	$__process = FS-Copy-File "${_target}" "${_directory}"
-	if ($__process -ne 0) {
-		OS-Print-Status error "copy failed."
+	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
+	$null = I18N-Assemble "${_source}" "${_directory}"
+	$___process = FS-Copy-File "${_source}" "${_directory}"
+	if ($___process -ne 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 

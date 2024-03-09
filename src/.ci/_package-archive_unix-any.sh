@@ -43,37 +43,37 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         return 10 # not applicable
                 fi
 
-                __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/"
-                I18N_Copy "${__source}/*" "$_directory"
-                FS_Copy_All "$__source" "$_directory"
+                _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/"
+                I18N_Assemble "${_source}/*" "$_directory"
+                FS_Copy_All "$_source" "$_directory"
                 if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
+                        I18N_Assemble_Failed
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
-                I18N_Copy "$_target" "$_directory"
+                I18N_Assemble "$_target" "$_directory"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
+                        I18N_Assemble_Failed
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
         elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                I18N_Copy "$_target" "$_directory"
+                I18N_Assemble "$_target" "$_directory"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
+                        I18N_Assemble_Failed
                         return 1
                 fi
 
-                __source="${_target%.wasm*}.js"
+                _source="$(FS_Extension_Remove "$_target" ".wasm").js"
                 FS_Is_File "$__source"
                 if [ $? -eq 0 ]; then
-                        I18N_Copy "$__source" "$_directory"
-                        FS_Copy_File "$__source" "$_directory"
+                        I18N_Assemble "$_source" "$_directory"
+                        FS_Copy_File "$_source" "$_directory"
                         if [ $? -ne 0 ]; then
-                                I18N_Copy_Failed
+                                I18N_Assemble_Failed
                                 return 1
                         fi
                 fi
@@ -95,31 +95,31 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         ;;
                 esac
 
-                I18N_Copy "$_target" "$_dest"
+                I18N_Assemble "$_target" "$_dest"
                 FS_Copy_File "$_target" "$_dest"
                 if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
+                        I18N_Assemble_Failed
                         return 1
                 fi
         fi
 
 
         # copy user guide
-        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        I18N_Copy "$_target" "$_directory"
-        FS_Copy_File "$_target" "${_directory}/."
+        _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
+        I18N_Assemble "$_source" "$_directory"
+        FS_Copy_File "$_source" "${_directory}/."
         if [ $? -ne 0 ]; then
-                I18N_Copy_Failed
+                I18N_Assemble_Failed
                 return 1
         fi
 
 
         # copy license file
-        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        I18N_Copy "$_target" "$_directory"
-        FS_Copy_File "$_target" "${_directory}/."
+        _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
+        I18N_Assemble "$_source" "$_directory"
+        FS_Copy_File "$_source" "${_directory}/."
         if [ $? -ne 0 ]; then
-                I18N_Copy_Failed
+                I18N_Assemble_Failed
                 return 1
         fi
 
