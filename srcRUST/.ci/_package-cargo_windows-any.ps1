@@ -49,29 +49,29 @@ function PACKAGE-Assemble-CARGO-Content {
 
 
 	# assemble the cargo package
-	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\"
-	$null = I18N-Assemble "${_source}" "${_directory}"
-	$___process = FS-Copy-All "${_source}" "${_directory}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\"
+	$null = I18N-Assemble "${___source}" "${_directory}"
+	$___process = FS-Copy-All "${___source}" "${_directory}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_CARGO_README}"
-	$_dest = "${_directory}\README.md"
-	$null = I18N-Assemble "${_source}" "${_dest}"
-	$___process = FS-Copy-File "${_source}" "${_dest}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_CARGO_README}"
+	$___dest = "${_directory}\README.md"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$___process = FS-Copy-File "${___source}" "${___dest}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$_dest = "${_directory}\Cargo.toml"
+	$___dest = "${_directory}\Cargo.toml"
 	$null = FS-Remove-Silently "${_directory}\Cargo.lock"
 	$null = FS-Remove-Silently "${_directory}\.ci"
-	$null = I18N-Create "${_dest}"
+	$null = I18N-Create "${___dest}"
 	$___process = RUST-Create-CARGO-TOML `
-		"${_dest}" `
+		"${___dest}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}" `

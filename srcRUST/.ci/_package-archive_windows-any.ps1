@@ -47,10 +47,10 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 		}
 		$null = FS-Remove-Silently "${_directory}\.ci"
 
-		$_source = "${_directory}\Cargo.toml"
-		$null = I18N-Create "${_source}"
+		$___source = "${_directory}\Cargo.toml"
+		$null = I18N-Create "${___source}"
 		$___process = RUST-Create-CARGO-TOML `
-			"${_source}" `
+			"${___source}" `
 			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 			"${env:PROJECT_SKU}" `
 			"${env:PROJECT_VERSION}" `
@@ -68,14 +68,14 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			return 1
 		}
 	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
-		$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
-		$___process = FS-Is-Directory "${_source}"
+		$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
+		$___process = FS-Is-Directory "${___source}"
 		if ($___process -ne 0) {
 			return 10 # not applicable
 		}
 
-		$null = I18N-Assemble "${_source}" "${_directory}"
-		$___process = FS-Copy-All "${_source}" "${_directory}"
+		$null = I18N-Assemble "${___source}" "${_directory}"
+		$___process = FS-Copy-All "${___source}" "${_directory}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
@@ -92,11 +92,11 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			return 1
 		}
 
-		$_source = "$(FS-Extension-Remove "${_target}" ".wasm").js"
-		$___process = FS-Is-File "${_source}"
+		$___source = "$(FS-Extension-Remove "${_target}" ".wasm").js"
+		$___process = FS-Is-File "${___source}"
 		if ($___process -eq 0) {
-			$null = I18N-Assemble "${_source}" "${_directory}"
-			$___process = Fs-Copy-File "${_source}" "${_directory}"
+			$null = I18N-Assemble "${___source}" "${_directory}"
+			$___process = Fs-Copy-File "${___source}" "${_directory}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
@@ -128,9 +128,9 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 
 
 	# copy user guide
-	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
-	$null = I18N-Assemble "${_source}" "${_directory}"
-	$___process = FS-Copy-File "${_source}" "${_directory}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
+	$null = I18N-Assemble "${___source}" "${_directory}"
+	$___process = FS-Copy-File "${___source}" "${_directory}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
@@ -138,9 +138,9 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 
 
 	# copy license file
-	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
-	$null = I18N-Assemble "${_source}" "${_directory}"
-	$___process = FS-Copy-File "${_source}" "${_directory}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
+	$null = I18N-Assemble "${___source}" "${_directory}"
+	$___process = FS-Copy-File "${___source}" "${_directory}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1

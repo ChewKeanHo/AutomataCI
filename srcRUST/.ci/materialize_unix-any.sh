@@ -70,12 +70,12 @@ fi
 
 
 # exporting executable
-__source="${__workspace}/${__target}/release/${PROJECT_SKU}"
-__dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-I18N_Export "$__source" "$__dest"
-FS_Make_Housing_Directory "$__dest"
-FS_Remove_Silently "$__dest"
-FS_Move "$__source" "$__dest"
+___source="${__workspace}/${__target}/release/${PROJECT_SKU}"
+___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
+I18N_Export "$___source" "$___dest"
+FS_Make_Housing_Directory "$___dest"
+FS_Remove_Silently "$___dest"
+FS_Move "$___source" "$___dest"
 if [ $? -ne 0 ]; then
         I18N_Export_Failed
         return 1

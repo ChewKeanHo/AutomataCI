@@ -47,29 +47,29 @@ PACKAGE_Assemble_CARGO_Content() {
 
 
         # assemble the cargo package
-        _source="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/"
-        I18N_Assemble "$_source" "$_directory"
-        FS_Copy_All "$_source" "$_directory"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/"
+        I18N_Assemble "$___source" "$_directory"
+        FS_Copy_All "$___source" "$_directory"
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
         fi
 
-        _source="${PROJECT_PATH_ROOT}/${PROJECT_CARGO_README}"
-        _dest="${_directory}/README.md"
-        I18N_Assemble "$_source" "$_dest"
-        FS_Copy_File "$_source" "$_dest"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_CARGO_README}"
+        ___dest="${_directory}/README.md"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Copy_File "$___source" "$___dest"
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
         fi
 
-        _dest="${_directory}/Cargo.toml"
-        I18N_Create "$_dest"
+        ___dest="${_directory}/Cargo.toml"
+        I18N_Create "$___dest"
         FS_Remove_Silently "${_directory}/Cargo.lock"
         FS_Remove_Silently "${_directory}/.ci"
         RUST_Create_CARGO_TOML \
-                "$_dest" \
+                "$___dest" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                 "$PROJECT_SKU" \
                 "$PROJECT_VERSION" \

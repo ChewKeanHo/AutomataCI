@@ -122,8 +122,8 @@ function SUBROUTINE-Build {
 			+ "--config `"target.${__target}.linker='${__linker}'`" "
 	}
 
-	$__err_log = [IO.Path]::ChangeExtension("${__log}", '').TrimEnd('.') + "-error.txt"
-	$__out_log = [IO.Path]::ChangeExtension("${__log}", '').TrimEnd('.') + "-output.txt"
+	$__err_log = "$(FS-Extension-Remove "${__log}" "*")-error.txt"
+	$__out_log = "$(FS-Extension-Remove "${__log}" "*")-output.txt"
 	$___process = Start-Process -Wait `
 		-Filepath "$(Get-Command "cargo" -ErrorAction SilentlyContinue)" `
 		-RedirectStandardError "${__err_log}" `

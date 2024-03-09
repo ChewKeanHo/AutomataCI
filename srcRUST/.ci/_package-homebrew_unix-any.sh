@@ -42,70 +42,70 @@ PACKAGE_Assemble_HOMEBREW_Content() {
 
 
         # assemble the package
-        __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/"
-        __dest="${_directory}/${PROJECT_PATH_SOURCE}"
-        I18N_Assemble "$__source" "$__dest"
-        FS_Make_Directory "$__dest"
-        FS_Copy_All "$__source" "$__dest"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/"
+        ___dest="${_directory}/${PROJECT_PATH_SOURCE}"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
         fi
 
-        __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/"
-        __dest="${_directory}/${PROJECT_PATH_SOURCE}/.ci"
-        I18N_Assemble "$__source" "$__dest"
-        FS_Make_Directory "$__dest"
-        FS_Copy_All "$__source" "$__dest"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/"
+        ___dest="${_directory}/${PROJECT_PATH_SOURCE}/.ci"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
         fi
 
-        __source="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/"
-        __dest="${_directory}/${PROJECT_RUST}"
-        I18N_Assemble "$__source" "$__dest"
-        FS_Make_Directory "$__dest"
-        FS_Copy_All "$__source" "$__dest"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/"
+        ___dest="${_directory}/${PROJECT_RUST}"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
         fi
 
-        __source="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/.ci/"
-        __dest="${_directory}/${PROJECT_RUST}/.ci"
-        I18N_Assemble "$__source" "$__dest"
-        FS_Make_Directory "$__dest"
-        FS_Copy_All "$__source" "$__dest"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_RUST}/.ci/"
+        ___dest="${_directory}/${PROJECT_RUST}/.ci"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
         fi
 
-        __source="${PROJECT_PATH_ROOT}/automataCI"
-        __dest="$_directory"
-        I18N_Assemble "$__source" "$__dest"
-        FS_Make_Directory "$__dest"
-        FS_Copy_All "$__source" "$__dest"
+        ___source="${PROJECT_PATH_ROOT}/automataCI"
+        ___dest="$_directory"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
         fi
 
-        __source="${PROJECT_PATH_ROOT}/CONFIG.toml"
-        __dest="$_directory"
-        I18N_Assemble "$__source" "$__dest"
-        FS_Make_Directory "$__dest"
-        FS_Copy_File "$__source" "$__dest"
+        ___source="${PROJECT_PATH_ROOT}/CONFIG.toml"
+        ___dest="$_directory"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_File "$___source" "$___dest"
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
         fi
 
-        __dest="${_directory}/${PROJECT_RUST}/Cargo.toml"
-        I18N_Create "$__dest"
+        ___dest="${_directory}/${PROJECT_RUST}/Cargo.toml"
+        I18N_Create "$___dest"
         RUST_Create_CARGO_TOML \
-                "$__dest" \
+                "$___dest" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                 "$PROJECT_SKU" \
                 "$PROJECT_VERSION" \
@@ -125,9 +125,9 @@ PACKAGE_Assemble_HOMEBREW_Content() {
 
 
         # script formula.rb
-        __dest="${_directory}/formula.rb"
-        I18N_Create "$__dest"
-        FS_Write_File "$__dest" "\
+        ___dest="${_directory}/formula.rb"
+        I18N_Create "$___dest"
+        FS_Write_File "$___dest" "\
 class ${PROJECT_SKU_TITLECASE} < Formula
   desc \"${PROJECT_PITCH}\"
   homepage \"${PROJECT_CONTACT_WEBSITE}\"

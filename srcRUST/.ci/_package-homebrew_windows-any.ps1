@@ -43,70 +43,70 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 
 
 	# assemble the package
-	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
-	$__dest = "${_directory}\${env:PROJECT_PATH_SOURCE}"
-	$null = I18N-Assemble "${__source}" "${__dest}"
-	$null = FS-Make-Directory "${__dest}"
-	$___process = FS-Copy-All "${__source}" "${__dest}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
+	$___dest = "${_directory}\${env:PROJECT_PATH_SOURCE}"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci"
-	$__dest = "${_directory}\${env:PROJECT_PATH_SOURCE}\.ci"
-	$null = I18N-Assemble "${__source}" "${__dest}"
-	$null = FS-Make-Directory "${__dest}"
-	$___process = FS-Copy-All "${__source}" "${__dest}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci"
+	$___dest = "${_directory}\${env:PROJECT_PATH_SOURCE}\.ci"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
-	$__dest = "${_directory}\${env:PROJECT_RUST}"
-	$null = I18N-Assemble "${__source}" "${__dest}"
-	$null = FS-Make-Directory "${__dest}"
-	$___process = FS-Copy-All "${__source}" "${__dest}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
+	$___dest = "${_directory}\${env:PROJECT_RUST}"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\.ci"
-	$__dest = "${_directory}\${env:PROJECT_RUST}\.ci"
-	$null = I18N-Assemble "${__source}" "${__dest}"
-	$null = FS-Make-Directory "${__dest}"
-	$___process = FS-Copy-All "${__source}" "${__dest}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\.ci"
+	$___dest = "${_directory}\${env:PROJECT_RUST}\.ci"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__source = "${env:PROJECT_PATH_ROOT}\automataCI"
-	$__dest = "${_directory}"
-	$null = I18N-Assemble "${__source}" "${__dest}"
-	$null = FS-Make-Directory "${__dest}"
-	$___process = FS-Copy-All "${__source}" "${__dest}"
+	$___source = "${env:PROJECT_PATH_ROOT}\automataCI"
+	$___dest = "${_directory}"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-All "${___source}" "${___dest}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__source = "${env:PROJECT_PATH_ROOT}\CONFIG.toml"
-	$__dest = "${_directory}"
-	$null = I18N-Assemble "${__source}" "${__dest}"
-	$null = FS-Make-Directory "${__dest}"
-	$___process = FS-Copy-File "${__source}" "${__dest}"
+	$___source = "${env:PROJECT_PATH_ROOT}\CONFIG.toml"
+	$___dest = "${_directory}"
+	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = FS-Make-Directory "${___dest}"
+	$___process = FS-Copy-File "${___source}" "${___dest}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__dest = "${_directory}\${env:PROJECT_RUST}\Cargo.toml"
-	$null = I18N-Create "${__dest}"
+	$___dest = "${_directory}\${env:PROJECT_RUST}\Cargo.toml"
+	$null = I18N-Create "${___dest}"
 	$___process = RUST-Create-CARGO-TOML `
-		"${__dest}" `
+		"${___dest}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\Cargo.toml" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_VERSION}" `
@@ -126,9 +126,9 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 
 
 	# script formula.rb
-	$__dest = "${_directory}\formula.rb"
-	$null = I18N-Create "${__dest}"
-	$___process = FS-Write-File "${__dest}" @"
+	$___dest = "${_directory}\formula.rb"
+	$null = I18N-Create "${___dest}"
+	$___process = FS-Write-File "${___dest}" @"
 class ${env:PROJECT_SKU_TITLECASE} < Formula
   desc "${env:PROJECT_PITCH}"
   homepage "${env:PROJECT_CONTACT_WEBSITE}"

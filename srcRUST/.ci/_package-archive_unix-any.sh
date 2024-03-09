@@ -46,10 +46,10 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                 fi
                 FS_Remove_Silently "${_directory}/.ci"
 
-                _source="${_directory}/Cargo.toml"
-                I18N_Create "$_target" "$_directory"
+                ___source="${_directory}/Cargo.toml"
+                I18N_Create "$___source"
                 RUST_Create_CARGO_TOML \
-                        "$_source" \
+                        "$___source" \
                         "${PROJECT_PATH_ROOT}/${PROJECT_RUST}/Cargo.toml" \
                         "$PROJECT_SKU" \
                         "$PROJECT_VERSION" \
@@ -67,14 +67,14 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
-                _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
-                FS_Is_Directory "$_source"
+                ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+                FS_Is_Directory "$___source"
                 if [ $? -ne 0 ]; then
                         return 10 # not applicable
                 fi
 
-                I18N_Assemble "$_source" "$_directory"
-                FS_Copy_All "${_source}/" "$_directory"
+                I18N_Assemble "$___source" "$_directory"
+                FS_Copy_All "${___source}/" "$_directory"
                 if [ $? -ne 0 ]; then
                         I18N_Assemble_Failed
                         return 1
@@ -91,11 +91,11 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         return 1
                 fi
 
-                _source="$(FS_Extension_Remove "$_target" ".wasm").js"
-                FS_Is_File "$_source"
+                ___source="$(FS_Extension_Remove "$_target" ".wasm").js"
+                FS_Is_File "$___source"
                 if [ $? -eq 0 ]; then
-                        I18N_Assemble "$_source" "$_directory"
-                        FS_Copy_File "$_source" "$_directory"
+                        I18N_Assemble "$___source" "$_directory"
+                        FS_Copy_File "$___source" "$_directory"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
@@ -129,9 +129,9 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
 
         # copy user guide
-        _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        I18N_Assemble "$_source" "$_directory"
-        FS_Copy_File "$_source" "${_directory}/."
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
+        I18N_Assemble "$___source" "$_directory"
+        FS_Copy_File "$___source" "${_directory}/."
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
@@ -139,9 +139,9 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
 
         # copy license file
-        _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        I18N_Assemble "$_source" "$_directory"
-        FS_Copy_File "$_source" "${_directory}/."
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
+        I18N_Assemble "$___source" "$_directory"
+        FS_Copy_File "$___source" "${_directory}/."
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1

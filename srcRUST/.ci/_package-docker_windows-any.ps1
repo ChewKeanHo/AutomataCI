@@ -114,7 +114,7 @@ LABEL org.opencontainers.image.source=`"${env:PROJECT_SOURCE_URL}`"
 		}
 	}
 
-	$___process = FS-Append-File "${_directory}\Dockerfile" @"
+	$___process = FS-Append-File "${___dest}" @"
 # Defining environment variables
 ENV ARCH ${_target_arch}
 ENV OS ${_target_os}
