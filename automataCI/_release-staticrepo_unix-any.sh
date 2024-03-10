@@ -10,10 +10,19 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/i18n/translations.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/versioners/git.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/versioners/git.sh"
+
+
+
+
+# initialize
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run me from automataCI/ci.sh.ps1 instead!\n"
+        return 1
+fi
 
 
 

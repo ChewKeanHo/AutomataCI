@@ -9,10 +9,20 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\i18n\translations.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\versioners\git.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\versioners\git.ps1"
+
+
+
+
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
+	return
+}
+
 
 
 
@@ -75,14 +85,14 @@ function RELEASE-Setup-STATIC-REPO {
 
 	# execute
 	$null = I18N-Setup "STATIC REPO"
-	$__process = GIT-Clone-Repo `
+	$___process = GIT-Clone-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
 		"$(Get-Location)" `
 		"${env:PROJECT_STATIC_REPO}" `
 		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
 		"${env:PROJECT_STATIC_REPO_DIRECTORY}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Setup-Failed
 		return 1
 	}
@@ -91,8 +101,8 @@ function RELEASE-Setup-STATIC-REPO {
 	$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
 	if ($(FS-Is-Directory "${__staging}") -eq 0) {
 		$null = I18N-Export "STATIC REPO"
-		$__process = FS-Copy-All "${__staging}/" "${__dest}"
-		if ($__process -ne 0) {
+		$___process = FS-Copy-All "${__staging}/" "${__dest}"
+		if ($___process -ne 0) {
 			$null = I18N-Export-Failed
 			return 1
 		}
