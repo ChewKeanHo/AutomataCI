@@ -16,26 +16,26 @@
 
 # initialize
 if [ "$PROJECT_PATH_ROOT" = "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-cargo_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-changelog_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-checksum_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-chocolatey_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-citation_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-deb_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-docker_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-homebrew_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-pypi_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-rpm_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-staticrepo_unix-any.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/_release-docsrepo_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-cargo_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-changelog_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-checksum_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-chocolatey_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-citation_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-deb_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-docker_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-homebrew_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-pypi_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-rpm_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-staticrepo_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-docsrepo_unix-any.sh"
 
 
 
