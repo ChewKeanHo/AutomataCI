@@ -15,7 +15,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run me from ci.cmd instead!`n"
+	Write-Error "[ ERROR ] - Please run me from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
@@ -284,8 +284,7 @@ if ($___process -eq 0) {
 	$___process = SYNC-Exec-Parallel `
 		${function:SUBROUTINE-Package}.ToString() `
 		"${__parallel_control}" `
-		"${__control_directory}" `
-		"$([System.Environment]::ProcessorCount)"
+		"${__control_directory}"
 	if ($___process -ne 0) {
 		$null = I18N-Sync-Failed
 		return 1
