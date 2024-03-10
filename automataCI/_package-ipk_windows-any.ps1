@@ -19,7 +19,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return
 }
 
@@ -43,8 +43,8 @@ function PACKAGE-Run-IPK {
 
 	# validate input
 	$null = I18N-Check-Availability "IPK"
-	$__process = IPK-Is-Available "${_target_os}" "${_target_arch}"
-	switch ($__process) {
+	$___process = IPK-Is-Available "${_target_os}" "${_target_arch}"
+	switch ($___process) {
 	{ $_ -in 2, 3 } {
 		$null = I18N-Check-Incompatible-Skipped
 		return 0
@@ -62,8 +62,8 @@ function PACKAGE-Run-IPK {
 	$_target_path = "${_dest}\${_src}.ipk"
 	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\ipk_${_src}"
 	$null = I18N-Remake "${_src}"
-	$__process = FS-Remake-Directory "${_src}"
-	if ($__process -ne 0) {
+	$___process = FS-Remake-Directory "${_src}"
+	if ($___process -ne 0) {
 		$null = I18N-Remake-Failed
 		return 1
 	}
@@ -73,28 +73,28 @@ function PACKAGE-Run-IPK {
 
 	# execute
 	$null = I18N-Check "${_target_path}"
-	$__process = FS-Is-File "${_target_path}"
-	if ($__process -eq 0) {
+	$___process = FS-Is-File "${_target_path}"
+	if ($___process -eq 0) {
 		$null = I18N-Check-Failed
 		return 1
 	}
 
 	$cmd = "PACKAGE-Assemble-IPK-Content"
 	$null = I18N-Check-Function "$cmd"
-	$__process = OS-Is-Command-Available "$cmd"
-	if ($__process -ne 0) {
+	$___process = OS-Is-Command-Available "$cmd"
+	if ($___process -ne 0) {
 		$null = I18N-Check-Failed
 		return 1
 	}
 
 	$null = I18N-Assemble-Package
-	$__process = PACKAGE-Assemble-IPK-Content `
+	$___process = PACKAGE-Assemble-IPK-Content `
 		"${_target}" `
 		"${_src}" `
 		"${_target_filename}" `
 		"${_target_os}" `
 		"${_target_arch}"
-	switch ($__process) {
+	switch ($___process) {
 	10 {
 		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
@@ -107,15 +107,15 @@ function PACKAGE-Run-IPK {
 	}}
 
 	$null = I18N-Check "control\control"
-	$__process = FS-Is-File "${_src}\control\control"
-	if ($__process -ne 0) {
+	$___process = FS-Is-File "${_src}\control\control"
+	if ($___process -ne 0) {
 		$null = I18N-Check-Failed
 		return 1
 	}
 
 	$null = I18N-Package "${_target_path}"
-	$__process = IPK-Create-Archive "${_src}" "${_target_path}"
-	if ($__process -ne 0) {
+	$___process = IPK-Create-Archive "${_src}" "${_target_path}"
+	if ($___process -ne 0) {
 		$null = I18N-Package-Failed
 		return 1
 	}
