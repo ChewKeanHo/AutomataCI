@@ -23,6 +23,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\installer.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\go.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
@@ -84,8 +85,7 @@ if ($(STRINGS-Is-Empty "${env:PROJECT_PYTHON}") -ne 0) {
 
 if ($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) {
 	$null = I18N-Install "go"
-	$__process = INSTALLER-Setup-Go
-	if ($__process -ne 0) {
+	if ($(GO-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
 	}

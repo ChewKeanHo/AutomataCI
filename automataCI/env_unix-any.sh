@@ -25,6 +25,7 @@ fi
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/installer.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/go.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 . "${LIBS_AUTOMATACI}/services/crypto/notary.sh"
@@ -96,7 +97,7 @@ fi
 
 if [ $(STRINGS_Is_Empty "$PROJECT_GO") -ne 0 ]; then
         I18N_Install "go"
-        INSTALLER::setup_go
+        GO_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
                 return 1

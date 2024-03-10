@@ -80,6 +80,41 @@ function GO-Is-Localized {
 
 
 
+function Go-Setup {
+	# validate input
+	$___process =  OS-Is-Command-Available "choco"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process =  OS-Is-Command-Available "go"
+	if ($___process -eq 0) {
+		return 0
+	}
+
+
+	# execute
+	$___process = OS-Exec "choco" "install go -y"
+	if ($___process -ne 0) {
+		return 1
+	}
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+
+	# report status
+	$___process = OS-Is-Command-Available "go"
+	if ($___process -eq 0) {
+		return 0
+	}
+
+	return 1
+}
+
+
+
+
 function GO-Setup-Local-Environment {
 	# validate input
 	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_ROOT)) {
