@@ -17,6 +17,15 @@
 
 
 
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
+	return
+}
+
+
+
+
 function RELEASE-Run-DOCKER {
 	param(
 		[string]$_target,
@@ -31,8 +40,8 @@ function RELEASE-Run-DOCKER {
 	}
 
 	$null = I18N-Check-Availability "DOCKER"
-	$__process = DOCKER-Is-Available
-	if ($__process -ne 0) {
+	$___process = DOCKER-Is-Available
+	if ($___process -ne 0) {
 		$null = I18N-Check-Failed
 		return 1
 	}
