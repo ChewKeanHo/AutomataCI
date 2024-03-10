@@ -18,6 +18,15 @@
 
 
 
+# initialize
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run me from automataCI/ci.sh.ps1 instead!\n"
+        return 1
+fi
+
+
+
+
 RELEASE_Run_RPM() {
         __target="$1"
         __directory="$2"
@@ -38,7 +47,7 @@ RELEASE_Run_RPM() {
 
 
         # execute
-        __dest="${2}/rpm"
+        __dest="${__directory}/rpm"
         I18N_Create "$__dest"
         FS_Make_Directory "${__dest}"
         if [ $? -ne 0 ]; then
