@@ -17,6 +17,15 @@
 
 
 
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!`n"
+	return
+}
+
+
+
+
 function PACKAGE-Run-CITATION {
 	param(
 		[string]$__citation_cff
@@ -24,7 +33,7 @@ function PACKAGE-Run-CITATION {
 
 	# execute
 	$null = I18N-Create "${__citation_cff}"
-	$__process = CITATION-Build `
+	$___process = CITATION-Build `
 		"${__citation_cff}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\ABSTRACTS.txt" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\CITATIONS.yml" `
@@ -40,7 +49,7 @@ function PACKAGE-Run-CITATION {
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_WEBSITE}" `
 		"${env:PROJECT_CONTACT_EMAIL}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
 	}
