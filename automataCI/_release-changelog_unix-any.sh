@@ -16,6 +16,15 @@
 
 
 
+# initialize
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run me from automataCI/ci.sh.ps1 instead!\n"
+        return 1
+fi
+
+
+
+
 RELEASE_Conclude_CHANGELOG() {
         # execute
         I18N_Export "${PROJECT_VERSION} CHANGELOG"
