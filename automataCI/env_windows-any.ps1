@@ -21,6 +21,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\c.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\installer.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\go.ps1"
@@ -96,8 +97,7 @@ if (($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) -or
 	($(STRINGS-Is-Empty "${env:PROJECT_NIM}") -ne 0) -or
 	($(STRINGS-Is-Empty "${env:PROJECT_RUST}") -ne 0)) {
 	$null = I18N-Install "c"
-	$__process = INSTALLER-Setup-C
-	if ($__process -ne 0) {
+	if ($(C-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
 	}

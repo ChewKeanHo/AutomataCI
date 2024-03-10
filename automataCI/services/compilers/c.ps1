@@ -318,3 +318,46 @@ function C-Is-Available {
 
 	return 1
 }
+
+
+
+
+function C-Setup {
+	# validate input
+	$___process = C-Is-Available
+	if ($___process -eq 0) {
+		return 0
+	}
+
+	$___process =  OS-Is-Command-Available "choco"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$___process = OS-Exec "choco" "install gcc-arm-embedded -y"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = OS-Exec "choco" "install mingw -y"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	# BUG: choco fails to install emscripten's dependency properly (git.install)
+	#      See: https://github.com/aminya/chocolatey-emscripten/issues/2
+	#$___process = OS-Exec "choco" "install emscripten -y"
+	#if ($___process -ne 0) {
+	#	return 1
+	#}
+
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+
+	# report status
+	return 0
+}

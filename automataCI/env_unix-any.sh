@@ -23,6 +23,7 @@ fi
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/io/net/http.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/c.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/installer.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/go.sh"
@@ -109,7 +110,7 @@ if [ $(STRINGS_Is_Empty "$PROJECT_C") -ne 0 ] ||
         [ $(STRINGS_Is_Empty "$PROJECT_NIM") -ne 0 ] ||
         [ $(STRINGS_Is_Empty "$PROJECT_RUST") -ne 0 ]; then
         I18N_Install "c"
-        INSTALLER::setup_c "$PROJECT_OS" "$PROJECT_ARCH"
+        C_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
                 return 1

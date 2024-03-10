@@ -64,45 +64,6 @@ function INSTALLER-Setup-Angular {
 
 
 
-function INSTALLER-Setup-C {
-	# validate input
-	$__process =  OS-Is-Command-Available "choco"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-
-	# execute
-	$__process = OS-Exec "choco" "install gcc-arm-embedded -y"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process = OS-Exec "choco" "install mingw -y"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	# BUG: choco fails to install emscripten's dependency properly (git.install)
-	#      See: https://github.com/aminya/chocolatey-emscripten/issues/2
-	#$__process = OS-Exec "choco" "install emscripten -y"
-	#if ($__process -ne 0) {
-	#	return 1
-	#}
-
-
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
-
-
-	# report status
-	return 0
-}
-
-
-
-
 function INSTALLER-Setup-Nim {
 	# validate input
 	$__process =  OS-Is-Command-Available "choco"

@@ -367,3 +367,50 @@ C::is_available() {
         # report status
         return 1
 }
+
+
+
+
+C_Setup() {
+        # validate input
+        C::is_available
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        OS_Is_Command_Available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        if [ "$(OS_Get)" = "darwin" ]; then
+                brew install \
+                        aarch64-elf-gcc \
+                        arm-none-eabi-gcc \
+                        riscv64-elf-gcc \
+                        x86_64-elf-gcc \
+                        i686-elf-gcc \
+                        mingw-w64 \
+                        emscripten \
+                        gcc
+        else
+                brew install \
+                        aarch64-elf-gcc \
+                        arm-none-eabi-gcc \
+                        riscv64-elf-gcc \
+                        x86_64-elf-gcc \
+                        i686-elf-gcc \
+                        mingw-w64 \
+                        emscripten \
+                        llvm
+        fi
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # report status
+        return 1
+}

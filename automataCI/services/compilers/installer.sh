@@ -49,57 +49,6 @@ INSTALLER::setup_angular() {
 
 
 
-INSTALLER::setup_c() {
-        #__os="$1"
-        #__arch="$2"
-
-
-        # validate input
-        OS_Is_Command_Available "brew"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-
-        # execute
-        C::is_available
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        if [ "$1" = "darwin" ]; then
-                brew install \
-                        aarch64-elf-gcc \
-                        arm-none-eabi-gcc \
-                        riscv64-elf-gcc \
-                        x86_64-elf-gcc \
-                        i686-elf-gcc \
-                        mingw-w64 \
-                        emscripten \
-                        gcc
-        else
-                brew install \
-                        aarch64-elf-gcc \
-                        arm-none-eabi-gcc \
-                        riscv64-elf-gcc \
-                        x86_64-elf-gcc \
-                        i686-elf-gcc \
-                        mingw-w64 \
-                        emscripten \
-                        llvm
-        fi
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-
-        # report status
-        return 1
-}
-
-
-
-
 INSTALLER::setup_nim() {
         # validate input
         OS_Is_Command_Available "brew"
