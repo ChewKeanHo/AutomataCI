@@ -179,31 +179,3 @@ INSTALLER::setup_node() {
         # report status
         return 0
 }
-
-
-
-
-INSTALLER::setup_osslsigncode() {
-        # validate input
-        OS_Is_Command_Available "brew"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        OS_Is_Command_Available "osslsigncode"
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-
-        # execute
-        brew install osslsigncode
-
-
-        # report status
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
-        return 1
-}

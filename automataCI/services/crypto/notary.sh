@@ -86,6 +86,34 @@ NOTARY_Microsoft_Is_Available() {
 
 
 
+NOTARY_Setup_Microsoft() {
+        # validate input
+        OS_Is_Command_Available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS_Is_Command_Available "osslsigncode"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        brew install osslsigncode
+
+
+        # report status
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+
+
+
 NOTARY_Sign_Apple() {
         #___destination="$1"
         #___file="$2"

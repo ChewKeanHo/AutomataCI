@@ -27,6 +27,7 @@ fi
 . "${LIBS_AUTOMATACI}/services/compilers/installer.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/python.sh"
+. "${LIBS_AUTOMATACI}/services/crypto/notary.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/dotnet.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/homebrew.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/reprepro.sh"
@@ -76,7 +77,7 @@ fi
 
 
 I18N_Install "osslsigncode"
-INSTALLER::setup_osslsigncode
+NOTARY_Setup_Microsoft
 if [ $? -ne 0 ]; then
         I18N_Install_Failed
         return 1

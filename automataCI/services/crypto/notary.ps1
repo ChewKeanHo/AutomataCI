@@ -85,6 +85,14 @@ function NOTARY-Microsoft-Is-Available {
 
 
 
+function NOTARY-Setup-Microsoft {
+	# report status
+	return 0 # not applicable
+}
+
+
+
+
 function NOTARY-Sign-Apple {
 	param (
 		[string]$___file,
