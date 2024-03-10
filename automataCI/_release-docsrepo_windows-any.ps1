@@ -16,6 +16,15 @@
 
 
 
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
+	return
+}
+
+
+
+
 function RELEASE-Conclude-DOCS {
 	# validate input
 	$null = I18N-Check "DOCS"
@@ -34,7 +43,7 @@ function RELEASE-Conclude-DOCS {
 
 	# execute
 	$null = I18N-Setup "DOCS"
-	$__process = GIT-Clone-Repo `
+	$___process = GIT-Clone-Repo `
 		"${env:PROJECT_PATH_ROOT}" `
 		"${env:PROJECT_PATH_RELEASE}" `
 		"$(Get-Location)" `
@@ -42,7 +51,7 @@ function RELEASE-Conclude-DOCS {
 		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
 		"${env:PROJECT_DOCS_REPO_DIRECTORY}" `
 		"${env:PROJECT_DOCS_REPO_BRANCH}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Setup-Failed
 		return 1
 	}
