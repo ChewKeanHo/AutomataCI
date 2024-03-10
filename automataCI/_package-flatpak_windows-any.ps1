@@ -19,7 +19,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return
 }
 
@@ -121,13 +121,13 @@ function PACKAGE-Run-FLATPAK {
 
 	# archive the assembled payload
 	$null = I18N-Package "${_target_path}"
-	$__process = FLATPAK-Create-Archive `
+	$___process = FLATPAK-Create-Archive `
 		"${_src}" `
 		"${_target_path}" `
 		"${_repo}" `
 		"${env:PROJECT_APP_ID}" `
 		"${env:PROJECT_GPG_ID}"
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		$null = I18N-Package-Failed "${_target_path}"
 		return 1
 	}
