@@ -16,6 +16,15 @@
 
 
 
+# initialize
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run me from automataCI/ci.sh.ps1 instead!\n"
+        return 1
+fi
+
+
+
+
 RELEASE_Run_CITATION_CFF() {
         _target="$1"
 

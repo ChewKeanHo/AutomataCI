@@ -15,6 +15,15 @@
 
 
 
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
+	return
+}
+
+
+
+
 function RELEASE-Run-CITATION-CFF {
 	param(
 		[string]$_target
