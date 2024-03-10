@@ -91,7 +91,7 @@ function PACKAGE-Assemble-IPK-Content {
 		$null = I18N-Copy "${_target}" "${_filepath}"
 		$___process = FS-Make-Housing-Directory "${_filepath}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
+			$null = I18N-Create-Failed
 			return 1
 		}
 

@@ -12,10 +12,18 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
-. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/deb.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/reprepro.sh"
+
+
+
+
+# initialize
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run me from automataCI/ci.sh.ps1 instead!\n"
+        return 1
+fi
 
 
 

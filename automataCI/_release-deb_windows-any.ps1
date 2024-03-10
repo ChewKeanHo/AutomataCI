@@ -11,10 +11,18 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\deb.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\reprepro.ps1"
+
+
+
+
+# initialize
+if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
+	return
+}
 
 
 
