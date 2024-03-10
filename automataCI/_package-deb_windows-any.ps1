@@ -19,7 +19,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!`n"
 	return
 }
 
@@ -44,8 +44,8 @@ function PACKAGE-Run-DEB {
 
 	# validate input
 	$null = I18N-Check-Availability "DEB"
-	$__process = DEB-Is-Available "${_target_os}" "${_target_arch}"
-	switch ($__process) {
+	$___process = DEB-Is-Available "${_target_os}" "${_target_arch}"
+	switch ($___process) {
 	{ $_ -in 2, 3 } {
 		$null = I18N-Check-Incompatible-Skipped
 		return 0
