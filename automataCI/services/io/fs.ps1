@@ -563,7 +563,7 @@ function FS-Make-Housing-Directory {
 
 
 	# perform create
-	$___process = FS-Make-Directory (Split-Path -Path $___target)
+	$___process = FS-Make-Directory (Split-Path -Parent -Path $___target)
 
 
 	# report status

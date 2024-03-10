@@ -57,16 +57,16 @@ PACKAGE_Assemble_IPK_Content() {
                 #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
                 _filepath="${_directory}/data/usr/local/lib/${PROJECT_SKU}"
                 _filepath="${_filepath}/lib${PROJECT_SKU}.a"
-                I18N_Copy "$_target" "$_filepath"
+                I18N_Assemble "$_target" "$_filepath"
                 FS_Make_Housing_Directory "$_filepath"
                 if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
+                        I18N_Assemble_Failed
                         return 1
                 fi
 
                 FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
+                        I18N_Assemble_Failed
                         return 1
                 fi
 
@@ -90,16 +90,11 @@ PACKAGE_Assemble_IPK_Content() {
                 #      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
                 _filepath="${_directory}/data/usr/local/bin/${PROJECT_SKU}"
 
-                I18N_Copy "$_target" "$_filepath"
+                I18N_Assemble "$_target" "$_filepath"
                 FS_Make_Housing_Directory "$_filepath"
-                if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
-                        return 1
-                fi
-
                 FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
+                        I18N_Assemble_Failed
                         return 1
                 fi
         fi
