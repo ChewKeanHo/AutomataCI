@@ -21,9 +21,9 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\angular.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\c.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
-. "${env:LIBS_AUTOMATACI}\services\compilers\installer.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\go.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\nim.ps1"
@@ -127,8 +127,7 @@ if (($(STRINGS-Is-Empty "${env:PROJECT_NODE}") -ne 0) -or
 
 if ($(STRINGS-Is-Empty "${env:PROJECT_ANGULAR}") -ne 0) {
 	$null = I18N-Install "angular"
-	$__process = INSTALLER-Setup-Angular
-	if ($__process -ne 0) {
+	if ($(ANGULAR-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
 	}

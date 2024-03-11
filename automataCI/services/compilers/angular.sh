@@ -50,3 +50,30 @@ ANGULAR::is_available() {
 
         return 0
 }
+
+
+
+
+ANGULAR_Setup() {
+        # validate input
+        ANGULAR::is_available
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        OS_Is_Command_Available "npm"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        npm install -g @angular/cli
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}

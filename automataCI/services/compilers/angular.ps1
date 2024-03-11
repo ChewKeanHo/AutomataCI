@@ -39,6 +39,10 @@ function ANGULAR-Build {
 
 
 function ANGULAR-Is-Available {
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
 	$__program = Get-Command npm -ErrorAction SilentlyContinue
 	if (-not $__program) {
 		return 1
@@ -49,5 +53,40 @@ function ANGULAR-Is-Available {
 		return 1
 	}
 
+	return 0
+}
+
+
+
+
+function ANGULAR-Setup {
+	# validate input
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+	$___process = ANGULAR-Is-Available
+	if ($___process -eq 0) {
+		return 0
+	}
+
+	$___process =  OS-Is-Command-Available "npm"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$___process = OS-Exec "npm" "install -g @angular/cli"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+
+	# report status
 	return 0
 }
