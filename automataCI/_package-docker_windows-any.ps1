@@ -51,7 +51,7 @@ function PACKAGE-Run-DOCKER {
 	} 0 {
 		# accepted
 	} Default {
-		$null = I18N-Check-Failed
+		$null = I18N-Check-Failed-Skipped
 		return 0
 	}}
 

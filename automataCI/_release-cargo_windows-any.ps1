@@ -55,22 +55,23 @@ function RELEASE-Run-CARGO {
 		$___process = RUST-Cargo-Login
 		if ($___process -ne 0) {
 			$null = I18N-Check-Failed
-			$null = I18N-Logout
+			$null = I18N-Logout "CARGO"
 			$null = RUST-Cargo-Logout
 			return 1
 		}
 
 		$___process = RUST-Cargo-Release-Crate "${_target}"
-
-		$null = I18N-Logout
-		$____process = RUST-Cargo-Logout
-		if ($____process -ne 0) {
-			$null = I18N-Logout-Failed
+		if ($___process -ne 0) {
+			$null = I18N-Logout "CARGO"
+			$null = RUST-Cargo-Logout
+			$null = I18N-Publish-Failed
 			return 1
 		}
 
+		$null = I18N-Logout "CARGO"
+		$___process = RUST-Cargo-Logout "CARGO"
 		if ($___process -ne 0) {
-			$null = I18N-Publish-Failed
+			$null = I18N-Logout-Failed
 			return 1
 		}
 	}

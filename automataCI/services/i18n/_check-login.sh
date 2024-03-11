@@ -15,7 +15,7 @@
 
 
 
-I18N_Check_login() {
+I18N_Check_Login() {
         # execute
         case "$AUTOMATACI_LANG" in
         *)

@@ -62,7 +62,7 @@ PACKAGE_Run_DOCKER() {
                 # accepted
                 ;;
         *)
-                I18N_Check_Failed
+                I18N_Check_Failed_Skipped
                 return 0
                 ;;
         esac

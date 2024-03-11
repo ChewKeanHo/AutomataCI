@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -550,6 +550,13 @@ function deactivate {
 	Copy-Item -Path Function:_OLD_PROMPT -Destination Function:prompt
 	Remove-Item -Path Function:_OLD_PROMPT
 }
+
+
+# check existing
+if (-not [string]::IsNullOrEmpty(`${env:PROJECT_RUST_LOCALIZED})) {
+	return
+}
+
 
 # activate
 `${env:CARGO_HOME} = "${CARGO_HOME}"

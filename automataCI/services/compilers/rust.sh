@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -593,6 +593,13 @@ deactivate() {
         unset CARGO_HOME RUSTUP_HOME
         return 0
 }
+
+
+# check existing
+if [ ! -z \"\$PROJECT_RUST_LOCALIZED\" ]; then
+        return 0
+fi
+
 
 # activate
 export CARGO_HOME='${CARGO_HOME}'

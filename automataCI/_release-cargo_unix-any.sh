@@ -55,23 +55,23 @@ RELEASE_Run_CARGO() {
                 RUST_Cargo_Login
                 if [ $? -ne 0 ]; then
                         I18N_Check_Failed
-                        I18N_Logout
+                        I18N_Logout "CARGO"
                         RUST_Cargo_Logout
                         return 1
                 fi
 
                 RUST_Cargo_Release_Crate "$_target"
-                ___process=$?
-
-                I18N_Logout
-                RUST_Cargo_Logout
                 if [ $? -ne 0 ]; then
-                        I18N_Logout_Failed
+                        I18N_Publish_Failed
+                        I18N_Logout "CARGO"
+                        RUST_Cargo_Logout
                         return 1
                 fi
 
-                if [ $___process -ne 0 ]; then
-                        I18N_Publish_Failed
+                I18N_Logout "CARGO"
+                RUST_Cargo_Logout
+                if [ $? -ne 0 ]; then
+                        I18N_Logout_Failed
                         return 1
                 fi
         fi
