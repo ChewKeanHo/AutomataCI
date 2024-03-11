@@ -1,5 +1,5 @@
-name: on Git Push
-run-name: CI Run upon Git Push.
+name: Git Push
+run-name: CI - Git Push
 on:
   push:
     branches:
@@ -25,68 +25,68 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
         PROJECT_SIMULATE_RELEASE_REPO: true
     steps:
-      - name: Checking out designated commit - GITHUB ACTIONS
+      - name: GITHUB ACTIONS - CHECKOUT
         id: git_check_out
         uses: actions/checkout@v4
-      - name: Initialize - GITHUB ACTIONS
+      - name: GIT - INIT
         id: git_initialize
         run: |
           git config --global user.email "github.actions.runner@github.com"
-          git config --global user.name "Github Action Automated Runner"
-      - name: Execute repo's AutomataCI - PURGE
-        id: native_ci_purge
+          git config --global user.name "Github Actions Automated Runner System"
+      - name: AutomataCI - PURGE
+        id: automataci_ci_purge
         run: |
           ./automataCI/ci.sh.ps1 purge
-      - name: Execute repo's AutomataCI - CLEAN
-        id: native_ci_clean
+      - name: AutomataCI - CLEAN
+        id: automataci_ci_clean
         run: |
           ./automataCI/ci.sh.ps1 clean
-      - name: Execute repo's AutomataCI - ENVIRONMENT
-        id: native_ci_env
+      - name: AutomataCI - ENVIRONMENT
+        id: automataci_ci_env
         run: |
           ./automataCI/ci.sh.ps1 env
-      - name: Execute repo's AutomataCI - SETUP
-        id: native_ci_setup
+      - name: AutomataCI - SETUP
+        id: automataci_ci_setup
         run: |
           ./automataCI/ci.sh.ps1 setup
-      - name: Execute repo's AutomataCI - PREPARE
-        id: native_ci_prepare
+      - name: AutomataCI - PREPARE
+        id: automataci_ci_prepare
         run: |
           ./automataCI/ci.sh.ps1 prepare
-      - name: Execute repo's AutomataCI - START
-        id: native_ci_start
+      - name: AutomataCI - START
+        id: automataci_ci_start
         run: |
           ./automataCI/ci.sh.ps1 start
-      - name: Execute repo's AutomataCI - TEST
-        id: native_ci_test
+      - name: AutomataCI - TEST
+        id: automataci_ci_test
         run: |
           ./automataCI/ci.sh.ps1 test
-      - name: Execute repo's AutomataCI - MATERIALIZE
-        id: native_ci_materialize
+      - name: AutomataCI - MATERIALIZE
+        id: automataci_ci_materialize
         run: |
           ./automataCI/ci.sh.ps1 materialize
-      - name: Execute repo's AutomataCI - BUILD
-        id: native_ci_build
+      - name: AutomataCI - BUILD
+        id: automataci_ci_build
         run: |
           ./automataCI/ci.sh.ps1 build
-      - name: Execute repo's AutomataCI - NOTARIZE
-        id: native_ci_notarize
+      - name: AutomataCI - NOTARIZE
+        id: automataci_ci_notarize
         run: |
           ./automataCI/ci.sh.ps1 notarize
-      - name: Execute repo's AutomataCI - PACKAGE
-        id: native_ci_package
+      - name: AutomataCI - PACKAGE
+        id: automataci_ci_package
         run: |
           ./automataCI/ci.sh.ps1 package
-      - name: Execute repo's AutomataCI - RELEASE
-        id: native_ci_release
+      - name: AutomataCI - RELEASE
+        id: automataci_ci_release
         run: |
           ./automataCI/ci.sh.ps1 release
-      - name: Execute repo's AutomataCI - STOP
-        id: native_ci_stop
+      - name: AutomataCI - STOP
+        id: automataci_ci_stop
         run: |
           ./automataCI/ci.sh.ps1 stop
-      - name: Execute repo's AutomataCI - DEPLOY
-        id: native_ci_deploy
+      - name: AutomataCI - DEPLOY
+        id: automataci_ci_deploy
         run: |
           ./automataCI/ci.sh.ps1 deploy
       - name: Archive Payloads Artifacts
