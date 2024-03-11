@@ -29,6 +29,7 @@ fi
 . "${LIBS_AUTOMATACI}/services/compilers/go.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/nim.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/node.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 . "${LIBS_AUTOMATACI}/services/crypto/notary.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/dotnet.sh"
@@ -132,6 +133,17 @@ fi
 if [ $(STRINGS_Is_Empty "$PROJECT_NIM") -ne 0 ]; then
         I18N_Install "nim"
         NIM_Setup
+        if [ $? -ne 0 ]; then
+                I18N_Install_Failed
+                return 1
+        fi
+fi
+
+
+if [ $(STRINGS_Is_Empty "$PROJECT_NODE") -ne 0 ] ||
+        [ $(STRINGS_Is_Empty "$PROJECT_ANGULAR") -ne 0 ]; then
+        I18N_Install "node"
+        NODE_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
                 return 1

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2024 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -10,32 +10,26 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
 
 
 
 
-INSTALLER::setup_angular() {
+NODE_Setup() {
         # validate input
+        OS_Is_Command_Available "npm"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
         OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        OS_Is_Command_Available "ng"
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
 
         # execute
-        INSTALLER::setup_node
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        npm install -g @angular/cli
+        brew install node
         if [ $? -ne 0 ]; then
                 return 1
         fi
