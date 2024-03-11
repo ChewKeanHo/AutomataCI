@@ -121,6 +121,33 @@ NIM::is_localized() {
 
 
 
+NIM_Setup() {
+        # validate input
+        OS_Is_Command_Available "nim"
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+        OS_Is_Command_Available "brew"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        brew install nim
+        if [ $? -eq 0 ]; then
+                return 0
+        fi
+
+
+        # report status
+        return 1
+}
+
+
+
+
 NIM::setup_local_environment() {
         # validate input
         if [ -z "$PROJECT_PATH_ROOT" ]; then

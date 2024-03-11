@@ -125,6 +125,37 @@ function NIM-Is-Localized {
 
 
 
+function NIM-Setup {
+	# validate input
+	$___process = NIM-Is-Available
+	if ($___process -eq 0) {
+		return 0
+	}
+
+	$___process =  OS-Is-Command-Available "choco"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$___process = OS-Exec "choco" "install nim -y"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function NIM-Setup-Local-Environment {
 	# validate input
 	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_ROOT)) {

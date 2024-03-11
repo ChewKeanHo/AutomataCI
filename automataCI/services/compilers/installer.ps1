@@ -64,41 +64,6 @@ function INSTALLER-Setup-Angular {
 
 
 
-function INSTALLER-Setup-Nim {
-	# validate input
-	$__process =  OS-Is-Command-Available "choco"
-	if ($__process -ne 0) {
-		return 1
-	}
-
-	$__process =  OS-Is-Command-Available "nim"
-	if ($__process -eq 0) {
-		return 0
-	}
-
-
-	# execute
-	$__process = OS-Exec "choco" "install nim -y"
-	if ($__process -ne 0) {
-		return 1
-	}
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
-
-
-	# report status
-	$__process = OS-Is-Command-Available "nim"
-	if ($__process -eq 0) {
-		return 0
-	}
-
-	return 1
-}
-
-
-
-
 function INSTALLER-Setup-Node {
 	# validate input
 	$__process =  OS-Is-Command-Available "choco"

@@ -26,6 +26,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\compilers\installer.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\go.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\nim.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
@@ -106,8 +107,7 @@ if (($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) -or
 
 if ($(STRINGS-Is-Empty "${env:PROJECT_NIM}") -ne 0) {
 	$null = I18N-Install "nim"
-	$__process = INSTALLER-Setup-Nim
-	if ($__process -ne 0) {
+	if ($(NIM-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
 	}
