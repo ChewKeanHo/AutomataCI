@@ -15,7 +15,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
@@ -37,48 +37,43 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 # begin service
-$null = I18N-Install "dotnet"
-$__process = DOTNET-Setup
-if ($__process -ne 0) {
+$null = I18N-Install "DOTNET"
+if ($(DOTNET-Setup) -ne 0) {
 	$null = I18N-Install-Failed
 	return 1
 }
 
 
-$null = I18N-Install "chocolatey"
-$__process = CHOCOLATEY-Setup
-if ($__process -ne 0) {
+$null = I18N-Install "CHOCOLATEY"
+if ($(CHOCOLATEY-Setup) -ne 0) {
 	$null = I18N-Install-Failed
 	return 1
 }
 
 
-$null = I18N-Install "docker"
-$__process = DOCKER-Setup
-if ($__process -ne 0) {
+$null = I18N-Install "DOCKER"
+if ($(DOCKER-Setup) -ne 0) {
 	$null = I18N-Install-Failed
 	return 1
 }
 
 
-$null = I18N-Install "MSI WiX packager"
-$__process = MSI-Setup
-if ($__process -ne 0) {
+$null = I18N-Install "MSI (WIX)"
+if ($(MSI-Setup) -ne 0) {
 	$null = I18N-Install-Failed
 	return 1
 }
 
 
-$null = I18N-Install "reprepro"
-$___process = REPREPRO-Setup
-if ($___process -ne 0) {
+$null = I18N-Install "REPREPRO"
+if ($(REPREPRO-Setup) -ne 0) {
 	$null = I18N-Install-Failed
 	return 1
 }
 
 
 if ($(STRINGS-Is-Empty "${env:PROJECT_PYTHON}") -ne 0) {
-	$null = I18N-Install "python"
+	$null = I18N-Install "PYTHON"
 	if ($(PYTHON-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
@@ -87,7 +82,7 @@ if ($(STRINGS-Is-Empty "${env:PROJECT_PYTHON}") -ne 0) {
 
 
 if ($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) {
-	$null = I18N-Install "go"
+	$null = I18N-Install "GO"
 	if ($(GO-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
@@ -95,10 +90,11 @@ if ($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) {
 }
 
 
-if (($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) -or
+if (($(STRINGS-Is-Empty "${env:PROJECT_C}") -ne 0) -or
+	($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) -or
 	($(STRINGS-Is-Empty "${env:PROJECT_NIM}") -ne 0) -or
 	($(STRINGS-Is-Empty "${env:PROJECT_RUST}") -ne 0)) {
-	$null = I18N-Install "c"
+	$null = I18N-Install "C/C++"
 	if ($(C-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
@@ -107,7 +103,7 @@ if (($(STRINGS-Is-Empty "${env:PROJECT_GO}") -ne 0) -or
 
 
 if ($(STRINGS-Is-Empty "${env:PROJECT_NIM}") -ne 0) {
-	$null = I18N-Install "nim"
+	$null = I18N-Install "NIM"
 	if ($(NIM-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
@@ -117,7 +113,7 @@ if ($(STRINGS-Is-Empty "${env:PROJECT_NIM}") -ne 0) {
 
 if (($(STRINGS-Is-Empty "${env:PROJECT_NODE}") -ne 0) -or
 	($(STRINGS-Is-Empty "${env:PROJECT_ANGULAR}") -ne 0)) {
-	$null = I18N-Install "node"
+	$null = I18N-Install "NODE"
 	if ($(NODE-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
@@ -126,7 +122,7 @@ if (($(STRINGS-Is-Empty "${env:PROJECT_NODE}") -ne 0) -or
 
 
 if ($(STRINGS-Is-Empty "${env:PROJECT_ANGULAR}") -ne 0) {
-	$null = I18N-Install "angular"
+	$null = I18N-Install "ANGULAR"
 	if ($(ANGULAR-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1

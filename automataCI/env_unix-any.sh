@@ -16,7 +16,7 @@
 
 # initialize
 if [ "$PROJECT_PATH_ROOT" = "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
@@ -40,7 +40,7 @@ fi
 
 
 # begin service
-I18N_Install "brew"
+I18N_Install "BREW"
 HOMEBREW_Setup
 if [ $? -ne 0 ]; then
         I18N_Install_Failed
@@ -48,7 +48,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-I18N_Install "curl"
+I18N_Install "CURL"
 HTTP_Setup
 if [ $? -ne 0 ]; then
         I18N_Install_Failed
@@ -56,7 +56,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-I18N_Install "msitools"
+I18N_Install "MSITOOLS"
 MSI_Setup
 if [ $? -ne 0 ]; then
         I18N_Install_Failed
@@ -64,7 +64,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-I18N_Install "docker"
+I18N_Install "DOCKER"
 DOCKER_Setup
 if [ $? -ne 0 ]; then
         I18N_Install_Failed
@@ -72,7 +72,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-I18N_Install "reprepro"
+I18N_Install "REPREPRO"
 REPREPRO_Setup
 if [ $? -ne 0 ]; then
         I18N_Install_Failed
@@ -80,7 +80,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-I18N_Install "osslsigncode"
+I18N_Install "OSSLSIGNCODE"
 NOTARY_Setup_Microsoft
 if [ $? -ne 0 ]; then
         I18N_Install_Failed
@@ -89,7 +89,7 @@ fi
 
 
 if [ $(STRINGS_Is_Empty "$PROJECT_PYTHON") -ne 0 ]; then
-        I18N_Install "python"
+        I18N_Install "PYTHON"
         PYTHON_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
@@ -99,7 +99,7 @@ fi
 
 
 if [ $(STRINGS_Is_Empty "$PROJECT_GO") -ne 0 ]; then
-        I18N_Install "go"
+        I18N_Install "GO"
         GO_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
@@ -109,9 +109,10 @@ fi
 
 
 if [ $(STRINGS_Is_Empty "$PROJECT_C") -ne 0 ] ||
+        [ $(STRINGS_Is_Empty "$PROJECT_GO") -ne 0 ] ||
         [ $(STRINGS_Is_Empty "$PROJECT_NIM") -ne 0 ] ||
         [ $(STRINGS_Is_Empty "$PROJECT_RUST") -ne 0 ]; then
-        I18N_Install "c"
+        I18N_Install "C/C++"
         C_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
@@ -121,7 +122,7 @@ fi
 
 
 if [ $(STRINGS_Is_Empty "$PROJECT_DOTNET") -ne 0 ]; then
-        I18N_Install "dotnet"
+        I18N_Install "DOTNET"
         DOTNET_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
@@ -131,7 +132,7 @@ fi
 
 
 if [ $(STRINGS_Is_Empty "$PROJECT_NIM") -ne 0 ]; then
-        I18N_Install "nim"
+        I18N_Install "NIM"
         NIM_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
@@ -142,7 +143,7 @@ fi
 
 if [ $(STRINGS_Is_Empty "$PROJECT_NODE") -ne 0 ] ||
         [ $(STRINGS_Is_Empty "$PROJECT_ANGULAR") -ne 0 ]; then
-        I18N_Install "node"
+        I18N_Install "NODE"
         NODE_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
@@ -152,7 +153,7 @@ fi
 
 
 if [ $(STRINGS_Is_Empty "$PROJECT_ANGULAR") -ne 0 ]; then
-        I18N_Install "angular"
+        I18N_Install "ANGULAR"
         ANGULAR_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
