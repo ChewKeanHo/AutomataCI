@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,58 +15,45 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
-
-
-
-
-# safety checking control surfaces
-OS_Print_Status info "checking python|python3 availability...\n"
-PYTHON_Is_Available
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "missing python|python3 intepreter.\n"
-        return 1
-fi
-
-
-OS_Print_Status info "activating python venv...\n"
-PYTHON_Activate_VENV
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "activation failed.\n"
-        return 1
-fi
-
-
-OS_Print_Status info "checking pip availability...\n"
-PYTHON_Has_PIP
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "missing pip module manager.\n"
-        return 1
-fi
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 
 
 
 
 # execute
-OS_Print_Status info "updating pip to the latest...\n"
-python -m pip install --upgrade pip
+I18N_Activate_Environment
+PYTHON_Activate_VENV
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "pip update failed.\n"
+        I18N_Activate_Failed
         return 1
 fi
 
 
-file="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/requirements.txt"
-OS_Print_Status info "executing pip install against ${file}\n"
-pip install -r "$file"
+I18N_Check "PIP"
+PYTHON_Has_PIP
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "pip install failed.\n"
+        I18N_Check_Failed
+        return 1
+fi
+
+
+I18N_Import_Dependencies
+python -m pip install --upgrade pip
+if [ $? -ne 0 ]; then
+        I18N_Import_Failed
+        return 1
+fi
+
+
+pip install -r "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/requirements.txt"
+if [ $? -ne 0 ]; then
+        I18N_Import_Failed
         return 1
 fi
 

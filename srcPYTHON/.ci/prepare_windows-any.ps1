@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,57 +15,44 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
-
-
-
-
-# safety checking control surfaces
-OS-Print-Status info "checking python availability..."
-$__process = PYTHON-Is-Available
-if ($__process -ne 0) {
-	OS-Print-Status error "missing python intepreter."
-	return 1
-}
-
-
-OS-Print-Status info "activating python venv..."
-$__process = PYTHON-Activate-VENV
-if ($__process -ne 0) {
-	OS-Print-Status error "activation failed."
-	return 1
-}
-
-
-OS-Print-Status info "checking pip availability..."
-$__process = PYTHON-Has-PIP
-if ($__process -ne 0) {
-	OS-Print-Status error "missing pip module manager."
-	return 1
-}
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 
 
 
 
 # execute
-OS-Print-Status info "upgrading pip to the latest..."
-$__process = OS-Exec "python" "-m pip install --upgrade pip"
-if ($__process -ne 0) {
-	OS-Print-Status error "pip update failed."
+$null = I18N-Activate-Environment
+$___process = PYTHON-Activate-VENV
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
 	return 1
 }
 
 
-$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\requirements.txt"
-OS-Print-Status info "executing pip install against ${__file}"
-$__process = OS-Exec "pip" "install -r ${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "pip install failed."
+$null = I18N-Check "PIP"
+$___process = PYTHON-Has-PIP
+if ($___process -ne 0) {
+	$null = I18N-Check-Failed
+	return 1
+}
+
+
+$null = I18N-Import-Dependencies
+$___process = OS-Exec "python" "-m pip install --upgrade pip"
+if ($___process -ne 0) {
+	$null = I18N-Import-Failed
+	return 1
+}
+
+
+$___process = OS-Exec "pip" "install -r ${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\requirements.txt"
+if ($___process -ne 0) {
+	$null = I18N-Import-Failed
 	return 1
 }
 
