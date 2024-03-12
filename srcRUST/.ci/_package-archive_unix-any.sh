@@ -129,7 +129,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
 
         # copy user guide
-        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/USER-GUIDES-EN.pdf"
         I18N_Assemble "$___source" "$_directory"
         FS_Copy_File "$___source" "${_directory}/."
         if [ $? -ne 0 ]; then
@@ -139,7 +139,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
 
         # copy license file
-        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/LICENSE-EN.pdf"
         I18N_Assemble "$___source" "$_directory"
         FS_Copy_File "$___source" "${_directory}/."
         if [ $? -ne 0 ]; then
