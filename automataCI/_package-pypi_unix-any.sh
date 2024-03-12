@@ -53,7 +53,7 @@ PACKAGE_Run_PYPI() {
 
 
         # validate input
-        if [ $(FS_Is_Target_A_Source "$_target") -ne 0 ]; then
+        if [ $(FS_Is_Target_A_Pypi "$_target") -ne 0 ]; then
                 return 0
         fi
 

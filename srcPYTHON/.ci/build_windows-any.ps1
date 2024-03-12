@@ -55,6 +55,7 @@ $__placeholders = @(
 	"${env:PROJECT_SKU}-src_any-any"
 	"${env:PROJECT_SKU}-homebrew_any-any"
 	"${env:PROJECT_SKU}-chocolatey_any-any"
+	"${env:PROJECT_SKU}-pypi_any-any"
 )
 
 

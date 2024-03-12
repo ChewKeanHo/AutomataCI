@@ -28,7 +28,7 @@ fi
 
 
 
-PACKAGE_Assemble_PYPI_content() {
+PACKAGE_Assemble_PYPI_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -37,8 +37,7 @@ PACKAGE_Assemble_PYPI_content() {
 
 
         # validate project
-        FS_Is_Target_A_Source "$_target"
-        if [ $? -ne 0 ]; then
+        if [ $(FS_Is_Target_A_Pypi "$_target") -ne 0 ]; then
                 return 10
         fi
 

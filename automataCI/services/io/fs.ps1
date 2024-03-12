@@ -390,6 +390,25 @@ function FS-Is-Target-A-Nupkg {
 
 
 
+function FS-Is-Target-A-Pypi {
+	param (
+		[string]$___target
+	)
+
+
+	# execute
+	if (($("${___target}" -replace '^.*-pypi') -ne "${___target}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-Source {
 	param (
 		[string]$___target

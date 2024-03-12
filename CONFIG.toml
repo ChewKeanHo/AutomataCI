@@ -328,7 +328,7 @@ PROJECT_PATH_NIM_ENGINE = "nim-engine"
 #
 # To enable it: simply supply the path (e.g. default is 'srcPYTHON').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_PYTHON = ''
+PROJECT_PYTHON = 'srcPYTHON'
 
 
 # PROJECT_PATH_PYTHON_ENGINE
@@ -350,6 +350,11 @@ PROJECT_PYPI_REPO_URL = "https://test.pypi.org/legacy/"
 PROJECT_PYPI_README = "README.md"
 
 
+# PROJECT_PYPI_README_MIME
+# The PyPi README file's MIME type data. Default is 'text/markdown'.
+PROJECT_PYPI_README_MIME = "text/markdown"
+
+
 
 
 ######################
@@ -364,7 +369,7 @@ PROJECT_PYPI_README = "README.md"
 #
 # To enable it: simply supply the path (e.g. default is 'srcRUST').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_RUST = 'srcRUST'
+PROJECT_RUST = ''
 
 
 # PROJECT_RUST_EDITION

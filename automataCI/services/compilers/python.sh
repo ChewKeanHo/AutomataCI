@@ -196,7 +196,7 @@ PYTHON_Create_PYPI_Config() {
 
         # check existing overriding file
         FS_Is_File "${___directory}/pyproject.toml"
-        if [ $? -ne 0 ]; then
+        if [ $? -eq 0 ]; then
                 return 2
         fi
 
@@ -230,18 +230,20 @@ email = '${___email}'
 [project.urls]
 Homepage = '${___website}'
 "
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
-        return $?
+        return 0
 }
 
 
 
 
 PYTHON_Get_Activator_Path() {
-        ___location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}"
-        ___location="${___location}/bin/activate"
+        ___location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_PYTHON_ENGINE}/bin/activate"
         printf -- "$___location"
 
 
@@ -294,13 +296,13 @@ PYTHON_Is_Valid_PYPI() {
                 return 1
         fi
 
-
-        # execute
         STRINGS_Has_Prefix "pypi" "${1##*/}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+
+        # execute
         ___hasWHL=false
         ___hasTAR=false
         for ___file in "${1}/"*; do
@@ -346,6 +348,11 @@ PYTHON_PYPI_Is_Available() {
 
         # execute
         PYTHON_Is_VENV_Activated
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS_Is_Command_Available "twine"
         if [ $? -ne 0 ]; then
                 return 1
         fi

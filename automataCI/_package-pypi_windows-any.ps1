@@ -43,7 +43,7 @@ function PACKAGE-Run-PYPI {
 
 
 	# validate input
-	if ($(FS-Is-Target-A-Source "${_target}") -ne 0) {
+	if ($(FS-Is-Target-A-Pypi "${_target}") -ne 0) {
 		return 0
 	}
 
@@ -77,6 +77,7 @@ function PACKAGE-Run-PYPI {
 		$null = I18N-Remake-Failed
 		return 1
 	}
+
 
 	$null = I18N-Check "${_target_path}"
 	$___process = FS-Is-Directory "${_target_path}"
@@ -116,7 +117,7 @@ function PACKAGE-Run-PYPI {
 
 
 	# generate required files
-	$null = I18N-Create "pyproject.toml"
+	$null = I18N-Create "${_src}\pyproject.toml"
 	$___process = PYTHON-Create-PYPI-Config `
 		"${_src}" `
 		"${env:PROJECT_NAME}" `

@@ -19,7 +19,7 @@
 function PYTHON-Activate-VENV {
 	# validate input
 	$___process = PYTHON-Is-VENV-Activated
-	if ($___process -ne 0) {
+	if ($___process -eq 0) {
 		return 0
 	}
 
@@ -147,7 +147,7 @@ function PYTHON-Create-PYPI-Archive {
 
 	# export to destination
 	foreach ($___file in (Get-ChildItem -Path "${___directory}\dist")) {
-		$___process = FS-Move "${___directory}\dist\${___file}" "${___destination}"
+		$___process = FS-Move "${___file}" "${___destination}"
 		if ($___process -ne 0) {
 			return 1
 		}
@@ -204,7 +204,7 @@ function PYTHON-Create-PYPI-Config {
 
 	# check existing overriding file
 	$___process = FS-Is-File "${___directory}\pyproject.toml"
-	if ($___process -ne 0) {
+	if ($___process -eq 0) {
 		return 2
 	}
 
@@ -251,9 +251,7 @@ Homepage = '${___website}'
 
 
 function PYTHON-Get-Activator-Path {
-	return "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}" `
-		+ "\${env:PROJECT_PATH_PYTHON_ENGINE}\Scripts" `
-		+ "\Activate.ps1"
+	return "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}\${env:PROJECT_PATH_PYTHON_ENGINE}\Scripts\Activate.ps1"
 }
 
 
@@ -302,13 +300,13 @@ function PYTHON-Is-Valid-PYPI {
 		return 1
 	}
 
-
-	# execute
 	$___process = STRINGS-Has-Prefix "pypi" (Split-Path -Leaf -Path "${___target}")
 	if ($___process -ne 0) {
 		return 1
 	}
 
+
+	# execute
 	$___hasWHL = $false
 	$___hasTAR = $false
 	foreach ($___file in (Get-ChildItem -Path ${___target})) {
@@ -352,8 +350,11 @@ function PYTHON-PYPI-Is-Available {
 
 
 	# execute
-	$___process = PYTHON-Is-VENV-Activated
-	if ($___process -ne 0) {
+	if ($(PYTHON-Is-VENV-Activated) -ne 0) {
+		return 1
+	}
+
+	if ($(OS-Is-Command-Available "twine") -ne 0) {
 		return 1
 	}
 
@@ -427,14 +428,14 @@ function PYTHON-Setup {
 		return 0
 	}
 
+	$___process =  OS-Is-Command-Available "python3"
+	if ($___process -eq 0) {
+		return 0
+	}
+
 
 	# execute
 	$___process = OS-Exec "choco" "install python -y"
-	if ($___process -ne 0) {
-		return 1
-	}
-
-	$___process = OS-Is-Command-Available "python"
 	if ($___process -ne 0) {
 		return 1
 	}

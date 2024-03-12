@@ -38,7 +38,7 @@ function PACKAGE-Assemble-PYPI-Content {
 
 
 	# validate project
-	$___process = FS-Is-Target-A-Source "${_target}"
+	$___process = FS-Is-Target-A-Pypi "${_target}"
 	if ($___process -ne 0) {
 		return 10
 	}
@@ -59,8 +59,8 @@ function PACKAGE-Assemble-PYPI-Content {
 		return 1
 	}
 
-	$___source = "${PROJECT_PATH_ROOT}/${PROJECT_PYPI_README}"
-	$___dest = "${_directory}/${PROJECT_PYPI_README}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYPI_README}"
+	$___dest = "${_directory}\${env:PROJECT_PYPI_README}"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = PYTHON-Clean-Artifact "${___source}"
 	$___process = FS-Copy-File "${___source}" "${___dest}"
@@ -71,7 +71,7 @@ function PACKAGE-Assemble-PYPI-Content {
 
 
 	# generate the pyproject.toml
-	$___dest = "${_directory}/pyproject.toml"
+	$___dest = "${_directory}\pyproject.toml"
 	$null = I18N-Create "${___dest}"
 	$___process = FS-Write-File "${___dest}" @"
 [build-system]

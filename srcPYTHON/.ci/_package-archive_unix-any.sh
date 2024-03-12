@@ -38,7 +38,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
         # package based on target's nature
         if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 # it's a source target
-                _target="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs"
+                _target="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/"
                 PYTHON_Clean_Artifact "$_target"
                 I18N_Assemble "$_target" "$_directory"
                 FS_Copy_All "$_target" "$_directory"
@@ -49,7 +49,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
                 FS_Remove_Silently "${_directory}/.ci"
         elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
-                ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+                ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/"
                 FS_Is_Directory "$___source"
                 if [ $? -ne 0 ]; then
                         return 10 # not applicable

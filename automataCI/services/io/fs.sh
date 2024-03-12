@@ -390,6 +390,25 @@ FS_Is_Target_A_Nupkg() {
 
 
 
+FS_Is_Target_A_Pypi() {
+        #___target="$1"
+
+
+        # execute
+        if [ "${1#*-pypi}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
 FS_Is_Target_A_Source() {
         #___target="$1"
 
