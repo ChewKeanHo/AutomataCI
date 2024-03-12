@@ -264,8 +264,8 @@ Write-Host \"Uninstalling ${PROJECT_SKU} (${PROJECT_VERSION})...\"
         <files>
                 <file src=\"README.md\" target=\"README.md\" />
                 <file src=\"icon.png\" target=\"icon.png\" />
-                <file src=\"Data\**\" target=\"Data\" />
-                <file src=\"tools\**\" target=\"tools\" />
+                <file src=\"Data\\\\**\" target=\"Data\" />
+                <file src=\"tools\\\\**\" target=\"tools\" />
         </files>
 </package>
 "
