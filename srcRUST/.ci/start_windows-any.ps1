@@ -25,7 +25,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# safety checking control surfaces
+# execute
 $null = I18N-Activate-Environment
 $___process = RUST-Activate-Local-Environment
 if ($___process -ne 0) {
@@ -34,9 +34,6 @@ if ($___process -ne 0) {
 }
 
 
-
-
-# execute
 $null = I18N-Guide-Start-Source "${env:PROJECT_RUST_LOCALIZED}"
 
 

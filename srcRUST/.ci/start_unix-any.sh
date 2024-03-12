@@ -26,7 +26,7 @@ fi
 
 
 
-# safety checking control surfaces
+# execute
 I18N_Activate_Environment
 RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
@@ -35,9 +35,6 @@ if [ $? -ne 0 ]; then
 fi
 
 
-
-
-# execute
 I18N_Guide_Start_Source "$PROJECT_RUST_LOCALIZED"
 
 
