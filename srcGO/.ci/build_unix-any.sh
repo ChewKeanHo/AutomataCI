@@ -29,7 +29,7 @@ fi
 
 # safety checking control surfaces
 OS_Print_Status info "checking go availability...\n"
-GO::is_available
+GO_Is_Available
 if [ $? -ne 0 ]; then
         OS_Print_Status error "missing go compiler.\n"
         return 1
@@ -37,7 +37,7 @@ fi
 
 
 OS_Print_Status info "activating local environment...\n"
-GO::activate_local_environment
+GO_Activate_Local_Environment
 if [ $? -ne 0 ]; then
         OS_Print_Status error "activation failed.\n"
         return 1
@@ -59,12 +59,7 @@ for __platform in $(go tool dist list); do
                 __filename="${PROJECT_SKU}_${__os}-${__arch}"
                 ;;
         android/amd64)
-                if [ "$PROJECT_OS" = "darwin" ]; then
-                        continue
-                fi
-
-                __filename="${PROJECT_SKU}_${__os}-${__arch}"
-                __arguments="-buildmode=pie"
+                continue
                 ;;
         android/arm64)
                 if [ "$PROJECT_OS" = "darwin" ]; then
@@ -91,7 +86,6 @@ for __platform in $(go tool dist list); do
                 fi
 
                 __filename="${PROJECT_SKU}_${__os}-${__arch}"
-                __arguments="-buildmode=pie"
                 ;;
         illumos/amd64)
                 __filename="${PROJECT_SKU}_${__os}-${__arch}"
@@ -229,7 +223,6 @@ fi
 
 
 # compose documentations
-OS_Print_Status info "printing html documentations...\n"
 
 
 

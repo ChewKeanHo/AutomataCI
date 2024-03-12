@@ -28,7 +28,7 @@ fi
 
 # safety checking control surfaces
 OS_Print_Status info "checking go availability...\n"
-GO::is_available
+GO_Is_Available
 if [ $? -ne 0 ]; then
         OS_Print_Status error "missing go compiler.\n"
         return 1
@@ -39,7 +39,7 @@ fi
 
 # execute
 OS_Print_Status info "setup localized environment...\n"
-GO::setup_local_environment
+GO_Setup_Local_Environment
 if [ $? -ne 0 ]; then
         OS_Print_Status error "setup failed.\n"
         return 1

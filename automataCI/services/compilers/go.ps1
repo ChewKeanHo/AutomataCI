@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -9,35 +9,35 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
 
 function GO-Activate-Local-Environment {
 	# validate input
-	$__process = GO-Is-Available
-	if ($__process -ne 0) {
+	$___process = GO-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = GO-Is-Localized
-	if ($__process -eq 0) {
+	$___process = GO-Is-Localized
+	if ($___process -eq 0) {
 		return 0
 	}
 
 
 	# execute
-	$__location = "$(GO-Get-Activator-Path)"
-	if (-not (Test-Path "${__location}")) {
+	$___location = "$(GO-Get-Activator-Path)"
+	if ($(FS-Is-File "${___location}") -ne 0) {
 		return 1
 	}
 
-	. $__location
-	$__process = GO-Is-Localized
-	if ($__process -eq 0) {
+	. "${___location}"
+	$___process = GO-Is-Localized
+	if ($___process -eq 0) {
 		return 0
 	}
 
@@ -50,19 +50,21 @@ function GO-Activate-Local-Environment {
 
 
 function GO-Get-Activator-Path {
-	return "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}" `
-		+ "\${env:PROJECT_PATH_GO_ENGINE}\Activate.ps1"
+	return "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}\${env:PROJECT_PATH_GO_ENGINE}\Activate.ps1"
 }
 
 
 
 
 function GO-Is-Available {
-	$__program = Get-Command go -ErrorAction SilentlyContinue
-	if ($__program) {
+	# execute
+	$___process = OS-Is-Command-Available "go"
+	if ($___process) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -70,10 +72,13 @@ function GO-Is-Available {
 
 
 function GO-Is-Localized {
-	if (-not [string]::IsNullOrEmpty($env:PROJECT_GO_LOCALIZED)) {
+	# execute
+	if ($(STRINGS-Is-Empty "${env:PROJECT_GO_LOCALIZED}") -ne 0) {
 		return 0
 	}
 
+
+	# report status
 	return 1
 }
 
@@ -82,14 +87,14 @@ function GO-Is-Localized {
 
 function Go-Setup {
 	# validate input
-	$___process =  OS-Is-Command-Available "choco"
-	if ($___process -ne 0) {
-		return 1
-	}
-
-	$___process =  OS-Is-Command-Available "go"
+	$___process = Go-Is-Available
 	if ($___process -eq 0) {
 		return 0
+	}
+
+	$___process = OS-Is-Command-Available "choco"
+	if ($___process -ne 0) {
+		return 1
 	}
 
 
@@ -104,12 +109,7 @@ function Go-Setup {
 
 
 	# report status
-	$___process = OS-Is-Command-Available "go"
-	if ($___process -eq 0) {
-		return 0
-	}
-
-	return 1
+	return 0
 }
 
 
@@ -117,40 +117,40 @@ function Go-Setup {
 
 function GO-Setup-Local-Environment {
 	# validate input
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_ROOT)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_ROOT}") -eq 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_TOOLS)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_TOOLS}") -eq 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_GO_ENGINE)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_GO_ENGINE}") -eq 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = GO-Is-Available
-	if ($__process -ne 0) {
+	$___process = GO-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = GO-Is-Localized
-	if ($__process -eq 0) {
+	$___process = GO-Is-Localized
+	if ($___process -eq 0) {
 		return 0
 	}
 
 
 	## it's a clean repo. Start setting up localized environment...
-	$__label = "($env:PROJECT_PATH_GO_ENGINE)"
-	$__location = "$(GO-Get-Activator-Path)"
+	$___label = "($env:PROJECT_PATH_GO_ENGINE)"
+	$___location = "$(GO-Get-Activator-Path)"
 
-	$null = FS-Make-Housing-Directory "${__location}"
-	$null = FS-Make-Directory "$(Split-Path -Path ${__location})\bin"
-	$null = FS-Make-Directory "$(Split-Path -Path ${__location})\cache"
-	$null = FS-Make-Directory "$(Split-Path -Path ${__location})\env"
-	$null = FS-Write-File "${__location}" @"
+	$null = FS-Make-Housing-Directory "${___location}"
+	$null = FS-Make-Directory "$(Split-Path -Path ${___location})\bin"
+	$null = FS-Make-Directory "$(Split-Path -Path ${___location})\cache"
+	$null = FS-Make-Directory "$(Split-Path -Path ${___location})\env"
+	$null = FS-Write-File "${___location}" @"
 if (-not (Get-Command "go" -ErrorAction SilentlyContinue)) {
 	Write-Error "[ ERROR ] missing go compiler."
 	return
@@ -170,26 +170,27 @@ function deactivate {
 `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") ``
 	+ ";" ``
 	+ [System.Environment]::GetEnvironmentVariable("Path","User")
-`${env:GOPATH} = "$(Split-Path -Path ${__location})"
-`${env:GOBIN} = "$(Split-Path -Path ${__location})\bin"
-`${env:GOCACHE} = "$(Split-Path -Path ${__location})\cache"
-`${env:GOENV} = "$(Split-Path -Path ${__location})\env"
-`${env:PROJECT_GO_LOCALIZED} = "${__location}"
+`${env:GOPATH} = "$(Split-Path -Path ${___location})"
+`${env:GOBIN} = "$(Split-Path -Path ${___location})\bin"
+`${env:GOCACHE} = "$(Split-Path -Path ${___location})\cache"
+`${env:GOENV} = "$(Split-Path -Path ${___location})\env"
+`${env:PROJECT_GO_LOCALIZED} = "${___location}"
 Copy-Item -Path function:prompt -Destination function:_OLD_PROMPT
 function global:prompt {
-	Write-Host -NoNewline -ForegroundColor Green "(${__label}) "
+	Write-Host -NoNewline -ForegroundColor Green "(${___label}) "
 	_OLD_VIRTUAL_PROMPT
 }
 "@
 
-	if (-not (Test-Path "${__location}")) {
+	$___process = FS-Is-File "${___location}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# testing the activation
-	$__process = GO-Activate-Local-Environment
-	if ($__process -ne 0) {
+	$___process = GO-Activate-Local-Environment
+	if ($___process -ne 0) {
 		return 1
 	}
 
