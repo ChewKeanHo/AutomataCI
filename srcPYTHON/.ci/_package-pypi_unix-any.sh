@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,15 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 
 
 
@@ -40,28 +42,37 @@ PACKAGE_Assemble_PYPI_content() {
                 return 10
         fi
 
-        if [ -z "$PROJECT_PYTHON" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_PYTHON") -eq 0 ]; then
                 return 10
         fi
 
 
         # assemble the python package
-        PYTHON_Clean_Artifact "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/"
-        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/" "${_directory}"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/"
+        ___dest="$_directory"
+        I18N_Assemble "$___source" "$___dest"
+        PYTHON_Clean_Artifact "$___source"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_File \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PYPI_README}" \
-                "${_directory}/${PROJECT_PYPI_README}"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PYPI_README}"
+        ___dest="${_directory}/${PROJECT_PYPI_README}"
+        I18N_Assemble "$___source" "$___dest"
+        PYTHON_Clean_Artifact "$___source"
+        FS_Copy_File "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
 
         # generate the pyproject.toml
-        FS_Write_File "${_directory}/pyproject.toml" "\
+        ___dest="${_directory}/pyproject.toml"
+        I18N_Create "$___dest"
+        FS_Write_File "$___dest" "\
 [build-system]
 requires = [ 'setuptools' ]
 build-backend = 'setuptools.build_meta'
@@ -90,6 +101,7 @@ email = '${PROJECT_CONTACT_EMAIL}'
 Homepage = '${PROJECT_CONTACT_WEBSITE}'
 "
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
