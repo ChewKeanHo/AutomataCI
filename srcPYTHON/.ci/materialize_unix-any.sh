@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,45 +15,40 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 
 
 
 
-# safety checking control surfaces
-OS_Print_Status info "checking python|python3 availability...\n"
-PYTHON_Is_Available
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "missing python|python3 intepreter.\n"
-        return 1
-fi
-
-
-OS_Print_Status info "activating python venv...\n"
+# execute
+I18N_Activate_Environment
 PYTHON_Activate_VENV
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "activation failed.\n"
+        I18N_Activate_Failed
         return 1
 fi
 
 
-OS_Print_Status info "checking pyinstaller availability...\n"
-if [ -z "$(type -t "pyinstaller")" ]; then
-        OS_Print_Status error "missing pyintaller command.\n"
+I18N_Check "PYINSTALLER"
+OS_Is_Command_Available "pyinstaller"
+if [ $? -ne 0 ]; then
+        I18N_Check_Failed
         return 1
 fi
 
 
-OS_Print_Status info "checking pdoc availability...\n"
-if [ -z "$(type -t "pdoc")" ]; then
-        OS_Print_Status error "missing pdoc command.\n"
+I18N_Check "PDOC"
+OS_Is_Command_Available "pdoc"
+if [ $? -ne 0 ]; then
+        I18N_Check_Failed
         return 1
 fi
 
@@ -70,7 +65,7 @@ windows)
         ;;
 esac
 
-OS_Print_Status info "building output file: ${__file}\n"
+I18N_Build "$__source"
 pyinstaller --noconfirm \
         --onefile \
         --clean \
@@ -81,7 +76,7 @@ pyinstaller --noconfirm \
         --hidden-import=main \
         "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/main.py"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
+        I18N_Build_Failed
         return 1
 fi
 
@@ -91,12 +86,12 @@ fi
 # shipping executable
 __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS_Print_Status info "exporting ${__source} to ${__dest}\n"
+I18N_Export "$__source" "$__dest"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__source" "$__dest"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "export failed.\n"
+        I18N_Export_Failed
         return 1
 fi
 
