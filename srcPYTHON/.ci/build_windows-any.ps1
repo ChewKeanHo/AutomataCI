@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -13,50 +13,49 @@
 
 
 
-# initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 
 
 
 
-# safety checking control surfaces
-OS-Print-Status info "checking python availability..."
-$__process = PYTHON-Is-Available
-if ($__process -ne 0) {
-	OS-Print-Status error "missing python intepreter."
-	return 1
-}
-
-
-OS-Print-Status info "activating python venv..."
-$__process = PYTHON-Activate-VENV
-if ($__process -ne 0) {
-	OS-Print-Status error "activation failed."
+# execute
+$null = I18N-Activate-Environment
+$___process = PYTHON-Activate-VENV
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
 	return 1
 }
 
 
-OS-Print-Status info "checking pyinstaller availability..."
-$__process = OS-Is-Command-Available "pyinstaller"
-if ($__process -ne 0) {
-	OS-Print-Status error "missing pyinstaller command."
+$null = I18N-Check "PYINSTALLER"
+$___process = OS-Is-Command-Available "pyinstaller"
+if ($___process -ne 0) {
+	$null = I18N-Check-Failed
 	return 1
 }
 
 
-OS-Print-Status info "checking pdoc availability..."
-$__process = OS-Is-Command-Available "pdoc"
-if ($__process -ne 0) {
-	OS-Print-Status error "missing pdoc command."
+$null = I18N-Check "PDOC"
+$___process = OS-Is-Command-Available "pdoc"
+if ($___process -ne 0) {
+	$null = I18N-Check-Failed
 	return 1
 }
+
+
+$__placeholders = @(
+	"${env:PROJECT_SKU}-src_any-any"
+	"${env:PROJECT_SKU}-homebrew_any-any"
+	"${env:PROJECT_SKU}-chocolatey_any-any"
+)
 
 
 
@@ -64,76 +63,54 @@ if ($__process -ne 0) {
 # build output binary file
 switch (${env:PROJECT_OS}) {
 windows {
-	$__file = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}.exe"
+	$__source = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}.exe"
 } default {
-	$__file = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
+	$__source = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 }}
 
-OS-Print-Status info "building output file: ${__file}"
+$null = I18N-Build "${__source}"
 $__argument = "--noconfirm " `
 	+ "--onefile " `
 	+ "--clean " `
 	+ "--distpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}`" " `
 	+ "--workpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}`" " `
 	+ "--specpath `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}`" " `
-	+ "--name `"${__file}`" " `
+	+ "--name `"${__source}`" " `
 	+ "--hidden-import=main " `
 	+ "`"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\main.py`""
-$__process = OS-Exec "pyinstaller" "${__argument}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
+$___process = OS-Exec "pyinstaller" "${__argument}"
+if ($___process -ne 0) {
+	$null = I18N-Build-Failed
 	return 1
 }
 
 
 
 
-# placeholding source code flag
-$__file = "${env:PROJECT_SKU}-src_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
-}
-
-
-
-
-# placeholding homebrew flag
-$__file = "${env:PROJECT_SKU}-homebrew_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
-}
-
-
-
-
-# placeholding chocolatey flag
-$__file = "${env:PROJECT_SKU}-chocolatey_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
+# placeholding flag files
+foreach ($__line in $__placeholders) {
+	$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__line}"
+	$null = I18N-Build "${__file}"
+	$___process = FS-Touch-File "${__file}"
+	if ($___process -ne 0) {
+		$null = I18N-Build-Failed
+		return 1
+	}
 }
 
 
 
 
 # compose documentations
-OS-Print-Status info "printing html documentations..."
+$null = I18N-Build "PDOCS"
 $__output = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}\python"
 FS-Remake-Directory "${__output}\${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 $__arguments = "--html " +
 		"--output-dir `"${__output}\${env:PROJECT_OS}-${env:PROJECT_ARCH}`" " +
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs\"
-$__process = OS-Exec "pdoc" "${__arguments}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
+$___process = OS-Exec "pdoc" "${__arguments}"
+if ($___process -ne 0) {
+	$null = I18N-Build-Failed
 	return 1
 }
 

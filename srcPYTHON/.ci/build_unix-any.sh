@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,8 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
@@ -27,35 +27,36 @@ fi
 
 
 
-# safety checking control surfaces
-OS_Print_Status info "checking python|python3 availability...\n"
-PYTHON_Is_Available
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "missing python|python3 intepreter.\n"
-        return 1
-fi
-
-
-OS_Print_Status info "activating python venv...\n"
+# execute
+I18N_Activate_Environment
 PYTHON_Activate_VENV
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "activation failed.\n"
+        I18N_Activate_Failed
         return 1
 fi
 
 
-OS_Print_Status info "checking pyinstaller availability...\n"
-if [ -z "$(type -t "pyinstaller")" ]; then
-        OS_Print_Status error "missing pyintaller command.\n"
+I18N_Check "PYINSTALLER"
+OS_Is_Command_Available "pyinstaller"
+if [ $? -ne 0 ]; then
+        I18N_Check_Failed
         return 1
 fi
 
 
-OS_Print_Status info "checking pdoc availability...\n"
-if [ -z "$(type -t "pdoc")" ]; then
-        OS_Print_Status error "missing pdoc command.\n"
+I18N_Check "PDOC"
+OS_Is_Command_Available "pdoc"
+if [ $? -ne 0 ]; then
+        I18N_Check_Failed
         return 1
 fi
+
+
+__placeholders="\
+${PROJECT_SKU}-src_any-any
+${PROJECT_SKU}-homebrew_any-any
+${PROJECT_SKU}-chocolatey_any-any
+"
 
 
 
@@ -63,77 +64,58 @@ fi
 # build output binary file
 case "$PROJECT_OS" in
 windows)
-        __file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}.exe"
+        __source="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}.exe"
         ;;
 *)
-        __file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
+        __source="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
         ;;
 esac
 
-__file="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
-OS_Print_Status info "building output file: ${__file}\n"
+__source="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
+I18N_Build "$__source"
 pyinstaller --noconfirm \
         --onefile \
         --clean \
         --distpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}" \
         --workpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}" \
         --specpath "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}" \
-        --name "$__file" \
+        --name "$__source" \
         --hidden-import=main \
         "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/main.py"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
+        I18N_Build_Failed
         return 1
 fi
 
 
 
 
-# placeholding source code flag
-__file="${PROJECT_SKU}-src_${PROJECT_OS}-${PROJECT_ARCH}"
-OS_Print_Status info "building output file: ${__file}\n"
-touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
-        return 1
-fi
-
-
-
-
-# placeholding homebrew code flag
-__file="${PROJECT_SKU}-homebrew_any-any"
-OS_Print_Status info "building output file: ${__file}\n"
-touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
-        return 1
-fi
-
-
-
-
-# placeholding chocolatey code flag
-__file="${PROJECT_SKU}-chocolatey_any-any"
-OS_Print_Status info "building output file: ${__file}\n"
-touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
-        return 1
-fi
+# placeholding flag files
+old_IFS="$IFS"
+while IFS="" read -r __line || [ -n "$__line" ]; do
+        __file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__line}"
+        I18N_Build "$__file"
+        FS_Touch_File "$__file"
+        if [ $? -ne 0 ]; then
+                I18N_Build_Failed
+                return 1
+        fi
+done <<EOF
+$__placeholders
+EOF
 
 
 
 
 # compose documentations
-OS_Print_Status info "printing html documentations...\n"
+I18N_Build "PDOCS"
 __output="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/python"
 FS_Remake_Directory "${__output}/${PROJECT_OS}-${PROJECT_ARCH}"
 pdoc --html \
         --output-dir "${__output}/${PROJECT_OS}-${PROJECT_ARCH}" \
         "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}/Libs/"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "compose failed.\n"
+        I18N_Build_Failed
         return 1
 fi
 
