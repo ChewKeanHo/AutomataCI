@@ -78,7 +78,7 @@ function PACKAGE-Assemble-DOCKER-Content {
 
 	# generate the Dockerfile
 	$___dest = "${_directory}\Dockerfile"
-	$null = I18N-Assemble "${___dest}"
+	$null = I18N-Create "${___dest}"
 	$___process = FS-Write-File "${___dest}" @"
 # Defining baseline image
 FROM --platform=${_target_os}/${_target_arch} scratch

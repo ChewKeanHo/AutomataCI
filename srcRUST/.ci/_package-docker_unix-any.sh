@@ -90,6 +90,7 @@ LABEL org.opencontainers.image.licenses=\"${PROJECT_LICENSE}\"
 "
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
+                return 1
         fi
 
 
@@ -99,6 +100,7 @@ LABEL org.opencontainers.image.url=\"${PROJECT_CONTACT_WEBSITE}\"
 "
                 if [ $? -ne 0 ]; then
                         I18N_Create_Failed
+                        return 1
                 fi
         fi
 
@@ -108,6 +110,7 @@ LABEL org.opencontainers.image.source=\"${PROJECT_SOURCE_URL}\"
 "
                 if [ $? -ne 0 ]; then
                         I18N_Create_Failed
+                        return 1
                 fi
         fi
 

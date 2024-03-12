@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,14 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
@@ -49,46 +50,69 @@ PACKAGE_Assemble_DOCKER_Content() {
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_Homebrew "$_target") -eq 0 ]; then
                 return 10 # not applicable
+        elif [ $(FS_Is_Target_A_Cargo "$_target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS_Is_Target_A_MSI "$_target") -eq 0 ]; then
+                return 10 # not applicable
         fi
 
         case "$_target_os" in
         linux|windows)
                 ;;
         *)
-                return 10
+                return 10 # not available
                 ;;
         esac
 
-        OS_Print_Status info "running python specific content assembling function...\n"
-
 
         # assemble the package
-        FS_Copy_File "$_target" "${_directory}/${PROJECT_SKU}"
+        ___dest="${_directory}/${PROJECT_SKU}"
+        I18N_Assemble "$_target" "$___dest"
+        FS_Copy_File "$_target" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Touch_File "${_directory}/.blank"
+        ___dest="${_directory}/.blank"
+        I18N_Create "$___dest"
+        FS_Touch_File "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
 
         # generate the Dockerfile
-        FS_Write_File "${_directory}/Dockerfile" "\
+        ___dest="${_directory}/Dockerfile"
+        I18N_Create "$___dest"
+        FS_Write_File "$___dest" "\
 # Defining baseline image
 "
+        if [ $? -ne 0 ]; then
+                I18N_Create_Failed
+                return 1
+        fi
+
         if [ "$_target_os" = "windows" ]; then
                 FS_Append_File "${_directory}/Dockerfile" "\
 FROM --platform=${_target_os}/${_target_arch} mcr.microsoft.com/windows/nanoserver:ltsc2022
 "
+                if [ $? -ne 0 ]; then
+                        I18N_Create_Failed
+                        return 1
+                fi
         else
                 FS_Append_File "${_directory}/Dockerfile" "\
 FROM --platform=${_target_os}/${_target_arch} linuxcontainers/debian-slim:latest
 "
+                if [ $? -ne 0 ]; then
+                        I18N_Create_Failed
+                        return 1
+                fi
         fi
 
-        FS_Append_File "${_directory}/Dockerfile" "\
+        FS_Append_File "$___dest" "\
 LABEL org.opencontainers.image.title=\"${PROJECT_NAME}\"
 LABEL org.opencontainers.image.description=\"${PROJECT_PITCH}\"
 LABEL org.opencontainers.image.authors=\"${PROJECT_CONTACT_NAME} <${PROJECT_CONTACT_EMAIL}>\"
@@ -96,20 +120,32 @@ LABEL org.opencontainers.image.version=\"${PROJECT_VERSION}\"
 LABEL org.opencontainers.image.revision=\"${PROJECT_CADENCE}\"
 LABEL org.opencontainers.image.licenses=\"${PROJECT_LICENSE}\"
 "
+        if [ $? -ne 0 ]; then
+                I18N_Create_Failed
+                return 1
+        fi
 
-        if [ ! -z "$PROJECT_CONTACT_WEBSITE" ]; then
-                FS_Append_File "${_directory}/Dockerfile" "\
+        if [ $(STRINGS_Is_Empty "$PROJECT_CONTACT_WEBSITE") -ne 0 ]; then
+                FS_Append_File "$___dest" "\
 LABEL org.opencontainers.image.url=\"${PROJECT_CONTACT_WEBSITE}\"
 "
+                if [ $? -ne 0 ]; then
+                        I18N_Create_Failed
+                        return 1
+                fi
         fi
 
-        if [ ! -z "$PROJECT_SOURCE_URL" ]; then
-                FS_Append_File "${_directory}/Dockerfile" "\
+        if [ $(STRINGS_Is_Empty "$PROJECT_SOURCE_URL") -ne 0 ]; then
+                FS_Append_File "$___dest" "\
 LABEL org.opencontainers.image.source=\"${PROJECT_SOURCE_URL}\"
 "
+                if [ $? -ne 0 ]; then
+                        I18N_Create_Failed
+                        return 1
+                fi
         fi
 
-        FS_Append_File "${_directory}/Dockerfile" "\
+        FS_Append_File "$___dest" "\
 # Defining environment variables
 ENV ARCH ${_target_arch}
 ENV OS ${_target_os}
@@ -126,6 +162,7 @@ EXPOSE 80
 ENTRYPOINT [\"/app/bin/${PROJECT_SKU}\"]
 "
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
