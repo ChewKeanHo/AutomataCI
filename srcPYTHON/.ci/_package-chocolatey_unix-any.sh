@@ -22,6 +22,7 @@ fi
 
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 
 
 
@@ -65,6 +66,7 @@ PACKAGE_Assemble_CHOCOLATEY_Content() {
         ___dest="${_directory}/Data/${PROJECT_PYTHON}"
         I18N_Assemble "$___source" "$___dest"
         FS_Make_Directory "$___dest"
+        PYTHON_Clean_Artifact "$___source"
         FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed

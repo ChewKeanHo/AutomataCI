@@ -21,6 +21,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 
 
 
@@ -65,6 +66,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
 	$___dest = "${_directory}\Data\${env:PROJECT_PYTHON}"
 	$null = I18N-Assemble "${___source}" "${___dest}"
+	$null = PYTHON-Clean-Artifact "${___source}"
 	$null = FS-Make-Directory "${___dest}"
 	$___process = FS-Copy-All "${___source}" "${___dest}"
 	if ($___process -ne 0) {

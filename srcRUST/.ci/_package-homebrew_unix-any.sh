@@ -82,7 +82,7 @@ PACKAGE_Assemble_HOMEBREW_Content() {
                 return 1
         fi
 
-        ___source="${PROJECT_PATH_ROOT}/automataCI"
+        ___source="${PROJECT_PATH_ROOT}/automataCI/"
         ___dest="$_directory"
         I18N_Assemble "$___source" "$___dest"
         FS_Make_Directory "$___dest"
