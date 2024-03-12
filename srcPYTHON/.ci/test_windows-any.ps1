@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,66 +15,57 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
-
-
-
-
-# safety checking control surfaces
-OS-Print-Status info "checking python availability..."
-$__process = PYTHON-Is-Available
-if ($__process -ne 0) {
-	OS-Print-Status error "missing python intepreter."
-	return 1
-}
-
-
-OS-Print-Status info "activating python venv..."
-$__process = PYTHON-Activate-VENV
-if ($__process -ne 0) {
-	OS-Print-Status error "activation failed."
-	return 1
-}
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 
 
 
 
 # execute
-$__report_location = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\python-test-report"
-OS-Print-Status info "preparing report vault: ${__report_location}"
-$__process = FS-Make-Directory "${__report_location}"
-if ($__process -ne 0) {
-	OS-Print-Status error "preparation failed."
+$null = I18N-Activate-Environment
+$___process = PYTHON-Activate-VENV
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
 	return 1
 }
 
 
-OS-Print-Status info "executing all tests with coverage..."
+$__report_location = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\python-test-report"
+
+
+$null = I18N-Prepare "${__report_location}"
+$___process = FS-Remake-Directory "${__report_location}"
+if ($___process -ne 0) {
+	$null = I18N-Prepare-Failed
+	return 1
+}
+
+
+$null = I18N-Run-Test-Coverage
 $__argument = "-m coverage run " `
 	+ "--data-file=`"${__report_location}\.coverage`" " `
 	+ "-m unittest discover " `
 	+ "-s `"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}`" " `
 	+ "-p '*_test.py'"
-$__process = OS-Exec python "$__argument"
-if ($__process -ne 0) {
-	OS-Print-Status error "test executions failed."
+$___process = OS-Exec python "${__argument}"
+if ($___process -ne 0) {
+	$null = I18N-Run-Failed
 	return 1
 }
 
 
-OS-Print-Status info "processing test coverage data to html..."
+$null = I18N-Processing-Test-Coverage
 $__argument = "-m coverage html " `
 	+ "--data-file=`"${__report_location}\.coverage`" " `
 	+ "--directory=`"${__report_location}`""
-$__process = OS-Exec python $__argument
-if ($__process -ne 0) {
-	OS-Print-Status error "data processing failed."
+$___process = OS-Exec python "${__argument}"
+if ($___process -ne 0) {
+	$null = I18N-Processing-Failed
 	return 1
 }
 

@@ -27,7 +27,7 @@ fi
 
 
 
-# safety checking control surfaces
+# execute
 I18N_Activate_Environment
 RUST_Activate_Local_Environment
 if [ $? -ne 0 ]; then
@@ -36,9 +36,6 @@ if [ $? -ne 0 ]; then
 fi
 
 
-
-
-# execute
 __report_location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/rust-test-report"
 __target="$(RUST_Get_Build_Target "$PROJECT_OS" "$PROJECT_ARCH")"
 __filename="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"

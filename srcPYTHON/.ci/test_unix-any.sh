@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,60 +15,56 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
-
-
-
-
-# safety checking control surfaces
-OS_Print_Status info "checking python|python3 availability...\n"
-PYTHON_Is_Available
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "missing python|python3 intepreter.\n"
-        return 1
-fi
-
-
-OS_Print_Status info "activating python venv...\n"
-PYTHON_Activate_VENV
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "activation failed.\n"
-        return 1
-fi
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 
 
 
 
 # execute
-report_location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/python-test-report"
-OS_Print_Status info "preparing report vault: ${report_location}\n"
-mkdir -p "$report_location"
-
-
-OS_Print_Status info "executing all tests with coverage...\n"
-python -m coverage run \
-        --data-file="${report_location}/.coverage" \
-        -m unittest discover \
-        -s "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}" \
-        -p '*_test.py'
+I18N_Activate_Environment
+PYTHON_Activate_VENV
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "test executions failed.\n"
+        I18N_Activate_Failed
         return 1
 fi
 
 
-OS_Print_Status info "processing test coverage data to html...\n"
-python -m coverage html \
-        --data-file="${report_location}/.coverage" \
-        --directory="$report_location"
+__report_location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/python-test-report"
+
+
+I18N_Prepare "$__report_location"
+FS_Remake_Directory "$__report_location"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "data processing failed.\n"
+        I18N_Prepare_Failed
+        return 1
+fi
+
+
+I18N_Run_Test_Coverage
+python -m coverage run \
+        --data-file="${__report_location}/.coverage" \
+        -m unittest discover \
+        -s "${PROJECT_PATH_ROOT}/${PROJECT_PYTHON}" \
+        -p '*_test.py'
+if [ $? -ne 0 ]; then
+        I18N_Run_Failed
+        return 1
+fi
+
+
+I18N_Processing_Test_Coverage
+python -m coverage html \
+        --data-file="${__report_location}/.coverage" \
+        --directory="$__report_location"
+if [ $? -ne 0 ]; then
+        I18N_Processing_Failed
         return 1
 fi
 

@@ -26,7 +26,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-# safety checking control surfaces
+# execute
 $null = I18N-Activate-Environment
 $___process = RUST-Activate-Local-Environment
 if ($___process -ne 0) {
@@ -37,7 +37,6 @@ if ($___process -ne 0) {
 
 
 
-# execute
 $__report_location = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\rust-test-report"
 $__target = Rust-Get-Build-Target "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
 $__filename = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
