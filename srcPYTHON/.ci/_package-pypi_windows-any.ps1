@@ -49,7 +49,7 @@ function PACKAGE-Assemble-PYPI-Content {
 
 
 	# assemble the python package
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\Libs\"
 	$___dest = "${_directory}"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = PYTHON-Clean-Artifact "${___source}"

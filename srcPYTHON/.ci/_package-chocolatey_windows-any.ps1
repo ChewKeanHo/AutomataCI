@@ -43,7 +43,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 
 
 	# assemble the package
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\"
 	$___dest = "${_directory}\Data\${env:PROJECT_PATH_SOURCE}"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
@@ -53,7 +53,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		return 1
 	}
 
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci\"
 	$___dest = "${_directory}\Data\${env:PROJECT_PATH_SOURCE}\.ci"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
@@ -63,7 +63,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		return 1
 	}
 
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\"
 	$___dest = "${_directory}\Data\${env:PROJECT_PYTHON}"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = PYTHON-Clean-Artifact "${___source}"
@@ -74,7 +74,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		return 1
 	}
 
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\.ci"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}\.ci\"
 	$___dest = "${_directory}\Data\${env:PROJECT_PYTHON}\.ci"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
@@ -84,7 +84,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		return 1
 	}
 
-	$___source = "${env:PROJECT_PATH_ROOT}\automataCI"
+	$___source = "${env:PROJECT_PATH_ROOT}\automataCI\"
 	$___dest = "${_directory}\Data\automataCI"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
