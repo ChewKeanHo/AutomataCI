@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,19 +15,19 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\python.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 
 
 
 
 # execute
 $__target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PYTHON}"
-OS-Print-Status info "cleaning ${__target}..."
+$null = I18N-Clean "${__target}"
 $null = PYTHON-Clean-Artifact "${__target}"
 
 
