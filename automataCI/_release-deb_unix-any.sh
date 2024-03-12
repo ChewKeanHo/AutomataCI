@@ -42,7 +42,7 @@ RELEASE_Run_DEB() {
         I18N_Check_Availability "REPREPRO"
         REPREPRO_Is_Available
         if [ $? -ne 0 ]; then
-                I18N_Check_Failed
+                I18N_Check_Failed_Skipped
                 return 0
         fi
 

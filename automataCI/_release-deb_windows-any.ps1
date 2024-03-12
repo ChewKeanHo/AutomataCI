@@ -43,7 +43,7 @@ function RELEASE-Run-DEB {
 	$null = I18N-Check-Availability "REPREPRO"
 	$___process = REPREPRO-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Check-Failed
+		$null = I18N-Check-Failed-Skipped
 		return 0
 	}
 
