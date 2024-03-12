@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,33 +15,22 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/python.sh"
-
-
-
-
-# safety checking control surfaces
-OS_Print_Status info "checking python|python3 availability...\n"
-PYTHON_Is_Available
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "missing python|python3 intepreter.\n"
-        return 1
-fi
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 
 
 
 
 # execute
-OS_Print_Status info "setup python venv...\n"
+I18N_Setup_Environment
 PYTHON_Setup_VENV
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "setup failed.\n"
+        I18N_Setup_Failed
         return 1
 fi
 
