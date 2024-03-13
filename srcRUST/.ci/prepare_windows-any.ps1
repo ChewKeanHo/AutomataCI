@@ -34,8 +34,6 @@ if ($___process -ne 0) {
 }
 
 
-
-
 $null = I18N-Import-Dependencies
 $__current_path = Get-Location
 $null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"

@@ -35,8 +35,6 @@ if [ $? -ne 0 ]; then
 fi
 
 
-
-
 I18N_Import_Dependencies
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_RUST}"
 cargo fetch
