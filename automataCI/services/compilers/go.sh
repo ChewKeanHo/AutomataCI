@@ -116,6 +116,11 @@ GO_Setup() {
 
 GO_Setup_Local_Environment() {
         # validate input
+        GO_Is_Localized
+        if [ $? -eq 0 ] ; then
+                return 0
+        fi
+
         if [ $(STRINGS_Is_Empty "$PROJECT_PATH_ROOT") -eq 0 ]; then
                 return 1
         fi
@@ -131,11 +136,6 @@ GO_Setup_Local_Environment() {
         GO_Is_Available
         if [ $? -ne 0 ] ; then
                 return 1
-        fi
-
-        GO_Is_Localized
-        if [ $? -eq 0 ] ; then
-                return 0
         fi
 
 

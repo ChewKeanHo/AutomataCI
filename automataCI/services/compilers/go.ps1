@@ -59,7 +59,7 @@ function GO-Get-Activator-Path {
 function GO-Is-Available {
 	# execute
 	$___process = OS-Is-Command-Available "go"
-	if ($___process) {
+	if ($___process -eq 0) {
 		return 0
 	}
 
@@ -85,7 +85,7 @@ function GO-Is-Localized {
 
 
 
-function Go-Setup {
+function GO-Setup {
 	# validate input
 	$___process = Go-Is-Available
 	if ($___process -eq 0) {
@@ -117,6 +117,11 @@ function Go-Setup {
 
 function GO-Setup-Local-Environment {
 	# validate input
+	$___process = GO-Is-Localized
+	if ($___process -eq 0) {
+		return 0
+	}
+
 	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_ROOT}") -eq 0) {
 		return 1
 	}
@@ -129,20 +134,16 @@ function GO-Setup-Local-Environment {
 		return 1
 	}
 
-
-	# execute
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
 	$___process = GO-Is-Available
 	if ($___process -ne 0) {
 		return 1
 	}
 
-	$___process = GO-Is-Localized
-	if ($___process -eq 0) {
-		return 0
-	}
 
-
-	## it's a clean repo. Start setting up localized environment...
+	# execute
 	$___label = "($env:PROJECT_PATH_GO_ENGINE)"
 	$___location = "$(GO-Get-Activator-Path)"
 
