@@ -20,9 +20,9 @@ if [ "$PROJECT_PATH_ROOT" = "" ]; then
         return 1
 fi
 
-. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/rust.sh"
 
 
@@ -37,9 +37,6 @@ if [ $? -ne 0 ]; then
 fi
 
 
-
-
-# build output binary file
 I18N_Configure_Build_Settings
 __target="$(RUST_Get_Build_Target "$PROJECT_OS" "$PROJECT_ARCH")"
 __filename="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
@@ -50,26 +47,19 @@ if [ $(STRINGS_Is_Empty "$__target") -eq 0 ]; then
 fi
 
 
-
-
-# building target
 I18N_Build "$__filename"
 FS_Remove_Silently "$__workspace"
 
-
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_RUST}"
 cargo build --release --target-dir "$__workspace" --target="$__target"
-__exit_code=$?
+___process=$?
 cd "$__current_path" && unset __current_path
-if [ $__exit_code -ne 0 ]; then
+if [ $___process -ne 0 ]; then
         I18N_Build_Failed
         return 1
 fi
 
 
-
-
-# exporting executable
 ___source="${__workspace}/${__target}/release/${PROJECT_SKU}"
 ___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
 I18N_Export "$___source" "$___dest"

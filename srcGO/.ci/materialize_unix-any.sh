@@ -1,10 +1,10 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
 # the License at:
-#                 http://www.apache.org/licenses/LICENSE-2.0
+#                http://www.apache.org/licenses/LICENSE-2.0
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,168 +15,41 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/go.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/go.sh"
 
 
 
 
-# safety checking control surfaces
-OS_Print_Status info "checking go availability...\n"
-GO_Is_Available
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "missing go compiler.\n"
-        return 1
-fi
-
-
-OS_Print_Status info "activating local environment...\n"
+# execute
+I18N_Activate_Environment
 GO_Activate_Local_Environment
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "activation failed.\n"
+        I18N_Activate_Failed
         return 1
 fi
 
 
-
-
-# build output binary file
-OS_Print_Status info "configuring build settings...\n"
+I18N_Configure_Build_Settings
 __output_directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
-__arguments=""
-__os="$PROJECT_OS"
-__arch="$PROJECT_ARCH"
-case "${__os}/${__arch}" in
-aix/ppc64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-android/amd64)
-        if [ "$PROJECT_OS" = "darwin" ]; then
-                return 1
-        fi
+__arguments="$(GO_Get_Compiler_Optimization_Arguments "$PROJECT_OS" "$PROJECT_ARCH")"
 
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        __arguments="-buildmode=pie"
-        ;;
-android/arm64)
-        if [ "$PROJECT_OS" = "darwin" ]; then
-                return 1
-        fi
-
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        __arguments="-buildmode=pie"
-        ;;
-darwin/amd64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        __arguments="-buildmode=pie"
-        ;;
-darwin/arm64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        __arguments="-buildmode=pie"
-        ;;
-dragonfly/amd64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-freebsd/amd64)
-        if [ "$PROJECT_OS" = "darwin" ]; then
-                return 1
-        fi
-
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        __arguments="-buildmode=pie"
-        ;;
-illumos/amd64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-ios/amd64)
-        if [ ! "$PROJECT_OS" = "darwin" ]; then
-                return 1
-        fi
-
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-ios/arm64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        return 1 # impossible without cgo
-        ;;
-js/wasm)
-        __filename="${__output_directory}/${PROJECT_SKU}_${__os}-${__arch}.js"
-        FS_Remove_Silently "$__filename"
-        FS_Copy_File "$(go env GOROOT)/misc/wasm/wasm_exec.js" "$__filename"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        __filename="${PROJECT_SKU}_${__os}-${__arch}.wasm"
-        ;;
-linux/amd64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        __arguments="-buildmode=pie"
-        ;;
-linux/arm64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        __arguments="-buildmode=pie"
-        ;;
-linux/ppc64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-linux/ppc64le)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        __arguments="-buildmode=pie"
-        ;;
-linux/riscv64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-linux/s390x)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-netbsd/amd64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-netbsd/arm64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-openbsd/amd64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-openbsd/arm64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-plan9/amd64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-solaris/amd64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}"
-        ;;
-wasip1/wasm)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}.wasi"
-        ;;
-windows/amd64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}.exe"
-        __arguments="-buildmode=pie"
-        ;;
-windows/arm64)
-        __filename="${PROJECT_SKU}_${__os}-${__arch}.exe"
-        __arguments="-buildmode=pie"
-        ;;
-*)
+__filename="$(GO_Get_Filename "$PROJECT_SKU" "$PROJECT_OS" "$PROJECT_ARCH")"
+if [ $(STRINGS_Is_Empty "$__filename") -eq 0 ]; then
+        I18N_Configure_Failed
         return 1
-        ;;
-esac
+fi
 
 
-
-
-# building target
-OS_Print_Status info "building ${__filename}...\n"
+I18N_Build "$__filename"
 FS_Remove_Silently "${__output_directory}/${__filename}"
-CGO_ENABLED=0 GOOS="$__os" GOARCH="$__arch" go build \
+CGO_ENABLED=0 GOOS="$PROJECT_OS" GOARCH="$PROJECT_ARCH" go build \
         -C "${PROJECT_PATH_ROOT}/${PROJECT_GO}" \
         $__arguments \
         -ldflags "-s -w" \
@@ -185,22 +58,19 @@ CGO_ENABLED=0 GOOS="$__os" GOARCH="$__arch" go build \
         -asmflags "-trimpath=${GOPATH}" \
         -o "${__output_directory}/${__filename}"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
+        I18N_Build_Failed
         return 1
 fi
 
 
-
-
-# shipping executable
-__source="${__output_directory}/${__filename}"
-__dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS_Print_Status info "exporting ${__source} to ${__dest}\n"
-FS_Make_Housing_Directory "$__dest"
-FS_Remove_Silently "$__dest"
-FS_Move "$__source" "$__dest"
+___source="${__output_directory}/${__filename}"
+___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
+I18N_Export "$___source" "$___dest"
+FS_Make_Housing_Directory "$___dest"
+FS_Remove_Silently "$___dest"
+FS_Move "$___source" "$___dest"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "export failed.\n"
+        I18N_Export_Failed
         return 1
 fi
 

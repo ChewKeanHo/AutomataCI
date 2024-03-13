@@ -36,9 +36,6 @@ if ($___process -ne 0) {
 }
 
 
-
-
-# build output binary file
 $null = I18N-Configure-Build-Settings
 $__target = RUST-Get-Build-Target "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
 $__filename = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
@@ -49,12 +46,8 @@ if ($(STRINGS-Is-Empty "${__target}") -eq 0) {
 }
 
 
-
-
-# building target
 $null = I18N-Build "${__filename}"
 $null = FS-Remove-Silently "${__workspace}"
-
 
 $__current_path = Get-Location
 $null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
@@ -71,9 +64,6 @@ if ($___process -ne 0) {
 }
 
 
-
-
-# exporting executable
 $___source = "${__workspace}\${__target}\release\${env:PROJECT_SKU}.exe"
 $___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}\${env:PROJECT_SKU}.exe"
 $null = I18N-Export "${___source}" "${___dest}"

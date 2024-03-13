@@ -58,6 +58,94 @@ GO_Get_Activator_Path() {
 
 
 
+GO_Get_Compiler_Optimization_Arguments() {
+        #___os="$1"
+        #___arch="$2"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
+                printf -- ""
+                return 1
+        fi
+
+
+        # execute
+        ___os="$(STRINGS_To_Lowercase "$1")"
+        ___arch="$(STRINGS_To_Lowercase "$2")"
+        ___arguments=""
+
+        case "${___os}-${___arch}" in
+        android-arm64)
+                if [ "$PROJECT_OS" != "darwin" ]; then
+                        ___arguments="${___argument} -buildmode=pie"
+                fi
+                ;;
+        darwin-amd64|darwin-arm64)
+                ___arguments="${___argument} -buildmode=pie"
+                ;;
+        linux-amd64|linux-arm64|linux-ppc64le)
+                ___arguments="${___argument} -buildmode=pie"
+                ;;
+        windows-amd64|windows-arm64)
+                ___arguments="${___argument} -buildmode=pie"
+                ;;
+        *)
+                ;;
+        esac
+
+
+        # report status
+        printf -- "%b" "$(STRINGS_Trim_Whitespace "$___arguments")"
+        return 0
+}
+
+
+
+
+GO_Get_Filename() {
+        #___name="$1"
+        #___os="$2"
+        #___arch="$3"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$2") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$3") -eq 0 ]; then
+                printf -- ""
+                return 1
+        fi
+
+
+        # execute
+        ___os="$(STRINGS_To_Lowercase "$2")"
+        ___arch="$(STRINGS_To_Lowercase "$3")"
+        ___filename="${1}_${___os}-${___arch}"
+
+        case "${___os}-${___arch}" in
+        js-wasm)
+                ___filename="${___filename}.wasm"
+                ;;
+        wasip1-wasm)
+                ___filename="${___filename}.wasi"
+                ;;
+        windows*)
+                ___filename="${___filename}.exe"
+                ;;
+        *)
+                ;;
+        esac
+
+
+        # report status
+        printf -- "%b" "$(STRINGS_Trim_Whitespace "$___filename")"
+        return 0
+}
+
+
+
+
 GO_Is_Available() {
         # execute
         OS_Is_Command_Available "go"

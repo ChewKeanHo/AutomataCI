@@ -56,6 +56,87 @@ function GO-Get-Activator-Path {
 
 
 
+function Go-Get-Compiler-Optimization-Arguments() {
+	param(
+		[string]$___os,
+		[string]$___arch
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___os}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___arch}") -eq 0)) {
+		return ""
+	}
+
+
+	# execute
+	$___os = "$(STRINGS-To-Lowercase "${___os}")"
+	$___arch = "$(STRINGS-To-Lowercase "${___arch}")"
+	$___arguments = ""
+
+	switch ("${___os}-${___arch}") {
+	"android-amd64" {
+		if ("${env:PROJECT_OS}" -ne "darwin") {
+			$___arguments = "${___argument} -buildmode=pie"
+		}
+	} { $_ -in "darwin-amd64", "darwin-arm64" } {
+		$___arguments = "${___argument} -buildmode=pie"
+	} { $_ -in "linux-amd64", "linux-arm64", "linux-ppc64le" } {
+		$___arguments = "${___argument} -buildmode=pie"
+	} { $_ -in "windows-amd64", "windows-arm64" } {
+		$___arguments = "${___argument} -buildmode=pie"
+	} default {
+		# do nothing
+	}}
+
+
+	# report status
+	return STRINGS-Trim-Whitespace "${___arguments}"
+}
+
+
+
+
+function Go-Get-Filename {
+	param(
+		[string]$___name,
+		[string]$___os,
+		[string]$___arch
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___name}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___os}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___arch}") -eq 0)) {
+		return ""
+	}
+
+
+	# execute
+	$___os = "$(STRINGS-To-Lowercase "${___os}")"
+	$___arch = "$(STRINGS-To-Lowercase "${___arch}")"
+	$___filename = "${___name}_${___os}-${___arch}"
+
+	switch -Regex ("${___os}-${___arch}") {
+	"^js-wasm$" {
+		$___filename = "${___filename}.wasm"
+	} "^wasip1-wasm$" {
+		$___filename = "${___filename}.wasi"
+	} "^windows-.*$" {
+		$___filename = "${___filename}.exe"
+	} default {
+		# do nothing
+	}}
+
+
+	# report status
+	return STRINGS-Trim-Whitespace "${___filename}"
+}
+
+
+
 function GO-Is-Available {
 	# execute
 	$___process = OS-Is-Command-Available "go"
