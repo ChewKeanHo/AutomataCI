@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,37 +15,34 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\go.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\go.ps1"
 
 
 
 
-# safety checking control surfaces
-OS-Print-Status info "checking go availability..."
-$__process = Go-Is-Available
-if ($__process -ne 0) {
-	OS-Print-Status error "missing go compiler."
-	return 1
-}
-
-
-OS-Print-Status info "activating local environment..."
-$__process = GO-Activate-Local-Environment
-if ($__process -ne 0) {
-	OS-Print-Status error "activation failed."
+# execute
+$null = I18N-Activate-Environment
+$___process = GO-Activate-Local-Environment
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
 	return 1
 }
 
 
+$__placeholders = @(
+	"${env:PROJECT_SKU}-src_any-any"
+	"${env:PROJECT_SKU}-homebrew_any-any"
+	"${env:PROJECT_SKU}-chocolatey_any-any"
+	"${env:PROJECT_SKU}-msi_any-any"
+)
 
 
-# build output binary file
 $__output_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
 $__work_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}"
 $__cgo = ${env:CGO_ENABLED}
@@ -56,146 +53,75 @@ ${env:CGO_ENABLED} = 0
 	# select supported platforms
 	$__os = $__platform.Split("/")[0]
 	$__arch = $__platform.Split("/")[1]
-	$__arguments = ""
-
-	switch ($__platform) {
-	"aix/ppc64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "android/amd64" {
+	switch ("${__os}-${__arch}") {
+	"android-amd64" {
+		continue loop #impossible without cgo
+	} "android-386" {
+		continue loop #impossible without cgo
+	} "android-arm" {
+		continue loop #impossible without cgo
+	} "android-arm64" {
+		continue loop #impossible without cgo
+	} "ios-amd64" {
 		continue loop
-	} "android/arm64" {
+	} "ios-arm64" {
 		continue loop
-	} "darwin/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-		$__arguments = "-buildmode=pie "
-	} "darwin/arm64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-		$__arguments = "-buildmode=pie "
-	} "dragonfly/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "freebsd/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "illumos/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "ios/amd64" {
-		continue loop
-	} "ios/arm64" {
-		continue loop
-	} "js/wasm" {
+	} "js-wasm" {
 		$__filename = "${__output_directory}\${env:PROJECT_SKU}_${__os}-${__arch}.js"
 		$null = FS-Remove-Silently "${__filename}"
-		$__process = FS-Copy-File `
+		$___process = FS-Copy-File `
 			"$(Invoke-Expression "go env GOROOT")/misc/wasm/wasm_exec.js" `
 			"${__filename}"
-		if ($__process -ne 0) {
+		if ($___process -ne 0) {
 			return 1
 		}
-
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}.wasm"
-	} "linux/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-		$__arguments = "-buildmode=pie "
-	} "linux/arm64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-		$__arguments = "-buildmode=pie "
-	} "linux/ppc64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "linux/ppc64le" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-		$__arguments = "-buildmode=pie "
-	} "linux/riscv64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "linux/s390x" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "netbsd/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "netbsd/arm64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "openbsd/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "openbsd/arm64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "plan9/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "solaris/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}"
-	} "windows/amd64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}.exe"
-		$__arguments = "-buildmode=pie "
-	} "windows/arm64" {
-		$__filename = "${env:PROJECT_SKU}_${__os}-${__arch}.exe"
-		$__arguments = "-buildmode=pie "
 	} Default {
-		continue loop
+		# proceed
 	}}
+	$__arguments = "$(GO-Get-Compiler-Optimization-Arguments "${__os}" "${__arch}")"
+	$__filename = "$(GO-Get-Filename "${env:PROJECT_SKU}" "${__os}" "${__arch}")"
 
-
-	# building target
-	OS-Print-Status info "building ${__filename}..."
+	$null = I18N-Build "${__filename}"
 	$null = FS-Remove-Silently "${__output_directory}\${__filename}"
 	${env:GOOS} = $__os
 	${env:GOARCH} = $__arch
 	$__arguments = "build " `
 		+ "-C `"${env:PROJECT_PATH_ROOT}/${env:PROJECT_GO}`" " `
-		+ "${__arguments}" `
+		+ "${__arguments} " `
 		+ "-ldflags `"-s -w`" " `
 		+ "-trimpath " `
 		+ "-gcflags `"-trimpath=${env:GOPATH}`" " `
 		+ "-asmflags `"-trimpath=${GOPATH}`" "`
 		+ "-o `"${__output_directory}\${__filename}`""
-	$__process = OS-Exec "go" $__arguments
-	if ($__process -ne 0) {
+	$___process = OS-Exec "go" "${__arguments}"
+	if ($___process -ne 0) {
 		${env:CGO_ENABLED} = $__cgo
 		${env:GOOS} = $__go_os
 		${env:GOARCH} = $__go_arch
-		OS-Print-Status error "build failed."
+		$null = I18N-Build-Failed
 		return 1
 	}
 }
 ${env:CGO_ENABLED} = $__cgo
 ${env:GOOS} = $__go_os
 ${env:GOARCH} = $__go_arch
+$null = Remove-Variable -Name __cgo
+$null = Remove-Variable -Name __go_os
+$null = Remove-Variable -Name __go_arch
 
 
 
 
-# placeholding source code flag
-$__file = "${env:PROJECT_SKU}-src_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
+# placeholding flag files
+foreach ($__line in $__placeholders) {
+	$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__line}"
+	$null = I18N-Build "${__file}"
+	$___process = FS-Touch-File "${__file}"
+	if ($___process -ne 0) {
+		$null = I18N-Build-Failed
+		return 1
+	}
 }
-
-
-
-
-# placeholding homebrew flag
-$__file = "${env:PROJECT_SKU}-homebrew_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
-}
-
-
-
-
-# placeholding chocolatey flag
-$__file = "${env:PROJECT_SKU}-chocolatey_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
-}
-
-
-
-
-# compose documentations
 
 
 
