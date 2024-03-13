@@ -35,8 +35,6 @@ if ($___process -ne 0) {
 }
 
 
-
-
 $__report_location = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\rust-test-report"
 $__target = Rust-Get-Build-Target "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
 $__filename = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
