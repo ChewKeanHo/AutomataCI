@@ -99,7 +99,7 @@ function PACKAGE-Assemble-Archive-Content {
 
 
 	# copy user guide
-	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\USER-GUIDES-EN.pdf"
+	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\USER-GUIDES-EN.pdf"
 	OS-Print-Status info "copying ${_target} to ${_directory}"
 	$__process = FS-Copy-File "${_target}" "${_directory}"
 	if ($__process -ne 0) {
@@ -108,7 +108,7 @@ function PACKAGE-Assemble-Archive-Content {
 
 
 	# copy license file
-	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\LICENSE-EN.pdf"
+	$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\LICENSE-EN.pdf"
 	OS-Print-Status info "copying ${_target} to ${_directory}"
 	$__process = FS-Copy-File "${_target}" "${_directory}"
 	if ($__process -ne 0) {

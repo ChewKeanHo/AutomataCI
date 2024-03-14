@@ -38,7 +38,7 @@ if ($___process -ne 0) {
 
 
 # execute
-$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\changelog"
+$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog"
 $null = I18N-Create "${env:PROJECT_VERSION} DATA CHANGELOG"
 $___process = CHANGELOG-Build-DATA-Entry $__file
 if ($___process -ne 0) {

@@ -167,7 +167,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
         I18N_Create "copyright.gz"
         COPYRIGHT_Create \
                 "${_directory}/BUILD/copyright" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/deb-copyright" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/deb-copyright" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
@@ -211,7 +211,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
         I18N_Create "spec"
         RPM_Create_Spec \
                 "$_directory" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
                 "$_package" \
                 "$PROJECT_VERSION" \
                 "$PROJECT_CADENCE" \
@@ -220,7 +220,7 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE" \
                 "$PROJECT_LICENSE" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/ABSTRACTS.txt"
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/ABSTRACTS.txt"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
                 return 1

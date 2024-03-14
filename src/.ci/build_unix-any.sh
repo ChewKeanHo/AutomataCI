@@ -39,7 +39,7 @@ fi
 
 
 # execute
-__file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/changelog"
+__file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog"
 I18N_Create "${PROJECT_VERSION} DATA CHANGELOG"
 CHANGELOG_Build_Data_Entry "$__file"
 if [ $? -ne 0 ]; then

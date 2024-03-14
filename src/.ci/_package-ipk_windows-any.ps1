@@ -102,7 +102,7 @@ function PACKAGE-Assemble-IPK-Content {
 	$null = I18N-Create "control\control"
 	$___process = IPK-Create-Control `
 		"${_directory}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}" `
 		"${_package}" `
 		"${env:PROJECT_VERSION}" `
 		"${_target_arch}" `
@@ -113,7 +113,7 @@ function PACKAGE-Assemble-IPK-Content {
 		"${env:PROJECT_PITCH}" `
 		"${env:PROJECT_DEBIAN_PRIORITY}" `
 		"${env:PROJECT_DEBIAN_SECTION}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\ABSTRACTS.txt"
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\ABSTRACTS.txt"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1

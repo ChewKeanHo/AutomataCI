@@ -142,7 +142,7 @@ function PACKAGE-Assemble-DEB-Content {
 
 	$___process = COPYRIGHT-Create `
 		"${_copyright}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\deb-copyright" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}" `
@@ -202,7 +202,7 @@ function PACKAGE-Assemble-DEB-Content {
 	$null = I18N-Create "control\control"
 	$___process = DEB-Create-Control `
 		"${_directory}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}" `
 		"${_package}" `
 		"${env:PROJECT_VERSION}" `
 		"${_target_arch}" `
@@ -213,7 +213,7 @@ function PACKAGE-Assemble-DEB-Content {
 		"${env:PROJECT_PITCH}" `
 		"${env:PROJECT_DEBIAN_PRIORITY}" `
 		"${env:PROJECT_DEBIAN_SECTION}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\ABSTRACTS.txt"
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\ABSTRACTS.txt"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1

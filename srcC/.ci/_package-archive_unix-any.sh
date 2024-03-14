@@ -98,7 +98,7 @@ PACKAGE::assemble_archive_content() {
 
 
         # copy user guide
-        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
+        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/USER-GUIDES-EN.pdf"
         OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then
@@ -107,7 +107,7 @@ PACKAGE::assemble_archive_content() {
 
 
         # copy license file
-        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
+        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/LICENSE-EN.pdf"
         OS_Print_Status info "copying ${_target} to ${_directory}\n"
         FS_Copy_File "$_target" "${_directory}/."
         if [ $? -ne 0 ]; then

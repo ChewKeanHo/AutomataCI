@@ -104,7 +104,7 @@ PACKAGE_Assemble_IPK_Content() {
         I18N_Create "control/control"
         IPK_Create_Control \
                 "$_directory" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}" \
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
                 "$_package" \
                 "$PROJECT_VERSION" \
                 "$_target_arch" \
@@ -115,7 +115,7 @@ PACKAGE_Assemble_IPK_Content() {
                 "$PROJECT_PITCH" \
                 "$PROJECT_DEBIAN_PRIORITY" \
                 "$PROJECT_DEBIAN_SECTION" \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/ABSTRACTS.txt"
+                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/ABSTRACTS.txt"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
                 return 1

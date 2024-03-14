@@ -169,7 +169,7 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 	$null = I18N-Create "copyright.gz"
 	$___process = COPYRIGHT-Create `
 		"${_directory}\BUILD\copyright" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\licenses\deb-copyright" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\deb-copyright" `
 		${env:PROJECT_SKU} `
 		${env:PROJECT_CONTACT_NAME} `
 		${env:PROJECT_CONTACT_EMAIL} `
@@ -214,7 +214,7 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 	$null = I18N-Create "spec"
 	$___process = RPM-Create-Spec `
 		"${_directory}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}" `
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}" `
 		"${_package}" `
 		"${env:PROJECT_VERSION}" `
 		"${env:PROJECT_CADENCE}" `
@@ -223,7 +223,7 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 		"${env:PROJECT_CONTACT_EMAIL}" `
 		"${env:PROJECT_CONTACT_WEBSITE}" `
 		"${env:PROJECT_LICENSE}" `
-		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RESOURCES}\docs\ABSTRACTS.txt"
+		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\ABSTRACTS.txt"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
