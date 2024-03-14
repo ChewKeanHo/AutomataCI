@@ -178,7 +178,6 @@ PACKAGE_Assemble_DEB_Content() {
         # NOTE: OPTIONAL (Comment to turn it off)
         I18N_Create "${_directory}/source.list"
         DEB_Create_Source_List \
-                "$PROJECT_SIMULATE_RELEASE_REPO" \
                 "$_directory" \
                 "$PROJECT_GPG_ID" \
                 "$PROJECT_STATIC_URL" \

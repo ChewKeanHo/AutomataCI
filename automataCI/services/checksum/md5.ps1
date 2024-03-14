@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -22,7 +22,7 @@ function MD5-Checksum-From-File {
 
 
 	# validate input
-	if ($(STRINGS-Is-Available "${___target}") -eq 0) {
+	if ($(STRINGS-Is-Empty "${___target}") -eq 0) {
 		return 1
 	}
 

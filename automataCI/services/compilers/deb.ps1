@@ -170,7 +170,7 @@ function DEB-Create-Checksum {
 		return 1
 	}
 
-	$___process = FS-Is-Directory "$1"
+	$___process = FS-Is-Directory "${___directory}"
 	if ($___process -ne 0) {
 		return 1
 	}
@@ -184,9 +184,8 @@ function DEB-Create-Checksum {
 
 	# checksum each file
 	foreach ($___line in (Get-ChildItem -Path "${___directory}\data" -File -Recurse)) {
-		$___checksum = MD5-Checksum-From-File $___line.FullName
-		$___path = $___line.FullName `
-			-replace [regex]::Escape("${___directory}\data\"), ""
+		$___checksum = MD5-Checksum-From-File "${___line}"
+		$___path = "${___line}" -replace [regex]::Escape("${___directory}\data\"), ""
 		$___path = $___path -replace "\\", "/"
 		$___process = FS-Append-File "${___location}" "${___checksum} ${___path}"
 		if ($___process -ne 0) {
@@ -312,13 +311,12 @@ Description: ${___pitch}
 
 function DEB-Create-Source-List {
 	param(
-		[string]$___is_simulated,
 		[string]$___directory,
 		[string]$___gpg_id,
 		[string]$___url,
 		[string]$___codename,
 		[string]$___distribution,
-		[string]$___sku
+		[string]$___keyring
 	)
 
 
@@ -327,12 +325,11 @@ function DEB-Create-Source-List {
 		($(STRINGS-Is-Empty "${___url}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___codename}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___distribution}") -eq 0) -or
-		($(STRINGS-Is-Empty "${___sku}") -eq 0)) {
+		($(STRINGS-Is-Empty "${___keyring}") -eq 0)) {
 		return 1
 	}
 
-	if (($(STRINGS-Is-Empty "${___gpg_id}") -eq 0) -and
-			($(STRINGS-Is-Empty "${___is_simulated}") -eq 0)) {
+	if (($(STRINGS-Is-Empty "${___gpg_id}") -eq 0) -and ($(OS-Is-Run-Simulated) -ne 0)) {
 		return 1
 	}
 
@@ -345,8 +342,8 @@ function DEB-Create-Source-List {
 	# execute
 	$___url = "${___url}/deb"
 	$___url = $___url -replace "//deb", "/deb"
-	$___key = "usr\local\share\keyrings\${___sku}-keyring.gpg"
-	$___filename = "${___directory}\data\etc\apt\sources.list.d\${___sku}.list"
+	$___key = "usr\local\share\keyrings\${___keyring}-keyring.gpg"
+	$___filename = "${___directory}\data\etc\apt\sources.list.d\${___keyring}.list"
 
 	$___process = FS-Is-File "${___filename}"
 	if ($___process -eq 0) {
@@ -368,21 +365,19 @@ deb [signed-by=/${___key}] ${___url} ${___codename} ${___distribution}
 	}
 
 	$null = FS-Make-Housing-Directory "${___directory}\data\${___key}"
-	if ($(STRINGS-Is-Empty "${___is_simulated}") -eq 0) {
-		$null = FS-Make-Housing-Directory "${___directory}\data\${___key}"
+	if ($(OS-Is-Run-Simulated) -eq 0) {
 		$___process = FS-Write-File "${___directory}\data\${___key}" ""
 	} else {
 		$___process = GPG-Export-Public-Keyring `
 			"${___directory}\data\${___key}" `
 			"${___gpg_id}"
 	}
-
-
-	# report status
 	if ($___process -ne 0) {
 		return 1
 	}
 
+
+	# report status
 	return 0
 }
 

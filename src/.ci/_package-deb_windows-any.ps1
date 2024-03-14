@@ -171,7 +171,6 @@ function PACKAGE-Assemble-DEB-Content {
 	# NOTE: OPTIONAL (Comment to turn it off)
 	$null = I18N-Create "source.list"
 	$___process = DEB-Create-Source-List `
-		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
 		"${_directory}" `
 		"${env:PROJECT_GPG_ID}" `
 		"${env:PROJECT_STATIC_URL}" `

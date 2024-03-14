@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -24,8 +24,8 @@ function GPG-Detach-Sign-File {
 
 
 	# validate input
-	if (($(STRINGS_Is_Empty "${___target}") -eq 0) -or
-		($(STRINGS_Is_Empty "${___id}") -eq 0)) {
+	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___id}") -eq 0)) {
 		return 1
 	}
 
@@ -43,7 +43,7 @@ function GPG-Detach-Sign-File {
 	# execute
 	$___process = OS-Exec `
 		"gpg" "--armor --detach-sign --local-user `"${__id}`" `"${__target}`""
-	if ($__process -ne 0) {
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -63,8 +63,8 @@ function GPG-Export-Public-Key {
 
 
 	# validate input
-	if (($(STRINGS_Is_Empty "${___destination}") -eq 0) -or
-		($(STRINGS_Is_Empty "${___id}") -eq 0)) {
+	if (($(STRINGS-Is-Empty "${___destination}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___id}") -eq 0)) {
 		return 1
 	}
 
@@ -97,8 +97,8 @@ function GPG-Export-Public-Keyring {
 
 
 	# validate input
-	if (($(STRINGS_Is_Empty "${___destination}") -eq 0) -or
-		($(STRINGS_Is_Empty "${___id}") -eq 0)) {
+	if (($(STRINGS-Is-Empty "${___destination}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___id}") -eq 0)) {
 		return 1
 	}
 

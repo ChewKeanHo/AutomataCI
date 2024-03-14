@@ -299,13 +299,12 @@ Description: $___pitch
 
 
 DEB_Create_Source_List() {
-        ___is_simulated="$1"
-        ___directory="$2"
-        ___gpg_id="$3"
-        ___url="$4"
-        ___codename="$5"
-        ___distribution="$6"
-        ___sku="$7"
+        ___directory="$1"
+        ___gpg_id="$2"
+        ___url="$3"
+        ___codename="$4"
+        ___distribution="$5"
+        ___keyring="$6"
 
 
         # validate input
@@ -313,12 +312,11 @@ DEB_Create_Source_List() {
                 [ $(STRINGS_Is_Empty "$___url") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___codename") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___distribution") -eq 0 ] ||
-                [ $(STRINGS_Is_Empty "$___sku") -eq 0 ]; then
+                [ $(STRINGS_Is_Empty "$___keyring") -eq 0 ]; then
                 return 1
         fi
 
-        if [ $(STRINGS_Is_Empty "$___gpg_id") -eq 0 ] &&
-                [ $(STRINGS_Is_Empty "$___is_simulated") -eq 0 ]; then
+        if [ $(STRINGS_Is_Empty "$___gpg_id") -eq 0 ] && [ $(OS_Is_Run_Simulated) -ne 0 ]; then
                 return 1
         fi
 
@@ -331,8 +329,8 @@ DEB_Create_Source_List() {
         # execute
         ___url="${___url}/deb"
         ___url="${___url%//deb*}/deb"
-        ___key="usr/local/share/keyrings/${___sku}-keyring.gpg"
-        ___filename="${___directory}/data/etc/apt/sources.list.d/${___sku}.list"
+        ___key="usr/local/share/keyrings/${___keyring}-keyring.gpg"
+        ___filename="${___directory}/data/etc/apt/sources.list.d/${___keyring}.list"
 
         FS_Is_File "$___filename"
         if [ $? -eq 0 ]; then
@@ -355,7 +353,7 @@ deb [signed-by=/${___key}] ${___url} ${___codename} ${___distribution}
         fi
 
         FS_Make_Housing_Directory "${___directory}/data/${___key}"
-        if [ $(STRINGS_Is_Empty "$___is_simulated") -ne 0 ]; then
+        if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
                 FS_Write_File "${___directory}/data/${___key}" ""
         else
                 GPG_Export_Public_Keyring "${___directory}/data/${___key}" "$___gpg_id"
