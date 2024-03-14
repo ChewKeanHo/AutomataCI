@@ -44,6 +44,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         I18N_Assemble_Failed
                         return 1
                 fi
+
                 FS_Remove_Silently "${_directory}/.ci"
 
                 ___source="${_directory}/Cargo.toml"
@@ -67,7 +68,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
-                ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+                ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/"
                 FS_Is_Directory "$___source"
                 if [ $? -ne 0 ]; then
                         return 10 # not applicable

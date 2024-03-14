@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +15,18 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
 
-PACKAGE::assemble_archive_content() {
+PACKAGE_Assemble_ARCHIVE_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -36,35 +36,26 @@ PACKAGE::assemble_archive_content() {
 
         # package based on target's nature
         if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
-                _target="${PROJECT_PATH_ROOT}/${PROJECT_GO}/libs"
-                OS_Print_Status info "copying ${_target} to ${_directory}\n"
+                _target="${PROJECT_PATH_ROOT}/${PROJECT_GO}/libs/"
+                I18N_Assemble "$_target" "$_directory"
                 FS_Copy_All "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
-                        OS_Print_Status error "copy failed."
+                        I18N_Assemble_Failed
                         return 1
                 fi
 
-                FS_Is_File "${_directory}/go.mod"
-                if [ $? -ne 0 ]; then
-                        OS_Print_Status info "creating localized go.mod file...\n"
-                        FS_Write_File "${_directory}/go.mod" "\
-module ${PROJECT_SKU}
-
-replace ${PROJECT_SKU} => ./
-"
-                        if [ $? -ne 0 ]; then
-                                OS_Print_Status error "create failed."
-                                return 1
-                        fi
-                fi
+                FS_Remove_Silently "${_directory}/.ci"
         elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
-                FS_Is_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+                ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/"
+                FS_Is_Directory "$___source"
                 if [ $? -ne 0 ]; then
                         return 10 # not applicable
                 fi
 
-                FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/" "$_directory"
+                I18N_Assemble "$___source" "$_directory"
+                FS_Copy_All "${___source}/" "$_directory"
                 if [ $? -ne 0 ]; then
+                        I18N_Assemble_Failed
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
@@ -72,23 +63,30 @@ replace ${PROJECT_SKU} => ./
         elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
         elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                OS_Print_Status info "copying ${_target} to ${_directory}\n"
+                I18N_Assemble "$_target" "$_directory"
                 FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
+                        I18N_Assemble_Failed
                         return 1
                 fi
 
-                FS_Is_File "${_target%.wasm*}.js"
+                ___source="$(FS_Extension_Remove "$_target" ".wasm").js"
+                FS_Is_File "$___source"
                 if [ $? -eq 0 ]; then
-                        OS_Print_Status info "copying ${_target%.wasm*}.js to ${_directory}\n"
-                        FS_Copy_File "${_target%.wasm*}.js" "$_directory"
+                        I18N_Assemble "$___source" "$_directory"
+                        FS_Copy_File "$___source" "$_directory"
                         if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
                                 return 1
                         fi
                 fi
         elif [ $(FS_Is_Target_A_Chocolatey "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_Homebrew "$_target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS_Is_Target_A_Cargo "$_target") -eq 0 ]; then
+                return 10 # not applicable
+        elif [ $(FS_Is_Target_A_MSI "$_target") -eq 0 ]; then
                 return 10 # not applicable
         else
                 case "$_target_os" in
@@ -100,31 +98,31 @@ replace ${PROJECT_SKU} => ./
                         ;;
                 esac
 
-                OS_Print_Status info "copying ${_target} to ${_dest}\n"
+                I18N_Assemble "$_target" "$_dest"
                 FS_Copy_File "$_target" "$_dest"
                 if [ $? -ne 0 ]; then
-                        OS_Print_Status error "copy failed."
+                        I18N_Assemble_Failed
                         return 1
                 fi
         fi
 
 
         # copy user guide
-        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/docs/USER-GUIDES-EN.pdf"
-        OS_Print_Status info "copying ${_target} to ${_directory}\n"
-        FS_Copy_File "$_target" "${_directory}/."
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/USER-GUIDES-EN.pdf"
+        I18N_Assemble "$___source" "$_directory"
+        FS_Copy_File "$___source" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS_Print_Status error "copy failed."
+                I18N_Assemble_Failed
                 return 1
         fi
 
 
         # copy license file
-        _target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RESOURCES}/licenses/LICENSE-EN.pdf"
-        OS_Print_Status info "copying ${_target} to ${_directory}\n"
-        FS_Copy_File "$_target" "${_directory}/."
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/LICENSE-EN.pdf"
+        I18N_Assemble "$___source" "$_directory"
+        FS_Copy_File "$___source" "${_directory}/."
         if [ $? -ne 0 ]; then
-                OS_Print_Status error "copy failed."
+                I18N_Assemble_Failed
                 return 1
         fi
 

@@ -38,7 +38,7 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 
 	# package based on target's nature
 	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
-		$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
+		$_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\"
 		$null = I18N-Assemble "${_target}" "${_directory}"
 		$___process = FS-Copy-All "${_target}" "${_directory}"
 		if ($___process -ne 0) {
@@ -68,7 +68,7 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			return 1
 		}
 	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
-		$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
+		$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}\"
 		$___process = FS-Is-Directory "${___source}"
 		if ($___process -ne 0) {
 			return 10 # not applicable
