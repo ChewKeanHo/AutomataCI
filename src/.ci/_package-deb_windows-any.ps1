@@ -102,12 +102,7 @@ function PACKAGE-Assemble-DEB-Content {
 		$_filepath = "${_directory}\data\usr\local\bin\${env:PROJECT_SKU}"
 
 		$null = I18N-Copy "${_target}" "${_filepath}"
-		$___process = FS-Make-Housing-Directory "${_filepath}"
-		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
-			return 1
-		}
-
+		$null = FS-Make-Housing-Directory "${_filepath}"
 		$___process = FS-Copy-File "${_target}" "${_filepath}"
 		if ($___process -ne 0) {
 			$null = I18N-Copy-Failed

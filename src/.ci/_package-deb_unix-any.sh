@@ -105,11 +105,6 @@ PACKAGE_Assemble_DEB_Content() {
 
                 I18N_Copy "$_target" "$_filepath"
                 FS_Make_Housing_Directory "$_filepath"
-                if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
-                        return 1
-                fi
-
                 FS_Copy_File "$_target" "$_filepath"
                 if [ $? -ne 0 ]; then
                         I18N_Copy_Failed
