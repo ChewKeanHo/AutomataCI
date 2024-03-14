@@ -43,7 +43,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 
 
 	# assemble the package
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\"
 	$___dest = "${_directory}\Data\${env:PROJECT_PATH_SOURCE}"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
@@ -53,7 +53,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		return 1
 	}
 
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\.ci\"
 	$___dest = "${_directory}\Data\${env:PROJECT_PATH_SOURCE}\.ci"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
@@ -63,7 +63,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		return 1
 	}
 
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\"
 	$___dest = "${_directory}\Data\${env:PROJECT_RUST}"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
@@ -73,7 +73,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		return 1
 	}
 
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\.ci"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}\.ci\"
 	$___dest = "${_directory}\Data\${env:PROJECT_RUST}\.ci"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
@@ -83,7 +83,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 		return 1
 	}
 
-	$___source = "${env:PROJECT_PATH_ROOT}\automataCI"
+	$___source = "${env:PROJECT_PATH_ROOT}\automataCI\"
 	$___dest = "${_directory}\Data\automataCI"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
