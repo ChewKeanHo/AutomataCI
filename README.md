@@ -1,11 +1,11 @@
 # AutomataCI
-[![AutomataCI](src/icons/icon-1200x400.svg)](#automataci)
+[![AutomataCI](src/icons/banner_1200x200.svg)](#automataci)
 
-This is a template repository equipped with a native built-in semi-autonomous
-CI tool known as `AutomataCI`. It allows one to run a full-force CI jobs without
-solely relying on any 3rd-party service providers which makes the project
-extremely vulenrable to supply chain threat at least starting from year
-2021-2023 era.
+A multi-purpose Git template repository with built-in natively operable
+semi-autonomous CI infrastructure.
+
+***Run all full-force CI anywhere without solely depending on any 3rd-party
+provider***.
 
 
 
@@ -14,20 +14,66 @@ extremely vulenrable to supply chain threat at least starting from year
 
 Some good business reasons why using AutomataCI:
 
-1. **Starts off with a solid & tested foundation** - All the templates and CI
-   jobs are tested and have default configured for immediate software
-   development.
-2. **Avoid being threatend by malicious suppliers** - CI it's a nerve system for
+1. **Starts off with a solid & tested foundation** - All templates and CI
+   jobs are thoroughly tested and equipped with proper default configurations for
+   immediate development.
+3. **Avoid being threatend by malicious suppliers** - CI it's a nerve system for
    your product; handle it in-house and natively rather than leaving it nakedly
-   vulnerable for any kind 3rd-party extortions.
-3. **Steadily improvable** - AutomataCI itself are designed to be adaptive to
-   market changes, self-improvable, and cater to common use cases.
-4. **Simple and scalable** - Only uses `POSIX` shell and `PowerShell` so it
-   works natively without much external installation.
+   vulnerable for any kind of 3rd-party mercenaric extortions.
+4. **Steadily improvable** - AutomataCI itself are designed to be continuously
+   adaptive to market changes, self-improvable, and cater to common use cases.
+6. **Simple and scalable** - Built completely using only `POSIX` Shell and
+   `Power` Shell so it works natively without additional installations.
 
 
 
-### Supported Technologies
+### Cross-compile Confidently
+
+Build confidently not just for common CPU but other hardware as well with your
+selected technologies.
+
+[![cross-compile demo](.internals/screenshots/en/automataci_cross-compile-confidently_en.gif)](#cross-compile-confidently)
+
+
+
+### Maximizes Reaches
+
+Packaging your software to many standard distribution channels for maximizing
+customer reaches.
+
+[![maximize reaches demo](.internals/screenshots/en/automataci-packaging-many-distributions_en.gif)](#maximizes-reaches)
+
+
+
+### Focusing Business Objectives
+
+Deploy multiple technologies for your product via multiple technological
+integrations (within sensible requirements of course).
+
+[![focusing business objectives demo](.internals/screenshots/en/automataci-handles-various-tech-simultenously_en.gif)](#focusing-business-objectives)
+
+
+
+### Securing Point of Origin
+
+Crypographically sign the packages alongside shasum checking - for all security
+level needs; whenever, wherever.
+
+[![Securing point of origin](.internals/screenshots/en/automataci-securing-packages-with-cryptography_en.gif)](#securing-point-of-origin)
+
+
+
+### Container Ready
+
+Small-sized Open-Source Image Container (docker / podman) with cross-platform
+images are available whenever possible.
+
+[![Container ready](.internals/screenshots/en/automataci-multiarch-container-available_en.png)](#container-ready)
+
+
+
+
+## Supported Technologies
 
 * C Programming Language
   1. [i386 & amd64 GCC Compilers](https://gcc.gnu.org/)
@@ -56,7 +102,7 @@ Some good business reasons why using AutomataCI:
 * Microsoft Windows Ecosystems
   1. [`Chocolatey` ecosystem](https://chocolatey.org/) (for `choco install` capability)
   2. [`MSI` packages](https://wixtoolset.org/) (for conventional installation)
-  3. [`WinGet` repo](https://learn.microsoft.com/en-us/windows/package-manager/winget/) (for `winget install` capability)
+  3. [`WinGet` repo](https://learn.microsoft.com/en-us/windows/package-manager/winget/) (for `winget install` capability - COMING SOON)
 * Fleet Deployments
   1. [`OCI` compatible containers](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) (for `docker run` or `podman run` capability)
   2. [`PyPi` repo](https://pypi.org/) (for `pip install` capability)
