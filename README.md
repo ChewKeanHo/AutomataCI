@@ -4,8 +4,8 @@
 A multi-purpose Git template repository with built-in natively operable
 semi-autonomous CI infrastructure.
 
-***Run all full-force CI anywhere without solely depending on any 3rd-party
-provider***.
+***Run the CI with full-force anywhere anytime without solely depending on any
+3rd-party provider***.
 
 
 
@@ -14,41 +14,42 @@ provider***.
 
 Some good business reasons why using AutomataCI:
 
-1. **Starts off with a solid & tested foundation** - All templates and CI
-   jobs are thoroughly tested and equipped with proper default configurations for
-   immediate development.
-3. **Avoid being threatend by malicious suppliers** - CI it's a nerve system for
-   your product; handle it in-house and natively rather than leaving it nakedly
-   vulnerable for any kind of 3rd-party mercenaric extortions.
-4. **Steadily improvable** - AutomataCI itself are designed to be continuously
-   adaptive to market changes, self-improvable, and cater to common use cases.
-6. **Simple and scalable** - Built completely using only `POSIX` Shell and
-   `Power` Shell so it works natively without additional installations.
+1. **Starts off with a solid & tested foundation** - All CI jobs' recipes for
+   all supported technologies are thoroughly tested and equipped with proper
+   default configurations - rapid prototyping at will.
+3. **Avoiding threats by mercenaric suppliers** - CI is a nerve system for
+   your product(s)' production; handle it in-house and natively rather than
+   leaving it nakedly vulnerable for any kind of 3rd-party extortions.
+4. **Steadily improvable** - Designed to be continuously adaptive from market
+   changes.
+6. **Simple and scalable** - Built completely using **only** `POSIX` Shell and
+   `Power` Shell; Start operating natively without relying on additional
+   installations.
 
 
 
-### Cross-compile Confidently
+### Cross-compiling Confidently
 
-Build confidently not just for common CPU but other hardware as well with your
-selected technologies.
+Build confidently not just for the common CPUs but other hardware as well with
+your selected supportive technologies.
 
 [![cross-compile demo](.internals/screenshots/en/automataci_cross-compile-confidently_en.gif)](#cross-compile-confidently)
 
 
 
-### Maximizes Reaches
+### Maximizing Reaches
 
-Packaging your software to many standard distribution channels for maximizing
-customer reaches.
+Packaging your software for as many standardized distribution channels as
+possible; Makes customers' user experience easier and seamless.
 
-[![maximize reaches demo](.internals/screenshots/en/automataci-packaging-many-distributions_en.gif)](#maximizes-reaches)
+[![maximizing reaches demo](.internals/screenshots/en/automataci-packaging-many-distributions_en.gif)](#maximizing-reaches)
 
 
 
 ### Focusing Business Objectives
 
-Deploy multiple technologies for your product via multiple technological
-integrations (within sensible requirements of course).
+Deploy multiple technologies for your product development via integrations
+(within sensible needs of course).
 
 [![focusing business objectives demo](.internals/screenshots/en/automataci-handles-various-tech-simultenously_en.gif)](#focusing-business-objectives)
 
@@ -56,19 +57,19 @@ integrations (within sensible requirements of course).
 
 ### Securing Point of Origin
 
-Crypographically sign the packages alongside shasum checking - for all security
-level needs; whenever, wherever.
+GPG cryptographically signed packages alongside common shasum checking -
+end-to-end verifiable solution for all security level needs; whenever, wherever.
 
 [![Securing point of origin](.internals/screenshots/en/automataci-securing-packages-with-cryptography_en.gif)](#securing-point-of-origin)
 
 
 
-### Container Ready
+### Optimally Containerized
 
-Small-sized Open-Source Image Container (docker / podman) with cross-platform
-images are available whenever possible.
+Package small-sized Open-Source Image Container (for Docker OR Podman); AND
+compile cross-platform images whenever possible.
 
-[![Container ready](.internals/screenshots/en/automataci-multiarch-container-available_en.png)](#container-ready)
+[![Optimally Containerized](.internals/screenshots/en/automataci-multiarch-container-available_en.png)](#optimally-containerized)
 
 
 
@@ -114,7 +115,7 @@ images are available whenever possible.
   4. [`.opkg` repo](https://git.yoctoproject.org/opkg/) (with `opkg install` capability - *COMING SOON?!*)
   5. [`.rpm` repo](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/packaging_and_distributing_software/index) (with `yum install` capability)
 * Security
-  1. GitHub Security Advisory (for CVE management)
+  1. [GitHub Security Advisory (for CVE management)](https://github.com/ChewKeanHo/AutomataCI/security/advisories)
 * Static Website
   1. [Cloudflare Pages](https://pages.cloudflare.com/)
   2. [GitHub Pages](https://pages.github.com/)
@@ -162,10 +163,10 @@ A small token purchase would helps a lot.
 ### Craftmanship
 
 If you wish to bring in codes contribution, bug report, and ideas, please feel
-free to refer the PDF engineering spec located in the `automataCI/` directory.
+free to refer the PDF Handbook and execute accordingly.
 
 
 
 
 ## License
-AutomataCI is licensed under OSI compatible [Apache 2.0 License](LICENSE.txt)
+AutomataCI is licensed under OSI compatible [Apache 2.0 License](LICENSE.txt).
