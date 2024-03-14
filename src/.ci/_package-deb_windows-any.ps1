@@ -112,12 +112,12 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$null = I18N-Create "changelog.gz"
 	$_changelog_path = "${_directory}\data\usr\local\share\doc\${env:PROJECT_SKU}\changelog.gz"
 	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
 		$_changelog_path = "${_directory}\data\usr\share\doc\${env:PROJECT_SKU}\changelog.gz"
 	}
 
+	$null = I18N-Create "${_changelog_path}"
 	$___process = DEB-Create-Changelog `
 		"${_changelog_path}" `
 		"${_changelog}" `
@@ -129,12 +129,12 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$null = I18N-Create "copyright.gz"
 	$_copyright = "${_directory}\data\usr\local\share\doc\${env:PROJECT_SKU}\copyright"
 	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
 		$_copyright = "${_directory}\data\usr\share\doc\${env:PROJECT_SKU}\copyright"
 	}
 
+	$null = I18N-Create "${_copyright}"
 	$___process = COPYRIGHT-Create `
 		"${_copyright}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\deb-copyright" `
@@ -149,12 +149,12 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$null = I18N-Create "MANPAGE"
 	$_manual = "${_directory}\data\usr\local\share\man\man1\${env:PROJECT_SKU}.1"
 	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
 		$_manual = "${_directory}\data\usr\share\man\man1\${env:PROJECT_SKU}.1"
 	}
 
+	$null = I18N-Create "${_manual}"
 	$___process = MANUAL-Create `
 		"${_manual}" `
 		"${env:PROJECT_DEBIAN_IS_NATIVE}" `
@@ -185,7 +185,7 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$null = I18N-Create "control\md5sum"
+	$null = I18N-Create "${_directory}\control\md5sum"
 	$___process = DEB-Create-Checksum "${_directory}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
@@ -194,7 +194,7 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-	$null = I18N-Create "control\control"
+	$null = I18N-Create "${_directory}\control\control"
 	$___process = DEB-Create-Control `
 		"${_directory}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}" `

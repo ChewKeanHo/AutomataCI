@@ -134,11 +134,6 @@ function DEB-Create-Changelog {
 		return 1
 	}
 
-	$___process = FS-Is-Directory "${___directory}"
-	if ($___process -ne 0) {
-		return 1
-	}
-
 	$___process = FS-Is-File "${___filepath}"
 	if ($___process -ne 0) {
 		return 1

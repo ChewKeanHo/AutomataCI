@@ -114,12 +114,12 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        I18N_Create "changelog.gz"
         _changelog_path="${_directory}/data/usr/local/share/doc/${PROJECT_SKU}/changelog.gz"
         if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
                 _changelog_path="${_directory}/data/usr/share/doc/${PROJECT_SKU}/changelog.gz"
         fi
 
+        I18N_Create "$_changelog_path"
         DEB_Create_Changelog "$_changelog_path" "$_changelog" "$PROJECT_SKU"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
@@ -128,12 +128,12 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        I18N_Create "copyright.gz"
         _copyright="${_directory}/data/usr/local/share/doc/${PROJECT_SKU}/copyright"
         if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
                 _copyright="${_directory}/data/usr/share/doc/${PROJECT_SKU}/copyright"
         fi
 
+        I18N_Create "$_copyright"
         COPYRIGHT_Create \
                 "$_copyright" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/deb-copyright" \
@@ -148,12 +148,12 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        I18N_Create "MANPAGE"
         _manual="${_directory}/data/usr/local/share/man/man1/${PROJECT_SKU}.1"
         if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
                 _manual="${_directory}/data/usr/share/man/man1/${PROJECT_SKU}.1"
         fi
 
+        I18N_Create "$_manual"
         MANUAL_Create \
                 "$_manual" \
                 "$PROJECT_SKU" \
@@ -167,7 +167,7 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        I18N_Create "control/md5sum"
+        I18N_Create "${_directory}/control/md5sum"
         DEB_Create_Checksum "$_directory"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
@@ -176,7 +176,7 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: OPTIONAL (Comment to turn it off)
-        I18N_Create "source.list"
+        I18N_Create "${_directory}/source.list"
         DEB_Create_Source_List \
                 "$PROJECT_SIMULATE_RELEASE_REPO" \
                 "$_directory" \
@@ -192,7 +192,7 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
-        I18N_Create "control/control"
+        I18N_Create "${_directory}/control/control"
         DEB_Create_Control \
                 "$_directory" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \

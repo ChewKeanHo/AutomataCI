@@ -127,11 +127,6 @@ DEB_Create_Changelog() {
                 return 1
         fi
 
-        FS_Is_Directory "$___directory"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
         FS_Is_File "$___filepath"
         if [ $? -ne 0 ]; then
                 return 1
