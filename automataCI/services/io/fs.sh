@@ -184,6 +184,51 @@ FS_Get_Directory() {
 
 
 
+FS_Get_File() {
+        #___target="$1"
+
+
+        # validate input
+        if [ -z "$1" ]; then
+                printf -- ""
+                return 1
+        fi
+
+
+        # execute
+        printf -- "%b" "${1##*/}"
+
+
+        # report status
+        return 0
+}
+
+
+
+
+FS_Get_Path_Relative() {
+        #___target="$1"
+        #___base="$2"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ]; then
+                printf -- ""
+                return 1
+        fi
+
+
+        # execute
+        printf -- "%b" "${1#*${2}/}"
+
+
+        # report status
+        return 0
+}
+
+
+
+
 FS_Is_Directory() {
         #___target="$1"
 

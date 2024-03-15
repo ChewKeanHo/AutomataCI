@@ -176,6 +176,52 @@ function FS-Get-Directory {
 
 
 
+function FS-Get-File {
+	param (
+		[string]$___target
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($___target)) {
+		return ""
+	}
+
+
+	# execute
+	return "$(Split-Path -Leaf -Path "${___target}")"
+}
+
+
+
+
+function FS-Get-Path-Relative {
+	param (
+		[string]$___target,
+		[string]$___base
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($___target) -or [string]::IsNullOrEmpty($___base)) {
+		return ""
+	}
+
+
+	# execute
+	$___output = Resolve-Path -Relative -Path "${___target}" -RelativeBasePath "${___base}"
+	if ($___output.StartsWith(".\")) {
+		$___output = $___output.Substring(2)
+	}
+
+
+	# report status
+	return $___output
+}
+
+
+
+
 function FS-Is-Directory {
 	param (
 		[string]$___target

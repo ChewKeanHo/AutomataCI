@@ -83,6 +83,7 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_run.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_run-failed.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_run-successful.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_run-test.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_run-test-coverage.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_setup.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_setup-environment.sh"

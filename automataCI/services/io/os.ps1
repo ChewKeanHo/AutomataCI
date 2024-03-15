@@ -103,29 +103,89 @@ function OS-Is-Command-Available {
 function OS-Exec {
 	param (
 		[string]$___command,
-		[string]$___arguments
+		[string]$___arguments,
+		[string]$___log_stdout,
+		[string]$___log_stderr
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($___command) -or [string]::IsNullOrEmpty($___arguments)) {
+	if ([string]::IsNullOrEmpty($___command)) {
 		return 1
 	}
 
 
-	# get program
-	$___program = Get-Command $___command -ErrorAction SilentlyContinue
-	if (-not ($___program)) {
-		return 1
+	# get program fullpath
+	if (Test-Path -Path "${___command}" -ErrorAction SilentlyContinue) {
+		$___program = "${___command}"
+	} else {
+		$___program = Get-Command $___command -ErrorAction SilentlyContinue
+		if (-not ($___program)) {
+			return 1
+		}
 	}
 
 
 	# execute command
-	$___process = Start-Process -Wait `
-				-FilePath "${___program}" `
-				-NoNewWindow `
-				-ArgumentList "${___arguments}" `
-				-PassThru
+	if ([string]::IsNullOrEmpty($___arguments)) {
+		if ((-not [string]::IsNullOrEmpty($___log_stdout)) -and
+			(-not [string]::IsNullOrEmpty($___log_stderr))) {
+			$___process = Start-Process -Wait `
+						-FilePath "${___program}" `
+						-NoNewWindow `
+						-PassThru `
+						-RedirectStandardOutput "${___log_stdout}" `
+						-RedirectStandardError "${___log_stderr}"
+		} elseif (-not [string]::IsNullOrEmpty($___log_stdout)) {
+			$___process = Start-Process -Wait `
+						-FilePath "${___program}" `
+						-NoNewWindow `
+						-PassThru `
+						-RedirectStandardOutput "${___log_stdout}"
+		} elseif (-not [string]::IsNullOrEmpty($___log_stderr)) {
+			$___process = Start-Process -Wait `
+						-FilePath "${___program}" `
+						-NoNewWindow `
+						-PassThru `
+						-RedirectStandardError "${___log_stderr}"
+		} else {
+			$___process = Start-Process -Wait `
+						-FilePath "${___program}" `
+						-NoNewWindow `
+						-PassThru
+		}
+	} else {
+		if ((-not [string]::IsNullOrEmpty($___log_stdout)) -and
+			(-not [string]::IsNullOrEmpty($___log_stderr))) {
+			$___process = Start-Process -Wait `
+						-FilePath "${___program}" `
+						-NoNewWindow `
+						-PassThru `
+						-ArgumentList "${___arguments}" `
+						-RedirectStandardOutput "${___log_stdout}" `
+						-RedirectStandardError "${___log_stderr}"
+		} elseif (-not [string]::IsNullOrEmpty($___log_stdout)) {
+			$___process = Start-Process -Wait `
+						-FilePath "${___program}" `
+						-NoNewWindow `
+						-PassThru `
+						-ArgumentList "${___arguments}" `
+						-RedirectStandardOutput "${___log_stdout}"
+		} elseif (-not [string]::IsNullOrEmpty($___log_stderr)) {
+			$___process = Start-Process -Wait `
+						-FilePath "${___program}" `
+						-NoNewWindow `
+						-PassThru `
+						-ArgumentList "${___arguments}" `
+						-RedirectStandardError "${___log_stderr}"
+		} else {
+			$___process = Start-Process -Wait `
+						-FilePath "${___program}" `
+						-NoNewWindow `
+						-PassThru `
+						-ArgumentList "${___arguments}"
+		}
+	}
 	if ($___process.ExitCode -ne 0) {
 		return 1
 	}
