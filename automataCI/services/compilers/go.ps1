@@ -229,9 +229,9 @@ function GO-Setup-Local-Environment {
 	$___location = "$(GO-Get-Activator-Path)"
 
 	$null = FS-Make-Housing-Directory "${___location}"
-	$null = FS-Make-Directory "$(Split-Path -Path ${___location})\bin"
-	$null = FS-Make-Directory "$(Split-Path -Path ${___location})\cache"
-	$null = FS-Make-Directory "$(Split-Path -Path ${___location})\env"
+	$null = FS-Make-Directory "$(FS-Get-Directory "${___location}")\bin"
+	$null = FS-Make-Directory "$(FS-Get-Directory "${___location}")\cache"
+	$null = FS-Make-Directory "$(FS-Get-Directory "${___location}")\env"
 	$null = FS-Write-File "${___location}" @"
 if (-not (Get-Command "go" -ErrorAction SilentlyContinue)) {
 	Write-Error "[ ERROR ] missing go compiler."
@@ -248,14 +248,21 @@ function deactivate {
 	Remove-Item -Path Function:_OLD_PROMPT
 }
 
+
+# check existing
+if (-not [string]::IsNullOrEmpty(`${env:PROJECT_GO_LOCALIZED})) {
+	return
+}
+
+
 # activate
 `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") ``
 	+ ";" ``
 	+ [System.Environment]::GetEnvironmentVariable("Path","User")
-`${env:GOPATH} = "$(Split-Path -Path ${___location})"
-`${env:GOBIN} = "$(Split-Path -Path ${___location})\bin"
-`${env:GOCACHE} = "$(Split-Path -Path ${___location})\cache"
-`${env:GOENV} = "$(Split-Path -Path ${___location})\env"
+`${env:GOPATH} = "$(FS-Get-Directory "${___location}")"
+`${env:GOBIN} = "$(FS-Get-Directory "${___location}")\bin"
+`${env:GOCACHE} = "$(FS-Get-Directory "${___location}")\cache"
+`${env:GOENV} = "$(FS-Get-Directory "${___location}")\env"
 `${env:PROJECT_GO_LOCALIZED} = "${___location}"
 Copy-Item -Path function:prompt -Destination function:_OLD_PROMPT
 function global:prompt {

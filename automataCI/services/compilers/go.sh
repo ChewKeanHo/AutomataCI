@@ -16,6 +16,7 @@
 
 
 
+
 GO_Activate_Local_Environment() {
         # validate input
         GO_Is_Available
@@ -51,8 +52,7 @@ GO_Activate_Local_Environment() {
 
 
 GO_Get_Activator_Path() {
-        ___location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_GO_ENGINE}/activate.sh"
-        printf -- "%b" "$___location"
+        printf -- "%b" "${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_GO_ENGINE}/activate.sh"
 }
 
 
@@ -240,9 +240,9 @@ GO_Setup_Local_Environment() {
         fi
 
         FS_Make_Housing_Directory "$___location"
-        FS_Make_Directory "${___location%/*}/bin"
-        FS_Make_Directory "${___location%/*}/cache"
-        FS_Make_Directory "${___location%/*}/env"
+        FS_Make_Directory "$(FS_Get_Directory "$___location")/bin"
+        FS_Make_Directory "$(FS_Get_Directory "$___location")/cache"
+        FS_Make_Directory "$(FS_Get_Directory "$___location")/env"
         FS_Write_File "${___location}" "\
 #!/bin/sh
 if [ -z \"\$(type -t 'go')\" ]; then
@@ -267,10 +267,10 @@ fi
 
 # activate
 ${___brew}
-export GOPATH='${___location%/*}'
-export GOBIN='${___location%/*}/bin'
-export GOCACHE='${___location%/*}/cache'
-export GOENV='${___location%/*}/env'
+export GOPATH='$(FS_Get_Directory "$___location")'
+export GOBIN='$(FS_Get_Directory "$___location")/bin'
+export GOCACHE='$(FS_Get_Directory "$___location")/cache'
+export GOENV='$(FS_Get_Directory "$___location")/env'
 export PROJECT_GO_LOCALIZED='${___location}'
 export PS1=\"${___label} \${PS1}\"
 return 0
