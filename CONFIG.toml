@@ -145,15 +145,16 @@ PROJECT_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI"
 
 
 # AUTOMATACI_LANG
-# Configure AutomataCI to operate in a default language. Only accepts language
-# code complying to this format:
+# Overrides AutomataCI to operate in 1 specific language. Otherwise, AutomataCI
+# shall query the system language settings. Only accepts language code complying
+# to this format:
 #                        {iso639-1}[-{iso15954}]
 # Examples:
 #    en            – International English. (Default & Fallback)
 #    fr            – International French.
 #    zh-hans       – International Simplified Chinese.
 #    zh-hant       – International Traditional Chinese.
-AUTOMATACI_LANG = "en"
+AUTOMATACI_LANG = ""
 
 
 

@@ -143,6 +143,17 @@ if (Test-Path -Path "${env:PROJECT_PATH_ROOT}\SECRETS.toml" -PathType leaf) {
 
 
 
+# determine language
+if ($(STRINGS-Is-Empty "${env:AUTOMATACI_LANG}") -eq 0) {
+	$env:AUTOMATACI_LANG = "$(OS-Get-Lang)"
+	if ($(STRINGS-Is-Empty "${env:AUTOMATACI_LANG}") -eq 0) {
+		$env:AUTOMATACI_LANG = "en" # fallback to english
+	}
+}
+
+
+
+
 # update environment variables
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
 	+ ";" `

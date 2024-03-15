@@ -62,6 +62,18 @@ function OS-Get {
 
 
 
+function OS-Get-Lang {
+	$___lang = Get-WinSystemLocale
+	$fullLanguageCode = $___lang.Name
+	$___lang = $___lang -replace '[_-][A-Z]*$', ''
+	$___lang = $___lang -replace '_', '-'
+
+	return $___lang
+}
+
+
+
+
 function OS-Is-Command-Available {
 	param (
 		[string]$___command

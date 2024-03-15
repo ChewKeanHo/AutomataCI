@@ -91,6 +91,22 @@ OS_Get() {
 
 
 
+OS_Get_Lang() {
+        ___lang="${LC_ALL:-$LANG}"
+        ___lang="${___lang%.*}"
+        ___lang="${___lang%_[A-Z]*}"
+        ___lang="$(printf -- "%b" "$___lang" | tr '_' '-')"
+        if [ "$___lang" = "C" ]; then
+                ___lang="en"
+        fi
+
+        printf -- "%b" "$___lang"
+        return 0
+}
+
+
+
+
 OS_Is_Command_Available() {
         #___command="$1"
 

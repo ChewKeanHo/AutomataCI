@@ -15,7 +15,7 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
         >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
@@ -26,6 +26,8 @@ fi
 # determine PROJECT_PATH_PWD
 export PROJECT_PATH_PWD="$PWD"
 export PROJECT_PATH_AUTOMATA="automataCI"
+
+
 
 
 # determine PROJECT_PATH_ROOT
@@ -63,10 +65,14 @@ fi
 export LIBS_AUTOMATACI="${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}"
 
 
+
+
 # import fundamental libraries
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+
+
 
 
 # determine host system parameters
@@ -150,6 +156,15 @@ if [ -f "${PROJECT_PATH_ROOT}/SECRETS.toml" ]; then
                 export "$key"="$value"
         done < "${PROJECT_PATH_ROOT}/SECRETS.toml"
         IFS="$__old_IFS" && unset __old_IFS
+fi
+
+
+
+
+# determine language
+export AUTOMATACI_LANG="${AUTOMATACI_LANG:-$(OS_Get_Lang)}"
+if [ "$(STRINGS_Is_Empty "$AUTOMATACI_LANG")" -eq 0 ]; then
+        export AUTOMATACI_LANG="en" # fall back to english
 fi
 
 
