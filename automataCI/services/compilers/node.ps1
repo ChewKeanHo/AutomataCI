@@ -16,9 +16,8 @@
 
 function NODE-Setup {
 	# validate input
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Sync
+
 	$___process =  OS-Is-Command-Available "npm"
 	if ($___process -eq 0) {
 		return 0
@@ -35,9 +34,7 @@ function NODE-Setup {
 	if ($___process -ne 0) {
 		return 1
 	}
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Sync
 
 
 	# report status

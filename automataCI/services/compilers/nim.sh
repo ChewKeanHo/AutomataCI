@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -10,56 +10,64 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
-NIM::activate_local_environment() {
+NIM_Activate_Local_Environment() {
         # validate input
-        NIM::is_available
+        NIM_Is_Available
         if [ $? -ne 0 ] ; then
                 return 1
         fi
 
-        NIM::is_localized
+        NIM_Is_Localized
         if [ $? -eq 0 ] ; then
                 return 0
         fi
 
 
         # execute
-        __location="$(NIM::get_activator_path)"
-        if [ ! -f "$__location" ]; then
+        ___location="$(NIM_Get_Activator_Path)"
+        FS_Is_File "$___location"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        . "$__location"
-        NIM::is_localized
-        if [ $? -eq 0 ]; then
-                return 0
+        . "$___location"
+
+        NIM_Is_Localized
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
 
         # report status
-        return 1
+        return 0
 }
 
 
 
 
-NIM::check_package() {
-        #__directory="$1"
+NIM_Check_Package() {
+        #___directory="$1"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
 
 
         # execute
-        __current_path="$PWD" && cd "$1"
+        ___current_path="$PWD" && cd "$1"
         nimble check
-        __exit=$?
-        cd "$__current_path" && unset __current_path
-        if [ $__exit -ne 0 ]; then
+        ___process=$?
+        cd "$___current_path" && unset ___current_path
+        if [ $___process -ne 0 ]; then
                 return 1
         fi
 
@@ -71,11 +79,26 @@ NIM::check_package() {
 
 
 
-NIM::get_activator_path() {
+NIM_Get_Activator_Path() {
+        printf -- "%b" "${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_NIM_ENGINE}/activate.sh"
+}
+
+
+
+
+NIM_Is_Available() {
         # execute
-        __location="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_NIM_ENGINE}"
-        __location="${__location}/activate.sh"
-        printf -- "%b" "$__location"
+        OS_Sync
+
+        OS_Is_Command_Available "nim"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        OS_Is_Command_Available "nimble"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
 
 
         # report status
@@ -85,31 +108,9 @@ NIM::get_activator_path() {
 
 
 
-NIM::is_available() {
+NIM_Is_Localized() {
         # execute
-        if [ -z "$(type -t nim)" ]; then
-                return 1
-        fi
-
-        if [ -z "$(type -t nimble)" ]; then
-                return 1
-        fi
-
-        if [ -z "$(type -t gcc)" ] && [ -z "$(type -t clang)" ]; then
-                return 1
-        fi
-
-
-        # report status
-        return 0
-}
-
-
-
-
-NIM::is_localized() {
-        # execute
-        if [ ! -z "$PROJECT_NIM_LOCALIZED" ] ; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_NIM_LOCALIZED") -ne 0 ]; then
                 return 0
         fi
 
@@ -123,7 +124,7 @@ NIM::is_localized() {
 
 NIM_Setup() {
         # validate input
-        OS_Is_Command_Available "nim"
+        NIM_Is_Available
         if [ $? -eq 0 ]; then
                 return 0
         fi
@@ -136,59 +137,57 @@ NIM_Setup() {
 
         # execute
         brew install nim
-        if [ $? -eq 0 ]; then
-                return 0
+        if [ $? -ne 0 ]; then
+                return 1
         fi
 
 
         # report status
-        return 1
+        return 0
 }
 
 
 
 
-NIM::setup_local_environment() {
+NIM_Setup_Local_Environment() {
         # validate input
-        if [ -z "$PROJECT_PATH_ROOT" ]; then
+        NIM_Is_Localized
+        if [ $? -eq 0 ] ; then
+                return 0
+        fi
+
+        if [ $(STRINGS_Is_Empty "$PROJECT_PATH_ROOT") -eq 0 ]; then
                 return 1
         fi
 
-        if [ -z "$PROJECT_PATH_TOOLS" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_PATH_TOOLS") -eq 0 ]; then
                 return 1
         fi
 
-        if [ -z "$PROJECT_PATH_NIM_ENGINE" ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_PATH_NIM_ENGINE") -eq 0 ]; then
+                return 1
+        fi
+
+        NIM_Is_Available
+        if [ $? -ne 0 ] ; then
                 return 1
         fi
 
 
         # execute
-        NIM::is_available
-        if [ $? -ne 0 ] ; then
-                return 1
-        fi
-
-        NIM::is_localized
-        if [ $? -eq 0 ] ; then
-                return 0
-        fi
-
-
-        ## it's a clean repo. Start setting up localized environment...
-        __label="($PROJECT_PATH_NIM_ENGINE)"
-        __location="$(NIM::get_activator_path)"
+        ___label="($PROJECT_PATH_NIM_ENGINE)"
+        ___location="$(NIM_Get_Activator_Path)"
 
         if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
-                __brew="eval \$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+                ___brew="eval \$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         elif [ -f "/usr/local/bin/brew" ]; then
-                __brew="eval \$(/usr/local/bin/brew shellenv)"
+                ___brew="eval \$(/usr/local/bin/brew shellenv)"
         else
-                __brew=""
+                ___brew=""
         fi
 
-        FS_Make_Housing_Directory "$__location"
-        FS_Write_File "${__location}" "\
+        FS_Make_Housing_Directory "$___location"
+        FS_Write_File "$___location" "\
 #!/bin/sh
 if [ -z \"\$(type -t 'nim')\" ]; then
         1>&2 printf -- '[ ERROR ] missing nim compiler.\\\\n'
@@ -207,26 +206,32 @@ deactivate() {
                 NIMBLE_DIR=\"\$old_NIMBLE_DIR\"
                 unset old_NIMBLE_DIR
         fi
-        export PS1=\"\${PS1##*${__label} }\"
+        export PS1=\"\${PS1##*${___label} }\"
         unset PROJECT_NIM_LOCALIZED
         return 0
 }
 
+# check
+if [ ! -z \"\$PROJECT_NIM_LOCALIZED\" ]; then
+        return 0
+fi
+
 # activate
-${__brew}
+${___brew}
 export old_NIMBLE_DIR=\"\$NIMBLE_DIR\"
-export NIMBLE_DIR=\"${__location%/*}\"
-export PROJECT_NIM_LOCALIZED='${__location}'
-export PS1=\"${__label} \${PS1}\"
+export NIMBLE_DIR=\"$(FS_Get_Directory "${___location}")\"
+export PROJECT_NIM_LOCALIZED='${___location}'
+export PS1=\"${___label} \${PS1}\"
 return 0
 "
-        if [ ! -f "${__location}" ]; then
+        FS_Is_File "${___location}"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # testing the activation
-        . "${__location}"
+        NIM_Activate_Local_Environment
         if [ $? -ne 0 ] ; then
                 return 1
         fi

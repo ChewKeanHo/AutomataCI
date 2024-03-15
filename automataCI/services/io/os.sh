@@ -146,6 +146,30 @@ OS_Is_Run_Simulated() {
 
 
 
+OS_Sync() {
+        # execute
+        if [ -f "${HOME}/.bash_profile" ]; then
+                . "${HOME}/.bash_profile"
+        elif [ -f "${HOME}/.bashrc" ]; then
+                . "${HOME}/.bashrc"
+        elif [ -f "${HOME}/.zshrc" ]; then
+                . "${HOME}/.zshrc"
+        elif [ -f "${HOME}/.kshrc" ]; then
+                . "${HOME}/.kshrc"
+        elif [ -f "${HOME}/.profile" ]; then
+                . "${HOME}/.profile"
+        fi
+
+        sync
+
+
+        # report status
+        return 0
+}
+
+
+
+
 OS_Print_Status() {
         # NOTE: to be scrapped soon!
         __status_mode="$1" && shift 1

@@ -310,6 +310,8 @@ function C-Get-Strict-Settings {
 
 
 function C-Is-Available {
+	$null = OS-Sync
+
 	if (-not ([string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "windows" "amd64"))) -and
 		(-not [string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "" "wasm"))) -and
 		(-not [string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "windows" "arm64")))) {
@@ -353,9 +355,7 @@ function C-Setup {
 	#	return 1
 	#}
 
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Sync
 
 
 	# report status

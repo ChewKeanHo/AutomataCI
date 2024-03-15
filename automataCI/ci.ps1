@@ -155,9 +155,7 @@ if ($(STRINGS-Is-Empty "${env:AUTOMATACI_LANG}") -eq 0) {
 
 
 # update environment variables
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-	+ ";" `
-	+ [System.Environment]::GetEnvironmentVariable("Path","User")
+$null = OS-Sync
 
 
 

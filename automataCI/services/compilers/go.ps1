@@ -139,6 +139,8 @@ function Go-Get-Filename {
 
 function GO-Is-Available {
 	# execute
+	$null = OS-Sync
+
 	$___process = OS-Is-Command-Available "go"
 	if ($___process -eq 0) {
 		return 0
@@ -168,7 +170,7 @@ function GO-Is-Localized {
 
 function GO-Setup {
 	# validate input
-	$___process = Go-Is-Available
+	$___process = GO-Is-Available
 	if ($___process -eq 0) {
 		return 0
 	}
@@ -184,9 +186,7 @@ function GO-Setup {
 	if ($___process -ne 0) {
 		return 1
 	}
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Sync
 
 
 	# report status
@@ -215,9 +215,6 @@ function GO-Setup-Local-Environment {
 		return 1
 	}
 
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
 	$___process = GO-Is-Available
 	if ($___process -ne 0) {
 		return 1

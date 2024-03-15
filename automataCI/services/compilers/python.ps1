@@ -266,6 +266,8 @@ function PYTHON-Has-PIP {
 
 function PYTHON-Is-Available {
 	# execute
+	$null = OS-Sync
+
 	$___process = OS-Is-Command-Available "python3"
 	if ($___process -eq 0) {
 		return 0
@@ -439,6 +441,7 @@ function PYTHON-Setup {
 	if ($___process -ne 0) {
 		return 1
 	}
+	$null = OS-Sync
 
 	$___process = PYTHON-Setup-VENV
 	if ($___process -ne 0) {

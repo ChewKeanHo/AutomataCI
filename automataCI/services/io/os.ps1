@@ -152,6 +152,15 @@ function OS-Is-Run-Simulated {
 
 
 
+function OS-Sync {
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+}
+
+
+
+
 function OS-Print-Status {
 	# NOTE: to be scrapped soon!
 	param (

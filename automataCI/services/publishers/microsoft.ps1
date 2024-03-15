@@ -276,9 +276,7 @@ function MICROSOFT-Setup-WINGET {
 
 	# Sleep for letting winget get into the path because the installer is a buggy mess
 	Start-Sleep -s 5
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Sync
 	$___process = OS-Is-Command-Available "winget"
 	if ($___process -eq 0) {
 		return 0

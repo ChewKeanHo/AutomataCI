@@ -348,7 +348,7 @@ C::get_strict_settings() {
 
 
 
-C::is_available() {
+C_Is_Available() {
         # execute
         if [ ! -z "$(C::get_compiler_by_arch "windows" "amd64")" -a \
                 ! -z "$(C::get_compiler_by_arch "darwin" "amd64")" -a \
@@ -373,7 +373,7 @@ C::is_available() {
 
 C_Setup() {
         # validate input
-        C::is_available
+        C_Is_Available
         if [ $? -eq 0 ]; then
                 return 0
         fi

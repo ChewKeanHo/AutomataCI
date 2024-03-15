@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -9,41 +9,42 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
 
 function NIM-Activate-Local-Environment {
 	# validate input
-	$__process = NIM-Is-Available
-	if ($__process -ne 0) {
+	$___process = NIM-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__process = NIM-Is-Localized
-	if ($__process -eq 0) {
+	$___process = NIM-Is-Localized
+	if ($___process -eq 0) {
 		return 0
 	}
 
 
 	# execute
-	$__location = "$(NIM-Get-Activator-Path)"
-	if (-not (Test-Path "${__location}")) {
+	$___location = "$(NIM-Get-Activator-Path)"
+	if ($(FS-Is-File "${___location}") -ne 0) {
 		return 1
 	}
 
-	. $__location
-	$__process = NIM-Is-Localized
-	if ($__process -eq 0) {
-		return 0
+	. $___location
+
+	$___process = NIM-Is-Localized
+	if ($___process -ne 0) {
+		return 1
 	}
 
 
 	# report status
-	return 1
+	return 0
 }
 
 
@@ -51,17 +52,23 @@ function NIM-Activate-Local-Environment {
 
 function NIM-Check-Package {
 	param(
-		[string]$__directory
+		[string]$___directory
 	)
 
 
+	# validate input
+	if ($(STRINGS-Is-Empty "${___directory}") -eq 0) {
+		return 1
+	}
+
+
 	# execute
-	$__current_path = Get-Location
-	$null = Set-Location "${__directory}"
-	$__process = OS-Exec "nimble" "check"
-	$null = Set-Location "${__current_path}"
-	$null = Remove-Variable __current_path
-	if ($__process -ne 0) {
+	$___current_path = Get-Location
+	$null = Set-Location "${___directory}"
+	$___process = OS-Exec "nimble" "check"
+	$null = Set-Location "${___current_path}"
+	$null = Remove-Variable ___current_path
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -74,8 +81,7 @@ function NIM-Check-Package {
 
 
 function NIM-Get-Activator-Path {
-	return "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}" `
-		+ "\${env:PROJECT_PATH_NIM_ENGINE}\Activate.ps1"
+	return "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}\${env:PROJECT_PATH_NIM_ENGINE}\Activate.ps1"
 }
 
 
@@ -83,29 +89,21 @@ function NIM-Get-Activator-Path {
 
 function NIM-Is-Available {
 	# execute
-	$__program = Get-Command nim -ErrorAction SilentlyContinue
-	if (-not $__program) {
+	$null = OS-Sync
+
+	$___process = OS-Is-Command-Available "nim"
+	if ($___process -ne 0) {
 		return 1
 	}
 
-	$__program = Get-Command nimble -ErrorAction SilentlyContinue
-	if (-not $__program) {
+	$___process = OS-Is-Command-Available "nimble"
+	if ($___process -ne 0) {
 		return 1
-	}
-
-	$__program = Get-Command gcc -ErrorAction SilentlyContinue
-	if ($__program) {
-		return 0
-	}
-
-	$__program = Get-Command x86_64-w64-mingw32-gcc -ErrorAction SilentlyContinue
-	if ($__program) {
-		return 0
 	}
 
 
 	# report status
-	return 1
+	return 0
 }
 
 
@@ -113,7 +111,7 @@ function NIM-Is-Available {
 
 function NIM-Is-Localized {
 	# execute
-	if (-not [string]::IsNullOrEmpty($env:PROJECT_NIM_LOCALIZED)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_NIM_LOCALIZED}") -ne 0) {
 		return 0
 	}
 
@@ -143,14 +141,11 @@ function NIM-Setup {
 	if ($___process -ne 0) {
 		return 1
 	}
-
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Sync
 
 
 	# report status
-	return 1
+	return 0
 }
 
 
@@ -158,37 +153,38 @@ function NIM-Setup {
 
 function NIM-Setup-Local-Environment {
 	# validate input
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_ROOT)) {
+	$___process = NIM-Is-Localized
+	if ($___process -eq 0) {
+		return 0
+	}
+
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_ROOT}") -eq 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_TOOLS)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_TOOLS}") -eq 0) {
 		return 1
 	}
 
-	if ([string]::IsNullOrEmpty($env:PROJECT_PATH_NIM_ENGINE)) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_NIM_ENGINE}") -eq 0) {
+		return 1
+	}
+
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
+		+ ";" `
+		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$___process = NIM-Is-Available
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# execute
-	$__process = NIM-Is-Available
-	if ($__process -ne 0) {
-		return 1
-	}
+	$___label = "($env:PROJECT_PATH_NIM_ENGINE)"
+	$___location = "$(NIM-Get-Activator-Path)"
 
-	$__process = NIM-Is-Localized
-	if ($__process -eq 0) {
-		return 0
-	}
-
-
-	## it's a clean repo. Start setting up localized environment...
-	$__label = "($env:PROJECT_PATH_NIM_ENGINE)"
-	$__location = "$(NIM-Get-Activator-Path)"
-
-	$null = FS-Make-Housing-Directory "${__location}"
-	$null = FS-Write-File "${__location}" @"
+	$null = FS-Make-Housing-Directory "${___location}"
+	$null = FS-Write-File "${___location}" @"
 if (-not (Get-Command "nim" -ErrorAction SilentlyContinue)) {
 	Write-Error "[ ERROR ] missing nim compiler."
 	return
@@ -212,28 +208,35 @@ function deactivate {
 	Remove-Item -Path Function:_OLD_PROMPT
 }
 
+
+# check existing
+if (-not [string]::IsNullOrEmpty(`${env:PROJECT_NIM_LOCALIZED})) {
+	return
+}
+
+
 # activate
 `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") ``
 	+ ";" ``
 	+ [System.Environment]::GetEnvironmentVariable("Path","User")
 `${env:old_NIMBLE_DIR} = "`${NIMBLE_DIR}"
-`${env:NIMBLE_DIR} = "$(Split-Path -Parent -Path "${__location}")"
-`${env:PROJECT_NIM_LOCALIZED} = "${__location}"
+`${env:NIMBLE_DIR} = "$(FS-Get-Directory "${___location}")"
+`${env:PROJECT_NIM_LOCALIZED} = "${___location}"
 Copy-Item -Path function:prompt -Destination function:_OLD_PROMPT
 function global:prompt {
-	Write-Host -NoNewline -ForegroundColor Green "(${__label}) "
+	Write-Host -NoNewline -ForegroundColor Green "(${___label}) "
 	_OLD_VIRTUAL_PROMPT
 }
 "@
-
-	if (-not (Test-Path "${__location}")) {
+	$___process = FS-Is-File "${___location}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# testing the activation
-	$__process = NIM-Activate-Local-Environment
-	if ($__process -ne 0) {
+	$___process = NIM-Activate-Local-Environment
+	if ($___process -ne 0) {
 		return 1
 	}
 

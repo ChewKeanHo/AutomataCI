@@ -39,9 +39,7 @@ function ANGULAR-Build {
 
 
 function ANGULAR-Is-Available {
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Sync
 
 	$__program = Get-Command npm -ErrorAction SilentlyContinue
 	if (-not $__program) {
@@ -61,9 +59,7 @@ function ANGULAR-Is-Available {
 
 function ANGULAR-Setup {
 	# validate input
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Sync
 
 	$___process = ANGULAR-Is-Available
 	if ($___process -eq 0) {
@@ -81,10 +77,7 @@ function ANGULAR-Setup {
 	if ($___process -ne 0) {
 		return 1
 	}
-
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Sync
 
 
 	# report status

@@ -170,6 +170,12 @@ fi
 
 
 
+# update environment variable
+OS_Sync
+
+
+
+
 # execute command
 case "$1" in
 env|Env|ENV)

@@ -29,7 +29,7 @@ fi
 
 # safety check control surfaces
 OS_Print_Status info "checking nim availability...\n"
-NIM::is_available
+NIM_Is_Available
 if [ $? -ne 0 ]; then
         OS_Print_Status error "missing nim compiler.\n"
         return 1
@@ -37,7 +37,7 @@ fi
 
 
 OS_Print_Status info "activating local environment...\n"
-NIM::activate_local_environment
+NIM_Activate_Local_Environment
 if [ $? -ne 0 ]; then
         OS_Print_Status error "activation failed.\n"
         return 1
@@ -116,7 +116,7 @@ FS_Make_Directory "$__workspace"
 
 # execute
 OS_Print_Status info "checking nim package health...\n"
-NIM::check_package "$__source"
+NIM_Check_Package "$__source"
 if [ $? -ne 0 ]; then
         OS_Print_Status error "check failed.\n"
 fi

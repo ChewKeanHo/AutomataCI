@@ -243,7 +243,7 @@ GO_Setup_Local_Environment() {
         FS_Make_Directory "$(FS_Get_Directory "$___location")/bin"
         FS_Make_Directory "$(FS_Get_Directory "$___location")/cache"
         FS_Make_Directory "$(FS_Get_Directory "$___location")/env"
-        FS_Write_File "${___location}" "\
+        FS_Write_File "$___location" "\
 #!/bin/sh
 if [ -z \"\$(type -t 'go')\" ]; then
         1>&2 printf -- '[ ERROR ] missing go compiler.\\\\n'
