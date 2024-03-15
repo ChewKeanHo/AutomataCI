@@ -159,22 +159,24 @@ function NIM-Setup-Local-Environment {
 	}
 
 	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_ROOT}") -eq 0) {
+		Write-Host "DEBUG: nim root path failed"
 		return 1
 	}
 
 	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_TOOLS}") -eq 0) {
+		Write-Host "DEBUG: nim tool path failed"
 		return 1
 	}
 
 	if ($(STRINGS-Is-Empty "${env:PROJECT_PATH_NIM_ENGINE}") -eq 0) {
+		Write-Host "DEBUG: nim engine path failed"
 		return 1
 	}
 
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
-		+ ";" `
-		+ [System.Environment]::GetEnvironmentVariable("Path","User")
+	$null = OS-Exec
 	$___process = NIM-Is-Available
 	if ($___process -ne 0) {
+		Write-Host "DEBUG: nim available failed"
 		return 1
 	}
 

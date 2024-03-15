@@ -535,7 +535,7 @@ function RUST-Setup-Local-Environment {
 	$env:RUSTUP_HOME = Split-Path -Parent -Path "${___location}"
 
 	## download installer from official portal
-	$null = Invoke-Expression "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\rust-rustup.ps1"
+	$null = Invoke-Expression "${env:LIBS_AUTOMATACI}\services\compilers\rust-rustup.ps1"
 
 	## it's a clean repo. Start setting up localized environment...
 	$null = FS-Make-Housing-Directory "${___location}"

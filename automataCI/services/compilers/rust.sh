@@ -576,9 +576,7 @@ RUST_Setup_Local_Environment() {
         export RUSTUP_HOME="${___location%/*}"
 
         ## download installer from official portal
-        sh "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/rust-rustup.sh" \
-                -y \
-                --no-modify-path
+        sh "${LIBS_AUTOMATACI}/services/compilers/rust-rustup.sh" -y --no-modify-path
 
         ## it's a clean repo. Start setting up localized environment...
         FS_Make_Housing_Directory "$___location"
