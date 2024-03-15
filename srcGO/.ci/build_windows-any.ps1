@@ -55,17 +55,17 @@ ${env:CGO_ENABLED} = 0
 	$__arch = $__platform.Split("/")[1]
 	switch ("${__os}-${__arch}") {
 	"android-amd64" {
-		continue loop #impossible without cgo
+		continue loop # impossible without cgo
 	} "android-386" {
-		continue loop #impossible without cgo
+		continue loop # impossible without cgo
 	} "android-arm" {
-		continue loop #impossible without cgo
+		continue loop # impossible without cgo
 	} "android-arm64" {
-		continue loop #impossible without cgo
+		continue loop # impossible without cgo
 	} "ios-amd64" {
-		continue loop
+		continue loop # still experimental
 	} "ios-arm64" {
-		continue loop
+		continue loop # still experimental
 	} "js-wasm" {
 		$__filename = "${__output_directory}\${env:PROJECT_SKU}_${__os}-${__arch}.js"
 		$null = FS-Remove-Silently "${__filename}"
