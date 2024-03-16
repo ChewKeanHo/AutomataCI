@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,42 +15,31 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\nim.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\nim.ps1"
 
 
 
 
-# safety checking control surfaces
-OS-Print-Status info "checking nim availability..."
-$__process = NIM-Is-Available
-if ($__process -ne 0) {
-	OS-Print-Status error "missing nim compiler."
-	return 1
-}
-
-
-OS-Print-Status info "activating local environment..."
-$__process = NIM-Activate-Local-Environment
-if ($__process -ne 0) {
-	OS-Print-Status error "activation failed."
+# execute
+$null = I18N-Activate-Environment
+$___process = NIM-Activate-Local-Environment
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
 	return 1
 }
 
 
-OS-Print-Status info "prepare nim workspace..."
+$null = I18N-Configure-Build-Settings
 $__target = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
 $__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
-$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}"
-$__main = "${__source}\${env:PROJECT_SKU}.nim"
-
-$SETTINGS_CC = `
-	"compileToC " `
+$__main = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}\${env:PROJECT_SKU}.nim"
+$__arguments = "compileToC " `
 	+ "--passC:-Wall --passL:-Wall " `
 	+ "--passC:-Wextra --passL:-Wextra " `
 	+ "--passC:-std=gnu89 --passL:-std=gnu89 " `
@@ -67,9 +56,8 @@ $SETTINGS_CC = `
 	+ "--passC:-Wno-format-security --passL:-Wno-format-security " `
 	+ "--passC:-Os --passL:-Os " `
 	+ "--passC:-g0 --passL:-g0 " `
-	+ "--passC:-flto --passL:-flto "
-$SETTINGS_NIM = `
-	"--mm:orc " `
+	+ "--passC:-flto --passL:-flto " `
+	+ "--mm:orc " `
 	+ "--define:release " `
 	+ "--opt:size " `
 	+ "--colors:on " `
@@ -78,49 +66,55 @@ $SETTINGS_NIM = `
 	+ "--tlsEmulation:on " `
 	+ "--implicitStatic:on " `
 	+ "--trmacros:on " `
-	+ "--panics:on "
+	+ "--panics:on " `
+	+ "--cpu:${env:PROJECT_ARCH} "
+
+switch ("${env:PROJECT_OS}") {
+"darwin" {
+	$__arguments = "${__arguments} " `
+		+ "--cc:clang " `
+		+ "--passC:-fPIC"
+} "windows" {
+	$__arguments = "${__arguments} " `
+		+ "--passC:-static --passL:-static " `
+		+ "--passC:-s --passL:-s " `
+		+ "--os:${env:PROJECT_OS} "
+} default {
+	$__arguments = "${__arguments} " `
+		+ "--cc:gcc " `
+		+ "--passC:-static --passL:-static " `
+		+ "--passC:-s --passL:-s " `
+		+ "--os:${env:PROJECT_OS} "
+}}
+
+switch ("${env:PROJECT_OS}") {
+"windows" {
+	$__target = "${__workspace}\${__target}.exe"
+} default {
+	$__target = "${__workspace}\${__target}"
+}}
 
 
-
-
-# execute
+$null = I18N-Build "${__main}"
 $null = FS-Make-Directory "${__workspace}"
-
-
-OS-Print-Status info "checking nim package health..."
-$__process = NIM-Check-Package "${__source}"
-if ($__process -ne 0) {
-	OS-Print-Status error "check failed."
+$null = FS-Remove-Silently "${__target}"
+$___process = OS-Exec "nim" "${__arguments} --out:${__target} ${__main}"
+if ($___process -ne 0) {
+	$null = I18N-Build-Failed
 	return 1
 }
 
 
-OS-Print-Status info "building nim application..."
-$__arguments = "${SETTINGS_CC} " `
-	+ "${SETTINGS_NIM} " `
-	+ "--passC:-static --passL:-static " `
-	+ "--passC:-s --passL:-s " `
-	+ "--os:${env:PROJECT_OS} " `
-	+ "--cpu:${env:PROJECT_ARCH} " `
-	+ "--out:${__workspace}\${__target} "
-$__process = OS-Exec "nim" "${__arguments} ${__main}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
+$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}\${env:PROJECT_SKU}"
+if ("${env:PROJECT_OS}" -eq "windows") {
+	$__dest = "${__dest}.exe"
 }
-
-
-
-
-# exporting executable
-$__source = "${__workspace}\${__target}.exe"
-$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}\${env:PROJECT_SKU}.exe"
-OS-Print-Status info "exporting ${__source} to ${__dest}"
-$null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}"
+$null = I18N-Export "${__target}" "${__dest}"
+$null = FS-Make-Housing-Directory "${__dest}"
 $null = FS-Remove-Silently "${__dest}"
-$__process = FS-Move "${__source}" "${__dest}"
-if ($__process -ne 0) {
-	OS-Print-Status error "export failed."
+$___process = FS-Move "${__target}" "${__dest}"
+if ($___process -ne 0) {
+	$null = I18N-Export-Failed
 	return 1
 }
 

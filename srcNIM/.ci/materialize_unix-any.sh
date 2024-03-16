@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,42 +15,32 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/nim.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/nim.sh"
 
 
 
 
-# safety check control surfaces
-OS_Print_Status info "checking nim availability...\n"
-NIM_Is_Available
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "missing nim compiler.\n"
-        return 1
-fi
-
-
-OS_Print_Status info "activating local environment...\n"
+# execute
+I18N_Activate_Environment
 NIM_Activate_Local_Environment
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "activation failed.\n"
+        I18N_Activate_Failed
         return 1
 fi
 
 
-OS_Print_Status info "prepare nim workspace...\n"
+I18N_Configure_Build_Settings
 __target="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
 __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
-__source="${PROJECT_PATH_ROOT}/${PROJECT_NIM}"
-__main="${__source}/${PROJECT_SKU}.nim"
-
-SETTINGS_CC="\
+__main="${PROJECT_PATH_ROOT}/${PROJECT_NIM}/${PROJECT_SKU}.nim"
+__arguments="\
 compileToC \
 --passC:-Wall --passL:-Wall \
 --passC:-Wextra --passL:-Wextra \
@@ -70,8 +60,6 @@ compileToC \
 --passC:-g0 --passL:-g0 \
 --passC:-flto --passL:-flto \
 --passC:-s --passL:-s \
-"
-SETTINGS_NIM="\
 --mm:orc \
 --define:release \
 --opt:size \
@@ -82,65 +70,58 @@ SETTINGS_NIM="\
 --implicitStatic:on \
 --trmacros:on \
 --panics:on \
+--cpu:${PROJECT_ARCH} \
 "
 
 case "$PROJECT_OS" in
 darwin)
         __arguments="\
-${SETTINGS_CC} \
-${SETTINGS_NIM} \
+${__arguments} \
 --cc:clang \
 --passC:-fPIC \
---cpu:${PROJECT_ARCH} \
---out:${__workspace}/${__target} \
-$__main\
 "
         ;;
 *)
         __arguments="\
-${SETTINGS_CC} \
-${SETTINGS_NIM} \
+${__arguments} \
 --cc:gcc \
 --passC:-static --passL:-static \
+--passC:-s --passL:-s \
 --os:${PROJECT_OS} \
---cpu:${PROJECT_ARCH} \
---out:${__workspace}/${__target} \
-$__main\
 "
         ;;
 esac
+
+case "$PROJECT_OS" in
+windows)
+        __target="${__workspace}/${PROJECT_SKU}.exe"
+        ;;
+*)
+        __target="${__workspace}/${PROJECT_SKU}"
+        ;;
+esac
+
+
+I18N_Build "$__main"
 FS_Make_Directory "$__workspace"
-
-
-
-
-# execute
-OS_Print_Status info "checking nim package health...\n"
-NIM_Check_Package "$__source"
+FS_Remove_Silently "$__target"
+eval "nim ${__arguments} --out:${__target} ${__main}"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "check failed.\n"
-fi
-
-
-OS_Print_Status info "building nim application...\n"
-nim $__arguments
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
+        I18N_Build_Failed
         return 1
 fi
 
 
-
-
-# exporting executable
-__source="${__workspace}/${__target}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS_Print_Status info "exporting ${__source} to ${__dest}\n"
+if [ "$PROJECT_OS" = "windows" ]; then
+        __dest="${__dest}.exe"
+fi
+I18N_Export "$__target" "$__dest"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
-FS_Move "$__source" "$__dest"
+FS_Move "$__target" "$__dest"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "export failed.\n"
+        I18N_Export_Failed
         return 1
 fi
 
