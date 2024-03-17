@@ -99,6 +99,7 @@
 . "${env:LIBS_AUTOMATACI}\services\i18n\_source.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_source-skipped.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_sync-register.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_sync-register-skipped-missing-compiler.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_sync-register-skipped-missing-linker.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_sync-register-skipped-missing-target.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_sync-register-skipped-unsupported.ps1"

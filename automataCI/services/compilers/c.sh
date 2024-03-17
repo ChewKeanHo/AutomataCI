@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -10,23 +10,23 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 
 
 C_Get_Compiler() {
-        #__os="$1"
-        #__arch="$2"
-        #__base_os="$3"
-        #__base_arch="$4"
-        #__compiler="$5"
+        #___os="$1"
+        #___arch="$2"
+        #___base_os="$3"
+        #___base_arch="$4"
+        #___compiler="$5"
 
 
         # execute
-        if [ ! -z "$5" ]; then
+        if [ $(STRINGS_Is_Empty "$5") -ne 0 ]; then
                 OS_Is_Command_Available "$5"
                 if [ $? -eq 0 ]; then
                         printf -- "%b" "$5"
@@ -37,215 +37,407 @@ C_Get_Compiler() {
                 fi
         fi
 
-        __compiler="$(C::get_compiler_by_arch "$1" "$2")"
-        if [ $? -eq 0 ]; then
-                printf -- "%b" "$__compiler"
-                return 0
-        fi
-
-        __compiler="$(C::get_compiler_common "$1" "$2" "$3" "$4")"
-        if [ $? -eq 0 ]; then
-                printf -- "%b" "$__compiler"
-                return 0
-        fi
-
-
-        # report status
-        printf -- ""
-        return 1
-}
-
-
-
-
-C::get_compiler_by_arch() {
-        #__os="$1"
-        #__arch="$2"
-
-
-        # execute
-        case "$2" in
-        amd64)
-                case "$1" in
-                windows)
-                        __compiler="x86_64-w64-mingw32-gcc"
-                        ;;
-                darwin)
-                        __compiler="clang-17"
-                        OS_Is_Command_Available "$__compiler"
-                        if [ $? -eq 0 ]; then
-                                printf -- "%b" "$__compiler"
-                                return 0
-                        fi
-
-                        __compiler="clang-15"
-                        OS_Is_Command_Available "$__compiler"
-                        if [ $? -eq 0 ]; then
-                                printf -- "%b" "$__compiler"
-                                return 0
-                        fi
-
-                        __compiler="clang-14"
-                        ;;
-                *)
-                        __compiler="x86_64-linux-gnu-gcc"
-                        OS_Is_Command_Available "$__compiler"
-                        if [ $? -eq 0 ]; then
-                                printf -- "%b" "$__compiler"
-                                return 0
-                        fi
-
-                        __compiler="x86_64-elf-gcc"
-                        ;;
-                esac
-                ;;
-        arm|armel)
-                __compiler="arm-linux-gnueabi-gcc"
-                OS_Is_Command_Available "$__compiler"
+        case "${1}-${2}" in
+        darwin-amd64|darwin-arm64)
+                ___compiler="clang-17"
+                OS_Is_Command_Available "$___compiler"
                 if [ $? -eq 0 ]; then
-                        printf -- "%b" "$__compiler"
+                        printf -- "%b" "$___compiler"
                         return 0
                 fi
 
-                __compiler="arm-none-gnueabi-gcc"
-                ;;
-        armhf)
-                __compiler="arm-linux-gnueabihf-gcc"
-                ;;
-        arm64)
-                case "$1" in
-                windows)
-                        __compiler="x86_64-w64-mingw32-gcc"
-                        ;;
-                darwin)
-                        __compiler="clang-17"
-                        OS_Is_Command_Available "$__compiler"
-                        if [ $? -eq 0 ]; then
-                                printf -- "%b" "$__compiler"
-                                return 0
-                        fi
-
-                        __compiler="clang-15"
-                        OS_Is_Command_Available "$__compiler"
-                        if [ $? -eq 0 ]; then
-                                printf -- "%b" "$__compiler"
-                                return 0
-                        fi
-
-                        __compiler="clang-14"
-                        ;;
-                *)
-                        __compiler="aarch64-linux-gnu-gcc"
-                        ;;
-                esac
-                ;;
-        avr)
-                __compiler="avr-gcc"
-                OS_Is_Command_Available "$__compiler"
+                ___compiler="clang-15"
+                OS_Is_Command_Available "$___compiler"
                 if [ $? -eq 0 ]; then
-                        printf -- "%b" "$__compiler"
+                        printf -- "%b" "$___compiler"
                         return 0
                 fi
 
-                __compiler="clang-17"
-                OS_Is_Command_Available "$__compiler"
+                ___compiler="clang-14"
+                OS_Is_Command_Available "$___compiler"
                 if [ $? -eq 0 ]; then
-                        printf -- "%b" "$__compiler"
+                        printf -- "%b" "$___compiler"
                         return 0
                 fi
 
-                __compiler="clang-15"
-                OS_Is_Command_Available "$__compiler"
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="clang"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
+                ;;
+        js-wasm)
+                ___compiler="emcc"
+                OS_Is_Command_Available "$___compiler"
                 if [ $? -eq 0 ]; then
-                        printf -- "%b" "$__compiler"
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+                ;;
+        linux-amd64)
+                ___compiler="x86_64-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
                         return 0
                 fi
 
-                __compiler="clang-14"
-                ;;
-        i386)
-                case "$1" in
-                windows)
-                        __compiler="x86_64-w64-mingw32-gcc"
-                        ;;
-                darwin)
-                        __compiler="clang-17"
-                        OS_Is_Command_Available "$__compiler"
+                ___compiler="x86_64-elf-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
                         if [ $? -eq 0 ]; then
-                                printf -- "%b" "$__compiler"
+                                printf -- "%b" "$___compiler"
                                 return 0
                         fi
+                fi
+                ;;
+        linux-arm64)
+                ___compiler="aarch64-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
 
-                        __compiler="clang-15"
-                        OS_Is_Command_Available "$__compiler"
+                ___compiler="aarch64-elf-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
                         if [ $? -eq 0 ]; then
-                                printf -- "%b" "$__compiler"
+                                printf -- "%b" "$___compiler"
                                 return 0
                         fi
+                fi
+                ;;
+        linux-arm|linux-armel|linux-armle)
+                ___compiler="arm-linux-gnueabi-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
 
-                        __compiler="clang-14"
-                        ;;
-                *)
-                        __compiler="i686-linux-gnu-gcc"
-                        OS_Is_Command_Available "$__compiler"
+                ___compiler="arm-linux-eabi-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                ___compiler="arm-none-eabi-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
                         if [ $? -eq 0 ]; then
-                                printf -- "%b" "$__compiler"
+                                printf -- "%b" "$___compiler"
                                 return 0
                         fi
+                fi
+                ;;
+        linux-armhf)
+                ___compiler="arm-linux-gnueabihf-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
 
-                        __compiler="i686-elf-gcc"
-                        ;;
-                esac
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        mips)
-                __compiler="mips-linux-gnu-gcc"
+        linux-i386)
+                ___compiler="i686-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                ___compiler="i686-elf-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        mipsle)
-                __compiler="mipsel-linux-gnu-gcc"
+        linux-mips)
+                ___compiler="mips-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        mips64)
-                __compiler="mips64-linux-gnuabi64-gcc"
+        linux-mipsle|linux-mipsel)
+                ___compiler="mipsel-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        mips64le|mips64el)
-                __compiler="mips64el-linux-gnuabi64-gcc"
+        linux-mips64)
+                ___compiler="mips64-linux-gnuabi64-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        mips32r6|mipsisa32r6)
-                __compiler="mipsisa32r6-linux-gnu-gcc"
+        linux-mips64le|linux-mips64el)
+                ___compiler="mips64el-linux-gnuabi64-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        mips64r6|mipsisa64r6)
-                __compiler="mipsisa64r6-linux-gnuabi64-gcc"
+        linux-mips32r6|linux-mipsisa32r6)
+                ___compiler="mipsisa32r6-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        mips32r6le|mipsisa32r6le|mipsisa32r6el)
-                __compiler="mipsisa32r6el-linux-gnu-gcc"
+        linux-mips64r6|linux-mipsisa64r6)
+                ___compiler="mipsisa64r6-linux-gnuabi64-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        mips64r6le|mipsisa64r6le|mipsisa64r6el)
-                __compiler="mipsisa64r6el-linux-gnuabi64-gcc"
+        linux-mips32r6le|linux-mipsisa32r6le|linux-mipsisa32r6el)
+                ___compiler="mipsisa32r6el-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        powerpc)
-                __compiler="powerpc-linux-gnu-gcc"
+        linux-mips64r6le|linux-mipsisa64r6le|linux-mipsisa64r6el)
+                ___compiler="mipsisa64r6el-linux-gnuabi64-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        ppc64le|ppc64el)
-                __compiler="powerpc64le-linux-gnu-gcc"
+        linux-powerpc)
+                ___compiler="powerpc-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        riscv64)
-                __compiler="riscv64-elf-gcc"
+        linux-ppc64le|linux-ppc64el)
+                ___compiler="powerpc64le-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        s390x)
+        linux-riscv64)
+                ___compiler="riscv64-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                ___compiler="riscv64-elf-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
+                ;;
+        linux-s390x)
                 __compiler="s390x-linux-gnu-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+
+                if [ "$1" = "$3" ] || [ "$2" = "$4" ]; then
+                        ___compiler="gcc"
+                        OS_Is_Command_Available "$___compiler"
+                        if [ $? -eq 0 ]; then
+                                printf -- "%b" "$___compiler"
+                                return 0
+                        fi
+                fi
                 ;;
-        wasm)
-                __compiler="emcc"
+        none-avr)
+                ___compiler="avr-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+                ;;
+        windows-amd64)
+                ___compiler="x86_64-w64-mingw32-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+                ;;
+        windows-i386)
+                ___compiler="i686-w64-mingw32-gcc"
+                OS_Is_Command_Available "$___compiler"
+                if [ $? -eq 0 ]; then
+                        printf -- "%b" "$___compiler"
+                        return 0
+                fi
+                ;;
+        wasip1-wasm)
                 ;;
         *)
                 ;;
         esac
 
-        OS_Is_Command_Available "$__compiler"
-        if [ $? -eq 0 ]; then
-                printf -- "%b" "$__compiler"
-                return 0
-        fi
-
 
         # report status
         printf -- ""
@@ -255,72 +447,7 @@ C::get_compiler_by_arch() {
 
 
 
-C::get_compiler_common() {
-        __os="$1"
-        __arch="$2"
-        __base_os="$3"
-        __base_arch="$4"
-
-
-        # execute
-        if [ "$__arch" != "$__base_arch" ] || [ "$__os" != "$__base_os" ]; then
-                __compiler=""
-                printf -- ""
-                return 1
-        fi
-
-        __compiler="gcc"
-        OS_Is_Command_Available "$__compiler"
-        if [ $? -eq 0 ]; then
-                printf -- "%b" "$__compiler"
-                return 0
-        fi
-
-        __compiler="cc"
-        OS_Is_Command_Available "$__compiler"
-        if [ $? -eq 0 ]; then
-                printf -- "%b" "$__compiler"
-                return 0
-        fi
-
-        __compiler="clang17"
-        OS_Is_Command_Available "$__compiler"
-        if [ $? -eq 0 ]; then
-                printf -- "%b" "$__compiler"
-                return 0
-        fi
-
-        __compiler="clang15"
-        OS_Is_Command_Available "$__compiler"
-        if [ $? -eq 0 ]; then
-                printf -- "%b" "$__compiler"
-                return 0
-        fi
-
-        __compiler="clang14"
-        OS_Is_Command_Available "$__compiler"
-        if [ $? -eq 0 ]; then
-                printf -- "%b" "$__compiler"
-                return 0
-        fi
-
-        __compiler="clang"
-        OS_Is_Command_Available "$__compiler"
-        if [ $? -eq 0 ]; then
-                printf -- "%b" "$__compiler"
-                return 0
-        fi
-
-
-        # report status
-        printf -- ""
-        return 1
-}
-
-
-
-
-C::get_strict_settings() {
+C_Get_Strict_Settings() {
         # execute
         printf -- "%b" "\
 -Wall \
@@ -350,22 +477,13 @@ C::get_strict_settings() {
 
 C_Is_Available() {
         # execute
-        if [ ! -z "$(C::get_compiler_by_arch "windows" "amd64")" -a \
-                ! -z "$(C::get_compiler_by_arch "darwin" "amd64")" -a \
-                ! -z "$(C::get_compiler_by_arch "" "amd64")" -a \
-                ! -z "$(C::get_compiler_by_arch "" "arm")" -a \
-                ! -z "$(C::get_compiler_by_arch "windows" "arm64")" -a \
-                ! -z "$(C::get_compiler_by_arch "darwin" "arm64")" -a \
-                ! -z "$(C::get_compiler_by_arch "" "arm64")" -a \
-                ! -z "$(C::get_compiler_by_arch "" "i386")" -a \
-                ! -z "$(C::get_compiler_by_arch "" "wasm")" -a \
-                ! -z "$(C::get_compiler_by_arch "" "riscv64")" ]; then
-                return 0
+        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "$PROJECT_OS" "$PROJECT_ARCH")") -ne 0 ]; then
+                return 1
         fi
 
 
         # report status
-        return 1
+        return 0
 }
 
 
@@ -373,11 +491,6 @@ C_Is_Available() {
 
 C_Setup() {
         # validate input
-        C_Is_Available
-        if [ $? -eq 0 ]; then
-                return 0
-        fi
-
         OS_Is_Command_Available "brew"
         if [ $? -ne 0 ]; then
                 return 1
@@ -385,32 +498,81 @@ C_Setup() {
 
 
         # execute
-        if [ "$(OS_Get)" = "darwin" ]; then
-                brew install \
-                        aarch64-elf-gcc \
-                        arm-none-eabi-gcc \
-                        riscv64-elf-gcc \
-                        x86_64-elf-gcc \
-                        i686-elf-gcc \
-                        mingw-w64 \
-                        emscripten \
-                        gcc
-        else
-                brew install \
-                        aarch64-elf-gcc \
-                        arm-none-eabi-gcc \
-                        riscv64-elf-gcc \
-                        x86_64-elf-gcc \
-                        i686-elf-gcc \
-                        mingw-w64 \
-                        emscripten \
-                        llvm
+        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "linux" "arm64")") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_ROBOT_RUN") -ne 0 ]; then
+                brew install aarch64-elf-gcc
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
-        if [ $? -eq 0 ]; then
-                return 0
+
+        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "linux" "riscv64")") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_ROBOT_RUN") -ne 0 ]; then
+                brew install riscv64-elf-gcc
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "linux" "arm")") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_ROBOT_RUN") -ne 0 ]; then
+                brew install arm-none-eabi-gcc
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "linux" "amd64")") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_ROBOT_RUN") -ne 0 ]; then
+                brew install x86_64-elf-gcc
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "linux" "i386")") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_ROBOT_RUN") -ne 0 ]; then
+                brew install i686-elf-gcc
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "windows" "amd64")") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_ROBOT_RUN") -ne 0 ]; then
+                brew install mingw-w64
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "js" "wasm")") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_ROBOT_RUN") -ne 0 ]; then
+                brew install emscripten
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "$PROJECT_OS" "$PROJECT_ARCH")") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$PROJECT_ROBOT_RUN") -ne 0 ]; then
+                case "$PROJECT_OS" in
+                darwin)
+                        brew install gcc
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                        ;;
+                *)
+                        brew install llvm
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                        ;;
+                esac
         fi
 
 
         # report status
-        return 1
+        return 0
 }

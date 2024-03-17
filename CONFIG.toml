@@ -559,9 +559,14 @@ PROJECT_STATIC_REPO_DIRECTORY = "static"
 # security access or the ecosystem is not using Release Job at all (e.g. GitHub
 # Actions).
 #
-# To disable it: leave it empty.
-# To enable it: make it non-empty (e.g. 'true' string).
-# PROJECT_SIMULATE_RELEASE_REPO=""  # Reserved - provided by external ecosystem.
+# PROJECT_SIMULATE_RELEASE_REPO = "" # Reserved - provided by external.
+
+
+# PROJECT_ROBOT_RUN
+# A flag to indicate the run is operating inside a CI service by its
+# autonomous robot.
+#
+# PROJECT_ROBOT_RUN = ""  # Reserved - provided by external.
 
 
 # PROJECT_STATIC_URL

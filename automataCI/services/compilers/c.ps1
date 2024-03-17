@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -9,276 +9,387 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
 
 function C-Get-Compiler {
 	param(
-		[string]$__os,
-		[string]$__arch,
-		[string]$__base_os,
-		[string]$__base_arch,
-		[string]$__compiler
+		[string]$___os,
+		[string]$___arch,
+		[string]$___base_os,
+		[string]$___base_arch,
+		[string]$___compiler
 	)
 
 
 	# execute
-	if ([string]::IsNullOrEmpty($__compiler)) {
-		$__process = OS-Is-Command-Available "${__compiler}"
-		if ($__process -eq 0) {
-			return "${__compiler}"
+	if ($(STRINGS-Is-Empty "${___compiler}") -ne 0) {
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return "${___compiler}"
 		}
 	}
 
-	$__compiler = C-Get-Compiler-By-Arch "${__os}" "${__arch}"
-	if (-not [string]::IsNullOrEmpty($__compiler)) {
-		if (("${__os}" -eq "darwin") -and ("${__base_os}" -ne "darwin")) {
-			# MacOS binary is best built on MacOS itself due to
-			# Apple SDK is only available on MacOS
-			return ""
+	switch ("${___os}-${___arch}") {
+	{ $_ -in "darwin-amd64", "darwin-arm64" } {
+		$___compiler = "clang-17"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
 		}
 
-		return "${__compiler}"
-	}
-
-	$__compiler = C-Get-Compiler-Common `
-		"${__os}" `
-		"${__arch}" `
-		"${__base_os}" `
-		"${__base_arch}"
-	if ($__compiler -eq 0) {
-		return "${__compiler}"
-	}
-
-
-	# report status
-	return ""
-}
-
-
-
-
-function C-Get-Compiler-By-Arch {
-	param(
-		[string]$__os,
-		[string]$__arch
-	)
-
-
-	# execute
-	switch ($__arch) {
-	amd64 {
-		switch ($__os) {
-		windows {
-			$__compiler = "x86_64-w64-mingw32-gcc"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
-			}
-
-			$__compiler = "mingw64"
-		} darwin {
-			$__compiler = "clang-17"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
-			}
-
-			$__compiler = "clang-15"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
-			}
-
-			$__compiler = "clang-14"
-		} default {
-			$__compiler = "x86_64-linux-gnu-gcc"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
-			}
-
-			$__compiler = "x86_64-elf-gcc"
-		}}
-	} {$_ -in "arm", "armel"} {
-		$__compiler = "arm-linux-gnueabi-gcc"
-		$__process = OS-Is-Command-Available "${__compiler}"
-		if ($__process -eq 0) {
-			return $__compiler
+		$___compiler = "clang-15"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
 		}
 
-		$__compiler = "arm-none-gnueabi-gcc"
-	} armhf {
-		$__compiler = "arm-linux-gnueabihf-gcc"
-	} arm64 {
-		switch ($__os) {
-		windows {
-			$__compiler = "x86_64-w64-mingw32-gcc"
-		} darwin {
-			$__compiler = "clang-17"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
-			}
-
-			$__compiler = "clang-15"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
-			}
-
-			$__compiler = "clang-14"
-		} default {
-			$__compiler = "aarch64-linux-gnu-gcc"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
-			}
-
-			$__compiler = "aarch64-elf-gcc"
-		}}
-	} avr {
-		$__compiler = "avr-gcc"
-		$__process = OS-Is-Command-Available "${__compiler}"
-		if ($__process -eq 0) {
-			return $__compiler
+		$___compiler = "clang-14"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
 		}
 
-		$__compiler = "clang-17"
-		$__process = OS-Is-Command-Available "${__compiler}"
-		if ($__process -eq 0) {
-			return $__compiler
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "clang"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} "js-wasm" {
+		$___compiler = "emcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+	} "linux-amd64" {
+		$___compiler = "arm-linux-gnueabi-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
 		}
 
-		$__compiler = "clang-15"
-		$__process = OS-Is-Command-Available "${__compiler}"
-		if ($__process -eq 0) {
-			return $__compiler
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} "linux-arm64" {
+		$___compiler = "aarch64-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
 		}
 
-		$__compiler = "clang-14"
-	} i386 {
-		switch ($__os) {
-		windows {
-			$__compiler = "x86_64-w64-mingw32-gcc"
-		} darwin {
-			$__compiler = "clang-17"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
 			}
+		}
+	} { $_ -in "linux-arm", "linux-armel", "linux-armle" } {
+		$___compiler = "arm-linux-gnueabi-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
 
-			$__compiler = "clang-15"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
+		$___compiler = "arm-linux-eabi-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
 			}
+		}
+	} "linux-armhf" {
+		$___compiler = "arm-linux-gnueabihf-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
 
-			$__compiler = "clang-14"
-		} default {
-			$__compiler = "i686-linux-gnu-gcc"
-			$__process = OS-Is-Command-Available "${__compiler}"
-			if ($__process -eq 0) {
-				return $__compiler
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
 			}
+		}
+	} "linux-i386" {
+		$___compiler = "i686-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
 
-			$__compiler = "i686-elf-gcc"
-		}}
-	} mips {
-		$__compiler = "mips-linux-gnu-gcc"
-	} { $_ -in "mipsle", "mipsel" } {
-		$__compiler = "mipsel-linux-gnu-gcc"
-	} mips64 {
-		$__compiler = "mips64-linux-gnuabi64-gcc"
-	} { $_ -in "mips64le", "mips64el" } {
-		$__compiler = "mips64el-linux-gnuabi64-gcc"
-	} mipsisa32r6 {
-		$__compiler = "mipsisa32r6-linux-gnu-gcc"
-	} { $_ -in "mips64r6", "mipsisa64r6" } {
-		$__compiler = "mipsisa64r6-linux-gnuabi64-gcc"
-	} { $_ -in "mips32r6le", "mipsisa32r6le", "mipsisa32r6el" } {
-		$__compiler = "mipsisa32r6el-linux-gnu-gcc"
-	} { $_ -in "mips64r6le", "mips64r6el", "mipsisa64r6el" } {
-		$__compiler = "mipsisa64r6el-linux-gnuabi64-gcc"
-	} powerpc {
-		$__compiler = "powerpc-linux-gnu-gcc"
-	} { $_ -in "ppc64le", "ppc64el" } {
-		$__compiler = "powerpc64le-linux-gnu-gcc"
-	} riscv64 {
-		$__compiler = "riscv64-elf-gcc"
-	} s390x {
-		$__compiler = "s390x-linux-gnu-gcc"
-	} wasm {
-		$__compiler = "emcc"
+		$___compiler = "i686-elf-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} "linux-mips" {
+		$___compiler = "mips-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { $_ -in "linux-mipsle", "linux-mipsel" } {
+		$___compiler = "mipsel-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} "linux-mips64" {
+		$___compiler = "mips64-linux-gnuabi64-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { $_ -in "linux-mips64le", "linux-mips64el" } {
+		$___compiler = "mips64el-linux-gnuabi64-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { $_ -in "linux-mips32r6", "linux-mipsisa32r6" } {
+		$___compiler = "mipsisa32r6-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { $_ -in "linux-mips64r6", "linux-mipsisa64r6" } {
+		$___compiler = "mipsisa64r6-linux-gnuabi64-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { $_ -in "linux-mips32r6le", "linux-mipsisa32r6le", "linux-mipsisa32r6el" } {
+		$___compiler = "mipsisa32r6el-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { $_ -in "linux-mips64r6le", "linux-mipsisa64r6le", "linux-mipsisa64r6el" } {
+		$___compiler = "mipsisa64r6el-linux-gnuabi64-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} "linux-powerpc" {
+		$___compiler = "powerpc-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { $_ -in "linux-ppc64le", "linux-ppc64el" } {
+		$___compiler = "powerpc64le-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { "linux-riscv64" } {
+		$___compiler = "riscv64-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		$___compiler = "riscv64-elf-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { "linux-s390x" } {
+		$___compiler = "s390x-linux-gnu-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "gcc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} { "none-avr" } {
+		$___compiler = "avr-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+	} "windows-amd64" {
+		$___compiler = "x86_64-w64-mingw32-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+		$___compiler = "mingw64"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "cc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} "windows-i386" {
+		$___compiler = "i686-w64-mingw32-gcc"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
+
+		if (("${___os}" -eq "${___base_os}") -and
+			("${___arch}" -eq "${___base_arch}")) {
+			$___compiler = "cc"
+			$___process = OS-Is-Command-Available "${___compiler}"
+			if ($___process -eq 0) {
+				return $___compiler
+			}
+		}
+	} "wasip1-wasm" {
+		# let it fail
 	} default {
+		# let it fail
 	}}
-
-	$__process = OS-Is-Command-Available "${__compiler}"
-	if ($__process -eq 0) {
-		return $__compiler
-	}
-
-
-	# report status
-	return ""
-}
-
-
-
-
-function C-Get-Compiler-Common {
-	param(
-		[string]$__os,
-		[string]$__arch,
-		[string]$__base_os,
-		[string]$__base_arch
-	)
-
-
-	# execute
-	if (("${__arch}" -ne "${__base_arch}") -or ("${__os}" -ne "${__base_os}")) {
-		return ""
-	}
-
-	$__compiler = "gcc"
-	$__process = OS-Is-Command-Available "${__compiler}"
-	if ($__process -eq 0) {
-		return $__compiler
-	}
-
-	$__compiler = "cc"
-	$__process = OS-Is-Command-Available "${__compiler}"
-	if ($__process -eq 0) {
-		return $__compiler
-	}
-
-	$__compiler = "clang17"
-	$__process = OS-Is-Command-Available "${__compiler}"
-	if ($__process -eq 0) {
-		return $__compiler
-	}
-
-	$__compiler = "clang15"
-	$__process = OS-Is-Command-Available "${__compiler}"
-	if ($__process -eq 0) {
-		return $__compiler
-	}
-
-	$__compiler = "clang14"
-	$__process = OS-Is-Command-Available "${__compiler}"
-	if ($__process -eq 0) {
-		return $__compiler
-	}
-
-	$__compiler = "clang"
-	$__process = OS-Is-Command-Available "${__compiler}"
-	if ($__process -eq 0) {
-		return $__compiler
-	}
 
 
 	# report status
@@ -289,21 +400,21 @@ function C-Get-Compiler-Common {
 
 
 function C-Get-Strict-Settings {
-	return "-Wall" `
-		+ "-Wextra" `
-		+ "-std=gnu89" `
-		+ "-pedantic" `
-		+ "-Wstrict-prototypes" `
-		+ "-Wold-style-definition" `
-		+ "-Wundef" `
-		+ "-Wno-trigraphs" `
-		+ "-fno-strict-aliasing" `
-		+ "-fno-common" `
-		+ "-fshort-wchar" `
-		+ "-fstack-protector-all" `
-		+ "-Werror-implicit-function-declaration" `
-		+ "-Wno-format-security" `
-		+ "-pie -fPIE"
+	return " -Wall" `
+		+ " -Wextra" `
+		+ " -std=gnu89" `
+		+ " -pedantic" `
+		+ " -Wstrict-prototypes" `
+		+ " -Wold-style-definition" `
+		+ " -Wundef" `
+		+ " -Wno-trigraphs" `
+		+ " -fno-strict-aliasing" `
+		+ " -fno-common" `
+		+ " -fshort-wchar" `
+		+ " -fstack-protector-all" `
+		+ " -Werror-implicit-function-declaration" `
+		+ " -Wno-format-security" `
+		+ " -pie -fPIE"
 }
 
 
@@ -312,13 +423,15 @@ function C-Get-Strict-Settings {
 function C-Is-Available {
 	$null = OS-Sync
 
-	if (-not ([string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "windows" "amd64"))) -and
-		(-not [string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "" "wasm"))) -and
-		(-not [string]::IsNullOrEmpty($(C-Get-Compiler-By-Arch "windows" "arm64")))) {
-		return 0
+
+	$___process = C-Get-Compiler "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
+	if ($(STRINGS-Is-Empty "${___process}") -ne 0) {
+		return 1
 	}
 
-	return 1
+
+	# report status
+	return 0
 }
 
 
@@ -343,17 +456,21 @@ function C-Setup {
 		return 1
 	}
 
-	$___process = OS-Exec "choco" "install mingw -y"
-	if ($___process -ne 0) {
-		return 1
+	if ($(STRINGS-Is-Empty "$(C-Get-Compiler "windows" "amd64")") -eq 0) {
+		$___process = OS-Exec "choco" "install mingw -y"
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
-	# BUG: choco fails to install emscripten's dependency properly (git.install)
-	#      See: https://github.com/aminya/chocolatey-emscripten/issues/2
-	#$___process = OS-Exec "choco" "install emscripten -y"
-	#if ($___process -ne 0) {
-	#	return 1
-	#}
+	if ($(STRINGS-Is-Empty "$(C-Get-Compiler "js" "wasm")") -eq 0) {
+		# BUG: choco fails to install emscripten's dependency properly (git.install)
+		#      See: https://github.com/aminya/chocolatey-emscripten/issues/2
+		#$___process = OS-Exec "choco" "install emscripten -y"
+		#if ($___process -ne 0) {
+		#	return 1
+		#}
+	}
 
 	$null = OS-Sync
 

@@ -24,6 +24,7 @@ jobs:
         TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
         PROJECT_SIMULATE_RELEASE_REPO: true
+        PROJECT_ROBOT_RUN: true
     steps:
       - name: GITHUB ACTIONS - CHECKOUT
         id: git_check_out

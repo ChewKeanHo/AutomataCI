@@ -99,6 +99,7 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_source.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_source-skipped.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_sync-register.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_sync-register-skipped-missing-compiler.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_sync-register-skipped-missing-linker.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_sync-register-skipped-missing-target.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_sync-register-skipped-unsupported.sh"
