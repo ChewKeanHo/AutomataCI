@@ -95,8 +95,15 @@ fi
 # placeholding flag files
 old_IFS="$IFS"
 while IFS="" read -r __line || [ -n "$__line" ]; do
+        if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
+                continue
+        fi
+
+
+        # build the file
         __file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__line}"
-        I18N_Build "$__file"
+        I18N_Build "$__line"
+        FS_Remove_Silently "$__file"
         FS_Touch_File "$__file"
         if [ $? -ne 0 ]; then
                 I18N_Build_Failed

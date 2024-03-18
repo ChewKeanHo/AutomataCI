@@ -83,7 +83,10 @@ if ($___process -ne 0) {
 
 # exporting executable
 $__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__source}"
-$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}\${env:PROJECT_SKU}.exe"
+$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}\${env:PROJECT_SKU}"
+if ("${env:PROJECT_OS}" -eq "windows") {
+	$__dest = "${__dest}.exe"
+}
 $null = I18N-Export "${__source}" "${__dest}"
 $null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}"
 $null = FS-Remove-Silently "${__dest}"

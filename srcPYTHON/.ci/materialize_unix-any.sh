@@ -86,6 +86,9 @@ fi
 # shipping executable
 __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
 __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
+if [ "$PROJECT_OS" = "windows" ]; then
+        __dest="${__dest}.exe"
+fi
 I18N_Export "$__source" "$__dest"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
