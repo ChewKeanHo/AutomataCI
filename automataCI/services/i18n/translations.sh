@@ -96,6 +96,7 @@
 . "${LIBS_AUTOMATACI}/services/i18n/_simulate-conclusion.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_simulate-notarize.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_simulate-publish.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/_simulate-testing.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_source.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_source-skipped.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/_sync-register.sh"

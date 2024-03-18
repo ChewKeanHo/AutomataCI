@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,53 +15,63 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 
 
 
 # execute
-OS-Print-Status info "executing test..."
+$null = I18N-Run-Test-Coverage
 $__current_path = Get-Location
+$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}"
 if ($(OS-Is-Run-Simulated) -eq 0) {
-	OS-Print-Status warning "simulating release repo conclusion..."
-	$__exit_code = 0
+	$null = I18N-Simulate-Testing
+	return 0
 } else {
-	$null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}"
-	$env:CHROME_BIN = Get-Command "chrome.exe" -ErrorAction SilentlyContinue
-	if ($env:CHROME_BIN) {
-		$env:CHROME_BIN = $env:CHROME_BIN.Source
+	$___browser = Get-Command "chrome.exe" -ErrorAction SilentlyContinue
+	if ($(STRINGS-Is-Empty "${___browser}") -eq 0) {
+		$null = I18N-Run-Failed
+		return 1
 	}
-	$__exit_code = OS-Exec "ng" "test --no-watch --code-coverage"
+
+
+	$env:CHROME_BIN = $___browser
+	$___process = OS-Exec "ng" "test --no-watch --code-coverage"
+	if ($___process -ne 0) {
+		$null = I18N-Run-Failed
+		return 1
+	}
 }
 $null = Set-Location "${__current_path}"
 $null = Remove-Variable __current_path
 
 
+$null = I18N-Processing-Test-Coverage
+$___source = "${env:PROJECT_PATH_ROOT}/${env:PROJECT_ANGULAR}/coverage"
+$___dest = "${env:PROJECT_PATH_ROOT}/${env:PROJECT_PATH_LOG}/angular-test-report"
+$___process = FS-Is-Directory "${___source}"
+if ($___process -ne 0) {
+	$null = I18N-Processing-Failed
+	return 1
+}
 
-
-# export report
-OS-Print-Status info "exporting coverage report..."
-$__process = FS-Is-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\coverage"
-if ($__process -eq 0) {
-	$log_path = "${env:PROJECT_PATH_ROOT}/${env:PROJECT_PATH_LOG}/angular-test-report"
-	$null = FS-Remove-Silently "$log_path"
-	$null = FS-Make-Housing-Directory "$log_path"
-	$null = FS-Move "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}\coverage" "$log_path"
+$null = FS-Remove-Silently "${___dest}"
+$null = FS-Make-Housing-Directory "${___dest}"
+$___process = FS-Move "${___source}" "${___dest}"
+if ($___process -ne 0) {
+	$null = I18N-Processing-Failed
+	return 1
 }
 
 
 
 
 # report status
-if ($__exit_code -ne 0) {
-	OS-Print-Status error "test failed."
-	return 1
-}
-
 return 0

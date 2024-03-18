@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,49 +15,60 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
 
 # execute
-OS_Print_Status info "executing tests...\n"
+I18N_Run_Test_Coverage
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
 if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
-        OS_Print_Status warning "simulating on-screen unit testing...\n"
-        EXIT_CODE=0
+        I18N_Simulate_Testing
+        return 0
 else
-        CHROME_BIN='/usr/bin/vivaldi' ng test --no-watch --code-coverage
-        EXIT_CODE=$?
+        ___browser="$(type -p google-chrome)"
+        if [ $(STRINGS_Is_Empty "$___browser") -eq 0 ]; then
+                I18N_Run_Failed
+                return 1
+        fi
+
+        CHROME_BIN="${___browser}" ng test --no-watch --code-coverage
+        if [ $? -ne 0 ]; then
+                I18N_Run_Failed
+                return 1
+        fi
 fi
 cd "$__current_path" && unset __current_path
 
 
+I18N_Processing_Test_Coverage
+___source="${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/coverage"
+___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/angular-test-report"
+FS_Is_Directory "$___source"
+if [ $? -ne 0 ]; then
+        I18N_Processing_Failed
+        return 1
+fi
 
-
-# export report
-OS_Print_Status info "exporting coverage report...\n"
-FS_Is_Directory "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/coverage"
-if [ $? -eq 0 ]; then
-        LOG_PATH="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/angular-test-report"
-        FS_Remove_Silently "$LOG_PATH"
-        FS_Make_Housing_Directory "$LOG_PATH"
-        FS_Move "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}/coverage" "$LOG_PATH"
+FS_Remove_Silently "$___dest"
+FS_Make_Housing_Directory "$___dest"
+FS_Move "$___source" "$___dest"
+if [ $? -ne 0 ]; then
+        I18N_Processing_Failed
+        return 1
 fi
 
 
 
 
 # return status
-if [ $EXIT_CODE -ne 0 ]; then
-        OS_Print_Status error "test failed.\n"
-        return 1
-fi
-
 return 0

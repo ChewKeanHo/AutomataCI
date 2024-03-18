@@ -96,6 +96,7 @@
 . "${env:LIBS_AUTOMATACI}\services\i18n\_simulate-conclusion.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_simulate-notarize.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_simulate-publish.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\_simulate-testing.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_source.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_source-skipped.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\_sync-register.ps1"
