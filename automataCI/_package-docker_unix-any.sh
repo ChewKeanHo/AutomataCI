@@ -67,7 +67,7 @@ PACKAGE_Run_DOCKER() {
                 ;;
         esac
 
-        I18N_Check_login "DOCKER"
+        I18N_Check_Login "DOCKER"
         DOCKER_Check_Login
         if [ $? -ne 0 ]; then
                 I18N_Check_Failed
