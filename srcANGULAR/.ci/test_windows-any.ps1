@@ -23,11 +23,20 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\angular.ps1"
 
 
 
 
 # execute
+$null = I18N-Activate-Environment
+$___process = ANGULAR-Is-Available
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
+	return 1
+}
+
+
 $null = I18N-Run-Test-Coverage
 $__current_path = Get-Location
 $null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}"
@@ -40,10 +49,9 @@ if ($(OS-Is-Run-Simulated) -eq 0) {
 		$null = I18N-Run-Failed
 		return 1
 	}
-
-
 	$env:CHROME_BIN = $___browser
-	$___process = OS-Exec "ng" "test --no-watch --code-coverage"
+
+	$___process = ANGULAR-Test
 	if ($___process -ne 0) {
 		$null = I18N-Run-Failed
 		return 1

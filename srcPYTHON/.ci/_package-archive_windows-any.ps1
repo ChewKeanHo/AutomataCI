@@ -56,9 +56,7 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 		}
 
 		$null = I18N-Assemble "${___source}" "${_directory}"
-		$___process = FS-Copy-All `
-			"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}" `
-			"${_directory}"
+		$___process = FS-Copy-All "${___source}" "${_directory}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1

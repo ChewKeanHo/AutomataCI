@@ -38,14 +38,14 @@ PACKAGE_Assemble_ARCHIVE_Content() {
         if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
-                FS_Is_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}"
+                ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/"
+                FS_Is_Directory "$___source"
                 if [ $? -ne 0 ]; then
                         return 10 # not applicable
                 fi
 
-                _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_DOCS}/"
-                I18N_Assemble "${_source}/*" "$_directory"
-                FS_Copy_All "$_source" "$_directory"
+                I18N_Assemble "$___source" "$_directory"
+                FS_Copy_All "$___source" "$_directory"
                 if [ $? -ne 0 ]; then
                         I18N_Assemble_Failed
                         return 1

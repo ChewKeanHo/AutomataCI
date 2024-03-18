@@ -24,11 +24,20 @@ fi
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/angular.sh"
 
 
 
 
 # execute
+I18N_Activate_Environment
+ANGULAR_Is_Available
+if [ $? -ne 0 ]; then
+        I18N_Activate_Failed
+        return 1
+fi
+
+
 I18N_Run_Test_Coverage
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
 if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
@@ -41,7 +50,7 @@ else
                 return 1
         fi
 
-        CHROME_BIN="${___browser}" ng test --no-watch --code-coverage
+        CHROME_BIN="${___browser}" ANGULAR_Test
         if [ $? -ne 0 ]; then
                 I18N_Run_Failed
                 return 1

@@ -33,5 +33,5 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 
 
 	# execute
-	return 1 # not applicable - should be tech-oriented.
+	return 10 # not applicable - should be tech-oriented.
 }

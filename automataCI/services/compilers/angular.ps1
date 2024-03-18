@@ -87,3 +87,28 @@ function ANGULAR-Setup {
 	# report status
 	return 0
 }
+
+
+
+
+function ANGULAR-Test {
+	# validate input
+	$___process = ANGULAR-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$null = OS-Sync
+		# WARNING: DO NOT CHANGE - ng is not a win32 exe so OS-Exec will
+		#                          fail so bad. Leave this as it is.
+	$null = Invoke-Expression "ng test --no-watch --code-coverage"
+	if ($?) {
+		return 0
+	}
+
+
+	# return status
+	return 1
+}

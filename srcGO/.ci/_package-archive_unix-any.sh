@@ -53,7 +53,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                 fi
 
                 I18N_Assemble "$___source" "$_directory"
-                FS_Copy_All "${___source}/" "$_directory"
+                FS_Copy_All "$___source" "$_directory"
                 if [ $? -ne 0 ]; then
                         I18N_Assemble_Failed
                         return 1

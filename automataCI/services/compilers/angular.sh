@@ -80,3 +80,25 @@ ANGULAR_Setup() {
         # report status
         return 0
 }
+
+
+
+
+ANGULAR_Test() {
+        # validate input
+        ANGULAR_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        ng test --no-watch --code-coverage
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}

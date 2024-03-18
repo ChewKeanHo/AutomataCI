@@ -39,14 +39,14 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
-		$___process = FS-Is-Target-A-Docs "${_target}"
+		$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}\"
+		$___process = FS-Is-Directory "${___source}"
 		if ($___process -ne 0) {
 			return 10 # not applicable
 		}
 
-		$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
-		$null = I18N-Assemble "${_source}\*" "${_directory}"
-		$___process = FS-Copy-All "${__source}" "${_directory}"
+		$null = I18N-Assemble "${___source}" "${_directory}"
+		$___process = FS-Copy-All "${___source}" "${_directory}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
