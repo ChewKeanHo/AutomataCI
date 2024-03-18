@@ -11,8 +11,6 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
-. "${LIBS_AUTOMATACI}/services/io/fs.sh"
-. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 
 
 

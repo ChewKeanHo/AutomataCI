@@ -10,8 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
@@ -26,7 +24,9 @@ function ANGULAR-Build {
 
 	# execute
 	$null = OS-Sync
-	$null = Invoke-Expression "ng build" # DO NOT CHANGE - not a win32 exe
+		# WARNING: DO NOT CHANGE - ng is not a win32 exe so OS-Exec will
+		#                          fail so bad. Leave this as it is.
+	$null = Invoke-Expression "ng build"
 	if ($?) {
 		return 0
 	}
