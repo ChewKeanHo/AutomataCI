@@ -135,7 +135,6 @@ function NIM-Run-Parallel {
 	. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 	. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 	. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
-	. "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
 	. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 
