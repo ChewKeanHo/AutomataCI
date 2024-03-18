@@ -114,8 +114,15 @@ $null = Remove-Variable -Name __go_arch
 
 # placeholding flag files
 foreach ($__line in $__placeholders) {
+	if ($(STRINGS-Is-Empty "${__line}") -eq 0) {
+		continue
+	}
+
+
+	# build the file
 	$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__line}"
-	$null = I18N-Build "${__file}"
+	$null = I18N-Build "${__line}"
+	$null = FS-Remove-Silently "${__file}"
 	$___process = FS-Touch-File "${__file}"
 	if ($___process -ne 0) {
 		$null = I18N-Build-Failed
