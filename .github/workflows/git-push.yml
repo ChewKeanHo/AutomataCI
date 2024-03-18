@@ -98,7 +98,7 @@ jobs:
           ./automataCI/ci.sh.ps1 deploy
       - name: Archive Payloads Artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build_${{ matrix.os }}
           path: |
@@ -108,7 +108,7 @@ jobs:
             public/
       - name: Archive Workspace Artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: workspace_${{ matrix.os }}
           path: |
