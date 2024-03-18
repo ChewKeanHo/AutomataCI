@@ -62,6 +62,9 @@ fi
 
 ___source="${__workspace}/${__target}/release/${PROJECT_SKU}"
 ___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
+if [ "$PROJECT_OS" = "windows" ]; then
+        ___dest="${___dest}.exe"
+fi
 I18N_Export "$___source" "$___dest"
 FS_Make_Housing_Directory "$___dest"
 FS_Remove_Silently "$___dest"

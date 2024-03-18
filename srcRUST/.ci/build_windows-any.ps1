@@ -217,7 +217,25 @@ foreach ($__line in $__build_targets) {
 	## NOTE: perform any hard-coded host system restrictions or gatekeeping
 	##       customization adjustments here.
 	switch ($__arch) { ### filter by CPU Architecture
-	{ $_ -in "ppc64", "riscv64" } {
+	{ $_ -in "mips", "mipsel", "mipsle" } {
+		$null = I18N-Sync-Register-Skipped-Unsupported
+		continue
+	} { $_ -in "mips64" } {
+		$null = I18N-Sync-Register-Skipped-Unsupported
+		continue
+	} { $_ -in "mips64el", "mips64le" } {
+		$null = I18N-Sync-Register-Skipped-Unsupported
+		continue
+	} { $_ -in "ppc64el", "ppc64le" } {
+		$null = I18N-Sync-Register-Skipped-Unsupported
+		continue
+	} { $_ -in "ppc64" } {
+		$null = I18N-Sync-Register-Skipped-Unsupported
+		continue
+	} { $_ -in "riscv64" } {
+		$null = I18N-Sync-Register-Skipped-Unsupported
+		continue
+	} { $_ -in "s390x" } {
 		$null = I18N-Sync-Register-Skipped-Unsupported
 		continue
 	} wasm {
@@ -270,8 +288,15 @@ if ($___process -ne 0) {
 
 # placeholding flag files
 foreach ($__line in $__placeholders) {
+	if ($(STRINGS-Is-Empty "${__line}") -eq 0) {
+		continue
+	}
+
+
+	# build the file
 	$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__line}"
-	$null = I18N-Build "${__file}"
+	$null = I18N-Build "${__line}"
+	$null = FS-Remove-Silently "${__file}"
 	$___process = FS-Touch-File "${__file}"
 	if ($___process -ne 0) {
 		$null = I18N-Build-Failed

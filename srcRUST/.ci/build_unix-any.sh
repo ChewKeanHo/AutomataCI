@@ -189,6 +189,10 @@ SUBROUTINE_Build() {
 old_IFS="$IFS"
 while IFS="" read -r __line || [ -n "$__line" ]; do
         # parse target data
+        if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
+                continue
+        fi
+
         __extension="${__line##*|}"
         __line="${__line%|*}"
 
@@ -219,11 +223,31 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
         ## NOTE: perform any hard-coded host system restrictions or gatekeeping
         ##       customization adjustments here.
         case "$__arch" in ### filter by CPU Architecture
-        mips|mipsel|mipsle|mips64|mips64el|mips64le)
+        mips|mipsel|mipsle)
                 I18N_Sync_Register_Skipped_Unsupported
                 continue
                 ;;
-        ppc64|riscv64)
+        mips64)
+                I18N_Sync_Register_Skipped_Unsupported
+                continue
+                ;;
+        mips64el|mips64le)
+                I18N_Sync_Register_Skipped_Unsupported
+                continue
+                ;;
+        ppc64el|ppc64le)
+                I18N_Sync_Register_Skipped_Unsupported
+                continue
+                ;;
+        ppc64)
+                I18N_Sync_Register_Skipped_Unsupported
+                continue
+                ;;
+        riscv64)
+                I18N_Sync_Register_Skipped_Unsupported
+                continue
+                ;;
+        s390x)
                 I18N_Sync_Register_Skipped_Unsupported
                 continue
                 ;;
@@ -286,8 +310,15 @@ fi
 # placeholding flag files
 old_IFS="$IFS"
 while IFS="" read -r __line || [ -n "$__line" ]; do
+        if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
+                continue
+        fi
+
+
+        # build the file
         __file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__line}"
-        I18N_Build "$__file"
+        I18N_Build "$__line"
+        FS_Remove_Silently "$__file"
         FS_Touch_File "$__file"
         if [ $? -ne 0 ]; then
                 I18N_Build_Failed

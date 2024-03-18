@@ -65,7 +65,10 @@ if ($___process -ne 0) {
 
 
 $___source = "${__workspace}\${__target}\release\${env:PROJECT_SKU}.exe"
-$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}\${env:PROJECT_SKU}.exe"
+$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BIN}\${env:PROJECT_SKU}"
+if ("${env:PROJECT_OS}" -eq "windows") {
+	$___dest = "${___dest}.exe"
+}
 $null = I18N-Export "${___source}" "${___dest}"
 $null = FS-Make-Housing-Directory "${___dest}"
 $null = FS-Remove-Silently "${___dest}"
