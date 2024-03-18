@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,45 +15,76 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/angular.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/angular.sh"
 
 
 
 
 # execute
-OS_Print_Status info "executing build...\n"
+__placeholders="\
+${PROJECT_SKU}-docs_any-any
+"
+
+
+FS_Remake_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+
+
+I18N_Activate_Environment
+ANGULAR_Is_Available
+if [ $? -ne 0 ]; then
+        I18N_Activate_Failed
+        return 1
+fi
+
+
+I18N_Build "$PROJECT_ANGULAR"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
 ANGULAR_Build
-EXIT_CODE=$?
+___process=$?
 cd "$__current_path" && unset __current_path
-
-if [ $EXIT_CODE -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
+if [ $___process -ne 0 ]; then
+        I18N_Build_Failed
         return 1
 fi
 
 
 
 
-# placeholding docs flag
-__file="${PROJECT_SKU}-docs_any-any"
-OS_Print_Status info "building output file: ${__file}\n"
-FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
-touch "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__file}"
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "build failed.\n"
-        return 1
-fi
+# placeholding flag files
+old_IFS="$IFS"
+while IFS="" read -r __line || [ -n "$__line" ]; do
+        if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
+                continue
+        fi
+
+
+        # build the file
+        __file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__line}"
+        I18N_Build "$__line"
+        FS_Remove_Silently "$__file"
+        FS_Touch_File "$__file"
+        if [ $? -ne 0 ]; then
+                I18N_Build_Failed
+                return 1
+        fi
+done <<EOF
+$__placeholders
+EOF
 
 
 
 
-# return status
+# compose documentations
+
+
+
+
+# report status
 return 0

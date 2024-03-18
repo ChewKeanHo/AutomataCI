@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -15,41 +15,70 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from ci.cmd instead!\n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return 1
 }
 
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\os.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\io\fs.ps1"
-. "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}\services\compilers\angular.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\angular.ps1"
 
 
 
 
 # execute
-OS-Print-Status info "executing build..."
+$__placeholders = @(
+	"${env:PROJECT_SKU}-docs_any-any"
+)
+
+
+$null = FS-Remake-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
+
+
+$null = I18N-Activate-Environment
+$___process = ANGULAR-Is-Available
+if ($___process -ne 0) {
+	$null = I18N-Activate-Failed
+	return 1
+}
+
+
+$null = I18N-Build "${env:PROJECT_ANGULAR}"
 $__current_path = Get-Location
 $null = Set-Location "${env:PROJECT_PATH_ROOT}\${env:PROJECT_ANGULAR}"
-$__process = ANGULAR-Build
+$___process = ANGULAR-Build
 $null = Set-Location "${__current_path}"
 $null = Remove-Variable __current_path
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
+if ($___process -ne 0) {
+	$null = I18N-Build-Failed
 	return 1
 }
 
 
 
 
-# placeholding docs flag
-$__file = "${env:PROJECT_SKU}-docs_any-any"
-OS-Print-Status info "building output file: ${__file}"
-$null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
-$__process = FS-Touch-File "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__file}"
-if ($__process -ne 0) {
-	OS-Print-Status error "build failed."
-	return 1
+# placeholding flag files
+foreach ($__line in $__placeholders) {
+	if ($(STRINGS-Is-Empty "${__line}") -eq 0) {
+		continue
+	}
+
+
+	# build the file
+	$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__line}"
+	$null = I18N-Build "${__line}"
+	$null = FS-Remove-Silently "${__file}"
+	$___process = FS-Touch-File "${__file}"
+	if ($___process -ne 0) {
+		$null = I18N-Build-Failed
+		return 1
+	}
 }
+
+
+
+
+# compose documentations
 
 
 
