@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,34 +15,35 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/compilers/angular.sh"
-
-
-
-
-# safety checking control surfaces
-OS_Print_Status info "checking angular availability...\n"
-ANGULAR::is_available
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "missing angular engines.\n"
-        return 1
-fi
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/angular.sh"
 
 
 
 
 # execute
-OS_Print_Status info "installing all npm dependencies...\n"
+I18N_Activate_Environment
+ANGULAR_Is_Available
+if [ $? -ne 0 ]; then
+        I18N_Activate_Failed
+        return 1
+fi
+
+
+I18N_Import_Dependencies
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
 npm install
-EXIT_CODE=$?
+___process=$?
 cd "$__current_path" && unset __current_path
+if [ $___process -ne 0 ]; then
+        I18N_Import_Failed
+        return 1
+fi
 
 
 

@@ -30,7 +30,7 @@ fi
 # execute
 OS_Print_Status info "executing build...\n"
 __current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
-ANGULAR::build
+ANGULAR_Build
 EXIT_CODE=$?
 cd "$__current_path" && unset __current_path
 
