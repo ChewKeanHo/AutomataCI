@@ -25,14 +25,15 @@ function ANGULAR-Build {
 
 
 	# execute
-	$null = OS-Exec "ng" "build"
-	if ($___process -ne 0) {
-		return 1
+	$null = OS-Sync
+	$null = Invoke-Expression "ng build" # DO NOT CHANGE - not a win32 exe
+	if ($?) {
+		return 0
 	}
 
 
 	# return status
-	return 0
+	return 1
 }
 
 
