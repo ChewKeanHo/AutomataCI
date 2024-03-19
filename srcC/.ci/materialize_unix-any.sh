@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,123 +15,135 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/operators_unix-any.sh"
-
-
-
-
-# safety check control surfaces
-OS_Print_Status info "checking BUILD::compile function availability...\n"
-OS_Is_Command_Available "BUILD::compile"
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "check failed.\n"
-        return 1
-fi
-
-FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
-
-SETTINGS_BIN="\
--Wall \
--Wextra \
--std=gnu89 \
--pedantic \
--Wstrict-prototypes \
--Wold-style-definition \
--Wundef \
--Wno-trigraphs \
--fno-strict-aliasing \
--fno-common \
--fshort-wchar \
--fstack-protector-all \
--Werror-implicit-function-declaration \
--Wno-format-security \
--Os \
--g0 \
--static \
-"
-
-COMPILER=""
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/c.sh"
 
 
 
 
 # execute
-if [ "$PROJECT_OS" = "darwin" ]; then
-        BUILD::compile \
-                "c-binary" \
-                "darwin" \
-                "amd64" \
-                "automataCI.txt" \
-                "${SETTINGS_BIN} -target x86_64-apple-darwin-gcc" \
-                "$COMPILER"
-        if [ $? -ne 0 -a $? -ne 10 ]; then
-                return 1
-        fi
+FS_Remove_Silently "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}"
+FS_Remove_Silently "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}"
 
-        BUILD::compile \
-                "c-library" \
-                "darwin" \
-                "amd64" \
-                "libs/sample/automataCI.txt" \
-                "${SETTINGS_BIN} -target x86_64-apple-darwin-gcc -fPIC" \
-                "$COMPILER"
-        if [ $? -ne 0 -a $? -ne 10 ]; then
-                return 1
-        fi
-else
-        BUILD::compile "c-binary" "linux" "amd64" "automataCI.txt" "$SETTINGS_BIN" "$COMPILER"
-        if [ $? -ne 0 -a $? -ne 10 ]; then
-                return 1
-        fi
+__arguments="$(C_Get_Strict_Settings)"
+case "$PROJECT_OS" in
+darwin)
+        __arguments="${__arguments} -fPIC"
+        ;;
+*)
+        __arguments="${__arguments} -pie -fPIE"
+        ;;
+esac
 
-        BUILD::compile \
-                "c-library" \
-                "linux" \
-                "amd64" \
-                "libs/sample/automataCI.txt" \
-                "${SETTINGS_BIN} -pie -fPIE" \
-                "$COMPILER"
-        if [ $? -ne 0 -a $? -ne 10 ]; then
-                return 1
-        fi
-fi
-
-
-
-
-# exporting executable
-__source="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}.elf"
-__source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
-__dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
-OS_Print_Status info "exporting ${__source} to ${__dest}\n"
-FS_Make_Housing_Directory "$__dest"
-FS_Remove_Silently "$__dest"
-FS_Move "$__source" "$__dest"
-if [ $? -ne 0 ]; then
-        OS_Print_Status error "export failed.\n"
+__compiler="$(C_Get_Compiler "$PROJECT_OS" "$PROJECT_ARCH")"
+if [ $(STRINGS_Is_Empty "$__compiler") -eq 0 ]; then
+        I18N_Build_Failed
         return 1
 fi
 
 
 
 
-# exporting library
-__source="${PROJECT_SKU}-lib_${PROJECT_OS}-${PROJECT_ARCH}.a"
-__source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__source}"
-__dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}/lib${PROJECT_SKU}.a"
-OS_Print_Status info "exporting ${__source} to ${__dest}\n"
+# build main exectuable
+I18N_Configure_Build_Settings
+__target="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
+__output="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+__workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/build-${__target}"
+__log="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/build-${__target}"
+__main="${PROJECT_PATH_ROOT}/${PROJECT_C}/executable.txt"
+case "$PROJECT_OS" in
+windows)
+        __target="${__workspace}/${__target}.exe"
+        ;;
+*)
+        __target="${__workspace}/${__target}.elf"
+        ;;
+esac
+
+I18N_Build "$__main"
+FS_Make_Directory "$__output"
+FS_Remove_Silently "$__target"
+C_Build "$__target" \
+        "$__main" \
+        "executable" \
+        "$PROJECT_OS" \
+        "$PROJECT_ARCH" \
+        "$__workspace" \
+        "$__log" \
+        "$__compiler" \
+        "$__arguments"
+if [ $? -ne 0 ]; then
+        I18N_Build_Failed
+        return 1
+fi
+
+__dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
+if [ "$PROJECT_OS" = "windows" ]; then
+        __dest="${__dest}.exe"
+fi
+I18N_Export "$__target" "$__dest"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
-FS_Move "$__source" "$__dest"
+FS_Move "$__target" "$__dest"
 if [ $? -ne 0 ]; then
-        OS_Print_Status error "export failed.\n"
+        I18N_Export_Failed
+        return 1
+fi
+
+
+
+
+# build main library
+I18N_Configure_Build_Settings
+__target="lib${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
+__output="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+__workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/build-${__target}"
+__log="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/build-${__target}"
+__main="${PROJECT_PATH_ROOT}/${PROJECT_C}/library.txt"
+case "$PROJECT_OS" in
+windows)
+        __target="${__workspace}/${__target}.dll"
+        ;;
+*)
+        __target="${__workspace}/${__target}.a"
+        ;;
+esac
+
+I18N_Build "$__main"
+FS_Make_Directory "$__output"
+FS_Remove_Silently "$__target"
+C_Build "$__target" \
+        "$__main" \
+        "library" \
+        "$PROJECT_OS" \
+        "$PROJECT_ARCH" \
+        "$__workspace" \
+        "$__log" \
+        "$__compiler" \
+        "$__arguments"
+if [ $? -ne 0 ]; then
+        I18N_Build_Failed
+        return 1
+fi
+
+__dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}/lib${PROJECT_SKU}"
+if [ "$PROJECT_OS" = "windows" ]; then
+        __dest="${__dest}.dll"
+else
+        __dest="${__dest}.a"
+fi
+I18N_Export "$__target" "$__dest"
+FS_Make_Housing_Directory "$__dest"
+FS_Remove_Silently "$__dest"
+FS_Move "$__target" "$__dest"
+if [ $? -ne 0 ]; then
+        I18N_Export_Failed
         return 1
 fi
 

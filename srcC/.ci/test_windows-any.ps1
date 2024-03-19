@@ -39,11 +39,7 @@ switch ("${env:PROJECT_OS}") {
 
 
 $null = I18N-Run-Test
-$___process = C-Run-Test `
-	"${___source}" `
-	"${env:PROJECT_OS}" `
-	"${env:PROJECT_ARCH}" `
-	"${___arguments}"
+$___process = C-Test "${___source}" "${env:PROJECT_OS}" "${env:PROJECT_ARCH}" "${___arguments}"
 switch ("${___process}") {
 { $_ -in "0", "10" } {
 	# accepted

@@ -14,7 +14,196 @@
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\ar.ps1"
 
+
+
+
+function C-Build {
+	param(
+		[string]$___file_output,
+		[string]$___list_sources,
+		[string]$___output_type,
+		[string]$___target_os,
+		[string]$___target_arch,
+		[string]$___directory_workspace,
+		[string]$___directory_log,
+		[string]$___compiler,
+		[string]$___arguments
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___file_output}") -ne 0) -or
+		($(STRINGS-Is-Empty "${___list_sources}") -ne 0) -or
+		($(STRINGS-Is-Empty "${___output_type}") -ne 0) -or
+		($(STRINGS-Is-Empty "${___target_os}") -ne 0) -or
+		($(STRINGS-Is-Empty "${___target_arch}") -ne 0) -or
+		($(STRINGS-Is-Empty "${___directory_workspace}") -ne 0) -or
+		($(STRINGS-Is-Empty "${___directory_log}") -ne 0) -or
+		($(STRINGS-Is-Empty "${___compiler}") -ne 0) -or
+		($(STRINGS-Is-Empty "${___arguments}") -ne 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___list_sources}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___directory_source = "$(FS-Get-Directory "${___list_sources}")"
+	$___process = FS-Is-Directory "${___directory_source}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	switch ("${___output_type}") {
+	{ $_ -in "elf", "exe", "executable" } {
+		# accepted - build .elf|.exe file
+	} { $_ -in "lib", "dll", "library" } {
+		# accepted - build .a|.dll file
+	} "none" {
+		# accepted - build .o objects
+	} default {
+		return 1
+	}}
+
+	$___process = AR-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$___build_list = "${___directory_workspace}\build-list.txt"
+	$___object_list = "${___directory_workspace}\object-list.txt"
+	$null = FS-Remake-Directory "${___directory_workspace}"
+	$null = FS-Remake-Directory "${___directory_log}"
+	$null = FS-Remove-Silently "${___build_list}"
+	$null = FS-Remove-Silently "${___object_list}"
+
+	## (1) Scan for all files
+	foreach ($__line in (Get-Content -Path "${___list_sources}")) {
+		$__line = $__line -replace '#.*$', ''
+		$__line = "$(STRINGS-Trim-Whitespace "${__line}")"
+		if ($(STRINGS-Is-Empty "${__line}") -eq 0) {
+			continue
+		}
+		$__line = $__line -replace '/', '\'
+
+		$___platform = $__line -replace ' .*$', ''
+		$___file = $__line -replace '^.*\s', ''
+		$___file_src = "${___directory_source}\${___file}"
+		$___file_obj = "${___directory_workspace}\$(FS-Extension-Remove "${___file}" "*").o"
+		$___file_log = "${___directory_log}\$(FS-Extension-Remove "${___file}" "*")_build.log"
+
+
+		# check source code existence
+		$___process = FS-Is-File "${___file_src}"
+		if ($___process -ne 0) {
+			return 1
+		}
+
+
+		# check source file compatibilities
+		$___os = $___platform -replace '-.*$', ''
+		$___arch = $___platform -replace '^.*-', ''
+		if ($(STRINGS-Is-Empty "${___platform}") -ne 0) {
+			# verify OS
+			if ($___os -ne "any") {
+				if ($___os -ne $___target_os) {
+					continue
+				}
+			}
+
+			# verify ARCH
+			if ($___arch -ne "any") {
+				if ($___arch -ne $___target_arch) {
+					continue
+				}
+			}
+		}
+		$___os = "${___target_os}"
+		$___arch = "${___target_arch}"
+
+
+		# begin registrations
+		if ("$(FS-Extension-Remove "${___file_src}" ".c")" -ne "${___file_src}") {
+			# it's a .c file. Register for building and linking...
+			$___process = FS-Append-File "${___build_list}" @"
+build|${___file_obj}|${___file_src}|${___file_log}|${___os}|${___arch}|${___compiler}|${___arguments}
+"@
+			if ($___process -ne 0) {
+				return 1
+			}
+
+
+			$___process = FS-Append-File "${___object_file}" "${___file_obj}`n"
+			if ($___process -ne 0) {
+				return 1
+			}
+		} elseif ("$(FS-Extension-Remove "${___file_src}" ".o")" -ne "${___file_src}") {
+			# it's a .o file. Register only for linking...
+			$null = FS-Make-Housing-Directory "${___file_obj}"
+
+			$___process = FS-Copy-File "${___file_src}" "${___file_obj}"
+			if ($___process -ne 0) {
+				return 1
+			}
+
+			$___process = FS-Append-File "${___object_list}" "${___file_obj}`n"
+			if ($___process -ne 0) {
+				return 1
+			}
+		} else {
+			# it's an unknown file. Bail out...
+			return 1
+		}
+	}
+
+	## (2) Bail early if object list is unavailable
+	$___process = FS-Is-File "${___object_list}"
+	if ($___process -ne 0) {
+		return 0
+	}
+
+	## (3) Build all object files if found
+	$___process = FS-Is-File "${___build_list}"
+	if ($___process -eq 0) {
+		$___process = SYNC-Exec-Parallel `
+			${function:C-Run-Parallel}.ToString() `
+			"${___build_list}" `
+			"${___directory_workspace}"
+		if ($___process -ne 0) {
+			return 1
+		}
+	}
+
+	## (4) Link all objects into the target
+	$null = FS-Remove-Silently "${___file_output}"
+	switch ("${___output_type}") {
+	{ $_ -in "elf", "exe", "executable" } {
+		$___process = OS-Exec "${___compiler}" "-o ${___file_output} @${___object_list}"
+		if ($___process -ne 0) {
+			$null = FS-Remove-Silently "${___file_output}"
+			return 1
+		}
+	} { $_ -in "lib", "dll", "library" } {
+		foreach ($__line in (Get-Content -Path "${___object_list}")) {
+			$___process = AR-Create "${___file_output}" "${__line}"
+			if ($___process -ne 0) {
+				$null = FS-Remove-Silently "${___file_output}"
+				return 1
+			}
+		}
+	} default {
+		# assume to building only object file
+	}}
+
+
+	# report status
+	return 0
+}
 
 
 
@@ -424,11 +613,10 @@ function C-Get-Strict-Settings {
 
 
 function C-Is-Available {
+	# execute
 	$null = OS-Sync
-
-
 	$___process = C-Get-Compiler "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
-	if ($(STRINGS-Is-Empty "${___process}") -ne 0) {
+	if ($(STRINGS-Is-Empty "${___process}") -eq 0) {
 		return 1
 	}
 
@@ -459,14 +647,16 @@ function C-Setup {
 		return 1
 	}
 
-	if ($(STRINGS-Is-Empty "$(C-Get-Compiler "windows" "amd64")") -eq 0) {
+	if (($(STRINGS-Is-Empty "$(C-Get-Compiler "windows" "amd64")") -eq 0) -or
+		($(STRINGS-Is-Empty "${env:PROJECT_ROBOT_RUN}") -ne 0)) {
 		$___process = OS-Exec "choco" "install mingw -y"
 		if ($___process -ne 0) {
 			return 1
 		}
 	}
 
-	if ($(STRINGS-Is-Empty "$(C-Get-Compiler "js" "wasm")") -eq 0) {
+	if (($(STRINGS-Is-Empty "$(C-Get-Compiler "js" "wasm")") -eq 0) -or
+		($(STRINGS-Is-Empty "${env:PROJECT_ROBOT_RUN}") -ne 0)) {
 		# BUG: choco fails to install emscripten's dependency properly (git.install)
 		#      See: https://github.com/aminya/chocolatey-emscripten/issues/2
 		#$___process = OS-Exec "choco" "install emscripten -y"
@@ -501,63 +691,42 @@ function C-Run-Parallel {
 	# parse input
 	$___list = $___line.Split("|")
 	$___mode = $___list[0]
-	$___directory_source = $___list[1]
-	$___directory_workspace = $___list[2]
-	$___directory_log = $___list[3]
-	$___target = $___list[4]
-	$___target_os = $___list[5]
-	$___target_arch = $___list[6]
+	$___file_object = $___list[1]
+	$___file_source = $___list[2]
+	$___file_log = $___list[3]
+	$___target_os = $___list[4]
+	$___target_arch = $___list[5]
+	$___compiler = $___list[6]
 	$___arguments = $___list[7]
 
 
 	# validate input
 	if (($(STRINGS-Is-Empty "${___mode}") -eq 0) -or
-		($(STRINGS-Is-Empty "${___directory_source}") -eq 0) -or
-		($(STRINGS-Is-Empty "${___directory_workspace}") -eq 0) -or
-		($(STRINGS-Is-Empty "${___directory_log}") -eq 0) -or
-		($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___file_object}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___file_source}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___file_log}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___target_os}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___target_arch}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___compiler}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___arguments}") -eq 0)) {
 		return 1
 	}
 
 	$___mode = "$(STRINGS-To-Lowercase "${___mode}")"
 	switch ("${___mode}") {
-	{ $_ -in "build", "test" } {
+	{ $_ -in "build", "build-obj", "build-object" } {
+		# accepted
+	} { $_ -in "build-exe", "build-elf", "build-executable" } {
+		# accepted
+	} "test" {
 		# accepted
 	} default {
 		return 1
 	}}
 
-	$___target = FS-Get-Path-Relative "${___target}" "${___directory_source}"
-	$___directory_target = "$(FS-Get-Directory "${___target}")"
-	$___file_target = "$(FS-Get-File "${___target}")"
-
-	$___file_log = "${___directory_log}"
-	$___file_output = "${___directory_workspace}"
-	if ("${___directory_target}" -ne "${___file_target}") {
-		# there are sub-directories
-		$___file_log = "${___file_log}\${___directory_target}"
-		$___file_output = "${___file_output}\${___directory_target}"
-	}
-
-	$___file_target = "$(FS-Extension-Remove "${___file_target}" "*")"
-	if ("${___mode}" -eq "test") {
-		$___file_log = "${___file_log}\${___file_target}_test.log"
-	} else {
-		$___file_log = "${___file_log}\${___file_target}_build.log"
-	}
+	$null = FS-Make-Housing-Directory "${___file_object}"
 	$null = FS-Make-Housing-Directory "${___file_log}"
-
-	$___file_output = "${___file_output}\${___file_target}"
-	switch ("${___target_os}") {
-	"windows" {
-		$___file_output = "${___file_output}.exe"
-	} default {
-		$___file_output = "${___file_output}.elf"
-	}}
-	$null = FS-Make-Housing-Directory "${___file_output}"
+	$null = FS-Remove-Silently "${___file_log}"
 
 	if ("${___mode}" -eq "test") {
 		$null = I18N-Test "${___file_output}" *>> "${___file_log}"
@@ -589,16 +758,25 @@ function C-Run-Parallel {
 
 
 	# operate in build mode
-	$___compiler = "$(C-Get-Compiler "${___target_os}" "${___target_arch}")"
 	if ($(STRINGS-Is-Empty "${___compiler}") -eq 0) {
 		$null = I18N-Build-Failed *>> "${___file_log}"
 		return 1
 	}
 
-
-	$___arguments = @"
-${___arguments} -o ${___file_output} ${___directory_source}\${___target}
+	switch ("${___mode}") {
+	{ $_ -in "build-exe", "build-elf", "build-executable" } {
+		$___arguments = @"
+${___arguments} -o ${___file_output} ${___file_source}
 "@
+
+	} default {
+		# assume to building object file
+		$___arguments = @"
+${___arguments} -o ${___file_output} -c ${___file_source}
+"@
+	}}
+
+	$null = I18N-Run *>> "${___file_log}"
 	$___process = OS-Exec `
 			"${___compiler}" `
 			"${___arguments}" `
@@ -617,7 +795,7 @@ ${___arguments} -o ${___file_output} ${___directory_source}\${___target}
 
 
 
-function C-Run-Test {
+function C-Test {
 	param(
 		[string]$___directory,
 		[string]$___os,
@@ -639,6 +817,11 @@ function C-Run-Test {
 		return 1
 	}
 
+	$___compiler = "$(C-Get-Compiler "${___os}" "${___arch}")"
+	if ($(STRINGS-Is-Empty "${___compiler}") -eq 0) {
+		return 1
+	}
+
 
 	# execute
 	$___workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\test-${env:PROJECT_C}"
@@ -649,18 +832,29 @@ function C-Run-Test {
 	$null = FS-Remake-Directory "${___log}"
 
 	## (1) Scan for all test files
-	foreach ($__line in (Get-ChildItem -Path "${___directory}" `
+	foreach ($___file_src in (Get-ChildItem -Path "${___directory}" `
 			-Recurse `
 			-Filter "*_test.c").FullName) {
+		$___file_obj = "$(FS-Get-Path-Relative "${___file_src}" "${___directory}")"
+		$___file_obj = "$(FS-Extension-Remove "${___file_obj}" "*")"
+		$___file_log = "${___log}/${___file_obj}"
+		switch ("${___os}") {
+		"windows" {
+			$___file_obj = "${___workspace}\${___file_obj}.exe"
+		} default {
+			$___file_obj = "${___workspace}\${___file_obj}.elf"
+		}}
+
+
 		$___process = FS-Append-File "${___build_list}" @"
-build|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${___arguments}
+build-executable|${___file_obj}|${___file_src}|${___file_log}_build.log|${___os}|${___arch}|${___compiler}|${___arguments}
 "@
 		if ($___process -ne 0) {
 			return 1
 		}
 
 		$___process = FS-Append-File "${___test_list}" @"
-test|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${___arguments}
+test|${___file_obj}|${___file_src}|${___file_log}_test.log|${___os}|${___arch}|${___compiler}|${___arguments}
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -668,23 +862,21 @@ test|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${_
 	}
 
 	## (2) Bail early if test is unavailable
-	$___process = FS-Is-File "${___build_list}"
-	if ($___process -ne 0) {
-		return 0
-	}
-
 	$___process = FS-Is-File "${___test_list}"
 	if ($___process -ne 0) {
 		return 0
 	}
 
 	## (3) Build all test artifacts
-	$___process = SYNC-Exec-Parallel `
-		${function:C-Run-Parallel}.ToString() `
-		"${___build_list}" `
-		"${___workspace}"
-	if ($___process -ne 0) {
-		return 1
+	$___process = FS-Is-File "${___build_list}"
+	if ($___process -eq 0) {
+		$___process = SYNC-Exec-Parallel `
+			${function:C-Run-Parallel}.ToString() `
+			"${___build_list}" `
+			"${___workspace}"
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
 	## (4) Execute all test artifacts
@@ -695,6 +887,7 @@ test|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${_
 	if ($___process -ne 0) {
 		return 1
 	}
+
 
 	# report status
 	return 0

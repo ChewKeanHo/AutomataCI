@@ -49,7 +49,7 @@ AR_Create() {
 
 
         # execute
-        ar r "$1" $2
+        ar cr "$1" $2
         if [ $? -ne 0 ]; then
                 return 1
         fi

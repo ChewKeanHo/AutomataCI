@@ -15,6 +15,203 @@
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/io/sync.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/archive/ar.sh"
+
+
+
+
+C_Build() {
+        ___file_output="$1"
+        ___list_sources="$2"
+        ___output_type="$3"
+        ___target_os="$4"
+        ___target_arch="$5"
+        ___directory_workspace="$6"
+        ___directory_log="$7"
+        ___compiler="$8"
+        ___arguments="$9"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$___file_output") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___list_sources") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___output_type") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___target_os") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___target_arch") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___directory_workspace") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___directory_log") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___compiler") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___arguments") -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_File "$___list_sources"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        ___directory_source="$(FS_Get_Directory "$___list_sources")"
+        FS_Is_Directory "$___directory_source"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        case "$___output_type" in
+        elf|exe|executable)
+                # accepted - build .elf|.exe file
+                ;;
+        lib|dll|library)
+                # accepted - build .a|.dll file
+                ;;
+        none)
+                # accepted - build .o objects
+                ;;
+        *)
+                return 1
+        esac
+
+        AR_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        ___build_list="${___directory_workspace}/build-list.txt"
+        ___object_list="${___directory_workspace}/object-list.txt"
+        FS_Remake_Directory "$___directory_workspace"
+        FS_Remake_Directory "$___directory_log"
+        FS_Remove_Silently "$___build_list"
+        FS_Remove_Silently "$___object_list"
+
+        ## (1) Scan for all files
+        ___old_IFS="$IFS"
+        while IFS="" read -r __line || [ -n "$__line" ]; do
+                __line="${__line%%#*}"
+                __line="$(STRINGS_Trim_Whitespace "$__line")"
+                if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
+                        continue
+                fi
+
+                ___platform="${__line%% *}"
+                ___file="${__line##* }"
+                ___file_src="${___directory_source}/${___file}"
+                ___file_obj="${___directory_workspace}/$(FS_Extension_Remove "$___file" "*").o"
+                ___file_log="${___directory_log}/$(FS_Extension_Remove "$___file" "*")_build.log"
+
+
+                # check source file existence
+                FS_Is_File "$___file_src"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+
+
+                # check source file compatibilities
+                ___os="${___platform%%-*}"
+                ___arch="${___platform##*-}"
+                if [ $(STRINGS_Is_Empty "${___platform}") -ne 0 ]; then
+                        # verify OS
+                        if [ ! "$___os" = "any" ]; then
+                                if [ ! "$___os" = "$___target_os" ]; then
+                                        continue
+                                fi
+                        fi
+
+                        # verify ARCH
+                        if [ ! "$___arch" = "any" ]; then
+                                if [ ! "$___arch" = "$___target_arch" ]; then
+                                        continue
+                                fi
+                        fi
+                fi
+                ___os="$___target_os"
+                ___arch="$___target_arch"
+
+
+                # begin registrations
+                if [ ! "$(FS_Extension_Remove "$___file_src" ".c")" = "$___file_src" ]; then
+                        # it's a .c file. Register for building and linking...
+                        FS_Append_File "$___build_list" "\
+build|${___file_obj}|${___file_src}|${___file_log}|${___os}|${___arch}|${___compiler}|${___arguments}
+"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+
+                        FS_Append_File "$___object_list" "${___file_obj}\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                elif [ ! "$(FS_Extension_Remove "$___file_src" ".o")" = "$___file_src" ]; then
+                        # it's a .o file. Register only for linking...
+                        FS_Make_Housing_Directory "$___file_obj"
+
+                        FS_Copy_File "$___file_src" "$___file_obj"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+
+                        FS_Append_File "$___object_list" "${___file_obj}\n"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                else
+                        # it's an unknown file. Bail out...
+                        return 1
+                fi
+        done < "$___list_sources"
+        IFS="$___old_IFS" && unset ___old_IFS
+
+        ## (2) Bail early if object list is unavailable
+        FS_Is_File "$___object_list"
+        if [ $? -ne 0 ]; then
+                return 0
+        fi
+
+        ## (3) Build all object files if found
+        FS_Is_File "$___build_list"
+        if [ $? -eq 0 ]; then
+                SYNC_Exec_Parallel "C_Run_Parallel" "$___build_list" "$___directory_workspace"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        fi
+
+        ## (4) Link all objects into the target
+        FS_Remove_Silently "$___file_output"
+        case "$___output_type" in
+        elf|exe|executable)
+                "$___compiler" -o "$___file_output" @"$___object_list"
+                if [ $? -ne 0 ]; then
+                        FS_Remove_Silently "$___file_output"
+                        return 1
+                fi
+                ;;
+        lib|dll|library)
+                ___old_IFS="$IFS"
+                while IFS="" read -r __line || [ -n "$__line" ]; do
+                        if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
+                                continue
+                        fi
+
+                        AR_Create "$___file_output" "$__line"
+                        if [ $? -ne 0 ]; then
+                                FS_Remove_Silently "$___file_output"
+                                return 1
+                        fi
+                done < "$___object_list"
+                IFS="$___old_IFS" && unset ___old_IFS
+                ;;
+        *)
+                # assume to building only object file
+                ;;
+        esac
+
+
+        # report status
+        return 0
+}
 
 
 
@@ -591,16 +788,13 @@ C_Run_Parallel() {
         ___mode="${1%%|*}"
         ___arguments="${1#*|}"
 
-        ___directory_source="${___arguments%%|*}"
+        ___file_object="${___arguments%%|*}"
         ___arguments="${___arguments#*|}"
 
-        ___directory_workspace="${___arguments%%|*}"
+        ___file_source="${___arguments%%|*}"
         ___arguments="${___arguments#*|}"
 
-        ___directory_log="${___arguments%%|*}"
-        ___arguments="${___arguments#*|}"
-
-        ___target="${___arguments%%|*}"
+        ___file_log="${___arguments%%|*}"
         ___arguments="${___arguments#*|}"
 
         ___target_os="${___arguments%%|*}"
@@ -609,22 +803,31 @@ C_Run_Parallel() {
         ___target_arch="${___arguments%%|*}"
         ___arguments="${___arguments#*|}"
 
+        ___compiler="${___arguments%%|*}"
+        ___arguments="${___arguments#*|}"
+
 
         # validate input
         if [ $(STRINGS_Is_Empty "$___mode") -eq 0 ] ||
-                [ $(STRINGS_Is_Empty "$___directory_source") -eq 0 ] ||
-                [ $(STRINGS_Is_Empty "$___directory_workspace") -eq 0 ] ||
-                [ $(STRINGS_Is_Empty "$___directory_log") -eq 0 ] ||
-                [ $(STRINGS_Is_Empty "$___target") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___file_object") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___file_source") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___file_log") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___target_os") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___target_arch") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___compiler") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___arguments") -eq 0 ]; then
                 return 1
         fi
 
         ___mode="$(STRINGS_To_Lowercase "$___mode")"
         case "$___mode" in
-        build|test)
+        build|build-obj|build-object)
+                # accepted
+                ;;
+        build-exe|build-elf|build-executable)
+                # accepted
+                ;;
+        test)
                 # accepted
                 ;;
         *)
@@ -632,51 +835,24 @@ C_Run_Parallel() {
                 ;;
         esac
 
-        ___target="$(FS_Get_Path_Relative "$___target" "$___directory_source")"
-        ___directory_target="$(FS_Get_Directory "$___target")"
-        ___file_target="$(FS_Get_File "$___target")"
-
-        ___file_log="$___directory_log"
-        ___file_output="$___directory_workspace"
-        if [ ! "$___directory_target" = "$___file_target" ]; then
-                # there are sub-directories
-                ___file_log="${___file_log}/${___directory_target}"
-                ___file_output="${___file_output}/${___directory_target}"
-        fi
-
-        ___file_target="$(FS_Extension_Remove "$___file_target" "*")"
-        if [ "$___mode" = "test" ]; then
-                ___file_log="${___file_log}/${___file_target}_test.log"
-        else
-                ___file_log="${___file_log}/${___file_target}_build.log"
-        fi
+        FS_Make_Housing_Directory "$___file_object"
         FS_Make_Housing_Directory "$___file_log"
-
-        ___file_output="${___file_output}/${___file_target}"
-        case "$___target_os" in
-        windows)
-                ___file_output="${___file_output}.exe"
-                ;;
-        *)
-                ___file_output="${___file_output}.elf"
-                ;;
-        esac
-        FS_Make_Housing_Directory "$___file_output"
+        FS_Remove_Silently "$___file_log"
 
         if [ "$___mode" = "test" ]; then
-                I18N_Test "$___file_output" >> "$___file_log" 2>&1
+                I18N_Test "$___file_object" >> "$___file_log" 2>&1
                 if [ ! "$___target_os" = "$PROJECT_OS" ]; then
                         I18N_Test_Skipped >> "$___file_log" 2>&1
                         return 10 # skipped - cannot operate in host environment
                 fi
 
-                FS_Is_File "$___file_output"
+                FS_Is_File "$___file_object"
                 if [ $? -ne 0 ]; then
                         I18N_Test_Failed >> "$___file_log" 2>&1
                         return 1 # failed - build stage
                 fi
 
-                $___file_output >> "$___file_log" 2>&1
+                $___file_object >> "$___file_log" 2>&1
                 if [ $? -ne 0 ]; then
                         I18N_Test_Failed >> "$___file_log" 2>&1
                         return 1 # failed - test stage
@@ -689,22 +865,30 @@ C_Run_Parallel() {
 
 
         # operate in build mode
-        ___compiler="$(C_Get_Compiler "$___target_os" "$___target_arch")"
         if [ $(STRINGS_Is_Empty "$___compiler") -eq 0 ]; then
                 I18N_Build_Failed >> "$___file_log" 2>&1
                 return 1
         fi
 
-        ___command="\
-${___compiler} ${___arguments} -o ${___file_output} ${___directory_source}/${___target}
+        case "$___mode" in
+        build-exe|build-elf|build-executable)
+                ___command="\
+${___compiler} ${___arguments} -o ${___file_object} ${___file_source}
 "
+                ;;
+        *)
+                # assume to building object file
+                ___command="\
+${___compiler} ${___arguments} -o ${___file_object} -c ${___file_source}
+"
+                ;;
+        esac
 
-
-        # execute
-        I18N_Build "$___command" >> "$___file_log" 2>&1
-        $___command >> "$___file_log" 2>&1
+        I18N_Run "$___command" >> "$___file_log" 2>&1
+        FS_Remove_Silently "$___file_object"
+        eval "$___command" >> "$___file_log" 2>&1
         if [ $? -ne 0 ]; then
-                I18N_Build_Failed >> "$___file_log" 2>&1
+                I18N_Run_Failed >> "$___file_log" 2>&1
                 return 1
         fi
 
@@ -716,7 +900,7 @@ ${___compiler} ${___arguments} -o ${___file_output} ${___directory_source}/${___
 
 
 
-C_Run_Test() {
+C_Test() {
         ___directory="$1"
         ___os="$2"
         ___arch="$3"
@@ -736,6 +920,11 @@ C_Run_Test() {
                 return 1
         fi
 
+        ___compiler="$(C_Get_Compiler "$___os" "$___arch")"
+        if [ $(STRINGS_Is_Empty "$___compiler") -eq 0 ]; then
+                return 1
+        fi
+
 
         # execute
         ___workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/test-${PROJECT_C}"
@@ -748,15 +937,31 @@ C_Run_Test() {
         ## (1) Scan for all test files
         __old_IFS="$IFS"
         find "$___directory" -name '*_test.c' -print0 \
-                | while IFS="" read -r __line || [ -n "$__line" ]; do
+                | while IFS="" read -r ___file_src || [ -n "$___file_src" ]; do
+                if [ $(STRINGS_Is_Empty "$___file_src") -eq 0 ]; then
+                        continue
+                fi
+
+                ___file_obj="$(FS_Get_Path_Relative "$___file_src" "$___directory")"
+                ___file_obj="$(FS_Extension_Remove "$___file_obj" "*")"
+                ___file_log="${___log}/${___file_obj}"
+                case "$___os" in
+                windows)
+                        ___file_obj="${___workspace}/${___file_obj}.exe"
+                        ;;
+                *)
+                        ___file_obj="${___workspace}/${___file_obj}.elf"
+                        ;;
+                esac
+
                 FS_Append_File "$___build_list" "\
-build|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${___arguments}
+build-executable|${___file_obj}|${___file_src}|${___file_log}_build.log|${___os}|${___arch}|${___compiler}|${___arguments}
 "
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
                 FS_Append_File "$___test_list" "\
-test|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${___arguments}
+test|${___file_obj}|${___file_src}|${___file_log}_test.log|${___os}|${___arch}|${___compiler}|${___arguments}
 "
                 if [ $? -ne 0 ]; then
                         return 1
@@ -765,20 +970,18 @@ test|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${_
         IFS="$__old_IFS" && unset __old_IFS
 
         ## (2) Bail early if test is unavailable
-        FS_Is_File "$___build_list"
-        if [ $? -ne 0 ]; then
-                return 0
-        fi
-
         FS_Is_File "$___test_list"
         if [ $? -ne 0 ]; then
                 return 0
         fi
 
         ## (3) Build all test artifacts
-        SYNC_Exec_Parallel "C_Run_Parallel" "$___build_list" "$___workspace"
-        if [ $? -ne 0 ]; then
-                return 1
+        FS_Is_File "$___build_list"
+        if [ $? -eq 0 ]; then
+                SYNC_Exec_Parallel "C_Run_Parallel" "$___build_list" "$___workspace"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
         ## (4) Execute all test artifacts

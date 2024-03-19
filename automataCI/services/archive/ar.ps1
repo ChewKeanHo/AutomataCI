@@ -50,7 +50,7 @@ function AR-Create {
 
 
 	# execute
-	$___process = OS-Exec "ar" "r ${___name} ${___list}"
+	$___process = OS-Exec "ar" "cr ${___name} ${___list}"
 	if ($___process -ne 0) {
 		return 1
 	}

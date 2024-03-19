@@ -42,7 +42,7 @@ esac
 
 
 I18N_Run_Test
-C_Run_Test "$___source" "$PROJECT_OS" "$PROJECT_ARCH" "$___arguments"
+C_Test "$___source" "$PROJECT_OS" "$PROJECT_ARCH" "$___arguments"
 case "$?" in
 0|10)
         # accepted
