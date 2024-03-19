@@ -87,11 +87,15 @@ esac
 
 I18N_Run_Test
 NIM_Run_Test "$___source" "$PROJECT_OS" "$PROJECT_ARCH" "$___arguments"
-___process=$?
-if [ $___process -ne 0 ] && [ $___process -ne 10 ]; then
+case "$?" in
+0|10)
+        # accepted
+        ;;
+*)
         I18N_Run_Failed
         return 1
-fi
+        ;;
+esac
 
 
 

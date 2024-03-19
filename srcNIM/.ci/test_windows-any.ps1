@@ -35,7 +35,6 @@ if ($___process -ne 0) {
 }
 
 
-OS-Print-Status info "prepare nim workspace..."
 $___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NIM}"
 $null = I18N-Prepare "${___source}"
 $___arguments = "compileToC " `
@@ -79,7 +78,7 @@ $___process = NIM-Run-Test `
 	"${env:PROJECT_ARCH}" `
 	"${___arguments}"
 switch ("${___process}") {
-{ $_ -in "10", "0" } {
+{ $_ -in "0", "10" } {
 	# accepted
 } default {
 	$null = I18N-Run-Failed
