@@ -618,8 +618,7 @@ function C-Get-Strict-Settings {
 		+ " -fstack-protector-all" `
 		+ " -Werror-implicit-function-declaration" `
 		+ " -Wno-format-security" `
-		+ " -Os" `
-		+ " -static"
+		+ " -Os"
 }
 
 
