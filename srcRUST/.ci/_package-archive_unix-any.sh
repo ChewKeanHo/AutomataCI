@@ -111,17 +111,8 @@ PACKAGE_Assemble_ARCHIVE_Content() {
         elif [ $(FS_Is_Target_A_MSI "$_target") -eq 0 ]; then
                 return 10 # not applicable
         else
-                case "$_target_os" in
-                windows)
-                        _dest="${_directory}/${PROJECT_SKU}.exe"
-                        ;;
-                *)
-                        _dest="${_directory}/${PROJECT_SKU}"
-                        ;;
-                esac
-
-                I18N_Assemble "$_target" "$_dest"
-                FS_Copy_File "$_target" "$_dest"
+                I18N_Assemble "$_target" "$_directory"
+                FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
                         I18N_Assemble_Failed
                         return 1
