@@ -238,6 +238,7 @@ Write-Host "Uninstalling ${env:PROJECT_SKU} (${env:PROJECT_VERSION})..."
 	</metadata>
 	<dependencies>
 		<dependency id="chocolatey" version="0.9.8.21" />
+		<dependency id="go" version="1.22.1" />
 	</dependencies>
 	<files>
 		<file src="README.md" target="README.md" />

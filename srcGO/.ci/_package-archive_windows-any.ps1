@@ -89,15 +89,8 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 	} elseif ($(FS-Is-Target-A-MSI "${_target}") -eq 0) {
 		return 10 # not applicable
 	} else {
-		switch (${_target_os}) {
-		"windows" {
-			$_dest = "${_directory}\${env:PROJECT_SKU}.exe"
-		} Default {
-			$_dest = "${_directory}\${env:PROJECT_SKU}"
-		}}
-
-		$null = I18N-Assemble "${_target}" "${_dest}"
-		$___process = FS-Copy-File "${_target}" "${_dest}"
+		$null = I18N-Assemble "${_target}" "${_directory}"
+		$___process = FS-Copy-File "${_target}" "${_directory}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
