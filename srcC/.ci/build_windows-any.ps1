@@ -199,7 +199,7 @@ foreach ($__line in $__build_targets) {
 	$__target_os = "$(STRINGS-To-Lowercase $__list[0])"
 	$__target_arch = "$(STRINGS-To-Lowercase $__list[1])"
 	$__target_compiler = $__list[2]
-	$__target_compiler = $__list[3]
+	$__target_type = $__list[3]
 	$__source = $__list[4]
 
 
@@ -243,7 +243,12 @@ foreach ($__line in $__build_targets) {
 			continue
 		}
 	} else {
-		$__target_compiler = "$(C-Get-Compiler "${__target_os}" "${__target_arch}")"
+		$__target_compiler = "$(C-Get-Compiler `
+			"${__target_os}" `
+			"${__target_arch}" `
+			"${env:PROJECT_OS}" `
+			"${env:PROJECT_ARCH}"
+		)"
 		if ($(STRINGS-Is-Empty "${__target_compiler}") -eq 0) {
 			$null = I18N-Sync-Register-Skipped-Missing-Compiler
 			continue
@@ -281,7 +286,7 @@ foreach ($__line in $__build_targets) {
 			+ " -Os" `
 			+ " -static"
 	} default {
-		$__arguments = "$(C-Get-Strict-Settings) -pie -fPIE"
+		$__arguments = "$(C-Get-Strict-Settings) -static -pie -fPIE"
 	}}
 
 	switch ("${__target_arch}") {

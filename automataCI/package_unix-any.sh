@@ -164,8 +164,11 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
 
         STRINGS_Has_Prefix "$PROJECT_SKU" "$TARGET_FILENAME"
         if [ $? -ne 0 ]; then
-                I18N_Is_Incompatible_Skipped "$TARGET_FILENAME"
-                continue
+                STRINGS_Has_Prefix "lib${PROJECT_SKU}" "$TARGET_FILENAME"
+                if [ $? -ne 0 ]; then
+                        I18N_Is_Incompatible_Skipped "$TARGET_FILENAME"
+                        continue
+                fi
         fi
 
         I18N_Sync_Register "$i"

@@ -255,7 +255,12 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
                         continue
                 fi
         else
-                __target_compiler="$(C_Get_Compiler "$__target_os" "$__target_arch")"
+                __target_compiler="$(C_Get_Compiler \
+                        "$__target_os" \
+                        "$__target_arch" \
+                        "$PROJECT_OS" \
+                        "$PROJECT_ARCH" \
+                )"
                 if [ $(STRINGS_Is_Empty "$__target_compiler") -eq 0 ]; then
                         I18N_Sync_Register_Skipped_Missing_Compiler
                         continue
@@ -298,7 +303,7 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
 "
                 ;;
         *)
-                __arguments="$(C_Get_Strict_Settings) -pie -fPIE"
+                __arguments="$(C_Get_Strict_Settings) -static -pie -fPIE"
                 ;;
         esac
 

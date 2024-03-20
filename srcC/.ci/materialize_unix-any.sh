@@ -28,24 +28,25 @@ fi
 
 
 # execute
-FS_Remove_Silently "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}"
-FS_Remove_Silently "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}"
-
 __arguments="$(C_Get_Strict_Settings)"
 case "$PROJECT_OS" in
 darwin)
         __arguments="${__arguments} -fPIC"
         ;;
 *)
-        __arguments="${__arguments} -pie -fPIE"
+        __arguments="${__arguments} -static -pie -fPIE"
         ;;
 esac
 
-__compiler="$(C_Get_Compiler "$PROJECT_OS" "$PROJECT_ARCH")"
+__compiler="$(C_Get_Compiler "$PROJECT_OS" "$PROJECT_ARCH" "$PROJECT_OS" "$PROJECT_ARCH")"
 if [ $(STRINGS_Is_Empty "$__compiler") -eq 0 ]; then
         I18N_Build_Failed
         return 1
 fi
+
+FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+FS_Remake_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}"
+FS_Remake_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}"
 
 
 
@@ -53,10 +54,8 @@ fi
 # build main exectuable
 I18N_Configure_Build_Settings
 __target="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
-__output="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/build-${__target}"
 __log="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/build-${__target}"
-__main="${PROJECT_PATH_ROOT}/${PROJECT_C}/executable.txt"
 case "$PROJECT_OS" in
 windows)
         __target="${__workspace}/${__target}.exe"
@@ -66,11 +65,10 @@ windows)
         ;;
 esac
 
-I18N_Build "$__main"
-FS_Make_Directory "$__output"
+I18N_Build "$__target"
 FS_Remove_Silently "$__target"
 C_Build "$__target" \
-        "$__main" \
+        "${PROJECT_PATH_ROOT}/${PROJECT_C}/executable.txt" \
         "executable" \
         "$PROJECT_OS" \
         "$PROJECT_ARCH" \
@@ -87,7 +85,7 @@ __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BIN}/${PROJECT_SKU}"
 if [ "$PROJECT_OS" = "windows" ]; then
         __dest="${__dest}.exe"
 fi
-I18N_Export "$__target" "$__dest"
+I18N_Export "$__dest"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__target" "$__dest"
@@ -102,10 +100,8 @@ fi
 # build main library
 I18N_Configure_Build_Settings
 __target="lib${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
-__output="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/build-${__target}"
 __log="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/build-${__target}"
-__main="${PROJECT_PATH_ROOT}/${PROJECT_C}/library.txt"
 case "$PROJECT_OS" in
 windows)
         __target="${__workspace}/${__target}.dll"
@@ -115,11 +111,10 @@ windows)
         ;;
 esac
 
-I18N_Build "$__main"
-FS_Make_Directory "$__output"
+I18N_Build "$__target"
 FS_Remove_Silently "$__target"
 C_Build "$__target" \
-        "$__main" \
+        "${PROJECT_PATH_ROOT}/${PROJECT_C}/library.txt" \
         "library" \
         "$PROJECT_OS" \
         "$PROJECT_ARCH" \
@@ -138,7 +133,7 @@ if [ "$PROJECT_OS" = "windows" ]; then
 else
         __dest="${__dest}.a"
 fi
-I18N_Export "$__target" "$__dest"
+I18N_Export "$__dest"
 FS_Make_Housing_Directory "$__dest"
 FS_Remove_Silently "$__dest"
 FS_Move "$__target" "$__dest"

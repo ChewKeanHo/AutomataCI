@@ -180,8 +180,11 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 
 	$___process = STRINGS-Has-Prefix "${env:PROJECT_SKU}" "${TARGET_FILENAME}"
 	if ($___process -ne 0) {
-		$null = I18N-Is-Incompatible-Skipped "${TARGET_FILENAME}"
-		continue
+		$___process = STRINGS-Has-Prefix "lib${env:PROJECT_SKU}" "${TARGET_FILENAME}"
+		if ($___process -ne 0) {
+			$null = I18N-Is-Incompatible-Skipped "${TARGET_FILENAME}"
+			continue
+		}
 	}
 
 	$null = I18N-Sync-Register "$file"

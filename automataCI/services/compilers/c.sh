@@ -182,7 +182,17 @@ build|${___file_obj}|${___file_src}|${___file_log}|${___os}|${___arch}|${___comp
         FS_Remove_Silently "$___file_output"
         case "$___output_type" in
         elf|exe|executable)
-                "$___compiler" -o "$___file_output" @"$___object_list"
+                ___arguments=""
+                ___old_IFS="$IFS"
+                while IFS="" read -r __line || [ -n "$__line" ]; do
+                        if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
+                                continue
+                        fi
+                        ___arguments="${___arguments} ${__line}"
+                done < "$___object_list"
+                IFS="$___old_IFS" && unset ___old_IFS
+
+                eval "${___compiler} -o ${___file_output} ${___arguments}"
                 if [ $? -ne 0 ]; then
                         FS_Remove_Silently "$___file_output"
                         return 1
@@ -664,7 +674,6 @@ C_Get_Strict_Settings() {
 -Werror-implicit-function-declaration \
 -Wno-format-security \
 -Os \
--static \
 "
 
 
@@ -677,7 +686,12 @@ C_Get_Strict_Settings() {
 
 C_Is_Available() {
         # execute
-        if [ $(STRINGS_Is_Empty "$(C_Get_Compiler "$PROJECT_OS" "$PROJECT_ARCH")") -eq 0 ]; then
+        ___compiler="$(C_Get_Compiler \
+                        "$PROJECT_OS" \
+                        "$PROJECT_ARCH" \
+                        "$PROJECT_OS" \
+                        "$PROJECT_ARCH")"
+        if [ $(STRINGS_Is_Empty "$___compiler") -eq 0 ]; then
                 return 1
         fi
 
@@ -920,7 +934,12 @@ C_Test() {
                 return 1
         fi
 
-        ___compiler="$(C_Get_Compiler "$___os" "$___arch")"
+        ___compiler="$(C_Get_Compiler \
+                        "$___os" \
+                        "$___arch" \
+                        "$PROJECT_OS" \
+                        "$PROJECT_ARCH" \
+        )"
         if [ $(STRINGS_Is_Empty "$___compiler") -eq 0 ]; then
                 return 1
         fi

@@ -34,15 +34,15 @@ function C-Build {
 
 
 	# validate input
-	if (($(STRINGS-Is-Empty "${___file_output}") -ne 0) -or
-		($(STRINGS-Is-Empty "${___list_sources}") -ne 0) -or
-		($(STRINGS-Is-Empty "${___output_type}") -ne 0) -or
-		($(STRINGS-Is-Empty "${___target_os}") -ne 0) -or
-		($(STRINGS-Is-Empty "${___target_arch}") -ne 0) -or
-		($(STRINGS-Is-Empty "${___directory_workspace}") -ne 0) -or
-		($(STRINGS-Is-Empty "${___directory_log}") -ne 0) -or
-		($(STRINGS-Is-Empty "${___compiler}") -ne 0) -or
-		($(STRINGS-Is-Empty "${___arguments}") -ne 0)) {
+	if (($(STRINGS-Is-Empty "${___file_output}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___list_sources}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___output_type}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___target_os}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___target_arch}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___directory_workspace}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___directory_log}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___compiler}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___arguments}") -eq 0)) {
 		return 1
 	}
 
@@ -138,7 +138,7 @@ build|${___file_obj}|${___file_src}|${___file_log}|${___os}|${___arch}|${___comp
 			}
 
 
-			$___process = FS-Append-File "${___object_file}" "${___file_obj}`n"
+			$___process = FS-Append-File "${___object_list}" "${___file_obj}"
 			if ($___process -ne 0) {
 				return 1
 			}
@@ -151,7 +151,7 @@ build|${___file_obj}|${___file_src}|${___file_log}|${___os}|${___arch}|${___comp
 				return 1
 			}
 
-			$___process = FS-Append-File "${___object_list}" "${___file_obj}`n"
+			$___process = FS-Append-File "${___object_list}" "${___file_obj}"
 			if ($___process -ne 0) {
 				return 1
 			}
@@ -183,7 +183,12 @@ build|${___file_obj}|${___file_src}|${___file_log}|${___os}|${___arch}|${___comp
 	$null = FS-Remove-Silently "${___file_output}"
 	switch ("${___output_type}") {
 	{ $_ -in "elf", "exe", "executable" } {
-		$___process = OS-Exec "${___compiler}" "-o ${___file_output} @${___object_list}"
+		$___arguments = ""
+		foreach ($__line in (Get-Content -Path "${___object_list}")) {
+			$___arguments = "${___arguments} ${__line}"
+		}
+
+		$___process = OS-Exec "${___compiler}" "-o ${___file_output} ${___arguments}"
 		if ($___process -ne 0) {
 			$null = FS-Remove-Silently "${___file_output}"
 			return 1
@@ -218,6 +223,8 @@ function C-Get-Compiler {
 
 
 	# execute
+	$null = OS-Sync
+
 	if ($(STRINGS-Is-Empty "${___compiler}") -ne 0) {
 		$___process = OS-Is-Command-Available "${___compiler}"
 		if ($___process -eq 0) {
@@ -567,10 +574,16 @@ function C-Get-Compiler {
 			return $___compiler
 		}
 
+		$___compiler = "mingw32"
+		$___process = OS-Is-Command-Available "${___compiler}"
+		if ($___process -eq 0) {
+			return $___compiler
+		}
+
 
 		if (("${___os}" -eq "${___base_os}") -and
 			("${___arch}" -eq "${___base_arch}")) {
-			$___compiler = "cc"
+			$___compiler = "gcc"
 			$___process = OS-Is-Command-Available "${___compiler}"
 			if ($___process -eq 0) {
 				return $___compiler
@@ -615,7 +628,11 @@ function C-Get-Strict-Settings {
 function C-Is-Available {
 	# execute
 	$null = OS-Sync
-	$___process = C-Get-Compiler "${env:PROJECT_OS}" "${env:PROJECT_ARCH}"
+	$___process = C-Get-Compiler `
+			"${env:PROJECT_OS}" `
+			"${env:PROJECT_ARCH}" `
+			"${env:PROJECT_OS}" `
+			"${env:PROJECT_ARCH}"
 	if ($(STRINGS-Is-Empty "${___process}") -eq 0) {
 		return 1
 	}
@@ -729,20 +746,20 @@ function C-Run-Parallel {
 	$null = FS-Remove-Silently "${___file_log}"
 
 	if ("${___mode}" -eq "test") {
-		$null = I18N-Test "${___file_output}" *>> "${___file_log}"
+		$null = I18N-Test "${___file_object}" *>> "${___file_log}"
 		if ("${___target_os}" -ne "${env:PROJECT_OS}") {
 			$null = I18N-Test-Skipped *>> "${___file_log}"
 			return 10 # skipped - cannot operate in host environment
 		}
 
-		$($___process = FS-Is-File "${___file_output}") *> "${___file_log}"
+		$($___process = FS-Is-File "${___file_object}") *> "${___file_log}"
 		if ($___process -ne 0) {
 			$null = I18N-Test-Failed *>> "${___file_log}"
 			return 1 # failed - build stage
 		}
 
 		$___process = OS-Exec `
-			"${___file_output}" `
+			"${___file_object}" `
 			"" `
 			"$(FS-Extension-Remove "${___file_log}" ".log")-stdout.log" `
 			"$(FS-Extension-Remove "${___file_log}" ".log")-stderr.log"
@@ -766,17 +783,17 @@ function C-Run-Parallel {
 	switch ("${___mode}") {
 	{ $_ -in "build-exe", "build-elf", "build-executable" } {
 		$___arguments = @"
-${___arguments} -o ${___file_output} ${___file_source}
+${___arguments} -o ${___file_object} ${___file_source}
 "@
 
 	} default {
 		# assume to building object file
 		$___arguments = @"
-${___arguments} -o ${___file_output} -c ${___file_source}
+${___arguments} -o ${___file_object} -c ${___file_source}
 "@
 	}}
 
-	$null = I18N-Run *>> "${___file_log}"
+	$($null = I18N-Build "${___file_object}") *>> "${___file_log}"
 	$___process = OS-Exec `
 			"${___compiler}" `
 			"${___arguments}" `
@@ -817,7 +834,12 @@ function C-Test {
 		return 1
 	}
 
-	$___compiler = "$(C-Get-Compiler "${___os}" "${___arch}")"
+	$___compiler = "$(C-Get-Compiler `
+		"${___os}" `
+		"${___arch}" `
+		"${env:PROJECT_OS}" `
+		"${env:PROJET_ARCH}" `
+	)"
 	if ($(STRINGS-Is-Empty "${___compiler}") -eq 0) {
 		return 1
 	}
