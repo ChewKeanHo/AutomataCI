@@ -216,7 +216,9 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
         case "$__target_type" in
         elf|exe|executable)
                 __file_output="${PROJECT_SKU}_${__target_os}-${__target_arch}"
-                if [ "$__target_os" = "windows" ]; then
+                if [ "$__target_os" = "js" ] && [ "$__target_arch" = "wasm" ]; then
+                        __file_output="${__file_output}.wasm"
+                elif [ "$__target_os" = "windows" ]; then
                         __file_output="${__file_output}.exe"
                 else
                         __file_output="${__file_output}.elf"
@@ -224,7 +226,9 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
                 ;;
         lib|dll|library)
                 __file_output="lib${PROJECT_SKU}_${__target_os}-${__target_arch}"
-                if [ "$__target_os" = "windows" ]; then
+                if [ "$__target_os" = "js" ] && [ "$__target_arch" = "wasm" ]; then
+                        __file_output="${__file_output}.wasm"
+                elif [ "$__target_os" = "windows" ]; then
                         __file_output="${__file_output}.dll"
                 else
                         __file_output="${__file_output}.a"

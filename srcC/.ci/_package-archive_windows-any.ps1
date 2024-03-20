@@ -60,7 +60,7 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			return 1
 		}
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		I18N_Assemble "${_target}" "${_directory}"
+		I18N-Assemble "${_target}" "${_directory}"
 		$___process = FS-Copy-File "${_target}" "${_directory}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed

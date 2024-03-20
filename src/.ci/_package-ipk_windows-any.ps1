@@ -55,16 +55,11 @@ function PACKAGE-Assemble-IPK-Content {
 		# copy main libary
 		# TIP: (1) usually is: usr/local/lib
 		#      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
-		$_filepath = "${_directory}\data\usr\local\lib\${env:PROJECT_SKU}"
-		$_filepath = "${_filepath}\lib${env:PROJECT_SKU}.a"
-		$null = I18N-Assemble "${_target}" "${_filepath}"
-		$___process = FS-Make-Housing-Directory "${_filepath}"
-		if ($___process -ne 0) {
-			$null = I18N-Assemble-Failed
-			return 1
-		}
+		$___dest = "${_directory}\data\usr\local\lib\${env:PROJECT_SKU}"
 
-		$___process = FS-Copy-File "${_target}" "${_filepath}"
+		$null = I18N-Assemble "${_target}" "${___dest}"
+		$null = FS-Make-Directory "${___dest}"
+		$___process = FS-Copy-File "${_target}" "${___dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
@@ -86,11 +81,11 @@ function PACKAGE-Assemble-IPK-Content {
 		# copy main program
 		# TIP: (1) usually is: usr/local/bin or usr/local/sbin
 		#      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
-		$_filepath = "${_directory}\data\usr\local\bin\${env:PROJECT_SKU}"
+		$___dest = "${_directory}\data\usr\local\bin"
 
-		$null = I18N-Assemble "${_target}" "${_filepath}"
-		$null = FS-Make-Housing-Directory "${_filepath}"
-		$___process = FS-Copy-File "${_target}" "${_filepath}"
+		$null = I18N-Assemble "${_target}" "${___dest}"
+		$null = FS-Make-Directory "${___dest}"
+		$___process = FS-Copy-File "${_target}" "${___dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1

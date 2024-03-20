@@ -83,7 +83,7 @@ function PACKAGE-Assemble-HOMEBREW-Content {
 	}
 
 	$___source = "${env:PROJECT_PATH_ROOT}\automataCI\"
-	$___dest = "${_directory}"
+	$___dest = "${_directory}\automataCI"
 	$null = I18N-Assemble "${___source}" "${___dest}"
 	$null = FS-Make-Directory "${___dest}"
 	$___process = FS-Copy-All "${___source}" "${___dest}"

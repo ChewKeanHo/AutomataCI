@@ -207,14 +207,18 @@ foreach ($__line in $__build_targets) {
 	switch ("${__target_type}") {
 	{ $_ -in "elf", "exe", "executable" } {
 		$__file_output = "${env:PROJECT_SKU}_${__target_os}-${__target_arch}"
-		if ("${__target_os}" -eq "windows") {
+		if (("${__target_os}" -eq "js") -and ("${__target_arch}" -eq "wasm")) {
+			$__file_output = "${__file_output}.wasm"
+		} elseif ("${__target_os}" -eq "windows") {
 			$__file_output = "${__file_output}.exe"
 		} else {
 			$__file_output = "${__file_output}.elf"
 		}
 	} { $_ -in "lib", "dll", "library" } {
 		$__file_output = "lib${env:PROJECT_SKU}_${__target_os}-${__target_arch}"
-		if ("${__target_os}" -eq "windows") {
+		if (("${__target_os}" -eq "js") -and ("${__target_arch}" -eq "wasm")) {
+			$__file_output = "${__file_output}.wasm"
+		} elseif ("${__target_os}" -eq "windows") {
 			$__file_output = "${__file_output}.dll"
 		} else {
 			$__file_output = "${__file_output}.a"

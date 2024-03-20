@@ -60,6 +60,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                 fi
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
                 I18N_Assemble "$_target" "$_directory"
+                FS_Copy_File "$_target" "$_directory"
                 if [ $? -ne 0 ]; then
                         I18N_Assemble_Failed
                         return 1
