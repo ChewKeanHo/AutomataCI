@@ -68,11 +68,11 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			return 1
 		}
 
-		$_source = "$(FS-Extension-Remove "${_target}" ".wasm").js"
-		$___process = FS-Is-File "${_source}"
+		$___source = "$(FS-Extension-Remove "${_target}" ".wasm").js"
+		$___process = FS-Is-File "${___source}"
 		if ($___process -eq 0) {
-			$null = I18N-Assemble "${_source}" "${_directory}"
-			$___process = FS-Copy-File "${_source}" "${_directory}"
+			$null = I18N-Assemble "${___source}" "${_directory}"
+			$___process = FS-Copy-File "${___source}" "${_directory}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
@@ -97,9 +97,9 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 
 
 	# copy user guide
-	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\USER-GUIDES-EN.pdf"
-	$null = I18N-Assemble "${_source}" "${_directory}"
-	$___process = FS-Copy-File "${_source}" "${_directory}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\USER-GUIDES-EN.pdf"
+	$null = I18N-Assemble "${___source}" "${_directory}"
+	$___process = FS-Copy-File "${___source}" "${_directory}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1
@@ -107,9 +107,9 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 
 
 	# copy license file
-	$_source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\LICENSE-EN.pdf"
-	$null = I18N-Assemble "${_source}" "${_directory}"
-	$___process = FS-Copy-File "${_source}" "${_directory}"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\LICENSE-EN.pdf"
+	$null = I18N-Assemble "${___source}" "${_directory}"
+	$___process = FS-Copy-File "${___source}" "${_directory}"
 	if ($___process -ne 0) {
 		$null = I18N-Assemble-Failed
 		return 1

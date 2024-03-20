@@ -67,11 +67,11 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         return 1
                 fi
 
-                _source="$(FS_Extension_Remove "$_target" ".wasm").js"
-                FS_Is_File "$__source"
+                ___source="$(FS_Extension_Remove "$_target" ".wasm").js"
+                FS_Is_File "$___source"
                 if [ $? -eq 0 ]; then
-                        I18N_Assemble "$_source" "$_directory"
-                        FS_Copy_File "$_source" "$_directory"
+                        I18N_Assemble "$___source" "$_directory"
+                        FS_Copy_File "$___source" "$_directory"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
@@ -96,9 +96,9 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
 
         # copy user guide
-        _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/USER-GUIDES-EN.pdf"
-        I18N_Assemble "$_source" "$_directory"
-        FS_Copy_File "$_source" "${_directory}/."
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/USER-GUIDES-EN.pdf"
+        I18N_Assemble "$___source" "$_directory"
+        FS_Copy_File "$___source" "${_directory}/."
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1
@@ -106,9 +106,9 @@ PACKAGE_Assemble_ARCHIVE_Content() {
 
 
         # copy license file
-        _source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/LICENSE-EN.pdf"
-        I18N_Assemble "$_source" "$_directory"
-        FS_Copy_File "$_source" "${_directory}/."
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/LICENSE-EN.pdf"
+        I18N_Assemble "$___source" "$_directory"
+        FS_Copy_File "$___source" "${_directory}/."
         if [ $? -ne 0 ]; then
                 I18N_Assemble_Failed
                 return 1

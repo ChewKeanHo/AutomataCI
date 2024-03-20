@@ -60,15 +60,8 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			return 1
 		}
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		$___dest = "${_directory}\lib${PROJECT_SKU}"
-		if ("${_target_os}" -eq "windows") {
-			$___dest = "${___dest}.dll"
-		} else {
-			$___dest = "${___dest}.a"
-		}
-
-		I18N_Assemble "${_target}" "${___dest}"
-		$___process = FS-Copy-File "${_target}" "${___dest}"
+		$null = I18N-Assemble "${_target}" "${_directory}"
+		$___process = FS-Copy-File "${_target}" "${_directory}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
@@ -102,15 +95,8 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 	} elseif ($(FS-Is-Target-A-MSI "${_target}") -eq 0) {
 		return 10 # not applicable
 	} else {
-		switch (${_target_os}) {
-		"windows" {
-			$_dest = "${_directory}\${env:PROJECT_SKU}.exe"
-		} Default {
-			$_dest = "${_directory}\${env:PROJECT_SKU}"
-		}}
-
-		$null = I18N-Assemble "${_target}" "${_dest}"
-		$___process = FS-Copy-File "${_target}" "${_dest}"
+		$null = I18N-Assemble "${_target}" "${_directory}"
+		$___process = FS-Copy-File "${_target}" "${_directory}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
