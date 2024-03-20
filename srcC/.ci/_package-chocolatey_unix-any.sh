@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +15,18 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
 
-PACKAGE::assemble_chocolatey_content() {
+PACKAGE_Assemble_CHOCOLATEY_Content() {
         _target="$1"
         _directory="$2"
         _target_name="$3"
@@ -35,90 +35,117 @@ PACKAGE::assemble_chocolatey_content() {
 
 
         # validate project
-        if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_Chocolatey "$_target") -eq 0 ]; then
-                : # accepted
-        elif [ $(FS_Is_Target_A_Homebrew "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        else
+        if [ $(FS_Is_Target_A_Chocolatey "$_target") -ne 0 ]; then
                 return 10 # not applicable
         fi
 
 
         # assemble the package
-        FS_Make_Directory "${_directory}/Data/${PROJECT_PATH_SOURCE}"
-        FS_Copy_All \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/" \
-                "${_directory}/Data/${PROJECT_PATH_SOURCE}"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/"
+        ___dest="${_directory}/Data/${PROJECT_PATH_SOURCE}"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_C}" "${_directory}/Data"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/"
+        ___dest="${_directory}/Data/${PROJECT_PATH_SOURCE}/.ci"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_All "${PROJECT_PATH_ROOT}/automataCI" "${_directory}/Data"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_C}/"
+        ___dest="${_directory}/Data/${PROJECT_C}"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_File "${PROJECT_PATH_ROOT}/CONFIG.toml" "${_directory}/Data"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_C}/.ci/"
+        ___dest="${_directory}/Data/${PROJECT_C}/.ci"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_File "${PROJECT_PATH_ROOT}/ci.cmd" "${_directory}/Data"
+        ___source="${PROJECT_PATH_ROOT}/automataCI/"
+        ___dest="${_directory}/Data/automataCI"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_File \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon-128x128.png" \
-                "${_directory}/icon.png"
+        ___source="${PROJECT_PATH_ROOT}/CONFIG.toml"
+        ___dest="${_directory}/Data"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Copy_File "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_File \
-                "${PROJECT_PATH_ROOT}/README.md" \
-                "${_directory}/README.md"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon-128x128.png"
+        ___dest="${_directory}/icon.png"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Copy_File "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
+                return 1
+        fi
+
+        ___source="${PROJECT_PATH_ROOT}/README.md"
+        ___dest="${_directory}/README.md"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Copy_File "$___source" "$___dest"
+        if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
 
         # REQUIRED: chocolatey required tools\ directory
+        ___dest="${_directory}/tools"
+        I18N_Create "$___dest"
         FS_Make_Directory "${_directory}/tools"
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
 
         # OPTIONAL: chocolatey tools\chocolateyBeforeModify.ps1
-        OS_Print_Status info "scripting tools/chocolateyBeforeModify.ps1...\n"
-        FS_Write_File "${_directory}/tools/chocolateyBeforeModify.ps1" "\
+        ___dest="${_directory}/tools/chocolateyBeforeModify.ps1"
+        I18N_Create "$___dest"
+        FS_Write_File "$___dest" "\
 # REQUIRED - BEGIN EXECUTION
 Write-Host \"Performing pre-configurations...\"
 "
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
 
         # REQUIRED: chocolatey tools\chocolateyinstall.ps1
-        OS_Print_Status info "scripting tools/chocolateyinstall.ps1...\n"
-        FS_Write_File "${_directory}/tools/chocolateyinstall.ps1" "\
+        ___dest="${_directory}/tools/chocolateyinstall.ps1"
+        I18N_Create "$___dest"
+        FS_Write_File "$___dest" "\
 # REQUIRED - PREPARING INSTALLATION
 \$tools_dir = \"\$(Split-Path -Parent -Path \$MyInvocation.MyCommand.Definition)\"
 \$data_dir = \"\$(Split-Path -Parent -Path \$tools_dir)\\\\Data\"
@@ -132,21 +159,21 @@ Write-Host \"Performing pre-configurations...\"
 # Materialize the binary
 Write-Host \"Building ${PROJECT_SKU} (${PROJECT_VERSION})...\"
 Set-Location \"\$data_dir\"
-.\\\\ci.cmd setup
+.\\\\automataCI\\\\ci.sh.ps1 setup
 if (\$LASTEXITCODE -ne 0) {
         Set-Location \"\$current_dir\"
         Set-PowerShellExitCode 1
         return
 }
 
-.\\\\ci.cmd prepare
+.\\\\automataCI\\\\ci.sh.ps1 prepare
 if (\$LASTEXITCODE -ne 0) {
         Set-Location \"\$current_dir\"
         Set-PowerShellExitCode 1
         return
 }
 
-.\\\\ci.cmd materialize
+.\\\\automataCI\\\\ci.sh.ps1 materialize
 if (\$LASTEXITCODE -ne 0) {
         Set-Location \"\$current_dir\"
         Set-PowerShellExitCode 1
@@ -163,30 +190,38 @@ if (-not (Test-Path \"\${data_dir}\\\\bin\\\\${PROJECT_SKU}.exe\")) {
 
 # Install
 Write-Host \"assembling workspace for installation...\"
-Move-Item -Path \"\${data_dir}\\\\bin\" -Destination \"\${root_dir}\"
-Move-Item -Path \"\${data_dir}\\\\lib\" -Destination \"\${root_dir}\"
+if (Test-Path -PathType Container -Path \"\${data_dir}\\\\bin\") {
+        Move-Item -Path \"\${data_dir}\\\\bin\" -Destination \"\${root_dir}\"
+}
+if (Test-Path -PathType Container -Path \"\${data_dir}\\\\lib\") {
+        Move-Item -Path \"\${data_dir}\\\\lib\" -Destination \"\${root_dir}\"
+}
 Set-Location \"\$current_dir\"
 Remove-Item \$data_dir -Force -Recurse -ErrorAction SilentlyContinue
 "
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
 
         # REQUIRED: chocolatey tools\chocolateyuninstall.ps1
-        OS_Print_Status info "scripting tools/chocolateyuninstall.ps1...\n"
-        FS_Write_File "${_directory}/tools/chocolateyuninstall.ps1" "\
+        ___dest="${_directory}/tools/chocolateyuninstall.ps1"
+        I18N_Create "$___dest"
+        FS_Write_File "$___dest" "\
 # REQUIRED - PREPARING UNINSTALLATION
 Write-Host \"Uninstalling ${PROJECT_SKU} (${PROJECT_VERSION})...\"
 "
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
 
         # REQUIRED: chocolatey xml.nuspec file
-        OS_Print_Status info "scripting ${PROJECT_SKU}.nuspec...\n"
-        FS_Write_File "${_directory}/${PROJECT_SKU}.nuspec" "\
+        ___dest="${_directory}/${PROJECT_SKU}.nuspec"
+        I18N_Create "$___dest"
+        FS_Write_File "$___dest" "\
 <?xml version=\"1.0\" encoding=\"utf-8\"?>
 <package xmlns=\"http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd\">
         <metadata>
@@ -209,12 +244,13 @@ Write-Host \"Uninstalling ${PROJECT_SKU} (${PROJECT_VERSION})...\"
         <files>
                 <file src=\"README.md\" target=\"README.md\" />
                 <file src=\"icon.png\" target=\"icon.png\" />
-                <file src=\"Data\**\" target=\"Data\" />
-                <file src=\"tools\**\" target=\"tools\" />
+                <file src=\"Data\\\\**\" target=\"Data\" />
+                <file src=\"tools\\\\**\" target=\"tools\" />
         </files>
 </package>
 "
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 

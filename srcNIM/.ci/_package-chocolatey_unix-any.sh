@@ -22,7 +22,6 @@ fi
 
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
-. "${LIBS_AUTOMATACI}/services/compilers/nim.sh"
 
 
 
@@ -239,6 +238,7 @@ Write-Host \"Uninstalling ${PROJECT_SKU} (${PROJECT_VERSION})...\"
         </metadata>
         <dependencies>
                 <dependency id=\"chocolatey\" version=\"0.9.8.21\" />
+                <dependency id=\"nim\" version=\"2.0.0\" />
                 <dependency id=\"gcc-arm-embedded\" version=\"10.3.1\" />
                 <dependency id=\"mingw\" version=\"13.2.0\" />
         </dependencies>

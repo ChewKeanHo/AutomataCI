@@ -21,7 +21,6 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
-. "${env:LIBS_AUTOMATACI}\services\compilers\nim.ps1"
 
 
 
@@ -239,6 +238,7 @@ Write-Host "Uninstalling ${env:PROJECT_SKU} (${env:PROJECT_VERSION})..."
 	</metadata>
 	<dependencies>
 		<dependency id="chocolatey" version="0.9.8.21" />
+		<dependency id="nim" version="2.0.0" />
 		<dependency id="gcc-arm-embedded" version="10.3.1" />
 		<dependency id="mingw" version="13.2.0" />
 	</dependencies>
