@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,13 @@
 
 
 # initialize
-if [ "$PROJECT_PATH_ROOT" == "" ]; then
-        >&2 printf "[ ERROR ] - Please run from ci.cmd instead!\n"
+if [ "$PROJECT_PATH_ROOT" = "" ]; then
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/os.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/fs.sh"
-. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
 
@@ -36,57 +35,77 @@ PACKAGE_Assemble_HOMEBREW_Content() {
 
 
         # validate project
-        if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_Chocolatey "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_Homebrew "$_target") -eq 0 ]; then
-                : # accepted
-        else
+        if [ $(FS_Is_Target_A_Homebrew "$_target") -ne 0 ]; then
                 return 10 # not applicable
         fi
 
 
         # assemble the package
-        FS_Make_Directory "${_directory}/Data/${PROJECT_PATH_SOURCE}"
-        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/" \
-                        "${_directory}/Data/${PROJECT_PATH_SOURCE}"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/"
+        ___dest="${_directory}/${PROJECT_PATH_SOURCE}"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_All "${PROJECT_PATH_ROOT}/${PROJECT_C}" "${_directory}/Data"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/.ci/"
+        ___dest="${_directory}/${PROJECT_PATH_SOURCE}/.ci"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_All "${PROJECT_PATH_ROOT}/automataCI" "${_directory}/Data"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_C}/"
+        ___dest="${_directory}/${PROJECT_C}"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_File "${PROJECT_PATH_ROOT}/CONFIG.toml" "${_directory}/Data"
+        ___source="${PROJECT_PATH_ROOT}/${PROJECT_C}/.ci/"
+        ___dest="${_directory}/${PROJECT_C}/.ci"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        FS_Copy_File "${PROJECT_PATH_ROOT}/ci.cmd" "${_directory}/Data"
+        ___source="${PROJECT_PATH_ROOT}/automataCI/"
+        ___dest="$_directory"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_All "$___source" "$___dest"
         if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
+                return 1
+        fi
+
+        ___source="${PROJECT_PATH_ROOT}/CONFIG.toml"
+        ___dest="$_directory"
+        I18N_Assemble "$___source" "$___dest"
+        FS_Make_Directory "$___dest"
+        FS_Copy_File "$___source" "$___dest"
+        if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
                 return 1
         fi
 
 
         # script formula.rb
-        OS_Print_Status info "scripting formula.rb...\n"
-        FS_Write_File "${_directory}/formula.rb" "\
+        ___dest="${_directory}/formula.rb"
+        I18N_Create "$___dest"
+        FS_Write_File "$___dest" "\
 class ${PROJECT_SKU_TITLECASE} < Formula
   desc \"${PROJECT_PITCH}\"
   homepage \"${PROJECT_CONTACT_WEBSITE}\"
@@ -103,23 +122,23 @@ class ${PROJECT_SKU_TITLECASE} < Formula
   end
 
   def install
-    system \"./ci.cmd setup\"
-    system \"./ci.cmd prepare\"
-    system \"./ci.cmd materialize\"
+    system \"./automataCI/ci.sh.ps1 setup\"
+    system \"./automataCI/ci.sh.ps1 prepare\"
+    system \"./automataCI/ci.sh.ps1 materialize\"
     chmod 0755, \"bin/${PROJECT_SKU}\"
     bin.install \"bin/${PROJECT_SKU}\"
-    libexec.install Dir[\"lib/*\"]
   end
 
   test do
-    system \"./ci.cmd setup\"
-    system \"./ci.cmd prepare\"
-    system \"./ci.cmd materialize\"
+    system \"./automataCI/ci.sh.ps1 setup\"
+    system \"./automataCI/ci.sh.ps1 prepare\"
+    system \"./automataCI/ci.sh.ps1 materialize\"
     assert_predicate ./bin/${PROJECT_SKU}, :exist?
   end
 end
 "
         if [ $? -ne 0 ]; then
+                I18N_Create_Failed
                 return 1
         fi
 
