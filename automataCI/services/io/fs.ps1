@@ -382,7 +382,10 @@ function FS-Is-Target-A-Library {
 
 
 	# execute
-	if (($("${___subject}" -replace '^.*-lib') -ne "${___subject}") -or
+	if (($("${___subject}" -replace '^lib.*') -ne "${___subject}") -or
+		($("${___subject}" -replace '.*\.a$') -ne "${___subject}") -or
+		($("${___subject}" -replace '.*\.dll$') -ne "${___subject}") -or
+		($("${___subject}" -replace '^.*-lib') -ne "${___subject}") -or
 		($("${___subject}" -replace '^.*-libs') -ne "${___subject}") -or
 		($("${___subject}" -replace '^.*-library') -ne "${___subject}") -or
 		($("${___subject}" -replace '^.*-libraries') -ne "${___subject}")) {
