@@ -57,8 +57,8 @@ __main="${PROJECT_PATH_ROOT}/${PROJECT_NIM}/${PROJECT_SKU}.nim"
 __build_targets="\
 darwin|amd64|clang|${__main}
 darwin|arm64|clang|${__main}
-js|wasm||${__main}
-js|js|emcc|${__main}
+js|wasm|emcc|${__main}
+js|js|native|${__main}
 linux|amd64|x86_64-linux-gnu-gcc|${__main}
 linux|arm64|aarch64-linux-gnu-gcc|${__main}
 linux|armle|arm-linux-gnueabi-gcc|${__main}

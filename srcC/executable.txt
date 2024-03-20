@@ -7,6 +7,16 @@
 #           any-any main.c
 #           linux-amd64 fx1_linux-amd64.c
 #           linux-amd64 fx2_linux-amd64.o
+#           linux-arm64 fx1_linux-amd64.c
+#           linux-arm64 fx2_linux-amd64.o
 #
+# (2) The leading platform tag is to tell AutomataCI when a source is compatible
+#     with a target build during cross-compilation. Use the value 'any' to
+#     signal an omninous source for a particular OS or ARCH. 'any-any' for all
+#     types of OS and ARCH.
+#
+# (3) The list also accepts pre-built library object files (.o extension).
+#     AutomataCI will register it for linking only and copy it into the
+#     workspace.
 any-any libs/sample/greeter_any-any.c
 any-any main.c
