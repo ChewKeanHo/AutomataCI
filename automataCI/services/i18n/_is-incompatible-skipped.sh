@@ -20,7 +20,7 @@ I18N_Is_Incompatible_Skipped() {
         case "$AUTOMATACI_LANG" in
         *)
                 # fallback to default english
-                ___subject="$(I18N_Status_Param_Process "$1")"
+                ___subject="$(I18N_Param_Process "$1")"
                 I18N_Status_Print info "${___subject} is incompatible. Skipping...\n"
                 ;;
         esac
