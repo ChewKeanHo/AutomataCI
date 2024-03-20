@@ -329,7 +329,7 @@ PROJECT_PATH_NIM_ENGINE = "nim-engine"
 #
 # To enable it: simply supply the path (e.g. default is 'srcPYTHON').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_PYTHON = ''
+PROJECT_PYTHON = 'srcPYTHON'
 
 
 # PROJECT_PATH_PYTHON_ENGINE
@@ -370,7 +370,7 @@ PROJECT_PYPI_README_MIME = "text/markdown"
 #
 # To enable it: simply supply the path (e.g. default is 'srcRUST').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_RUST = 'srcRUST'
+PROJECT_RUST = ''
 
 
 # PROJECT_RUST_EDITION
