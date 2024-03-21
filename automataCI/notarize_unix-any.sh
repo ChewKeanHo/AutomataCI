@@ -45,6 +45,12 @@ fi
 
 
 # begin notarize
+FS_Is_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
+if [ $? -ne 0 ]; then
+        # nothing build - bailing
+        return 0
+fi
+
 for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         FS_Is_File "$i"
         if [ $? -ne 0 ]; then

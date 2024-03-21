@@ -44,6 +44,12 @@ if ($___process -eq 0) {
 
 
 # begin notarize
+$___process = FS-Is-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
+if ($___process -ne 0) {
+	# nothing build - bailing
+	return 0
+}
+
 foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}")) {
 	$___process = FS-Is-File "$i"
 	if ($___process -ne 0) {

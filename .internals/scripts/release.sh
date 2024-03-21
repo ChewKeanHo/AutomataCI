@@ -177,8 +177,8 @@ FS_Remove_Silently "srcANGULAR/.angular"
 
 
 # execute command
-___directory="pkgAUTOMATACI"
-FS_Remake_Directory "$___directory"
+___directory="pkg"
+FS_Make_Directory "$___directory"
 sync
 
 old_IFS="$IFS"
@@ -190,13 +190,16 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
 
         # build the file
         if [ "$__line" = "automataCI" ]; then
-                tar czvf "${___directory}/AutomataCI-${PROJECT_VERSION}-core.tar.gz" \
+                ___dest="${___directory}/AutomataCI-${PROJECT_VERSION}-core.tar.gz"
+                FS_Remove_Silently "$___dest"
+                tar czvf "$___dest" \
                         -C "$PROJECT_PATH_ROOT" "$__line" \
                         -C "$PROJECT_PATH_ROOT" "CONFIG.toml" \
                         -C "$PROJECT_PATH_ROOT" ".gitignore"
         else
-                tar czvf "${___directory}/AutomataCI-${PROJECT_VERSION}-${__line}.tar.gz" \
-                        -C "$PROJECT_PATH_ROOT" "$__line"
+                ___dest="${___directory}/AutomataCI-${PROJECT_VERSION}-${__line}.tar.gz"
+                FS_Remove_Silently "$___dest"
+                tar czvf "$___dest" -C "$PROJECT_PATH_ROOT" "$__line"
         fi
 done <<EOF
 automataCI
@@ -222,9 +225,9 @@ find ".internals/docs/" -name '*.pdf' -print0 \
 
         ___file="${___file_src##*/}"
         ___file="$(FS_Extension_Remove "$___file" "*")"
-        1>&2 printf -- "%b --> %b \n" "$___file_src" "$___file"
-        cp "$___file_src" \
-                "${___directory}/AutomataCI-${PROJECT_VERSION}-User-Guide_${___file##*_}.pdf"
+        ___dest="${___directory}/AutomataCI-${PROJECT_VERSION}-User-Guide_${___file##*_}.pdf"
+        FS_Remove_Silently "$___dest"
+        FS_Copy_File "$___file_src" "$___dest"
 done
 IFS="$__old_IFS" && unset __old_IFS
 

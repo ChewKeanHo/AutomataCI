@@ -144,8 +144,8 @@ needs. Please take your time and download a copy:
 ## To Contribute
 
 AutomataCI cannot be made successfully without contributions from (Holloway)
-Chew, Kean Ho and supports from external folks. If you had been using AutomataCI
-and wish to contribute back, there are 2 ways to do so:
+Chew, Kean Ho, his teams, and supports from external folks. If you had been
+using AutomataCI and wish to contribute back, there are 2 ways to do so:
 
 
 

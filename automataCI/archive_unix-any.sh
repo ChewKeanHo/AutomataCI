@@ -65,10 +65,6 @@ tar czvf "$___artifact_build" \
         "$PROJECT_PATH_LOG" \
         "$PROJECT_PATH_PKG" \
         "$PROJECT_PATH_DOCS"
-if [ $? -ne 0 ]; then
-        I18N_Archive_Failed
-        return 1
-fi
 
 
 
@@ -82,10 +78,6 @@ tar czvf "$___artifact_workspace" \
         "$PROJECT_PATH_LIB" \
         "$PROJECT_PATH_TEMP" \
         "$PROJECT_PATH_RELEASE"
-if [ $? -ne 0 ]; then
-        I18N_Archive_Failed
-        return 1
-fi
 
 
 

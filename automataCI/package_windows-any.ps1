@@ -40,7 +40,7 @@ if ($___process -ne 0) {
 }
 
 
-$FILE_CHANGELOG_MD = "${env:PROJECT_SKU}-CHANGELOG_${env:PROJECT_VERSION}.md"
+$FILE_CHANGELOG_MD = "${env:PROJECT_SKU_TITLECASE}-CHANGELOG_${env:PROJECT_VERSION}.md"
 $FILE_CHANGELOG_MD = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${FILE_CHANGELOG_MD}"
 $FILE_CHANGELOG_DEB = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb\changelog.gz"
 $___process = Package-Run-CHANGELOG "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
@@ -49,7 +49,7 @@ if ($___process -ne 0) {
 }
 
 
-$FILE_CITATION_CFF = "${env:PROJECT_SKU}-CITATION_${env:PROJECT_VERSION}.cff"
+$FILE_CITATION_CFF = "${env:PROJECT_SKU_TITLECASE}-CITATION_${env:PROJECT_VERSION}.cff"
 $FILE_CITATION_CFF = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${FILE_CITATION_CFF}"
 $___process = Package-Run-CITATION "$FILE_CITATION_CFF"
 if ($___process -ne 0) {
@@ -154,8 +154,9 @@ function SUBROUTINE-Package {
 
 
 # begin registering packagers
+if ($(FS-Is-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}") -eq 0) {
 foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}" `
-			| Select-Object -ExpandProperty FullName)) {
+	| Select-Object -ExpandProperty FullName)) {
 	$___process = FS-Is-File "$file"
 	if ($___process -ne 0) {
 		continue
@@ -278,6 +279,7 @@ ${__common}|${__log}|PACKAGE-Run-RPM
 	if ($___process -ne 0) {
 		return 1
 	}
+}
 }
 
 

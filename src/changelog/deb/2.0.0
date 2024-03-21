@@ -1,0 +1,248 @@
+automataci (2.0.0) stable; urgency=low
+
+  * root: releasing version v2.0.0
+  * automataCI: removed obseleted OS_Print_Status function
+  * root: developed internal release execution script
+  * automataCI: removed unused and obselete operator API
+  * root: added ARCHIVE CI job
+  * srcPYTHON: backported new changes from srcC/ directory
+  * srcRUST: backported new changes from srcC/ directory
+  * srcGO: backported new changes from srcGO/ directory
+  * srcNIM: backported new changes from srcC/ directory
+  * srcC: finalized all CI job recipes
+  * automataCI: finalized C compiler
+  * srcC: fixed C compiler identification and sourcing bug
+  * automataCI: fixed i18n missing param process function bug
+  * srcC: refactored _package-archive CI job for i18n and latest specs
+  * srcC: refactored _package-chocolatey CI job for i18n and latest specs
+  * srcC: refactored _package-docker CI job for i18n and latest specs
+  * srcC: refactored _package-homebrew CI job for i18n and latest specs
+  * srcC: refactored build CI job for i18n and latest specs
+  * srcC: refactored materialize CI job for i18n and latest specs
+  * srcC: refactored package CI job for i18n and latest specs
+  * root: switched to srcC for applying i18n & latest specs
+  * .github: updated upload artifacts action to version 4
+  * srcANGULAR: fixed node security vulnerability
+  * srcANGULAR: finalized all CI job recipes
+  * automataCI: finalized node compiler
+  * automataCI: finalized angular compiler
+  * srcANGULAR: refactored build CI job for i18n and latest specs
+  * srcANGULAR: refactored materialize CI job for i18n and latest specs
+  * srcANGULAR: refactored prepare CI job for i18n and latest specs
+  * root: switched to srcANGULAR for applying i18n and latest specs updates
+  * srcANGULAR: updated @angular/cli to version 17
+  * srcRUST: backported enhanced changes from srcNIM
+  * automataCI: fixed a typo causing the docker packager failed
+  * .github: removed checkout dependency from GitHub Actions
+  * srcPYTHON: backported enhanced changes from srcNIM
+  * srcGO: backported enhanced changes for all CI job recipes
+  * srcNIM: finalized all CI job recipes
+  * automataCI: finalized nim compiler library
+  * srcNIM: refactored _package-archive CI job for i18n and latest specs
+  * srcNIM: refactored _package-chocolatey CI job for i18n and latest specs
+  * srcNIM: refactored _package-docker CI job for i18n and latest specs
+  * srcNIM: refactored _package-homebrew CI job for i18n and latest specs
+  * srcNIM: refactored build CI job for i18n and latest specs
+  * srcNIM: refactored materialize CI job for i18n and latest specs
+  * srcNIM: refactored test CI job for i18n and latest specs
+  * srcNIM: refactored stop CI job for i18n and latest specs
+  * srcNIM: refactored start CI job for i18n and latest specs
+  * automataCI: simplified rustup pathing
+  * srcNIM: refactored prepare CI job for i18n and latest specs
+  * srcNIM: refactored setup CI job for i18n and latest specs
+  * root: transition to Nim Programming language for refactoring
+  * automataCI: added system language detection feature
+  * srcGO: finalized all CI recipes
+  * automataCI: finalized go compiler library
+  * README.md: corrected some typo
+  * src: fixed _package-deb source list assembly bug
+  * root: updated marketing materials
+  * src: fixed _package-deb copyright assembly bug
+  * src: fixed _package-deb directory creation bug
+  * root: removed PROJECT_PATH_RESOURCES pathing
+  * srcGO: refactored _package-archive CI job for i18n and latest specs
+  * srcGO: refactored _package-chocolatey CI job for i18n and latest specs
+  * srcGO: refactored _package-docker CI job for the i18n and latest specs
+  * srcGO: refactored _package-homebrew CI job for the i18n and latest specs
+  * srcGO: refactored build CI job for the i18n and latest specs
+  * srcGO: refactored materialize CI job for the i18n and latest specs
+  * srcGO: refactored package CI job for the i18n and latest specs
+  * srcGO: refactored prepare CI job for i18n and latest specs
+  * srcGO: refactored start CI job for the i18n and latest specs
+  * srcGO: refactored stop CI job for the i18n and latest specs
+  * srcGO: refactored setup CI job for the i18n and latest specs
+  * srcGO: refactored test CI job for the i18n and latest specs
+  * automataCI: refactored Go compiler library
+  * srcPYTHON: finalized all CI jobs
+  * automataCI: finalized python functionalities
+  * automataCI: fixed _release-deb incorrect error message
+  * srcPYTHON: refactored test CI job for the i18n and latest specs
+  * srcPYTHON: refactored stop CI job for the i18n and latest specs
+  * srcPYTHON: refactored start CI job for the i18n and latest specs
+  * srcPYTHON: refactored setup CI job for the i18n and latest specs
+  * srcPYTHON: refactored prepare CI job for i18n and latest specs
+  * srcPYTHON: refactored package CI job for i18n and latest specs
+  * root: fixed python compiler bugs to ensure automation runs again
+  * srcPYTHON: refactored _package-pypi CI job for i18n and specs
+  * srcPYTHON: refactored _package-homebrew CI job for i18n and specs
+  * srcPYTHON: refactored _package-docker CI job for i18n and specs
+  * srcPYTHON: refactored _package-chocolatey CI job for i18n and specs
+  * srcPYTHON: refactored _package-archive CI job for i18n and latest specs
+  * srcPYTHON: refactored build CI job for i18n and latest specs
+  * srcPYTHON: refactored clean CI job for i18n and latest specs
+  * srcPYTHON: refactored materialize CI job for i18n and latest specs
+  * automataCI: finalized rust compiler service
+  * .github: removed language specific elements from GitHub Actions
+  * automataCI: finalized env CI job
+  * automataCI: shifted angular installer to its binary
+  * automataCI: shifted node installer to its own library
+  * automataCI: shifted nim installer to its library
+  * automataCI: shifted C installer to its library
+  * automataCI: shifted go installer to its library
+  * automataCI: shifted osslsigncode installer to its library
+  * automataCI: finalized notarize CI job
+  * automataCI: finalized release CI job
+  * automataCI: finalized purge CI job
+  * automataCI: finalized package CI job
+  * src: fixed _package-ipk content assembly bug
+  * automataCI: finalized _release-staticrepo CI job
+  * automataCI: finalized _release-rpm CI job
+  * automataCI: finalized _release-pypi CI job
+  * automataCI: finalized _release-homebrew CI job
+  * automataCI: finalized _release-docsrepo CI job
+  * automataCI: finalized _release-docker CI job
+  * automataCI: finalized _release-deb CI job
+  * automataCI: finalized _release-citation CI job
+  * automataCI: finalized _release-chocolatey CI job
+  * automataCI: finalized _release-checksum CI job
+  * automataCI: finalize _release-changelog CI job
+  * automataCI: finalized _release-cargo CI job
+  * automataCI: finalized _package-sourcing scripts
+  * automataCI: finalized _package-rpm CI job
+  * automataCI: finalized _package-pypi scripts
+  * automataCI: finalized _package-msi scripts
+  * automataCI: finalized _package-ipk CI job
+  * automataCI: finalized _package-homebrew CI job
+  * automataCI: finalized _package-flatpak CI job
+  * automataCI: finalized _package-docker CI job
+  * automataCI: finalized _package-deb scripts
+  * automataCI: finalized _package-citation CI job
+  * automataCI: finalized _package-chocolatey scripts
+  * automataCI: finalize _package-changelog CI job
+  * automataCI: finalized _package-cargo scripts
+  * automataCI: finalized _package-archive CI job
+  * automataCI: finalized ci.sh and ci.ps1 scripts
+  * srcRUST: finalized all CI recipes
+  * srcRUST: refactored _package-archive CI job for i18n and latest specs
+  * srcRUST: refactored _package-cargo CI job for i18n and latest specs
+  * srcRUST: refactored _package-chocolatey job for i18n and latest specs
+  * srcRUST: refactored _package-docker job for i18n and latest specs
+  * srcRUST: refactored _package-homebrew job for i18n and latest specs
+  * srcRUST: refactored build CI job for i18n and latest specs
+  * srcRUST: refactored materialize CI job for i18n and latest specs
+  * srcRUST: refactored package CI job for i18n and latest specs
+  * automataCI: finalized ci.sh.ps1 script
+  * srcRUST: refactored prepare CI job for i18n and latest specs
+  * srcRUST: refactored setup CI job for i18n and latest specs
+  * srcRUST: refactored start CI job for i18n and latest specs
+  * automataCI: fixed common CI job inconsistency bug
+  * srcRUST: refactored stop CI job for i18n and latest specs
+  * srcRUST: refactored test CI job for i18n and latest specs
+  * src: finalized all ci recipes
+  * src: refactored _package-archive CI job for i18n and latest specs
+  * src: refactored _package-cargo CI job for i18n and latest specs
+  * src: refactored _package-chocolatey CI job for i18n and latest specs
+  * src: refactored _package-deb CI job for i18n and latest specs
+  * src: refactored _package-docker CI job for i18n and latest specs
+  * src: refactored _package-flatpak CI job for i18n and latest specs
+  * src: refactored _package-homebrew CI job for i18n and latest specs
+  * src: refactored _package-ipk CI job for i18n and latest specs compliances
+  * src: refactored _package-msi CI job for i18n and latest specs compliances
+  * src: refactored _package-pypi CI job for i18n and latest specs compliances
+  * src: refactored _package-rpm job for i18n and latest specs compliances
+  * src: refactored build CI job for i18n and latest specs compliances
+  * src: refactored deploy CI job for i18n and latest specs compliances
+  * src: refactored materialize CI job for i18n and latest specs compliances
+  * src: refactored notarize CI job for i18n and latest specs compliances
+  * src: refactored package CI job for i18n and latest specs compliances
+  * src: refactored prepare CI job for i18n and latest specs compliances
+  * src: refactored release CI job for i18n and latest specs compliances
+  * src: refactored setup CI job for i18n and latest specs compliances
+  * src: refactored test CI job for i18n and latest specs compliances
+  * src: refactored stop CI job for i18n and latest specs compliances
+  * src: refactored start CI job for i18n and latest specs compliances
+  * automataCI: updated OS IO library matching the latest specs
+  * srcRUST: disabled js-wasm build
+  * automataCI: ensures common CI job are identitical
+  * automataCI: updated FS IO library matching latest specs
+  * automataCI: refactored STRINGS library to match latest specs
+  * automataCI: refactored i18n component for function naming alignment
+  * automataCI: updated MSI language code for Windows MSI
+  * automataCI: added i18n feature to release rpm function
+  * automataCI: backported changes to main packaging function
+  * automataCI: backported changes to rpm packaging function
+  * automataCI: added i18n feature to release pypi function
+  * automataCI: backported changes to msi packaging function
+  * automataCI: backported changes to flatpak packaging function
+  * automataCI: finalized dotnet publishing function
+  * automataCI: finalized microsoft publishing function
+  * automataCI: backported changes to package ipk function
+  * automataCI: backported changes to notarize CI job
+  * automataCI: added i18n feature to release homebrew function
+  * automataCI: finalized manual library function
+  * automataCI: finalized copyright library function
+  * automataCI: backported changes to io/time library
+  * automataCI: finalized io/sync library
+  * automataCI: finalized net/http library
+  * automataCI: added i18n feature to release docs function
+  * automataCI: finalized disk management library
+  * automataCI: added i18n feature to release docker function
+  * automataCI: backported reprepro changes
+  * automataCI: added i18n feature to release chocolatey function
+  * automataCI: fixed MD5_Is_Available bug
+  * automataCI: added i18n feature to release checksum function
+  * automataCI: added i18n feature to release changelog function
+  * automataCI: added i18n feature to release cargo function
+  * automataCI: added i18n feature to release deb function
+  * automataCI: added i18n feature to release citation function
+  * automataCI: backported finalization changes for chocolatey packager
+  * automataCI: added i18n for archive packaging function
+  * automataCI: finalized shasum library
+  * automataCI: finalized md5 library
+  * automataCI: finalized ar library
+  * automataCI: finalized zip library
+  * automataCI: finalized tar.gz and tar.xz libraries
+  * automataCI: finalizeed services/compress/gz library
+  * automataCI: added i18n feature to changelog packaging function
+  * automataCI: added i18n feature to cargo packaging function
+  * automataCI: added i18n feature to chocolatey packaging function
+  * automataCI: added i18n feature to deb packaging function
+  * automataCI: added i18n feature to docker packaging function
+  * automataCI: added i18n feature to flatpak packaging function
+  * automataCI: added i18n feature to homebrew packaging function
+  * automataCI: added i18n feature to ipk packaging function
+  * automataCI: applied i18n feature to pypi packaging function
+  * automataCI: added i18n feature to rpm packager function
+  * automataCI: added i18n for package sourcing function libraries
+  * automataCI: added i18n feature for notarize CI job function
+  * .internals: shifted business reason to first chapter in documentation
+  * automataCI: added i18n feature for common CI job function
+  * root: removed unwanted executable permissions in automataCI/
+  * root: internationalized handbook
+  * root: added msi packager function
+  * automataCI: upgraded status printing styling
+  * root: added msi packagers environment CI job function
+  * root: enhanced package CI job with parallel executions
+  * root: added CITATION.cff generative function
+  * root: tided up homebrew and chocolatey packagers' implementations
+  * src: tidied up DESCRIPTION.txt template to ABSTRACTS.txt
+  * root: added deploy CI job recipe
+  * root: added support for Rust programming language
+  * root: added Angular frontend framework technology
+  * root: added notarize CI job
+  * root: applied regressive changes to Python programming language
+  * root: applied regressive changes back to Go programming language
+  * root: applied regressive changes to C programming language
+  * root: added Nim Programming Language support
+
+-- Your Legal Full Name Here <contact@youremail.example>  Thu, 21 Mar 2024 14:50:53 +0800

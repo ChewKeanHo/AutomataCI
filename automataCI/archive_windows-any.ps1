@@ -63,10 +63,7 @@ foreach ($__line in @(
 	"${env:PROJECT_PATH_PKG}"
 	"${env:PROJECT_PATH_DOCS}"
 )) {
-	$___process = ZIP-Create "${___target}" "${__line}"
-	if ($___process -ne 0) {
-		$null = I18N-Archive-Failed
-	}
+	$null = ZIP-Create "${___target}" "${__line}"
 }
 
 
@@ -82,11 +79,9 @@ foreach ($__line in @(
 	"${env:PROJECT_PATH_TEMP}"
 	"${env:PROJECT_PATH_RELEASE}"
 )) {
-	$___process = ZIP-Create "${___target}" "${__line}"
-	if ($___process -ne 0) {
-		$null = I18N-Archive-Failed
-	}
+	$null = ZIP-Create "${___target}" "${__line}"
 }
+
 
 
 
