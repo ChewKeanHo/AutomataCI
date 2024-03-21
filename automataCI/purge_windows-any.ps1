@@ -52,6 +52,13 @@ foreach ($__target in @(
 
 
 
+# clean archive artifacts
+$null = Set-Location -Path "${PROJECT_PATH_ROOT}"
+$null = Remove-Item -Path "artifact-*.*" -ErrorAction SilentlyContinue
+
+
+
+
 # report status
 $null = I18N-Run-Successful
 return 0

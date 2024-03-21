@@ -55,6 +55,13 @@ done
 
 
 
+# clean archive artifacts
+cd "$PROJECT_PATH_ROOT"
+rm artifact-*.* &> /dev/null
+
+
+
+
 # report status
 I18N_Run_Successful
 return 0

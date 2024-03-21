@@ -22,6 +22,7 @@ output/
 #####################
 /SECRETS.toml
 /bin
+/lib
 /tools
 /tmp
 /log
@@ -29,6 +30,7 @@ output/
 /pkg
 /releases
 /resources/changelog/*/.*
+/artifact*
 
 #####################
 # Angular

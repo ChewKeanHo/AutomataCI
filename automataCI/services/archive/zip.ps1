@@ -23,7 +23,9 @@ function ZIP-Create {
 
 	# execute
 	try {
-		$null = Compress-Archive -Path $___source -DestinationPath $___destination
+		$null = Compress-Archive -Update `
+			-DestinationPath $___destination `
+			-Path $___source
 		$___process = FS-Is-File "${___destination}"
 		if ($___process -eq 0) {
 			return 0

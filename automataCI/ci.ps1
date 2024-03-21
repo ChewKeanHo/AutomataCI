@@ -198,6 +198,9 @@ switch ($args[0]) {
 } { $_ -in 'deploy', 'Deploy', 'DEPLOY' } {
 	$env:PROJECT_CI_JOB = "deploy"
 	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"
+} { $_ -in 'archive', 'Archive', 'ARCHIVE' } {
+	$env:PROJECT_CI_JOB = "archive"
+	$__exit_code = . "${env:LIBS_AUTOMATACI}\archive_windows-any.ps1"
 } { $_ -in 'clean', 'Clean', 'CLEAN' } {
 	$env:PROJECT_CI_JOB = "clean"
 	$__exit_code = . "${env:LIBS_AUTOMATACI}\common_windows-any.ps1"

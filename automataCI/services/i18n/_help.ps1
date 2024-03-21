@@ -54,6 +54,7 @@ Please try any of the following:
         To release the repo product 🠚          $ ${___executable} release
         To stop a development 🠚                $ ${___executable} stop
         To deploy the new release 🠚            $ ${___executable} deploy
+        To archive the workspace 🠚             $ ${___executable} archive
         To clean the workspace 🠚               $ ${___executable} clean
         To purge everything 🠚                  $ ${___executable} purge
 

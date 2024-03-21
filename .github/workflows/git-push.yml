@@ -21,7 +21,7 @@ jobs:
         TERM: xterm-256color
         ROBOT_NAME: "github.actions.runner@github.com"
         ROBOT_EMAIL: "Github Actions Autonomous Runner System"
-        REPO_NAME: ${{ github.event.repository.name }}
+        REPO_NAME: ${{ github.repository }}
         REPO_URL: "${{ github.server_url  }}/${{ github.repository }}"
         REPO_COMMIT: "${{ github.sha }}"
         CONTAINER_USERNAME: ${{ secrets.CONTAINER_USERNAME }}
@@ -30,6 +30,7 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
         PROJECT_SIMULATE_RELEASE_REPO: true
         PROJECT_ROBOT_RUN: true
+        PROJECT_ROBOT_GITHUB_TOKEN: "${{ github.token }}"
     steps:
       - name: Git - INIT
         id: git_init
@@ -96,23 +97,27 @@ jobs:
         id: automataci_ci_deploy
         run: |
           ./automataCI/ci.sh.ps1 deploy
+      - name: AutomataCI - ARCHIVE
+        id: automataci_ci_archive
+        run: |
+          ./automataCI/ci.sh.ps1 archive
       - name: Archive Payloads Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build_${{ matrix.os }}
+          name: build-${{ matrix.os }}
+          if-no-files-found: ignore
+          compression-level: 0
           path: |
-            build/
-            log/
-            pkg/
-            public/
-      - name: Archive Workspace Artifacts
+            artifact-build_*.tar.gz
+            artifact-build_*.zip
+      - name: Archive Payloads Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: workspace_${{ matrix.os }}
+          name: workspace-${{ matrix.os }}
+          if-no-files-found: ignore
+          compression-level: 0
           path: |
-            bin/
-            lib/
-            tmp/
-            releases/
+            artifact-workspace_*.tar.gz
+            artifact-workspace_*.zip

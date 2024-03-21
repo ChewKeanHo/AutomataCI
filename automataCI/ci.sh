@@ -239,6 +239,11 @@ deploy|Deploy|DEPLOY)
         . "${LIBS_AUTOMATACI}/common_unix-any.sh"
         __exit_code=$?
         ;;
+archive|Archive|ARCHIVE)
+        export PROJECT_CI_JOB="archive"
+        . "${LIBS_AUTOMATACI}/archive_unix-any.sh"
+        __exit_code=$?
+        ;;
 clean|Clean|CLEAN)
         export PROJECT_CI_JOB="clean"
         . "${LIBS_AUTOMATACI}/common_unix-any.sh"
