@@ -189,20 +189,20 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
 
 
         # build the file
-        if [ "$__line" = "automataCI" ]; then
-                ___dest="${___directory}/AutomataCI-${PROJECT_VERSION}-core.tar.gz"
+        if [ "$__line" = "${PROJECT_PATH_AUTOMATA}" ]; then
+                ___dest="${___directory}/${PROJECT_SKU}-${PROJECT_VERSION}-core.tar.gz"
                 FS_Remove_Silently "$___dest"
                 tar czvf "$___dest" \
                         -C "$PROJECT_PATH_ROOT" "$__line" \
                         -C "$PROJECT_PATH_ROOT" "CONFIG.toml" \
                         -C "$PROJECT_PATH_ROOT" ".gitignore"
         else
-                ___dest="${___directory}/AutomataCI-${PROJECT_VERSION}-${__line}.tar.gz"
+                ___dest="${___directory}/${PROJECT_SKU}-${PROJECT_VERSION}-${__line}.tar.gz"
                 FS_Remove_Silently "$___dest"
                 tar czvf "$___dest" -C "$PROJECT_PATH_ROOT" "$__line"
         fi
 done <<EOF
-automataCI
+${PROJECT_PATH_AUTOMATA}
 src
 srcC
 srcNIM
@@ -225,7 +225,7 @@ find ".internals/docs/" -name '*.pdf' -print0 \
 
         ___file="${___file_src##*/}"
         ___file="$(FS_Extension_Remove "$___file" "*")"
-        ___dest="${___directory}/AutomataCI-${PROJECT_VERSION}-User-Guide_${___file##*_}.pdf"
+        ___dest="${___directory}/${PROJECT_SKU}-${PROJECT_VERSION}-user-guide_${___file##*_}.pdf"
         FS_Remove_Silently "$___dest"
         FS_Copy_File "$___file_src" "$___dest"
 done
