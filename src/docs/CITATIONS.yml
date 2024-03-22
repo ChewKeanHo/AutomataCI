@@ -63,8 +63,8 @@ authors:
     affiliation: "Independent"
 identifiers:
   - type: doi
-    value: "10.5281/zenodo.10851740"
-    description: "Paper"
+    value: "10.5281/zenodo.10846862"
+    description: "General & Latest"
 keywords:
   - "continuous integration"
   - "native and locally available"
