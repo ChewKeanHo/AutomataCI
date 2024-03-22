@@ -196,6 +196,21 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
                         -C "$PROJECT_PATH_ROOT" "$__line" \
                         -C "$PROJECT_PATH_ROOT" "CONFIG.toml" \
                         -C "$PROJECT_PATH_ROOT" ".gitignore"
+        elif [ "$__line" = "src" ]; then
+                # move the changelog away first
+                ___changelog_temp="${PROJECT_PATH_ROOT}/.changelog"
+                ___changelog_real="${PROJECT_PATH_ROOT}/src/changelog/"
+                FS_Move "$___changelog_real" "$___changelog_temp"
+                FS_Make_Directory "$___changelog_real"
+
+                ___dest="${___directory}/${PROJECT_SKU}-${__line}_${PROJECT_VERSION}.tar.gz"
+                FS_Remove_Silently "$___dest"
+                tar czvf "$___dest" -C "$PROJECT_PATH_ROOT" "$__line"
+
+
+                # restore the changelog back
+                FS_Remove_Silently "$___changelog_real"
+                FS_Move "$___changelog_temp" "$___changelog_real"
         else
                 ___dest="${___directory}/${PROJECT_SKU}-${__line}_${PROJECT_VERSION}.tar.gz"
                 FS_Remove_Silently "$___dest"
