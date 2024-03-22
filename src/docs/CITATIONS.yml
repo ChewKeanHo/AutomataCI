@@ -63,7 +63,7 @@ authors:
     affiliation: "Independent"
 identifiers:
   - type: doi
-    value: "10.5281/zenodo.000000"
+    value: "10.5281/zenodo.10851740"
     description: "Paper"
 keywords:
   - "continuous integration"

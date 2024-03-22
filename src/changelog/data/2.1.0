@@ -1,0 +1,3 @@
+srcANGULAR: applied fix for CVE-2024-29180 security vulenerabiltiy
+root: reset everything to use PRODUCT_SKU instead of PRODUCT_SKU_TITLECASE
+.internals: staging for v2.1.0 development

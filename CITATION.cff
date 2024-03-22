@@ -2,9 +2,9 @@
 
 cff-version: "1.2.0"
 type: "software"
-date-released: "2024-03-21"
+date-released: "2024-03-22"
 title: "AutomataCI"
-version: "2.0.0"
+version: "2.1.0"
 license: "Apache-2.0"
 repository: "https://github.com/ChewKeanHo/AutomataCI"
 repository-code: "https://github.com/ChewKeanHo/AutomataCI"
@@ -48,7 +48,7 @@ authors:
     affiliation: "Independent"
 identifiers:
   - type: doi
-    value: "10.5281/zenodo.000000"
+    value: "10.5281/zenodo.10851740"
     description: "Paper"
 keywords:
   - "continuous integration"

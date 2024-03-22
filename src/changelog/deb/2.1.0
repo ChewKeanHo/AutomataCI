@@ -1,0 +1,7 @@
+automataci (2.1.0) stable; urgency=low
+
+  * srcANGULAR: applied fix for CVE-2024-29180 security vulenerabiltiy
+  * root: reset everything to use PRODUCT_SKU instead of PRODUCT_SKU_TITLECASE
+  * .internals: staging for v2.1.0 development
+
+-- Your Legal Full Name Here <contact@youremail.example>  Fri, 22 Mar 2024 14:18:54 +0800
