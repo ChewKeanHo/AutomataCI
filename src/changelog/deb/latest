@@ -1,0 +1,7 @@
+automataci (2.2.0) stable; urgency=low
+
+  * root: set AutomataCI's DOI to use Zenodo's general DOI instead
+  * .internals: ensures release script does not pack AutomataCI's changelogs
+  * .internals: updated release script to be more consistent
+
+-- Your Legal Full Name Here <contact@youremail.example>  Sat, 23 Mar 2024 14:14:17 +0800

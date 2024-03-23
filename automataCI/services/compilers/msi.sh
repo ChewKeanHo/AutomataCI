@@ -58,6 +58,38 @@ MSI_Compile() {
 
 
 
+MSI_Install_Silent() {
+        #___installer="$1"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        if [ $(FS_Is_File "$1") -ne 0 ]; then
+                return 1
+        fi
+
+        if [ $(FS_Is_Target_A_MSI "$1") -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        $1 /qn /norestart
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
 MSI_Is_Available() {
         # execute
         OS_Is_Command_Available "wixl"

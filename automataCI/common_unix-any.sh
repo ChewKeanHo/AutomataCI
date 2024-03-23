@@ -116,6 +116,12 @@ if [ $? -ne 0 ]; then
 fi
 
 
+Run_Subroutine_Exec "$PROJECT_RESEARCH" "RESEARCH"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
 Run_Subroutine_Exec "$PROJECT_PATH_SOURCE" "BASELINE"
 if [ $? -ne 0 ]; then
         return 1

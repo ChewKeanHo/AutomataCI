@@ -273,6 +273,43 @@ PROJECT_PATH_NUPKG = "nupkg"
 
 
 
+##########################
+# LIBREOFFICE TECHNOLOGY #
+##########################
+# PROJECT_LIBREOFFICE
+# This is a control variable used for enabling LibreOffice technology and also
+# defining its source directory relative to PROJECT_PATH_ROOT. Depending on the
+# offered service (e.g. GitHub Actions), setting this variable with value shall
+# notify the CI provider to setup Go development environment automatically.
+#
+# To enable it: simply supply the path (e.g. default is 'srcLIBREOFFICE').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_LIBREOFFICE = ''
+
+
+# PROJECT_LIBREOFFICE_MIRROR
+# This is the base URL for downloading the libreoffice installer. The pathing
+# shall be the directory listing each distribution type (as in you will see
+# 'flatpak', 'portable', 'src', 'stable', 'testing', ...). You should include
+# the URL without the suffixing the '/' symbol.
+#
+# Refer to the following mirror list for value selection:
+#     (1) https://download.documentfoundation.org/mirmon/allmirrors.html
+PROJECT_LIBREOFFICE_MIRROR = "https://ftp.osuosl.org/pub/tdf/libreoffice"
+
+
+# PROJECT_LIBREOFFICE_VERSION
+# This is for defining the LibreOffice version to install into the local OS.
+#
+# Refer the the following list for value selection:
+#     (1) https://www.libreoffice.org/download/download-libreoffice/
+#
+# Example: '24.2.1' for 'LibreOffice 24.2.1'
+PROJECT_LIBREOFFICE_VERSION = "24.2.1"
+
+
+
+
 ######################
 # GO TECHNOLOGY      #
 ######################
@@ -354,6 +391,22 @@ PROJECT_PYPI_README = "README.md"
 # PROJECT_PYPI_README_MIME
 # The PyPi README file's MIME type data. Default is 'text/markdown'.
 PROJECT_PYPI_README_MIME = "text/markdown"
+
+
+
+
+######################
+# RESEARCH PAPER     #
+######################
+# PROJECT_RESEARCH
+# This is the control variable used for enabling research paper generation and
+# also defining its source directory relative to PROJECT_PATH_ROOT. Depending on
+# the offered service (e.g. GitHub Actions), setting this variable with value
+# shall notify the CI provider to setup the necessary software automatically.
+#
+# To enable it: simply supply the path (e.g. default is 'srcRESEARCH').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_RESEARCH = 'srcRESEARCH'
 
 
 

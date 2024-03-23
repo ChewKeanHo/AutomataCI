@@ -88,6 +88,8 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_MSI "$_target") -eq 0 ]; then
                 return 10 # not applicable
+        elif [ $(FS_Is_Target_A_PDF "$_target") -eq 0 ]; then
+                return 10 # not applicable
         else
                 I18N_Assemble "$_target" "$_directory"
                 FS_Copy_File "$_target" "$_directory"

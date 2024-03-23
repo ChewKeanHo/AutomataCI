@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -37,17 +37,20 @@ HTTP_Download() {
         ## clean up workspace
         rm -rf "$___filepath" &> /dev/null
         mkdir -p "${___filepath%/*}" &> /dev/null
+        ___user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15"
 
         ## download payload
         if [ ! -z "$___auth_header" ]; then
                 if [ ! -z "$(type -t curl)" ]; then
                         curl --location \
+                                --header "$___user_agent" \
                                 --header "$___auth_header" \
                                 --output "$___filepath" \
                                 --request "$___method" \
                                 "$___url"
                 elif [ ! -z "$(type -t wget)" ]; then
                         wget --max-redirect 16 \
+                                --header "$___user_agent" \
                                 --header="$___auth_header" \
                                 --output-file"$___filepath" \
                                 --method="$___method" \
@@ -58,11 +61,13 @@ HTTP_Download() {
         else
                 if [ ! -z "$(type -t curl)" ]; then
                         curl --location \
+                                --header "$___user_agent" \
                                 --output "$___filepath" \
                                 --request "$___method" \
                                 "$___url"
                 elif [ ! -z "$(type -t wget)" ]; then
                         wget --max-redirect 16 \
+                                --header "$___user_agent" \
                                 --output-file"$___filepath" \
                                 --method="$___method" \
                                 "$___url"

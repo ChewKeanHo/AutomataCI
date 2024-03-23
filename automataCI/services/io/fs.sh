@@ -464,7 +464,26 @@ FS_Is_Target_A_Nupkg() {
 
 
 
-FS_Is_Target_A_Pypi() {
+FS_Is_Target_A_PDF() {
+        #___target="$1"
+
+
+        # execute
+        if [ "${1#*.pdf}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
+FS_Is_Target_A_PYPI() {
         #___target="$1"
 
 

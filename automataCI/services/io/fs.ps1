@@ -493,7 +493,26 @@ function FS-Is-Target-A-Nupkg {
 
 
 
-function FS-Is-Target-A-Pypi {
+function FS-Is-Target-A-PDF {
+	param (
+		[string]$___target
+	)
+
+
+	# execute
+	if (($("${___target}" -replace '^.*.pdf') -ne "${___target}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
+function FS-Is-Target-A-PYPI {
 	param (
 		[string]$___target
 	)

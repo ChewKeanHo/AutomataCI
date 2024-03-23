@@ -94,6 +94,8 @@ compile cross-platform images whenever possible.
 * [Nim Programming Language](https://nim-lang.org/)
 * [Python Programming Language](https://www.python.org/)
 * [Rust Programming Language](https://www.rust-lang.org/)
+* [LibreOffice](https://www.libreoffice.org/)
+  1. **Writer** - 2-Columns Research Paper PDF Creation (*`srcRESEARCH`*)
 * Some Manual MISC stuffs
 
 

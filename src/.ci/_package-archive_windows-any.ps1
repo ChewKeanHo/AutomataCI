@@ -86,6 +86,8 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-MSI "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
+		return 10 # not applicable
 	} else {
 		$null = I18N-Assemble "${_target}" "${_directory}"
 		$___process = FS-Copy-File "${_target}" "${_directory}"

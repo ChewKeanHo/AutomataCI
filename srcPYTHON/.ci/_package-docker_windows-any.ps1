@@ -55,6 +55,8 @@ function PACKAGE-Assemble-DOCKER-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-MSI "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
+		return 10 # not applicable
 	}
 
 	switch ($_target_os) {

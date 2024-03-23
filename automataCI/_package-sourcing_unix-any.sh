@@ -34,6 +34,7 @@ ${PROJECT_C:-none}
 ${PROJECT_GO:-none}
 ${PROJECT_NIM:-none}
 ${PROJECT_PYTHON:-none}
+${PROJECT_RESEARCH:-none}
 ${PROJECT_RUST:-none}
 "
 

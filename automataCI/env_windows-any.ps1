@@ -20,23 +20,34 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 }
 
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\net\http.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\appimage.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\angular.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\c.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\go.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\libreoffice.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\msi.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\nim.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\node.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\python.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\github.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\reprepro.ps1"
 
 
 
 
 # begin service
+$null = I18N-Install "GITHUB ACTIONS"
+if ($(GITHUB-Setup-Actions) -ne 0) {
+	$null = I18N-Install-Failed
+	return 1
+}
+
+
 $null = I18N-Install "DOTNET"
 if ($(DOTNET-Setup) -ne 0) {
 	$null = I18N-Install-Failed
@@ -51,8 +62,22 @@ if ($(CHOCOLATEY-Setup) -ne 0) {
 }
 
 
+$null = I18N-Install "CURL"
+if ($(HTTP-Setup) -ne 0) {
+	$null = I18N-Install-Failed
+	return 1
+}
+
+
 $null = I18N-Install "DOCKER"
 if ($(DOCKER-Setup) -ne 0) {
+	$null = I18N-Install-Failed
+	return 1
+}
+
+
+$null = I18N-Install "APPIMAGE"
+if ($(APPIMAGE-Setup) -ne 0) {
 	$null = I18N-Install-Failed
 	return 1
 }
@@ -124,6 +149,16 @@ if (($(STRINGS-Is-Empty "${env:PROJECT_NODE}") -ne 0) -or
 if ($(STRINGS-Is-Empty "${env:PROJECT_ANGULAR}") -ne 0) {
 	$null = I18N-Install "ANGULAR"
 	if ($(ANGULAR-Setup) -ne 0) {
+		$null = I18N-Install-Failed
+		return 1
+	}
+}
+
+
+if (($(STRINGS-Is-Empty "${env:PROJECT_LIBREOFFICE}") -ne 0) -or
+	($(STRINGS-Is-Empty "${env:PROJECT_RESEARCH}") -ne 0)) {
+	$null = I18N-Install "LIBREOFFICE"
+	if ($(LIBREOFFICE-Setup) -ne 0) {
 		$null = I18N-Install-Failed
 		return 1
 	}

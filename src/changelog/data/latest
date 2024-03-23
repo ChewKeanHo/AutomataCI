@@ -1,0 +1,3 @@
+root: set AutomataCI's DOI to use Zenodo's general DOI instead
+.internals: ensures release script does not pack AutomataCI's changelogs
+.internals: updated release script to be more consistent

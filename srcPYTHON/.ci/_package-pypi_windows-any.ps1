@@ -38,7 +38,7 @@ function PACKAGE-Assemble-PYPI-Content {
 
 
 	# validate project
-	$___process = FS-Is-Target-A-Pypi "${_target}"
+	$___process = FS-Is-Target-A-PYPI "${_target}"
 	if ($___process -ne 0) {
 		return 10
 	}

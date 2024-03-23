@@ -61,6 +61,8 @@ function PACKAGE-Assemble-FLATPAK-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-MSI "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
+		return 10 # not applicable
 	} elseif ($_target_os -ne "linux") {
 		return 10 # not applicable
 	}

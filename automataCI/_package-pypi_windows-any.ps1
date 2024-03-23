@@ -43,7 +43,7 @@ function PACKAGE-Run-PYPI {
 
 
 	# validate input
-	if ($(FS-Is-Target-A-Pypi "${_target}") -ne 0) {
+	if ($(FS-Is-Target-A-PYPI "${_target}") -ne 0) {
 		return 0
 	}
 

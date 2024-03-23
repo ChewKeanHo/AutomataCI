@@ -113,6 +113,20 @@ if ($(STRINGS-Is-Empty "${env:PROJECT_PYTHON}") -ne 0) {
 	}
 }
 
+if ($(STRINGS-Is-Empty "${env:PROJECT_RESEARCH}") -ne 0) {
+	$package_fx = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RESEARCH}"
+	$package_fx = "${package_fx}\${env:PROJECT_PATH_CI}\package_windows-any.ps1"
+	if ($(FS-Is-File "$package_fx") -eq 0) {
+		$null = I18N-Source "${package_fx}"
+
+		$___process = . $package_fx
+		if ($___process -ne 0) {
+			$null = I18N-Source-Failed
+			return 1
+		}
+	}
+}
+
 if ($(STRINGS-Is-Empty "${env:PROJECT_RUST}") -ne 0) {
 	$package_fx = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RUST}"
 	$package_fx = "${package_fx}\${env:PROJECT_PATH_CI}\package_windows-any.ps1"

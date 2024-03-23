@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -25,6 +25,11 @@ function HTTP-Download {
 		return 1
 	}
 
+	if ((-not (Get-Command curl -ErrorAction SilentlyContinue)) -and
+		(-not (Get-Command wget -ErrorAction SilentlyContinue))) {
+		return 1
+	}
+
 	if ([string]::IsNullOrEmpty($___method)) {
 		$___method = "GET"
 	}
@@ -34,23 +39,56 @@ function HTTP-Download {
 	## clean up workspace
 	$null = Remove-Item $___filepath -Force -Recurse -ErrorAction SilentlyContinue
 	$null = FS-Make-Directory (Split-Path -Path $___filepath) -ErrorAction SilentlyContinue
+	$___user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15"
+
 
 	## download payload
 	if (-not [string]::IsNullOrEmpty($___auth_header)) {
-		$null = Invoke-RestMethod `
-			-FollowRelLink `
-			-MaximumFollowRelLink 16 `
-			-Headers $___auth_header `
-			-OutFile $___filepath `
-			-Method $___method `
-			-Uri $___url
+		if (Get-Command curl -ErrorAction SilentlyContinue) {
+			curl --location `
+				--header $___user_agent `
+				--header $___auth_header `
+				--output $___filepath `
+				--request $___method `
+				$___url
+			if ($LASTEXITCODE -ne 0) {
+				return 1
+			}
+		} elseif (Get-Command wget -ErrorAction SilentlyContinue) {
+			wget --max-redirect 16 `
+				--header $___user_agent `
+				--header=$___auth_header `
+				--output-file=$___filepath `
+				--method=$___method `
+				$___url
+			if ($LASTEXITCODE -ne 0) {
+				return 1
+			}
+		} else {
+			return 1
+		}
 	} else {
-		$null = Invoke-RestMethod `
-			-FollowRelLink `
-			-MaximumFollowRelLink 16 `
-			-OutFile $___filepath `
-			-Method $___method `
-			-Uri $___url
+		if (Get-Command curl -ErrorAction SilentlyContinue) {
+			curl --location `
+				--header $___user_agent `
+				--output $___filepath `
+				--request $___method `
+				$___url
+			if ($LASTEXITCODE -ne 0) {
+				return 1
+			}
+		} elseif (Get-Command wget -ErrorAction SilentlyContinue) {
+			wget --max-redirect 16 `
+				--header $___user_agent `
+				--output-file=$___filepath `
+				--method=$___method `
+				$___url
+			if ($LASTEXITCODE -ne 0) {
+				return 1
+			}
+		} else {
+			return 1
+		}
 	}
 
 	if (-not (Test-Path -Path $___filepath)) {
@@ -102,5 +140,21 @@ function HTTP-Download {
 
 
 function HTTP-Setup {
-	return 0 # using PowerShell native function
+	# validate input
+	if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+		return 1
+	}
+
+	if (Get-Command curl -ErrorAction SilentlyContinue) {
+		return 0
+	}
+
+	choco install curl
+	if ($LASTEXITCODE -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 1
 }

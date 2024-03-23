@@ -112,6 +112,7 @@ function SUBROUTINE-Package {
 	$null = . "${env:LIBS_AUTOMATACI}\_package-homebrew_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-ipk_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-msi_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-pdf_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-pypi_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-rpm_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-sourcing_windows-any.ps1"
@@ -259,6 +260,14 @@ ${__common}|${__log}|PACKAGE-Run-IPK
 	$__log = "${__log_directory}\msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__log}|PACKAGE-Run-MSI
+"@
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$__log = "${__log_directory}\PDF_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+	$___process = FS-Append-File "${__parallel_control}" @"
+${__common}|${__log}|PACKAGE-Run-PDF
 "@
 	if ($___process -ne 0) {
 		return 1

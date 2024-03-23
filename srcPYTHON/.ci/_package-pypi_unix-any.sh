@@ -37,7 +37,7 @@ PACKAGE_Assemble_PYPI_Content() {
 
 
         # validate project
-        if [ $(FS_Is_Target_A_Pypi "$_target") -ne 0 ]; then
+        if [ $(FS_Is_Target_A_PYPI "$_target") -ne 0 ]; then
                 return 10
         fi
 

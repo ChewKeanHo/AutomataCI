@@ -79,6 +79,43 @@ function MSI-Compile {
 
 
 
+function MSI-Install-Silent() {
+	param(
+		[string]$___installer
+	)
+
+
+	# validate input
+	if ($(STRINGS-Is-Empty "${___installer}") -eq 0) {
+		return 1
+	}
+
+	if ($(FS-Is-File "${___installer}") -ne 0) {
+		return 1
+	}
+
+	if ($(FS-Is-Target-A-MSI "${___installer}") -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	try {
+		$null = Start-Process -FilePath "${___installer}" `
+				-ArgumentList "/qn /norestart" `
+				-Wait
+	} catch {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
 function MSI-Is-Available {
 	# execute
 	$___process = DOTNET-Activate-Environment

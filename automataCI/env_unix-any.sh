@@ -23,16 +23,19 @@ fi
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/io/net/http.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/appimage.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/angular.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/c.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/go.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/libreoffice.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/msi.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/nim.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/node.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/python.sh"
 . "${LIBS_AUTOMATACI}/services/crypto/notary.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/dotnet.sh"
+. "${LIBS_AUTOMATACI}/services/publishers/github.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/homebrew.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/reprepro.sh"
 
@@ -40,6 +43,14 @@ fi
 
 
 # begin service
+I18N_Install "GITHUB ACTION"
+GITHUB_Setup_Actions
+if [ $? -ne 0 ]; then
+        I18N_Install_Failed
+        return 1
+fi
+
+
 I18N_Install "BREW"
 HOMEBREW_Setup
 if [ $? -ne 0 ]; then
@@ -50,6 +61,14 @@ fi
 
 I18N_Install "CURL"
 HTTP_Setup
+if [ $? -ne 0 ]; then
+        I18N_Install_Failed
+        return 1
+fi
+
+
+I18N_Install "APPIMAGE"
+APPIMAGE_Setup
 if [ $? -ne 0 ]; then
         I18N_Install_Failed
         return 1
@@ -155,6 +174,17 @@ fi
 if [ $(STRINGS_Is_Empty "$PROJECT_ANGULAR") -ne 0 ]; then
         I18N_Install "ANGULAR"
         ANGULAR_Setup
+        if [ $? -ne 0 ]; then
+                I18N_Install_Failed
+                return 1
+        fi
+fi
+
+
+if [ $(STRINGS_Is_Empty "$PROJECT_LIBREOFFICE") -ne 0 ] ||
+        [ $(STRINGS_Is_Empty "$PROJECT_RESEARCH") -ne 0 ]; then
+        I18N_Install "LIBREOFFICE"
+        LIBREOFFICE_Setup
         if [ $? -ne 0 ]; then
                 I18N_Install_Failed
                 return 1
