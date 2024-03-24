@@ -76,7 +76,7 @@ compile cross-platform images whenever possible.
 
 ## Supported Technologies
 
-* C Programming Language
+* C Programming Language (*`srcC`*)
   1. [i386 & amd64 GCC Compilers](https://gcc.gnu.org/)
   2. [ARM (-64, -el, -hf) Cross-Compilers](https://wiki.debian.org/CrossToolchains)
   3. [MIPS (-64 -64el, -64r6, -64r6el, -el, -r6, -r6el) Cross-Compilers](https://wiki.debian.org/CrossToolchains)
@@ -87,13 +87,13 @@ compile cross-platform images whenever possible.
   8. [Clang](https://clang.llvm.org/)
   9. [MinGW](https://www.mingw-w64.org/)
   10. [Emscripten WASM](https://emscripten.org/)
-* Go
+* Go (*`srcGO`*)
   1. [Standard Go](https://go.dev/)
 * Javascript & Typescript Web Frameworks
-  1. [Angular](https://angular.io/)
-* [Nim Programming Language](https://nim-lang.org/)
-* [Python Programming Language](https://www.python.org/)
-* [Rust Programming Language](https://www.rust-lang.org/)
+  1. [Angular](https://angular.io/) (*`srcANGULAR`*)
+* [Nim Programming Language](https://nim-lang.org/) (*`srcNIM`*)
+* [Python Programming Language](https://www.python.org/) (*`srcPYTHON`*)
+* [Rust Programming Language](https://www.rust-lang.org/) (*`srcRUST`*)
 * [LibreOffice](https://www.libreoffice.org/)
   1. **Writer** - 2-Columns Research Paper PDF Creation (*`srcRESEARCH`*)
 * Some Manual MISC stuffs
