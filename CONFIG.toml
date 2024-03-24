@@ -321,7 +321,7 @@ PROJECT_LIBREOFFICE_VERSION = "24.2.1"
 #
 # To enable it: simply supply the path (e.g. default is 'srcGO').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_GO = ''
+PROJECT_GO = 'srcGO'
 
 
 # PROJECT_PATH_GO_ENGINE
@@ -423,7 +423,7 @@ PROJECT_RESEARCH = 'srcRESEARCH'
 #
 # To enable it: simply supply the path (e.g. default is 'srcRUST').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_RUST = 'srcRUST'
+PROJECT_RUST = ''
 
 
 # PROJECT_RUST_EDITION
