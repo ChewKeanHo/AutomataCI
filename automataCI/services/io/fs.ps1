@@ -195,6 +195,60 @@ function FS-Get-File {
 
 
 
+function FS-Get-MIME {
+	param(
+		[string]$___target
+	)
+
+
+	# validate input
+	if ((FS-Is-Target-Exist $___target) -ne 0) {
+		return ""
+	}
+
+
+	# execute
+	$___process = FS-Is-Directory "${___target}"
+	if ($___process -eq 0) {
+		return "inode/directory"
+	}
+
+
+	switch ((Get-ChildItem $___target).Extension.ToLower()) {
+	".avif" {
+		return "image/avif"
+	} ".gif" {
+		return "image/gif"
+	} ".gzip" {
+		return "application/x-gzip"
+	} { $_ -in ".jpg", ".jpeg" } {
+		return "image/jpeg"
+	} ".json" {
+		return "application/json"
+	} ".mkv" {
+		return "video/mkv"
+	} ".mp4" {
+		return "video/mp4"
+	} ".png" {
+		return "image/png"
+	} ".rar" {
+		return "application/x-rar-compressed"
+	} ".tiff" {
+		return "image/tiff"
+	} ".webp" {
+		return "image/webp"
+	} ".xml" {
+		return "application/xml"
+	} ".zip" {
+		return "application/zip"
+	} default {
+		return ""
+	}}
+}
+
+
+
+
 function FS-Get-Path-Relative {
 	param (
 		[string]$___target,

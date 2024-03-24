@@ -206,6 +206,32 @@ FS_Get_File() {
 
 
 
+FS_Get_MIME() {
+        #___target="$1"
+
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+
+        # execute
+        ___output="$(file --mime-type "$1")"
+        if [ $? -eq 0 ]; then
+                printf -- "%b" "${___output##* }"
+                return 0
+        fi
+
+
+        # report status
+        printf -- ""
+        return 1
+}
+
+
+
+
 FS_Get_Path_Relative() {
         #___target="$1"
         #___base="$2"
