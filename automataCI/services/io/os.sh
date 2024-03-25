@@ -118,7 +118,8 @@ OS_Is_Command_Available() {
 
 
         # execute
-        if [ ! -z "$(type -t "$1")" ]; then
+        2>/dev/null 1>/dev/null type "$1"
+        if [ $? -eq 0 ]; then
                 return 0
         fi
 
@@ -148,18 +149,6 @@ OS_Is_Run_Simulated() {
 
 OS_Sync() {
         # execute
-        if [ -f "${HOME}/.bash_profile" ]; then
-                . "${HOME}/.bash_profile"
-        elif [ -f "${HOME}/.bashrc" ]; then
-                . "${HOME}/.bashrc"
-        elif [ -f "${HOME}/.zshrc" ]; then
-                . "${HOME}/.zshrc"
-        elif [ -f "${HOME}/.kshrc" ]; then
-                . "${HOME}/.kshrc"
-        elif [ -f "${HOME}/.profile" ]; then
-                . "${HOME}/.profile"
-        fi
-
         sync
 
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -62,6 +62,7 @@ export LIBS_AUTOMATACI="${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}"
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/libreoffice.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
@@ -179,9 +180,9 @@ FS_Remove_Silently "srcANGULAR/.angular"
 # execute command
 ___directory="pkg"
 FS_Make_Directory "$___directory"
-sync
 
-old_IFS="$IFS"
+
+__old_IFS="$IFS"
 while IFS="" read -r __line || [ -n "$__line" ]; do
         if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
                 continue
@@ -191,30 +192,35 @@ while IFS="" read -r __line || [ -n "$__line" ]; do
         # build the file
         if [ "$__line" = "${PROJECT_PATH_AUTOMATA}" ]; then
                 ___dest="${___directory}/${PROJECT_SKU}-core_${PROJECT_VERSION}.tar.gz"
+                I18N_Export "$___dest"
                 FS_Remove_Silently "$___dest"
-                tar czvf "$___dest" \
+                tar czf "$___dest" \
                         -C "$PROJECT_PATH_ROOT" "$__line" \
                         -C "$PROJECT_PATH_ROOT" "CONFIG.toml" \
-                        -C "$PROJECT_PATH_ROOT" ".gitignore"
+                        -C "$PROJECT_PATH_ROOT" ".gitignore" &> /dev/null
         elif [ "$__line" = "src" ]; then
                 # move the changelog away first
                 ___changelog_temp="${PROJECT_PATH_ROOT}/.changelog"
                 ___changelog_real="${PROJECT_PATH_ROOT}/src/changelog/"
                 FS_Move "$___changelog_real" "$___changelog_temp"
                 FS_Make_Directory "$___changelog_real"
+                sync
 
                 ___dest="${___directory}/${PROJECT_SKU}-${__line}_${PROJECT_VERSION}.tar.gz"
+                I18N_Export "$___dest"
                 FS_Remove_Silently "$___dest"
-                tar czvf "$___dest" -C "$PROJECT_PATH_ROOT" "$__line"
+                tar czf "$___dest" -C "$PROJECT_PATH_ROOT" "$__line" &> /dev/null
 
 
                 # restore the changelog back
                 FS_Remove_Silently "$___changelog_real"
                 FS_Move "$___changelog_temp" "$___changelog_real"
+                sync
         else
                 ___dest="${___directory}/${PROJECT_SKU}-${__line}_${PROJECT_VERSION}.tar.gz"
+                I18N_Export "$___dest"
                 FS_Remove_Silently "$___dest"
-                tar czvf "$___dest" -C "$PROJECT_PATH_ROOT" "$__line"
+                tar czf "$___dest" -C "$PROJECT_PATH_ROOT" "$__line" &> /dev/null
         fi
 done <<EOF
 ${PROJECT_PATH_AUTOMATA}
@@ -226,23 +232,108 @@ srcGO
 srcPYTHON
 srcANGULAR
 EOF
-
-
+IFS="$__old_IFS" && unset __old_IFS
 
 
 # copy official documents
 __old_IFS="$IFS"
-find ".internals/docs/" -name '*.pdf' -print0 \
-        | while IFS="" read -r ___file_src || [ -n "$___file_src" ]; do
+find ".internals/docs" -maxdepth 1 -name '*.odt' -printf "%p\n" \
+        | while IFS= read -r ___file_src || [ -n "$___file_src" ]; do
         if [ $(STRINGS_Is_Empty "$___file_src") -eq 0 ]; then
                 continue
         fi
 
-        ___file="${___file_src##*/}"
-        ___file="$(FS_Extension_Remove "$___file" "*")"
-        ___dest="${___directory}/${PROJECT_SKU}-user-guide_${PROJECT_VERSION}_${___file##*_}.pdf"
-        FS_Remove_Silently "$___dest"
-        FS_Copy_File "$___file_src" "$___dest"
+        ## apply filter
+        case "$(FS_Get_File "$___file_src")" in
+        *automataci-user-guide_en*)
+                continue
+                ;;
+        *)
+                ;;
+        esac
+
+
+        ## build the pdf document
+        I18N_Build "$___file_src"
+        $(LIBREOFFICE_Get) --headless --convert-to "pdf:writer_pdf_Export:{
+        \"UseLosslessCompression\": true,
+        \"Quality\": 100,
+        \"SelectPdfVersion\": 0,
+        \"PDFUACompliance\": false,
+        \"UseTaggedPDF\": true,
+        \"ExportFormFields\": true,
+        \"FormsType\": 1,
+        \"ExportBookmarks\": true,
+        \"ExportPlaceholders\": true
+}" --outdir "$___directory" "$___file_src"
+        if [ $? -ne 0 ]; then
+                I18N_Build_Failed
+                exit 1
+        fi
+
+        ## obtain language code
+        ___src="${___file_src##*/}"
+        ___src="$(FS_Extension_Remove "$___src" "*")"
+
+        ## construct destination
+        case "$___src" in
+        de)
+                ___dest="${PROJECT_SKU}-bedienungsanleitung_${PROJECT_VERSION}_de.pdf"
+                ;;
+        en)
+                ___dest="${PROJECT_SKU}-user-guide_${PROJECT_VERSION}_en.pdf"
+                ;;
+        es)
+                ___dest="${PROJECT_SKU}-manual-de-usuario_${PROJECT_VERSION}_es.pdf"
+                ;;
+        fr)
+                ___dest="${PROJECT_SKU}-manuel-dutilisation_${PROJECT_VERSION}_fr.pdf"
+                ;;
+        jp)
+                ___dest="${PROJECT_SKU}-ユーザーガイド_${PROJECT_VERSION}_jp.pdf"
+                ;;
+        ko)
+                ___dest="${PROJECT_SKU}-사용자안내_${PROJECT_VERSION}_ko.pdf"
+                ;;
+        mn)
+                ___dest="${PROJECT_SKU}-xэрэглэгчийн-удирдамж_${PROJECT_VERSION}_mn.pdf"
+                ;;
+        nb)
+                ___dest="${PROJECT_SKU}-brukerveiledning_${PROJECT_VERSION}_nb.pdf"
+                ;;
+        nl)
+                ___dest="${PROJECT_SKU}-gebruiksaanwijzing_${PROJECT_VERSION}_nl.pdf"
+                ;;
+        nn)
+                ___dest="${PROJECT_SKU}-brukarrettleiding_${PROJECT_VERSION}_nn.pdf"
+                ;;
+        ru)
+                ___dest="${PROJECT_SKU}-pуководство-пользователя_${PROJECT_VERSION}_ru.pdf"
+                ;;
+        sv)
+                ___dest="${PROJECT_SKU}-användarhandbok_${PROJECT_VERSION}_sv.pdf"
+                ;;
+        uk)
+                ___dest="${PROJECT_SKU}-користувацький-посібник_${PROJECT_VERSION}_uk.pdf"
+                ;;
+        zh-hans)
+                ___dest="${PROJECT_SKU}-说明指南_${PROJECT_VERSION}_zh-hans.pdf"
+                ;;
+        zh-hant)
+                ___dest="${PROJECT_SKU}-說明指南_${PROJECT_VERSION}_zh-hant.pdf"
+                ;;
+        *)
+                continue # unknown - bail out
+                ;;
+        esac
+
+        ## export to correct name
+        I18N_Export "${___directory}/${___dest}"
+        FS_Move "${___directory}/${___src}.pdf" "${___directory}/${___dest}"
+        if [ $? -ne 0 ]; then
+                I18N_Export_Failed
+                exit 1
+        fi
 done
 IFS="$__old_IFS" && unset __old_IFS
 
@@ -250,4 +341,5 @@ IFS="$__old_IFS" && unset __old_IFS
 
 
 # report status
+I18N_Run_Successful
 exit 0

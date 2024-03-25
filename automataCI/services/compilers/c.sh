@@ -955,8 +955,8 @@ C_Test() {
 
         ## (1) Scan for all test files
         __old_IFS="$IFS"
-        find "$___directory" -name '*_test.c' -print0 \
-                | while IFS="" read -r ___file_src || [ -n "$___file_src" ]; do
+        find "$___directory" -name '*_test.c'  -printf "%p\n" \
+                | while IFS= read -r ___file_src || [ -n "$___file_src" ]; do
                 if [ $(STRINGS_Is_Empty "$___file_src") -eq 0 ]; then
                         continue
                 fi

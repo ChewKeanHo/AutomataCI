@@ -282,8 +282,8 @@ NIM_Run_Test() {
 
         ## (1) Scan for all test files
         __old_IFS="$IFS"
-        find "$___directory" -name '*_test.nim' -print0 \
-                | while IFS="" read -r __line || [ -n "$__line" ]; do
+        find "$___directory" -name '*_test.nim'  -printf "%p\n" \
+                | while IFS= read -r __line || [ -n "$__line" ]; do
                 FS_Append_File "$___build_list" "\
 build|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${___arguments}
 "

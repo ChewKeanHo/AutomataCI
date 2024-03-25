@@ -32,7 +32,7 @@ output/
 /resources/changelog/*/.*
 /artifact*
 /pkgAUTOMATACI
-/.internals/*.pdf
+/.internals/docs/*/*.pdf
 
 #####################
 # Angular
