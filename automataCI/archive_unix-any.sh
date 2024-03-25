@@ -27,6 +27,17 @@ fi
 
 
 
+# validate dependency
+I18N_Check "TAR"
+TAR_Is_Available
+if [ $? -ne 0 ]; then
+        I18N_Check_Failed
+        return 1
+fi
+
+
+
+
 # execute tech specific CI jobs if available
 old_IFS="$IFS"
 printf -- "%s" "\
@@ -78,6 +89,24 @@ tar czvf "$___artifact_workspace" \
         "$PROJECT_PATH_LIB" \
         "$PROJECT_PATH_TEMP" \
         "$PROJECT_PATH_RELEASE"
+
+
+
+
+# check existences
+I18N_Check "$___artifact_build"
+FS_Is_File "$___artifact_build"
+if [ $? -ne 0 ]; then
+        I18N_Check_Failed
+        return 1
+fi
+
+I18N_Check "$___artifact_workspace"
+FS_Is_File "$___artifact_workspace"
+if [ $? -ne 0 ]; then
+        I18N_Check_Failed
+        return 1
+fi
 
 
 

@@ -26,6 +26,17 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
+# validate dependency
+$null = I18N-Check "ZIP"
+$___process = ZIP-Is-Available
+if ($___process -ne 0) {
+	$null = I18N-Check-Failed
+	return 1
+}
+
+
+
+
 # execute tech specific CI jobs if available
 foreach ($__line in @(
 	"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}"
@@ -42,7 +53,7 @@ foreach ($__line in @(
 		continue
 	}
 
-	if ("${__line}" -eq "${env:PROJECT_PATH_ROOT}/") {
+	if ("${__line}" -eq "${env:PROJECT_PATH_ROOT}\") {
 		continue
 	}
 
@@ -54,32 +65,61 @@ $null = Set-Location "${env:PROJECT_PATH_ROOT}"
 
 
 # package build
-$___target = "artifact-build_${env:PROJECT_OS}-${env:PROJECT_ARCH}.zip"
-$null = I18N-Archive "${___target}"
-$null = FS-Remove-Silently "${___target}"
+$___artifact_build = "${env:PROJECT_PATH_ROOT}\artifact-build_${env:PROJECT_OS}-${env:PROJECT_ARCH}.zip"
+$null = I18N-Archive "${___artifact_build}"
+$null = FS-Remove-Silently "${___artifact_build}"
 foreach ($__line in @(
 	"${env:PROJECT_PATH_BUILD}"
 	"${env:PROJECT_PATH_LOG}"
 	"${env:PROJECT_PATH_PKG}"
 	"${env:PROJECT_PATH_DOCS}"
 )) {
-	$null = ZIP-Create "${___target}" "${__line}"
+	$null = Compress-Archive -Update `
+		-DestinationPath "${___artifact_build}" `
+		-Path "${__line}"
+}
+
+$null = I18N-Check "${___artifact_build}"
+$___process = FS-Is-File "${___artifact_build}"
+if ($___process -ne 0) {
+	$null = I18N-Check-Failed
+	return 1
 }
 
 
 
 
 # package workspace
-$___target = "artifact-workspace_${env:PROJECT_OS}-${env:PROJECT_ARCH}.zip"
-$null = I18N-Archive "${___target}"
-$null = FS-Remove-Silently "${___target}"
+$___artifact_workspace = "${env:PROJECT_PATH_ROOT}\artifact-workspace_${env:PROJECT_OS}-${env:PROJECT_ARCH}.zip"
+$null = I18N-Archive "${___artifact_workspace}"
+$null = FS-Remove-Silently "${___artifact_workspace}"
 foreach ($__line in @(
 	"${env:PROJECT_PATH_BIN}"
 	"${env:PROJECT_PATH_LIB}"
 	"${env:PROJECT_PATH_TEMP}"
 	"${env:PROJECT_PATH_RELEASE}"
 )) {
-	$null = ZIP-Create "${___target}" "${__line}"
+	$null = Compress-Archive -Update `
+		-DestinationPath "${___artifact_workspace}" `
+		-Path "${__line}"
+}
+
+
+
+
+# check existences
+$null = I18N-Check "${___artifact_build}"
+$___process = FS-Is-File "${___artifact_build}"
+if ($___process -ne 0) {
+	$null = I18N-Check-Failed
+	return 1
+}
+
+$null = I18N-Check "${___artifact_workspace}"
+$___process = FS-Is-File "${___artifact_workspace}"
+if ($___process -ne 0) {
+	$null = I18N-Check-Failed
+	return 1
 }
 
 
