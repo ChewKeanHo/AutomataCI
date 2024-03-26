@@ -245,9 +245,6 @@ find ".internals/docs" -maxdepth 1 -name '*.odt' -printf "%p\n" \
 
         ## apply filter
         case "$(FS_Get_File "$___file_src")" in
-        *automataci-user-guide_en*)
-                continue
-                ;;
         *)
                 ;;
         esac
