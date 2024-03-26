@@ -1,0 +1,206 @@
+German:
+Dieses Buch wurde vollständig von einem Menschen geschrieben.
+
+Falls Sie grammatikalische oder technische Fehler entdecken, melden Sie diese bitte an https://github.com/ChewKeanHo/AutomataCI/issues mit den folgenden Angaben:
+
+(1) Screenshot der fehlerhaften Stelle
+(2) Eine zum Kopieren und Einfügen geeignete Textkorrektur
+(3) Ihren vollständigen Namen und Ihre E-Mail-Adresse für die oben genannte Danksagung.
+
+Vielen Dank.
+
+
+
+
+English:
+This book is entirely written by human.
+
+If you spot any grammatical or technical errors, please report it to https://github.com/ChewKeanHo/AutomataCI/issues with the following:
+
+(1) Screenshot where it goes wrong
+(2) Provide a copy-paste capable text correction
+(3) Your full name and email address for acknowledgement listed above.
+
+Thank you.
+
+
+
+
+Spanish:
+Este libro está completamente escrito por un humano.
+
+Si detecta algún error gramatical o técnico, por favor repórtelo a https://github.com/ChewKeanHo/AutomataCI/issues con lo siguiente:
+
+(1) Captura de pantalla de dónde ocurra el error
+(2) Una corrección del texto que se pueda copiar y pegar
+(3) Su nombre completo y dirección de correo electrónico para poder ser reconocido.
+
+Gracias.
+
+
+
+
+French:
+Ce livre est entièrement écrit par un humain.
+
+Si vous repérez des erreurs grammaticales ou techniques, veuillez les signaler à https://github.com/ChewKeanHo/AutomataCI/issues en fournissant les éléments suivants :
+
+(1) Capture d'écran de l'erreur
+(2) Une correction du texte pouvant être copiée et collée
+(3) Votre nom complet et votre adresse e-mail pour être remercié.
+
+Merci.
+
+
+
+
+Japanese:
+この本は完全に人間によって書かれています。
+
+文法上または技術的な誤りを見つけた場合は、以下の情報を添えてhttps://github.com/ChewKeanHo/AutomataCI/issues。
+
+(1) エラー箇所のスクリーンショット
+(2) コピー＆ペースト可能な修正案
+(3) 謝辞のために、ご氏名とメールアドレス
+
+よろしくお願いいたします。
+
+
+
+
+Korean:
+이 책은 전적으로 인간이 썼습니다.
+
+문법적 또는 기술적 오류를 발견하신 경우 다음 사항을 https://github.com/ChewKeanHo/AutomataCI/issues 보고해 주세요.
+
+(1) 오류가 있는 부분의 스크린샷
+(2) 복사 및 붙여넣기 가능한 텍스트 수정본
+(3) 감사 인사를 위해 성함과 이메일 주소
+
+감사합니다.
+
+
+
+
+Mongolian:
+Энэ ном бүрэн хүний ​​гараар бичигдсэн.
+
+Хэрэв та алдаа олговол https://github.com/ChewKeanHo/AutomataCI/issues руу дараах мэдээллийг оруулан мэдээлнэ үү:
+
+(1) Алдаа гарсан газрын зураг
+(2) Хуулах, баставкалах боломжтой засах зөвлөмжийг оруулна уу
+(3) Таныг дээр дурдсанд талархал илэрхийлэх зорилгоор таны бүтэн нэр, имэйл хаяг
+
+Баярлалаа.
+
+
+
+
+Norwegian (Bokmål):
+Denne boken er i sin helhet skrevet av et menneske.
+
+Hvis du oppdager grammatiske eller tekniske feil, vennligst rapporter det til https://github.com/ChewKeanHo/AutomataCI/issues med følgende:
+
+(1) Skjermbilde av hvor det går galt
+(2) Gi en kopi- og lim inn-klar tekstkorrigering
+(3) Ditt fulle navn og e-postadresse for anerkjennelse som er listet ovenfor.
+
+Takk skal du ha.
+
+
+
+
+Dutch:
+Dit boek is volledig door een mens geschreven.
+
+Mocht u grammaticale of technische fouten tegenkomen, rapporteer deze dan alstublieft aan https://github.com/ChewKeanHo/AutomataCI/issues met het volgende:
+
+(1) Screenshot waar het misgaat
+(2) Een kopieer-plak geschikte tekstcorrectie
+(3) Uw volledige naam en e-mailadres voor een vermelding.
+
+Dank u.
+
+
+
+
+Norwegian (Nynorsk):
+Denne boka er i sin heilskap skriven av eit menneske.
+
+Dersom du oppdagar grammatiske eller tekniske feil, ver venleg og rapporter dei til https://github.com/ChewKeanHo/AutomataCI/issues med følgjande:
+
+(1) Skjermbilde av kvar det går gale
+(2) Ver venleg og oppgje ei tekstretting som kan kopierast og limast inn
+(3) Ditt fulle namn og di e-postadresse for ei stadfesting som er lista ovanfor.
+
+Tusen takk.
+
+
+
+
+Russian:
+Эта книга полностью написана человеком.
+
+Если вы заметили какие-либо грамматические или технические ошибки, пожалуйста, сообщите о них по адресу https://github.com/ChewKeanHo/AutomataCI/issues, предоставив следующее:
+
+(1) Скриншот ошибки
+(2) Текстовую поправку, которую можно скопировать и вставить
+(3) Ваши полное имя и адрес электронной почты для благодарности
+
+Спасибо.
+
+
+
+
+Swedish:
+Den här boken är helt skriven av en människa.
+
+Om du upptäcker några grammatiska eller tekniska fel, vänligen rapportera dem till https://github.com/ChewKeanHo/AutomataCI/issues med följande:
+
+(1) Skärmbild där det blir fel
+(2) Tillhandahåll en kopiera-och-klistra-kompatibel textkorrigering
+(3) Ditt fullständiga namn och e-postadress för tacksägelse enligt ovan.
+
+Tack.
+
+
+
+
+Ukrainian:
+Ця книга повністю написана людиною.
+
+Якщо ви помітили будь-які граматичні чи технічні помилки, будь ласка, повідомте про них за адресою https://github.com/ChewKeanHo/AutomataCI/issues з такими даними:
+
+(1) Скріншот помилки
+(2) Варіант виправленого тексту, який можна скопіювати та вставити
+(3) Ваше повне ім’я та електронну адресу для подяки
+
+Дякую.
+
+
+
+
+Simplified Chinese:
+这本书完全由人类编写。
+
+如果您发现任何语法或技术错误，请通过以下方式将其报告给https://github.com/ChewKeanHo/AutomataCI/issues：
+
+(1) 出现错误的截图
+(2) 提供可复制粘贴的文本更正
+(3) 您的全名和电子邮件地址（以上用以致谢）
+
+谢谢。
+
+
+
+
+Traditional Chinese:
+這本書完全由人類編寫。
+
+如果您發現任何語法或技術錯誤，請向https://github.com/ChewKeanHo/AutomataCI/issues回報，並提供以下資料：
+
+(1) 出現錯誤畫面的截圖
+(2) 提供可複製貼上的文字更正
+(3) 您的全名和電子郵件地址（作答謝之用）
+
+謝謝。
