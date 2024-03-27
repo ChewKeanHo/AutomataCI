@@ -171,7 +171,7 @@ AUTOMATACI_LANG = ""
 #
 # To enable it: simply supply the path (e.g. default is 'srcANGULAR').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_ANGULAR = 'srcANGULAR'
+PROJECT_ANGULAR = ''
 
 
 
@@ -406,7 +406,7 @@ PROJECT_PYPI_README_MIME = "text/markdown"
 #
 # To enable it: simply supply the path (e.g. default is 'srcRESEARCH').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_RESEARCH = 'srcRESEARCH'
+PROJECT_RESEARCH = ''
 
 
 
