@@ -15,22 +15,22 @@
 ################################################################################
 #                                                                  🠳 Max       #
 ################################################################################
-Continuous improvements or integrations (CI) is a nerve system of a
-software product production. Leaving the job blindly by outsourcing
-to any proprietary 3rd-party CI service provider is a guaranteed
-way for being threatened and extorted by any malicious suppliers.
-As of year 2021 to 2023, many evidences show that the suppliers
-vilely alter their pricing charges after the fact to the point of
-legally extorting their customers and destroyed some useful
-software entirely.
+Tired of being held hostage by third-party CI providers? AutomataCI
+is your liberation! Think of it as your software production's
+personal guardian angel – it ensures your build and deployment
+processes flow smoothly, no matter what.  AutomataCI gives you the
+power to run CI locally, decentralizing your workflow and shielding
+you from vendor lock-in or surprise price hikes.
 
-Therefore, AutomataCI counters such problem by facilitating CI
-functions natively, making it locally available, decentralized,
-and redistributable at git repository level. 3rd-party service
-providers can only call AutomataCI just like how the developer
-performs them locally. This de-risk the software owner by not
-completely depending on the service provider, allowing him/her
-to switch supplier easily. AutomataCI also facilitates
-technology-specific automation customization, capable of
-absorbing new changes easily across time. It only uses the
-basic POSIX compliant Shell and PowerShell scripts.
+With its friendly setup, you'll be up and running in no time.
+AutomataCI effortlessly integrates into your existing git
+repository, orchestrating everything from dependency management to
+testing, packaging, and deployment. It's your secret weapon for
+predictable, reliable software delivery.
+
+Best of all, AutomataCI is built with inclusivity in mind. It plays
+nicely with a multitude of programming languages and built using
+only POSIX Shell and PowerShell scripting tools. Say goodbye to
+frustrating compatibility issues! Ready to take back control?
+Embrace AutomataCI – the flexible, always-available CI solution that
+puts YOU in the driver's seat.
