@@ -28,10 +28,10 @@ Some good business reasons why using AutomataCI:
 
 
 
-### Cross-compiling Confidently
+### Cross-Compiling Confidently
 
-Build confidently not just for the common CPUs but other hardware as well with
-your selected supportive technologies.
+Build confidently not just for the common CPUs but also other hardware as well
+with your selected technologies.
 
 [![cross-compile demo](.internals/screenshots/en/automataci_cross-compile-confidently_en.gif)](#cross-compile-confidently)
 
@@ -40,7 +40,7 @@ your selected supportive technologies.
 ### Maximizing Reaches
 
 Packaging your software for as many standardized distribution channels as
-possible; Makes customers' user experience easier and seamless.
+possible making your customers' user experience seamless.
 
 [![maximizing reaches demo](.internals/screenshots/en/automataci-packaging-many-distributions_en.gif)](#maximizing-reaches)
 
@@ -48,7 +48,7 @@ possible; Makes customers' user experience easier and seamless.
 
 ### Focusing Business Objectives
 
-Deploy multiple technologies for your product development via integrations
+Deploy multiple technologies for your product development via integration
 (within sensible needs of course).
 
 [![focusing business objectives demo](.internals/screenshots/en/automataci-handles-various-tech-simultenously_en.gif)](#focusing-business-objectives)
@@ -57,7 +57,7 @@ Deploy multiple technologies for your product development via integrations
 
 ### Securing Point of Origin
 
-GPG cryptographically signed packages alongside common shasum checking -
+GPG cryptographically signed packages alongside common shasum checking for an
 end-to-end verifiable solution for all security level needs; whenever, wherever.
 
 [![Securing point of origin](.internals/screenshots/en/automataci-securing-packages-with-cryptography_en.gif)](#securing-point-of-origin)
@@ -66,7 +66,7 @@ end-to-end verifiable solution for all security level needs; whenever, wherever.
 
 ### Optimally Containerized
 
-Package small-sized Open-Source Image Container (for Docker OR Podman); AND
+Package small-sized Open-Source Image Container (for Docker OR Podman) AND
 compile cross-platform images whenever possible.
 
 [![Optimally Containerized](.internals/screenshots/en/automataci-multiarch-container-available_en.png)](#optimally-containerized)
