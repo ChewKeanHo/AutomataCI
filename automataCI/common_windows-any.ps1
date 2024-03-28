@@ -113,6 +113,11 @@ if ($___process -ne 0) {
 	return 1
 }
 
+$___process = RUN-Subroutine-Exec "${env:PROJECT_GOOGLEAI}" "GOOGLE AI"
+if ($___process -ne 0) {
+	return 1
+}
+
 $___process = RUN-Subroutine-Exec "${env:PROJECT_PATH_SOURCE}" "BASELINE"
 if ($___process -ne 0) {
 	return 1

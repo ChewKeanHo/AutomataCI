@@ -111,6 +111,20 @@ HTTP_Download() {
 
 
 
+HTTP_Is_Available() {
+        # execute
+        if [ ! -z "$(type -t "curl")" ]; then
+                return 0
+        fi
+
+
+        # report status
+        return 1
+}
+
+
+
+
 HTTP_Setup() {
         # validate input
         if [ -z "$(type -t "brew")" ]; then

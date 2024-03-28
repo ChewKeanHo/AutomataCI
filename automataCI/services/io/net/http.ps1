@@ -139,6 +139,20 @@ function HTTP-Download {
 
 
 
+function HTTP-Is-Available {
+	# execute
+	if (Get-Command curl -ErrorAction SilentlyContinue) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function HTTP-Setup {
 	# validate input
 	if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {

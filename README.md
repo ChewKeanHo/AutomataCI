@@ -76,6 +76,8 @@ compile cross-platform images whenever possible.
 
 ## Supported Technologies
 
+* AI
+  1. [Google AI](https://ai.google.dev/tutorials/rest_quickstart) (*`srcGOOGLEAI`*)
 * C Programming Language (*`srcC`*)
   1. [i386 & amd64 GCC Compilers](https://gcc.gnu.org/)
   2. [ARM (-64, -el, -hf) Cross-Compilers](https://wiki.debian.org/CrossToolchains)

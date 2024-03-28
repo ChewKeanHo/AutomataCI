@@ -273,6 +273,119 @@ PROJECT_PATH_NUPKG = "nupkg"
 
 
 
+######################
+# GOOGLE AI          #
+######################
+# PROJECT_GOOGLEAI
+# This is a control variable used for enabling the Google AI demo workspace in
+# the repository. It's entirely facilitated just to demonstrate and test the
+# integrated Google AI libraries.
+#
+# To enable it: simply supply the path (e.g. default is 'srcGOOGLEAI').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_GOOGLEAI = ''
+
+
+# GOOGLEAI_API_URL
+# This is the base URL for Google AI API interfaces. It is specified in
+#     (1) https://ai.google.dev/api/rest
+#     (2) https://ai.google.dev/tutorials/rest_quickstart
+#
+# This is used to enable Google AI interfacing for terminal. Note that without
+# the GOOGLE_AI_API_TOKEN (in SECRETS.toml), Google AI cloud services are
+# unavailable.
+GOOGLEAI_API_URL = 'https://generativelanguage.googleapis.com'
+
+
+# GOOGLEAI_API_VERSION
+# This specifies the API interface version. It is specified in
+#     (1) https://ai.google.dev/api/rest
+#
+# This is used to configure Google AI API interfaces for terminal.
+GOOGLEAI_API_VERSION = 'v1beta'
+
+
+# GOOGLEAI_MODEL
+# This specifies the AI model to be used. It is specified in:
+#     (1) https://ai.google.dev/models/
+#
+# This is used to configure Google AI API interfaces for terminal and it's part
+# of its url. Hence, the correct value is usually leads with 'models/[TYPE]'.
+#
+# Default is: models/gemini-pro
+GOOGLEAI_MODEL = 'models/gemini-pro'
+
+
+# GOOGLEAI_BLOCK_HATE_SPEECH
+# This specifies the AI filtering category for hate speeches. It uses the
+# string-type enumerated values stated in:
+#     (1) https://ai.google.dev/api/rest/v1beta/HarmCategory
+#     (2) https://ai.google.dev/api/rest/v1beta/SafetySetting#HarmBlockThreshold
+#
+# Acceptable values are:
+#     (1) 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' - not specified
+#     (2) 'BLOCK_LOW_AND_ABOVE' - NEGLIGIBLE is allowed.
+#     (3) 'BLOCK_MEDIUM_AND_ABOVE' - LOW & NEGLIGIBLE allowed.
+#     (4) 'BLOCK_ONLY_HIGH' - MEDIUM, LOW & NEGLIGIBLE allowed.
+#     (5) 'BLOCK_NONE' - All content will be allowed.
+#
+# If value is unavailable (empty string), then 'BLOCK_NONE' is the default.
+GOOGLEAI_BLOCK_HATE_SPEECH = 'BLOCK_NONE'
+
+
+# GOOGLEAI_BLOCK_SEXUALLY_EXPLICIT
+# This specifies the AI filtering category for sexually explicit content. It
+# uses the string-type enumerated values stated in:
+#     (1) https://ai.google.dev/api/rest/v1beta/HarmCategory
+#     (2) https://ai.google.dev/api/rest/v1beta/SafetySetting#HarmBlockThreshold
+#
+# Acceptable values are:
+#     (1) 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' - not specified
+#     (2) 'BLOCK_LOW_AND_ABOVE' - NEGLIGIBLE is allowed.
+#     (3) 'BLOCK_MEDIUM_AND_ABOVE' - LOW & NEGLIGIBLE allowed.
+#     (4) 'BLOCK_ONLY_HIGH' - MEDIUM, LOW & NEGLIGIBLE allowed.
+#     (5) 'BLOCK_NONE' - All content will be allowed.
+#
+# If value is unavailable (empty string), then 'BLOCK_NONE' is the default.
+GOOGLEAI_BLOCK_SEXUALLY_EXPLICIT = 'BLOCK_NONE'
+
+
+# GOOGLEAI_BLOCK_DANGEROUS_CONTENT
+# This specifies the AI filtering category for dangerous content. It
+# uses the string-type enumerated values stated in:
+#     (1) https://ai.google.dev/api/rest/v1beta/HarmCategory
+#     (2) https://ai.google.dev/api/rest/v1beta/SafetySetting#HarmBlockThreshold
+#
+# Acceptable values are:
+#     (1) 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' - not specified
+#     (2) 'BLOCK_LOW_AND_ABOVE' - NEGLIGIBLE is allowed.
+#     (3) 'BLOCK_MEDIUM_AND_ABOVE' - LOW & NEGLIGIBLE allowed.
+#     (4) 'BLOCK_ONLY_HIGH' - MEDIUM, LOW & NEGLIGIBLE allowed.
+#     (5) 'BLOCK_NONE' - All content will be allowed.
+#
+# If value is unavailable (empty string), then 'BLOCK_NONE' is the default.
+GOOGLEAI_BLOCK_DANGEROUS_CONTENT = 'BLOCK_NONE'
+
+
+# GOOGLEAI_BLOCK_HARASSMENT
+# This specifies the AI filtering category for harassment content. It
+# uses the string-type enumerated values stated in:
+#     (1) https://ai.google.dev/api/rest/v1beta/HarmCategory
+#     (2) https://ai.google.dev/api/rest/v1beta/SafetySetting#HarmBlockThreshold
+#
+# Acceptable values are:
+#     (1) 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' - not specified
+#     (2) 'BLOCK_LOW_AND_ABOVE' - NEGLIGIBLE is allowed.
+#     (3) 'BLOCK_MEDIUM_AND_ABOVE' - LOW & NEGLIGIBLE allowed.
+#     (4) 'BLOCK_ONLY_HIGH' - MEDIUM, LOW & NEGLIGIBLE allowed.
+#     (5) 'BLOCK_NONE' - All content will be allowed.
+#
+# If value is unavailable (empty string), then 'BLOCK_NONE' is the default.
+GOOGLEAI_BLOCK_HARASSMENT = 'BLOCK_NONE'
+
+
+
+
 ##########################
 # LIBREOFFICE TECHNOLOGY #
 ##########################
