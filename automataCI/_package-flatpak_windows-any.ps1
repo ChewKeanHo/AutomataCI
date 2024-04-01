@@ -96,6 +96,7 @@ function PACKAGE-Run-FLATPAK {
 	10 {
 		$null = I18N-Assemble-Skipped
 		$null = FS-Remove-Silently "${_src}"
+		return 0
 	} 0 {
 		# accepted
 	} default {
