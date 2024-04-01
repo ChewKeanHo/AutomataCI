@@ -170,6 +170,15 @@ function PACKAGE-Assemble-DEB-Content {
 	}
 
 
+	# NOTE: REQUIRED file
+	$null = I18N-Create "${_directory}\control\md5sum"
+	$___process = DEB-Create-Checksum "${_directory}"
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
+		return 1
+	}
+
+
 	# NOTE: OPTIONAL (Comment to turn it off)
 	$null = I18N-Create "source.list"
 	$___process = DEB-Create-Source-List `
@@ -179,15 +188,6 @@ function PACKAGE-Assemble-DEB-Content {
 		"${env:PROJECT_REPREPRO_CODENAME}" `
 		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
 		"${_gpg_keyring}"
-	if ($___process -ne 0) {
-		$null = I18N-Create-Failed
-		return 1
-	}
-
-
-	# NOTE: REQUIRED file
-	$null = I18N-Create "${_directory}\control\md5sum"
-	$___process = DEB-Create-Checksum "${_directory}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
