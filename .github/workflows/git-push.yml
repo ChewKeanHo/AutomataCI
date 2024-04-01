@@ -99,6 +99,7 @@ jobs:
           ./automataCI/ci.sh.ps1 deploy
       - name: AutomataCI - ARCHIVE
         id: automataci_ci_archive
+        if: always()
         run: |
           ./automataCI/ci.sh.ps1 archive
       - name: GITHUB ACTIONS - Upload Artifact
