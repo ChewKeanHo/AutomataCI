@@ -54,11 +54,11 @@ PACKAGE_Run_IPK() {
         I18N_Check_Availability "IPK"
         IPK_Is_Available "$_target_os" "$_target_arch"
         case $? in
-        2|3)
+        2)
                 I18N_Check_Incompatible_Skipped
                 return 0
                 ;;
-        0)
+        0|3)
                 # accepted
                 ;;
         *)
