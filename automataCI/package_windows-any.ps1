@@ -170,8 +170,10 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "\..*$"
 	$TARGET_OS = $TARGET_FILENAME -replace ".*_"
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "_.*"
-	$TARGET_ARCH = $TARGET_OS -replace ".*-"
+	$TARGET_ARCH = $TARGET_ARCH -replace ".*-"
+	$TARGET_ARCH = $TARGET_ARCH -replace "\..*$"
 	$TARGET_OS = $TARGET_OS -replace "-.*"
+	$TARGET_OS = $TARGET_OS -replace "\..*$"
 
 	if (($(STRINGS-Is-Empty "${TARGET_OS}") -eq 0) -or
 		($(STRINGS-Is-Empty "${TARGET_ARCH}") -eq 0) -or
