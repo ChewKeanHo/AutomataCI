@@ -143,6 +143,69 @@ function STRINGS-To-Lowercase {
 
 
 
+function STRINGS-To-Titlecase {
+	param(
+		[string]$___content
+	)
+
+
+	# validate input
+	$___process = STRINGS-Is-Empty "${___content}"
+	if ($___process -eq 0) {
+		return ""
+	}
+
+
+	# execute
+	$___buffer = ""
+	$___resevoir = "${___content}"
+	$___trigger = $true
+	while ($___resevoir -ne "") {
+		## extract character
+		$___char = $___resevoir.Substring(0, 1)
+		if ($___char -eq "``") {
+			$___char = $___resevoir.Substring(0, 2)
+		}
+		$___resevoir = $___resevoir -replace "^${___char}", ""
+
+		## process character
+		if ($___trigger ) {
+			$___char = $___char.ToUpper()
+		} else {
+			$___char = $___char.ToLower()
+		}
+		$___buffer += $___char
+
+		## set next character action
+		switch ("${___char}") {
+		{ $_ -in " ", "`r", "`n" } {
+			$___trigger = $true
+		} default {
+			$___trigger = $false
+		}}
+	}
+
+
+	# report status
+	return $___buffer
+}
+
+
+
+
+function STRINGS-To-Uppercase {
+	param(
+		[string]$___content
+	)
+
+
+	# execute
+	return $___content.ToUpper()
+}
+
+
+
+
 function STRINGS-Trim-Whitespace-Left {
 	param(
 		[string]$___content
@@ -182,17 +245,4 @@ function STRINGS-Trim-Whitespace {
 
 	# report status
 	return $___content
-}
-
-
-
-
-function STRINGS-To-Uppercase {
-	param(
-		[string]$___content
-	)
-
-
-	# execute
-	return $___content.ToUpper()
 }

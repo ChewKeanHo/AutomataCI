@@ -21,6 +21,7 @@ if [ "$PROJECT_PATH_ROOT" = "" ]; then
 fi
 
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
 
@@ -106,11 +107,11 @@ PACKAGE_Assemble_HOMEBREW_Content() {
         ___dest="${_directory}/formula.rb"
         I18N_Create "$___dest"
         FS_Write_File "$___dest" "\
-class ${PROJECT_SKU_TITLECASE} < Formula
+class $(STRINGS_To_Titlecase "$PROJECT_SKU") < Formula
   desc \"${PROJECT_PITCH}\"
   homepage \"${PROJECT_CONTACT_WEBSITE}\"
   license \"${PROJECT_LICENSE}\"
-  url \"${PROJECT_HOMEBREW_SOURCE_URL}/${PROJECT_VERSION}/{{ TARGET_PACKAGE }}\"
+  url \"${PROJECT_HOMEBREW_SOURCE_URL}/{{ TARGET_PACKAGE }}\"
   sha256 \"{{ TARGET_SHASUM }}\"
 
   on_linux do
@@ -126,7 +127,8 @@ class ${PROJECT_SKU_TITLECASE} < Formula
     system \"./automataCI/ci.sh.ps1 prepare\"
     system \"./automataCI/ci.sh.ps1 materialize\"
     chmod 0755, \"bin/${PROJECT_SKU}\"
-    bin.install \"bin/${PROJECT_SKU}\"
+    libexec.install \"bin/${PROJECT_SKU}\"
+    bin.install_symlink libexec/\"${PROJECT_SKU}\" => \"${PROJECT_SKU}\"
   end
 
   test do

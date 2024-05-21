@@ -141,6 +141,72 @@ STRINGS_To_Lowercase() {
 
 
 
+STRINGS_To_Titlecase() {
+        #___content="$1"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                printf -- ""
+                return 1
+        fi
+
+
+        # execute
+        ___buffer=""
+        ___resevoir="$1"
+        ___trigger=0
+        while [ -n "$___resevoir" ]; do
+                ## extract character
+                ___char="$(printf -- "%.1s" "$___resevoir")"
+                if [ "$___char" = '\' ]; then
+                        ___char="$(printf -- "%.2s" "$___resevoir")"
+                fi
+                ___resevoir="${___resevoir#*${___char}}"
+
+                ## process character
+                if [ $___trigger -eq 0 ]; then
+                        ___char="$(printf -- "%s" "$___char" | tr '[:lower:]' '[:upper:]')"
+                else
+                        ___char="$(printf -- "%s" "$___char" | tr '[:upper:]' '[:lower:]')"
+                fi
+                ___buffer="${___buffer}${___char}"
+
+                ## set next character action
+                case "$___char" in
+                " "|"\r"|"\n")
+                        ___trigger=0
+                        ;;
+                *)
+                        ___trigger=1
+                        ;;
+                esac
+        done
+
+
+        # report status
+        printf -- "%s" "$___buffer"
+        return 0
+}
+
+
+
+
+STRINGS_To_Uppercase() {
+        #___content="$1"
+
+
+        # execute
+        printf -- "%b" "$1" | tr '[:lower:]' '[:upper:]'
+
+
+        # report status
+        return 0
+}
+
+
+
+
 STRINGS_Trim_Whitespace_Left() {
         #___content="$1"
 
@@ -180,21 +246,6 @@ STRINGS_Trim_Whitespace() {
         ___content="$(STRINGS_Trim_Whitespace_Right "$___content")"
         printf -- "%b" "$___content"
         unset ___content
-
-
-        # report status
-        return 0
-}
-
-
-
-
-STRINGS_To_Uppercase() {
-        #___content="$1"
-
-
-        # execute
-        printf -- "%b" "$1" | tr '[:lower:]' '[:upper:]'
 
 
         # report status
