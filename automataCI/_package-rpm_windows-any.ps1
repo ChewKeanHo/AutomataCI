@@ -47,10 +47,10 @@ function PACKAGE-Run-RPM {
 	$null = I18N-Check-Availability "RPM"
 	$___process = RPM-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($___process) {
-	{ $_ -in 2, 3 } {
+	2 {
 		$null = I18N-Check-Incompatible-Skipped
 		return 0
-	} 0 {
+	} { $_ -in 0, 3 } {
 		# accepted
 	} Default {
 		$null = I18N-Check-Failed-Skipped

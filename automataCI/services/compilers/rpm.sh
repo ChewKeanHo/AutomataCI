@@ -475,7 +475,7 @@ RPM_Is_Available() {
 
         # check compatible target cpu architecture
         case "$___os" in
-        linux)
+        linux|any)
                 ;;
         *)
                 return 2

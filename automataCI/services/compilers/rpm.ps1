@@ -464,7 +464,7 @@ function RPM-Is-Available {
 
 	# check compatible target os
 	switch ($___os) {
-	linux {
+	{ $_ -in "linux", "any" } {
 		break
 	} default {
 		return 2
