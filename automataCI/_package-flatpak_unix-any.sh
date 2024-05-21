@@ -56,11 +56,11 @@ PACKAGE_Run_FLATPAK() {
         I18N_Check_Availability "FLATPAK"
         FLATPAK_Is_Available "$_target_os" "$_target_arch"
         case $? in
-        2|3)
+        2)
                 I18N_Check_Incompatible_Skipped
                 return 0
                 ;;
-        0)
+        0|3)
                 ;;
         *)
                 I18N_Check_Failed
