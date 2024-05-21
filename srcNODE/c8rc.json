@@ -1,0 +1,22 @@
+{
+  "extension": [
+    ".js",
+    ".ts",
+    ".tsx"
+  ],
+  "src": [
+    "src"
+  ],
+  "exclude": [
+    "**/*.spec.js",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ],
+  "reporter": [
+    "text",
+    "html"
+  ],
+  "all": true,
+  "report-dir": "dist/coverage",
+  "temp-directory": "dist/coverage-output"
+}

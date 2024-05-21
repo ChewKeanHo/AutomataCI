@@ -1,0 +1,31 @@
+{
+  "name": "hestiai18n",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "One Peaceful Frontend+Backend Software Library Suite: internationalization (i18n).",
+  "scripts": {
+    "build": "tsc -p tsconfig-build.json",
+    "test": "tsc -p tsconfig-test.json && c8 --config c8rc.json jasmine --config=tsconfig-test.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChewKeanHo/LIBS_hestiaI18N.git"
+  },
+  "keywords": [
+    "i18n",
+    "typescript"
+  ],
+  "author": " (Holloway)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ChewKeanHo/LIBS_hestiaI18N/issues"
+  },
+  "homepage": "https://github.com/ChewKeanHo/LIBS_hestiaI18N",
+  "devDependencies": {
+    "@types/jasmine": "^5.1.4",
+    "@types/node": "^20.12.7",
+    "c8": "^9.1.0",
+    "jasmine": "^5.1.0",
+    "typescript": "^5.4.5"
+  }
+}

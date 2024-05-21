@@ -1,0 +1,18 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"outDir": "./dist/test",
+		"sourceMap": true
+	},
+	"spec_dir": "./dist/test",
+	"spec_files": [
+		"**/*[sS]pec.?(m)js"
+	],
+	"helpers": [
+		"helpers/**/*.?(m)js"
+	],
+	"env": {
+		"stopSpecOnExpectationFailure": false,
+		"random": true
+	}
+}

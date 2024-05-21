@@ -105,9 +105,12 @@ certbot.log
 #####################
 # Node
 #####################
-node_modules
+node_modules/
 npm-debug.log
 yarn-error.log
+coverage/
+dist/
+.nyc_output
 
 #####################
 # Databases
