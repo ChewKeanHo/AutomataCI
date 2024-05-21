@@ -155,8 +155,10 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         TARGET_FILENAME="${TARGET_FILENAME%.*}"
         TARGET_OS="${TARGET_FILENAME##*_}"
         TARGET_FILENAME="${TARGET_FILENAME%%_*}"
-        TARGET_ARCH="${TARGET_OS##*-}"
+        TARGET_ARCH="${TARGET_ARCH##*-}"
+        TARGET_ARCH="${TARGET_ARCH%%.*}"
         TARGET_OS="${TARGET_OS%%-*}"
+        TARGET_OS="${TARGET_OS%%.*}"
 
         if [ "$(STRINGS_Is_Empty "$TARGET_OS")" -eq 0 ] ||
                 [ "$(STRINGS_Is_Empty "$TARGET_ARCH")" -eq 0 ] ||
