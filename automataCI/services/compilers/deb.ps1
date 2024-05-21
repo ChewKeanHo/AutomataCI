@@ -400,35 +400,37 @@ function DEB-Get-Architecture {
 
 	# process os
 	switch ($___os) {
-	"dragonfly" {
-		$___output="dragonflybsd"
+	linux {
+		$___output = ""
+	} dragonfly {
+		$___output = "dragonflybsd-"
 	} default {
-		$___output="${___os}"
+		$___output = "${___os}-"
 	}}
 
 
 	# process arch
 	switch ($___arch) {
 	{ $_ -in "386", "i386", "486", "i486", "586", "i586", "686", "i686" } {
-		$___output = "${___output}-i386"
+		$___output = "${___output}i386"
 	} "mipsle" {
-		$___output = "${___output}-mipsel"
+		$___output = "${___output}mipsel"
 	} "mipsr6le" {
-		$___output = "${___output}-mipsr6el"
+		$___output = "${___output}mipsr6el"
 	} "mips32le" {
-		$___output = "${___output}-mips32el"
+		$___output = "${___output}mips32el"
 	} "mips32r6le" {
-		$___output = "${___output}-mips32r6el"
+		$___output = "${___output}mips32r6el"
 	} "mips64le" {
-		$___output = "${___output}-mips64el"
+		$___output = "${___output}mips64el"
 	} "mips64r6le" {
-		$___output = "${___output}-mips64r6el"
+		$___output = "${___output}mips64r6el"
 	} "powerpcle" {
-		$___output = "${___output}-powerpcel"
+		$___output = "${___output}powerpcel"
 	} "ppc64le" {
-		$___output = "${___output}-ppc64el"
+		$___output = "${___output}ppc64el"
 	} default {
-		$___output = "${___output}-${___arch}"
+		$___output = "${___output}${___arch}"
 	}}
 
 
