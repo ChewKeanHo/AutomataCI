@@ -122,7 +122,7 @@ FLATPAK_Is_Available() {
 
         # check compatible target os
         case "$___os" in
-        linux)
+        linux|any)
                 # accepted
                 ;;
         *)

@@ -46,10 +46,10 @@ function PACKAGE-Run-FLATPAK {
 	$null = I18N-Check-Availability "FLATPAK"
 	$___process = FLATPAK-Is-Available "${_target_os}" "${_target_arch}"
 	switch ($___process) {
-	{ $_ -in 2, 3 } {
+	2 {
 		$null = I18N-Check-Incompatible-Skipped
 		return 0
-	} 0 {
+	} { $_ -in 0, 3 } {
 		break
 	} Default {
 		$null = I18N-Check-Failed
