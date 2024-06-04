@@ -59,10 +59,10 @@ ${__build_path}/${PROJECT_SKU}_windows-i386.exe|none
 ${__build_path}/${PROJECT_SKU}_windows-arm.exe|none
 ${__source_path}/licenses/LICENSE_en.rtf|LICENSE_en.rtf
 ${__source_path}/licenses/LICENSE_en.rtf|LICENSE_zh-hans.rtf
-${__source_path}/licenses/LICENSE-EN.pdf|LICENSE_en.pdf
-${__source_path}/licenses/LICENSE-EN.pdf|LICENSE_zh-hans.pdf
-${__source_path}/docs/USER-GUIDES-EN.pdf|USER-GUIDES_en.pdf
-${__source_path}/docs/USER-GUIDES-EN.pdf|USER-GUIDES_zh-hans.pdf
+${__source_path}/licenses/LICENSE_en.pdf|LICENSE_en.pdf
+${__source_path}/licenses/LICENSE_en.pdf|LICENSE_zh-hans.pdf
+${__source_path}/docs/USER-GUIDES_en.pdf|USER-GUIDES_en.pdf
+${__source_path}/docs/USER-GUIDES_en.pdf|USER-GUIDES_zh-hans.pdf
 ${__source_path}/icons/icon.ico|none
 ${__source_path}/icons/msi-banner_en.jpg|none
 ${__source_path}/icons/msi-banner_zh-hans.jpg|none

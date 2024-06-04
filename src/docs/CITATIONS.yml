@@ -54,7 +54,7 @@ message: |-
 authors:
   - given-names: "Kean Ho"
     family-names: "Chew"
-    email: "hollowaykeanho@gmail.com"
+    email: "me@hollowaykeanho.com"
     affiliation: "Independent"
     orcid: "https://orcid.org/0000-0003-4202-4863"
   - given-names: "Cory"

@@ -99,7 +99,7 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 
 
 	# copy user guide
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\USER-GUIDES-EN.pdf"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\USER-GUIDES_en.pdf"
 	$null = I18N-Assemble "${___source}" "${_directory}"
 	$___process = FS-Copy-File "${___source}" "${_directory}"
 	if ($___process -ne 0) {
@@ -109,7 +109,7 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 
 
 	# copy license file
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\LICENSE-EN.pdf"
+	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\LICENSE_en.pdf"
 	$null = I18N-Assemble "${___source}" "${_directory}"
 	$___process = FS-Copy-File "${___source}" "${_directory}"
 	if ($___process -ne 0) {
