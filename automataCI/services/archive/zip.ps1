@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 
 
 
@@ -50,25 +51,24 @@ function ZIP-Extract {
 
 
 	# validate input
+	$___process = FS-Is-Directory "${___destination}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
 	$___process = FS-Is-File "${___source}"
 	if ($___process -ne 0) {
 		return 1
 	}
 
-	$___process = FS-Is-File "${___destination}"
-	if ($___process -eq 0) {
-		return 1
-	}
-
 
 	# execute
+	$null = FS-Make-Directory "${___destination}"
 	try {
-		$null = FS-Make-Directory "${___destination}"
 		$null = Expand-Archive -Path $___source -DestinationPath $___destination
 	} catch {
 		return 1
 	}
-
 
 	# report status
 	return 0

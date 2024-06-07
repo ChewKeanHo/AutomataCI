@@ -1,7 +1,11 @@
-import { hello } from "./index.js";
+// [ COPYRIGHT CLASE HERE]
+import * as Package from "./index.js";
 
-describe('hello', () => {
+
+
+
+describe('Main', () => {
 	it('should perform a proper printout', () => {
-		expect(hello("World")).toBe("Hello World");
+		expect(Package.Main()).toBe("Jane from Sample!");
 	});
 });

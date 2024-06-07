@@ -23,7 +23,7 @@ function FS-Append-File {
 
 
 	# perform file write
-	$null = Add-Content -Path $___target -Value $___content
+	$null = Add-Content -Path $___target -Value $___content -NoNewline
 	if ($?) {
 		return 0
 	}
@@ -106,47 +106,55 @@ function FS-Extension-Remove {
 
 function FS-Extension-Replace {
 	param (
-		[string]$__target,
+		[string]$___path,
 		[string]$___extension,
 		[string]$___candidate
 	)
 
 
 	# validate input
-	if ([string]::IsNullOrEmpty($__target)) {
+	if ([string]::IsNullOrEmpty($___path)) {
 		return ""
 	}
 
 
 	# execute
+	## prepare working parameters
+	$___target = Split-Path -Leaf "${___path}"
+
 	if ($___extension -eq "*") {
-		$___target = Split-Path -Leaf "${__target}"
+		## trim all extensions to the first period
 		$___target = $___target -replace '(\.\w+)+$'
 
-		if (-not [string]::IsNullOrEmpty($(Split-Path -Parent "${__target}"))) {
-			$___target = $(Split-Path -Parent "${__target}") + "\" + "${___target}"
+		## restore directory pathing when available
+		if (-not [string]::IsNullOrEmpty($(Split-Path -Parent "${___path}"))) {
+			$___target = $(Split-Path -Parent "${___path}") + "\" + "${___target}"
 		}
 	} elseif (-not [string]::IsNullOrEmpty($___extension)) {
+		## trim off existing extension
 		if ($___extension.Substring(0,1) -eq ".") {
 			$___extension = $___extension.Substring(1)
 		}
-
-		$___target = Split-Path -Leaf "${__target}"
 		$___target = $___target -replace "\.${___extension}$"
 
-		if (-not [string]::IsNullOrEmpty($___candidate)) {
-			if ($___candidate.Substring(0,1) -eq ".") {
-				$___target += "." + $___candidate.Substring(1)
-			} else {
-				$___target += "." + $___candidate
+		## append new extension when available
+		if ($___target -ne $___path) {
+			if (-not [string]::IsNullOrEmpty($___candidate)) {
+				if ($___candidate.Substring(0,1) -eq ".") {
+					$___target += "." + $___candidate.Substring(1)
+				} else {
+					$___target += "." + $___candidate
+				}
 			}
 		}
 
-		if (-not [string]::IsNullOrEmpty($(Split-Path -Parent "${__target}"))) {
-			$___target = $(Split-Path -Parent "${__target}") + "\" + "${___target}"
+		## restore directory pathing when available
+		if (-not [string]::IsNullOrEmpty($(Split-Path -Parent "${___path}"))) {
+			$___target = $(Split-Path -Parent "${___path}") + "\" + "${___target}"
 		}
 	} else {
-		$___target = $__target
+		## do nothing
+		$___target = $___path
 	}
 
 
@@ -474,6 +482,25 @@ function FS-Is-Target-A-MSI {
 
 
 
+function FS-Is-Target-A-NPM {
+	param (
+		[string]$___target
+	)
+
+
+	# execute
+	if ($("${___target}" -replace '^.*_js-js.tgz') -ne "${___target}") {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-Nupkg {
 	param (
 		[string]$___target
@@ -500,7 +527,7 @@ function FS-Is-Target-A-PDF {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*.pdf') -ne "${___target}")) {
+	if ($("${___target}" -replace '^.*.pdf') -ne "${___target}") {
 		return 0
 	}
 
@@ -519,7 +546,7 @@ function FS-Is-Target-A-PYPI {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*-pypi') -ne "${___target}")) {
+	if ($("${___target}" -replace '^.*-pypi') -ne "${___target}") {
 		return 0
 	}
 
@@ -879,7 +906,7 @@ function FS-Write-File {
 
 
 	# perform file write
-	$null = Set-Content -Path $___target -Value $___content
+	$null = Set-Content -Path $___target -Value $___content -NoNewline
 	if ($?) {
 		return 0
 	}

@@ -79,6 +79,8 @@ function PACKAGE-Assemble-IPK-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
+		return 10 # not applicable
 	} else {
 		# copy main program
 		# TIP: (1) usually is: usr/local/bin or usr/local/sbin

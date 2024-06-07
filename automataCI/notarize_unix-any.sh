@@ -60,7 +60,8 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
 
         # parse build candidate
         I18N_Detected "$i"
-        TARGET_FILENAME="${i##*${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/}"
+        TARGET_FILENAME="$(FS_Get_File "$i")"
+        TARGET_FILENAME="$(FS_Extension_Remove "$TARGET_FILENAME")"
         TARGET_FILENAME="${TARGET_FILENAME%.*}"
         TARGET_OS="${TARGET_FILENAME##*_}"
         TARGET_FILENAME="${TARGET_FILENAME%%_*}"

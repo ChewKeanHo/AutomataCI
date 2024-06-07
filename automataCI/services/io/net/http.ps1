@@ -41,52 +41,75 @@ function HTTP-Download {
 	$null = FS-Make-Directory (Split-Path -Path $___filepath) -ErrorAction SilentlyContinue
 	$___user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15"
 
-
 	## download payload
 	if (-not [string]::IsNullOrEmpty($___auth_header)) {
 		if (Get-Command curl -ErrorAction SilentlyContinue) {
-			curl --location `
+			$null = curl --location `
 				--header $___user_agent `
 				--header $___auth_header `
 				--output $___filepath `
 				--request $___method `
 				$___url
 			if ($LASTEXITCODE -ne 0) {
+				$null = Remove-Item $___filepath `
+					-Force `
+					-Recurse `
+					-ErrorAction SilentlyContinue
 				return 1
 			}
 		} elseif (Get-Command wget -ErrorAction SilentlyContinue) {
-			wget --max-redirect 16 `
+			$null = wget --max-redirect 16 `
 				--header $___user_agent `
 				--header=$___auth_header `
 				--output-file=$___filepath `
 				--method=$___method `
 				$___url
 			if ($LASTEXITCODE -ne 0) {
+				$null = Remove-Item $___filepath `
+					-Force `
+					-Recurse `
+					-ErrorAction SilentlyContinue
 				return 1
 			}
 		} else {
+			$null = Remove-Item $___filepath `
+				-Force `
+				-Recurse `
+				-ErrorAction SilentlyContinue
 			return 1
 		}
 	} else {
 		if (Get-Command curl -ErrorAction SilentlyContinue) {
-			curl --location `
+			$null = curl --location `
 				--header $___user_agent `
 				--output $___filepath `
 				--request $___method `
 				$___url
 			if ($LASTEXITCODE -ne 0) {
+				$null = Remove-Item $___filepath `
+					-Force `
+					-Recurse `
+					-ErrorAction SilentlyContinue
 				return 1
 			}
 		} elseif (Get-Command wget -ErrorAction SilentlyContinue) {
-			wget --max-redirect 16 `
+			$null = wget --max-redirect 16 `
 				--header $___user_agent `
 				--output-file=$___filepath `
 				--method=$___method `
 				$___url
 			if ($LASTEXITCODE -ne 0) {
+				$null = Remove-Item $___filepath `
+					-Force `
+					-Recurse `
+					-ErrorAction SilentlyContinue
 				return 1
 			}
 		} else {
+			$null = Remove-Item $___filepath `
+				-Force `
+				-Recurse `
+				-ErrorAction SilentlyContinue
 			return 1
 		}
 	}

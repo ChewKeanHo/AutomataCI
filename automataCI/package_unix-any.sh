@@ -36,6 +36,7 @@ fi
 . "${LIBS_AUTOMATACI}/_package-homebrew_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-ipk_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-msi_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-npm_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-pdf_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-pypi_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-rpm_unix-any.sh"
@@ -155,7 +156,7 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
         TARGET_FILENAME="${TARGET_FILENAME%.*}"
         TARGET_OS="${TARGET_FILENAME##*_}"
         TARGET_FILENAME="${TARGET_FILENAME%%_*}"
-        TARGET_ARCH="${TARGET_ARCH##*-}"
+        TARGET_ARCH="${TARGET_OS##*-}"
         TARGET_ARCH="${TARGET_ARCH%%.*}"
         TARGET_OS="${TARGET_OS%%-*}"
         TARGET_OS="${TARGET_OS%%.*}"
@@ -247,6 +248,14 @@ ${__common}|${__log}|PACKAGE_Run_IPK
         __log="${__log_directory}/msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS_Append_File "$__serial_control" "\
 ${__common}|${__log}|PACKAGE_Run_MSI
+"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        __log="${__log_directory}/npm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+        FS_Append_File "$__serial_control" "\
+${__common}|${__log}|PACKAGE_Run_NPM
 "
         if [ $? -ne 0 ]; then
                 return 1

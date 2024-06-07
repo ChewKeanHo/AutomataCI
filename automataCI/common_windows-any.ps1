@@ -98,6 +98,11 @@ if ($___process -ne 0) {
 	return 1
 }
 
+$___process = RUN-Subroutine-Exec "${env:PROJECT_NODE}" "NODE"
+if ($___process -ne 0) {
+	return 1
+}
+
 $___process = RUN-Subroutine-Exec "${env:PROJECT_PYTHON}" "PYTHON"
 if ($___process -ne 0) {
 	return 1

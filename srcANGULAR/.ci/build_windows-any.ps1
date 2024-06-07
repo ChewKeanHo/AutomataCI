@@ -32,7 +32,6 @@ $__placeholders = @(
 )
 
 
-$null = FS-Remake-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
 
 
 $null = I18N-Activate-Environment

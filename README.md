@@ -1,8 +1,8 @@
 # AutomataCI
 [![AutomataCI](src/icons/banner_1200x200.svg)](#automataci)
 
-A multi-purpose Git template repository with built-in natively operable
-semi-autonomous CI infrastructure.
+An open-source, redistributable, template-guided, and semi-autonomous CI
+infrastructure readily available your next project.
 
 ***Run the CI with full-force anywhere anytime without solely depending on any
 3rd-party provider***.
@@ -33,7 +33,7 @@ Some good business reasons why using AutomataCI:
 Build confidently not just for the common CPUs but also other hardware as well
 with your selected technologies.
 
-[![cross-compile demo](.internals/screenshots/en/automataci_cross-compile-confidently_en.gif)](#cross-compile-confidently)
+[![cross-compile demo](/.internals/screenshots/en/automataci_cross-compile-confidently_en.gif)](#cross-compile-confidently)
 
 
 
@@ -42,7 +42,7 @@ with your selected technologies.
 Packaging your software for as many standardized distribution channels as
 possible making your customers' user experience seamless.
 
-[![maximizing reaches demo](.internals/screenshots/en/automataci-packaging-many-distributions_en.gif)](#maximizing-reaches)
+[![maximizing reaches demo](/.internals/screenshots/en/automataci-packaging-many-distributions_en.gif)](#maximizing-reaches)
 
 
 
@@ -51,7 +51,7 @@ possible making your customers' user experience seamless.
 Deploy multiple technologies for your product development via integration
 (within sensible needs of course).
 
-[![focusing business objectives demo](.internals/screenshots/en/automataci-handles-various-tech-simultenously_en.gif)](#focusing-business-objectives)
+[![focusing business objectives demo](/.internals/screenshots/en/automataci-handles-various-tech-simultenously_en.gif)](#focusing-business-objectives)
 
 
 
@@ -60,7 +60,7 @@ Deploy multiple technologies for your product development via integration
 GPG cryptographically signed packages alongside common shasum checking for an
 end-to-end verifiable solution for all security level needs; whenever, wherever.
 
-[![Securing point of origin](.internals/screenshots/en/automataci-securing-packages-with-cryptography_en.gif)](#securing-point-of-origin)
+[![Securing point of origin](/.internals/screenshots/en/automataci-securing-packages-with-cryptography_en.gif)](#securing-point-of-origin)
 
 
 
@@ -69,7 +69,7 @@ end-to-end verifiable solution for all security level needs; whenever, wherever.
 Package small-sized Open-Source Image Container (for Docker OR Podman) AND
 compile cross-platform images whenever possible.
 
-[![Optimally Containerized](.internals/screenshots/en/automataci-multiarch-container-available_en.png)](#optimally-containerized)
+[![Optimally Containerized](/.internals/screenshots/en/automataci-multiarch-container-available_en.png)](#optimally-containerized)
 
 
 
@@ -93,6 +93,7 @@ compile cross-platform images whenever possible.
   1. [Standard Go](https://go.dev/)
 * Javascript & Typescript Web Frameworks
   1. [Angular](https://angular.io/) (*`srcANGULAR`*)
+  2. [NodeJS](https://nodejs.org/) (*`srcNODE`*)
 * [Nim Programming Language](https://nim-lang.org/) (*`srcNIM`*)
 * [Python Programming Language](https://www.python.org/) (*`srcPYTHON`*)
 * [Rust Programming Language](https://www.rust-lang.org/) (*`srcRUST`*)

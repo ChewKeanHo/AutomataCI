@@ -63,6 +63,8 @@ PACKAGE_Assemble_FLATPAK_Content() {
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_PDF "$_target") -eq 0 ]; then
                 return 10 # not applicable
+        elif [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
+                return 10 # not applicable
         elif [ ! "$_target_os" = "linux" ] && [ ! "$_target_os" = "any" ]; then
                 return 10 # not applicable
         fi

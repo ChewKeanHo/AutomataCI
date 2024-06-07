@@ -147,6 +147,31 @@ OS_Is_Run_Simulated() {
 
 
 
+OS_Remove_Path() {
+        #___path="$1"
+
+
+        # validate input
+        if [ -z "$1" ]; then
+                return 1
+        fi
+
+
+        # execute
+        ___paths=:$PATH:
+        ___paths=${___paths/:$1:/:}
+        ___paths=${___paths%:}
+        ___paths=${___paths#:}
+        PATH=$___paths
+
+
+        # report status
+        return 0
+}
+
+
+
+
 OS_Sync() {
         # execute
         sync

@@ -132,7 +132,7 @@ function FLATPAK-Is-Available {
 
 	# check compatible target os
 	switch ($___os) {
-	{ $_ -in linux, any } {
+	{ $_ -in "linux", "any" } {
 		# accepted
 	} Default {
 		return 2

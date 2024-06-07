@@ -104,6 +104,12 @@ if [ $? -ne 0 ]; then
 fi
 
 
+Run_Subroutine_Exec "$PROJECT_NODE" "NODE"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
 Run_Subroutine_Exec "$PROJECT_PYTHON" "PYTHON"
 if [ $? -ne 0 ]; then
         return 1

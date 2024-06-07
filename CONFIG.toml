@@ -66,13 +66,13 @@ PRODUCT_APP_UUID = "76C7A54E-7360-CB70-1A5E-44D8A00CCB30"
 # PROJECT_NAME
 # This is the name of the product used in documentation, marketing addresses
 # etc only. For programming purposes, PROJECT_SKU is used instead.
-PROJECT_NAME = "AutomataCI"
+PROJECT_NAME = "Chew Kean Ho's AutomataCI"
 
 
 # PROJECT_PITCH
 # A short elevator pitch about the project used as a short description. Max
 # Max: 60 characters.
-PROJECT_PITCH = "Solid Foundation for Kickstarting Your Software Development"
+PROJECT_PITCH = "A redistributable & semi-autonomous CI infrastructure."
 
 
 # PROJECT_VERSION
@@ -103,33 +103,39 @@ PROJECT_CADENCE = "1"
 PROJECT_LICENSE = "Apache-2.0"
 
 
+# PROJECT_SCOPE
+# The scope of the project being housed in (e.g.
+# GitHub Username|Organization Name, NPMJS scope, etc). This is required for
+# certain packages' ecosystems such as but not limited to NPM.
+PROJECT_SCOPE = "chewkeanho"
+
+
 # PROJECT_CONTACT_BRAND
-# Entity's short brand name.
-# It should be in lowercase and should not be using dash ('-'),
-# underscore ('_'), and space (' ') for maximum compatibility.
-PROJECT_CONTACT_BRAND = "mybrand"
+# Contact Entity's short brand name. It should be in lowercase and should not be
+# using dash ('-'), underscore ('_'), and space (' ') for maximum compatibility.
+PROJECT_CONTACT_BRAND = "chewkeanho"
 
 
 # PROJECT_CONTACT_BRAND_TITLECASE
 # The titlecase version of PROJECT_CONTACT_BRAND. Used in certain packager
 # control scripts like MSI. Conditions is the same as PROJECT_CONTACT_BRAND
 # except it is in the TitleCase representation.
-PROJECT_CONTACT_BRAND_TITLECASE = "myBRAND"
+PROJECT_CONTACT_BRAND_TITLECASE = "ChewKeanHo"
 
 
 # PROJECT_CONTACT_NAME
 # Entity's full name for inquiries.
-PROJECT_CONTACT_NAME = "Your Legal Full Name Here"
+PROJECT_CONTACT_NAME = "(Holloway) Chew, Kean Ho"
 
 
 # PROJECT_CONTACT_EMAIL
 # Entity's email channel for email communications.
-PROJECT_CONTACT_EMAIL = "contact@youremail.example"
+PROJECT_CONTACT_EMAIL = "hello@hollowaykeanho.com"
 
 
 # PROJECT_CONTACT_WEBSITE
 # Entity's website channel for sourcing information.
-PROJECT_CONTACT_WEBSITE = "https://your-product.website.here"
+PROJECT_CONTACT_WEBSITE = "https://github.com/ChewKeanHo/AutomataCI"
 
 
 # PROJECT_SOURCE_URL
@@ -166,8 +172,8 @@ AUTOMATACI_LANG = ""
 # This is a control variable used for enabling Angular technology and also
 # defining its source codes directory relative to PROJECT_PATH_ROOT. Depending
 # on the offered service (e.g. GitHub Actions), setting this variable with value
-# shall notify the CI provider to setup Go development environment
-# automatically.
+# shall notify the CI provider to setup a localized virtual environment for
+# development automatically.
 #
 # To enable it: simply supply the path (e.g. default is 'srcANGULAR').
 # To disable it: simply supply an empty path (e.g. default is '').
@@ -183,7 +189,8 @@ PROJECT_ANGULAR = ''
 # This is a control variable used for enabling C technology and also defining
 # its source codes directory relative to PROJECT_PATH_ROOT. Depending on the
 # offered service (e.g. GitHub Actions), setting this variable with value shall
-# notify the CI provider to setup Go development environment automatically.
+# notify the CI provider to setup a localized virtual environment for
+# development automatically.
 #
 # To enable it: simply supply the path (e.g. default is 'srcC').
 # To disable it: simply supply an empty path (e.g. default is '').
@@ -393,7 +400,8 @@ GOOGLEAI_BLOCK_HARASSMENT = 'BLOCK_NONE'
 # This is a control variable used for enabling LibreOffice technology and also
 # defining its source directory relative to PROJECT_PATH_ROOT. Depending on the
 # offered service (e.g. GitHub Actions), setting this variable with value shall
-# notify the CI provider to setup Go development environment automatically.
+# notify the CI provider to setup a localized virtual environment for
+# development automatically.
 #
 # To enable it: simply supply the path (e.g. default is 'srcLIBREOFFICE').
 # To disable it: simply supply an empty path (e.g. default is '').
@@ -430,7 +438,8 @@ PROJECT_LIBREOFFICE_VERSION = "24.2.1"
 # This is a control variable used for enabling Go technology and also defining
 # its source codes directory relative to PROJECT_PATH_ROOT. Depending on the
 # offered service (e.g. GitHub Actions), setting this variable with value shall
-# notify the CI provider to setup Go development environment automatically.
+# notify the CI provider to setup a localized virtual environment for
+# development automatically.
 #
 # To enable it: simply supply the path (e.g. default is 'srcGO').
 # To disable it: simply supply an empty path (e.g. default is '').
@@ -452,7 +461,8 @@ PROJECT_PATH_GO_ENGINE = "go-engine"
 # This is a control variable used for enabling Nim technology and also defining
 # its source codes directory relative to PROJECT_PATH_ROOT. Depending on the
 # offered service (e.g. GitHub Actions), setting this variable with value shall
-# notify the CI provider to setup Go development environment automatically.
+# notify the CI provider to setup a localized virtual environment for
+# development automatically.
 #
 # To enable it: simply supply the path (e.g. default is 'srcNIM').
 # To disable it: simply supply an empty path (e.g. default is '').
@@ -468,18 +478,79 @@ PROJECT_PATH_NIM_ENGINE = "nim-engine"
 
 
 ######################
+# NODE TECHNOLOGY    #
+######################
+# PROJECT_NODE
+# This is a control variable used for enabling NodeJS technology and also
+# defining its source codes directory relative to PROJECT_PATH_ROOT. Depending
+# on the offered service (e.g. GitHub Actions), setting this variable with value
+# shall notify the CI provider to setup a localized virtual environment for
+# development automatically.
+#
+# To enable it: simply supply the path (e.g. default is 'srcNODE').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_NODE = 'srcNODE'
+
+
+# PROJECT_PATH_NODE_ENGINE
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
+# setting up localized virtual environment.
+PROJECT_PATH_NODE_ENGINE = "node-engine"
+
+
+# PROJECT_NODE_VERSION
+# This is to specify which version of node to be downloaded for the project
+# as the localized virtual environment engine. Please refer to:
+#          https://nodejs.org/en/download/prebuilt-binaries/current
+# for values.
+#
+# Leaving it empty shall set AutomataCI to use the system-level NodeJS
+# (e.g: your pre-configured NodeJS).
+#
+# To enable: specify a version (e.g. 'v22.2.0')
+# To disable: keep it empty ('').
+PROJECT_NODE_VERSION = 'v22.2.0'
+
+
+# PROJECT_NODE_LOCALIZED
+# This is a flag environment variable when a localized virtual environment for
+# NodeJS is active. This is useful for detecting which nodeJS engine you're
+# currently using for the project in a given terminal.
+#
+# When active, The variable's value is the pathing to the engine itself.
+#
+# This variable is reserved by the activator script created autonomously by
+# AutomataCI.
+#PROJECT_NODE_LOCALIZED - Reserved
+
+
+# PROJECT_NODE_NPM_REGISTRY
+# The registry URL for publishing the NPM packages.
+#
+# The following are identified:
+#
+# GitHub Packages: 'https://npm.pkg.github.com'
+# NPMJS          : 'https://registry.npmjs.com'
+#
+# Default is: 'https://npm.pkg.github.com'
+PROJECT_NODE_NPM_REGISTRY = 'https://npm.pkg.github.com'
+
+
+
+
+######################
 # PYTHON TECHNOLOGY  #
 ######################
 # PROJECT_PYTHON
 # This is a control variable used for enabling Python technology and also
 # defining its source codes directory relative to PROJECT_PATH_ROOT.
 # Depending on the offered service (e.g. GitHub Actions), setting this
-# variable with value shall notify the CI provider to setup Python development
-# environment automatically.
+# variable with value shall notify the CI provider to setup a localized virtual
+# environment for development automatically.
 #
 # To enable it: simply supply the path (e.g. default is 'srcPYTHON').
 # To disable it: simply supply an empty path (e.g. default is '').
-PROJECT_PYTHON = 'srcPYTHON'
+PROJECT_PYTHON = ''
 
 
 # PROJECT_PATH_PYTHON_ENGINE
@@ -725,14 +796,14 @@ PROJECT_STATIC_REPO_DIRECTORY = "static"
 # security access or the ecosystem is not using Release Job at all (e.g. GitHub
 # Actions).
 #
-# PROJECT_SIMULATE_RELEASE_REPO = "" # Reserved - provided by external.
+# PROJECT_SIMULATE_RELEASE_REPO = "" # Reserved - provided externally.
 
 
 # PROJECT_ROBOT_RUN
 # A flag to indicate the run is operating inside a CI service by its
 # autonomous robot.
 #
-# PROJECT_ROBOT_RUN = ""  # Reserved - provided by external.
+# PROJECT_ROBOT_RUN = ""  # Reserved - provided externally.
 
 
 # PROJECT_STATIC_URL

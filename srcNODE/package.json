@@ -1,5 +1,5 @@
 {
-  "name": "hestiai18n",
+  "name": "myPackage",
   "version": "0.0.1",
   "type": "module",
   "description": "One Peaceful Frontend+Backend Software Library Suite: internationalization (i18n).",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChewKeanHo/LIBS_hestiaI18N.git"
+    "url": "git+https://github.com/ChewKeanHo/AutomataCI.git"
   },
   "keywords": [
     "i18n",
@@ -18,9 +18,9 @@
   "author": " (Holloway)",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/ChewKeanHo/LIBS_hestiaI18N/issues"
+    "url": "https://github.com/ChewKeanHo/AutomataCI/issues"
   },
-  "homepage": "https://github.com/ChewKeanHo/LIBS_hestiaI18N",
+  "homepage": "https://github.com/ChewKeanHo/AutomataCI/",
   "devDependencies": {
     "@types/jasmine": "^5.1.4",
     "@types/node": "^20.12.7",

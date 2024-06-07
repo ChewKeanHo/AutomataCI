@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2024 (Holloway) Chew, Kean Ho <hello@hollowaykeanho.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -20,70 +20,57 @@ if [ "$PROJECT_PATH_ROOT" = "" ]; then
         return 1
 fi
 
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
-. "${LIBS_AUTOMATACI}/services/compilers/angular.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/node.sh"
 
 
 
 
 # execute
-__placeholders="\
-${PROJECT_SKU}-docs_any-any
-"
-
-
-
-
 I18N_Activate_Environment
-ANGULAR_Is_Available
+NODE_Activate_Local_Environment
 if [ $? -ne 0 ]; then
         I18N_Activate_Failed
         return 1
 fi
 
 
-I18N_Build "$PROJECT_ANGULAR"
-__current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_ANGULAR}"
-ANGULAR_Build
-___process=$?
+I18N_Run_Test_Coverage
+__current_path="$PWD" && cd "${PROJECT_PATH_ROOT}/${PROJECT_NODE}"
+if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
+        I18N_Simulate_Testing
+        return 0
+else
+        NODE_NPM_Run "test"
+        if [ $? -ne 0 ]; then
+                I18N_Run_Failed
+                return 1
+        fi
+fi
 cd "$__current_path" && unset __current_path
-if [ $___process -ne 0 ]; then
-        I18N_Build_Failed
+
+
+I18N_Processing_Test_Coverage
+___source="${PROJECT_PATH_ROOT}/${PROJECT_NODE}/dist/coverage"
+___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/node-test-report"
+FS_Is_Directory "$___source"
+if [ $? -ne 0 ]; then
+        I18N_Processing_Failed
+        return 1
+fi
+
+FS_Remove_Silently "$___dest"
+FS_Make_Housing_Directory "$___dest"
+FS_Move "$___source" "$___dest"
+if [ $? -ne 0 ]; then
+        I18N_Processing_Failed
         return 1
 fi
 
 
 
 
-# placeholding flag files
-old_IFS="$IFS"
-while IFS="" read -r __line || [ -n "$__line" ]; do
-        if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
-                continue
-        fi
-
-
-        # build the file
-        __file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${__line}"
-        I18N_Build "$__line"
-        FS_Remove_Silently "$__file"
-        FS_Touch_File "$__file"
-        if [ $? -ne 0 ]; then
-                I18N_Build_Failed
-                return 1
-        fi
-done <<EOF
-$__placeholders
-EOF
-
-
-
-
-# compose documentations
-
-
-
-
-# report status
+# return status
 return 0
