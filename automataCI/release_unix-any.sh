@@ -32,6 +32,7 @@ fi
 . "${LIBS_AUTOMATACI}/_release-deb_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-docker_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-homebrew_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-npm_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-pypi_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-rpm_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-staticrepo_unix-any.sh"
@@ -97,27 +98,12 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
         fi
         I18N_Processing "$TARGET"
 
-        RELEASE_Run_DEB "$TARGET" "$STATIC_REPO"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        RELEASE_Run_RPM "$TARGET" "$STATIC_REPO"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        RELEASE_Run_DOCKER "$TARGET"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
-        RELEASE_Run_PYPI "$TARGET"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
         RELEASE_Run_CARGO "$TARGET"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE_Run_CHOCOLATEY "$TARGET" "$CHOCOLATEY_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -127,12 +113,32 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
                 return 1
         fi
 
+        RELEASE_Run_DEB "$TARGET" "$STATIC_REPO"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE_Run_DOCKER "$TARGET"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
         RELEASE_Run_HOMEBREW "$TARGET" "$HOMEBREW_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        RELEASE_Run_CHOCOLATEY "$TARGET" "$CHOCOLATEY_REPO"
+        RELEASE_Run_NPM "$TARGET"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE_Run_PYPI "$TARGET"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        RELEASE_Run_RPM "$TARGET" "$STATIC_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi

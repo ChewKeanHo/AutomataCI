@@ -59,10 +59,8 @@ foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH
 
 	# parse build candidate
 	$null = I18N-Detected "$i"
-	$TARGET_FILENAME = Split-Path -Leaf $i
-	$TARGET_FILENAME = $TARGET_FILENAME -replace `
-		(Join-Path $env:PROJECT_PATH_ROOT $env:PROJECT_PATH_BUILD), ""
-	$TARGET_FILENAME = $TARGET_FILENAME -replace "\..*$"
+	$TARGET_FILENAME = FS-Get-File "$i"
+	$TARGET_FILENAME = FS-Extension-Remove "$TARGET_FILENAME"
 	$TARGET_OS = $TARGET_FILENAME -replace ".*_"
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "_.*"
 	$TARGET_ARCH = $TARGET_OS -replace ".*-"

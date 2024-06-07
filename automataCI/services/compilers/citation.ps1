@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -64,6 +64,7 @@ function CITATION-Build {
 
 cff-version: `"${___cff_version}`"
 type: `"${___type}`"
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -72,6 +73,7 @@ type: `"${___type}`"
 	if ($(STRINGS-Is-Empty "${___date}") -ne 0) {
 		$___process = FS-Append-File "${___filepath}" @"
 date-released: `"${___date}`"
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -81,6 +83,7 @@ date-released: `"${___date}`"
 	if ($(STRINGS-Is-Empty "${___title}") -ne 0) {
 		$___process = FS-Append-File "${___filepath}" @"
 title: `"${___title}`"
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -90,6 +93,7 @@ title: `"${___title}`"
 	if ($(STRINGS-Is-Empty "${___version}") -ne 0) {
 		$___process = FS-Append-File "${___filepath}" @"
 version: `"${___version}`"
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -99,6 +103,7 @@ version: `"${___version}`"
 	if ($(STRINGS-Is-Empty "${___license}") -ne 0) {
 		$___process = FS-Append-File "${___filepath}" @"
 license: `"${___license}`"
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -108,6 +113,7 @@ license: `"${___license}`"
 	if ($(STRINGS-Is-Empty "${___repo}") -ne 0) {
 		$___process = FS-Append-File "${___filepath}" @"
 repository: `"${___repo}`"
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -117,6 +123,7 @@ repository: `"${___repo}`"
 	if ($(STRINGS-Is-Empty "${___repo_code}") -ne 0) {
 		$___process = FS-Append-File "${___filepath}" @"
 repository-code: `"${___repo_code}`"
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -126,6 +133,7 @@ repository-code: `"${___repo_code}`"
 	if ($(STRINGS-Is-Empty "${___repo_artifact}") -ne 0) {
 		$___process = FS-Append-File "${___filepath}" @"
 repository-artifact: `"${___repo_artifact}`"
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -135,6 +143,7 @@ repository-artifact: `"${___repo_artifact}`"
 	if ($(STRINGS-Is-Empty "${___contact_website}") -ne 0) {
 		$___process = FS-Append-File "${___filepath}" @"
 url: `"${___contact_website}`"
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -147,6 +156,7 @@ url: `"${___contact_website}`"
 			$___process = FS-Append-File "${___filepath}" @"
 contact:
   - affiliation: `"${___contact_name}`"
+
 "@
 			if ($___process -ne 0) {
 				return 1
@@ -155,6 +165,7 @@ contact:
 			if ($(STRINGS-Is-Empty "${___contact_email}") -ne 0) {
 				$___process = FS-Append-File "${___filepath}" @"
     email: `"${___contact_email}`"
+
 "@
 				if ($___process -ne 0) {
 					return 1
@@ -164,6 +175,7 @@ contact:
 			if ($(STRINGS-Is-Empty "${___contact_website}") -ne 0) {
 				$___process = FS-Append-File "${___filepath}" @"
     website: `"${___contact_website}`"
+
 "@
 				if ($___process -ne 0) {
 					return 1
@@ -176,6 +188,7 @@ contact:
 	if ($___process -eq 0) {
 		$___process = FS-Append-File "${___filepath}" @"
 abstract: |-
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -192,7 +205,7 @@ abstract: |-
 				$___line = "  ${___line}"
 			}
 
-			$___process = FS-Append-File "${___filepath}" "${___line}"
+			$___process = FS-Append-File "${___filepath}" "${___line}`n"
 			if ($___process -ne 0) {
 				return 1
 			}
@@ -210,7 +223,7 @@ abstract: |-
 			continue
 		}
 
-		$___process = FS-Append-File "${___filepath}" "${___line}"
+		$___process = FS-Append-File "${___filepath}" "${___line}`n"
 		if ($___process -ne 0) {
 			return 1
 		}

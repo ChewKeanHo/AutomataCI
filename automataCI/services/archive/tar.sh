@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hello@hollowaykeanho.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -105,6 +105,11 @@ TAR_Create_GZ() {
                 return 1
         fi
 
+        GZ_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
 
         # create tar archive
         TAR_Create "${1%.gz*}" "$2" "$3" "$4"
@@ -164,6 +169,86 @@ TAR_Create_XZ() {
 
         # compress archive
         XZ_Create "${1%%.xz*}"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+TAR_Extract_GZ() {
+        #___destination="$1"
+        #___source="$2"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_File "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_File "$2"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        GZ_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # unpack tar.gz
+        tar -xzf "$2" -C "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+TAR_Extract_XZ() {
+        #___destination="$1"
+        #___source="$2"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_File "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_File "$2"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        XZ_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # unpack tar.xz
+        tar -xf "$2" -C "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi

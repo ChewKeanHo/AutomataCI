@@ -29,6 +29,7 @@ fi
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-homebrew_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-ipk_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-msi_unix-any.sh"
+. "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-npm_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-pdf_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-pypi_unix-any.sh"
 . "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}/_package-rpm_unix-any.sh"

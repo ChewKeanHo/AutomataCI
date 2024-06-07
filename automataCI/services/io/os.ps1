@@ -212,6 +212,29 @@ function OS-Is-Run-Simulated {
 
 
 
+function OS-Remove-Path {
+	param(
+		[string]$___path
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty("${___path}")) {
+		return 1
+	}
+
+
+	# execute
+	$env:Path = ($env:Path.Split(';') | Where-Object { $_ -ne "${___path}" }) -join ';'
+
+
+	# report status
+	return 0
+}
+
+
+
+
 function OS-Sync {
 	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") `
 		+ ";" `

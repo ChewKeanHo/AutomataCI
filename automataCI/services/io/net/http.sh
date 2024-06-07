@@ -48,6 +48,10 @@ HTTP_Download() {
                                 --output "$___filepath" \
                                 --request "$___method" \
                                 "$___url"
+                        if [ $? -ne 0 ]; then
+                                rm -rf "$___filepath" &> /dev/null
+                                return 1
+                        fi
                 elif [ ! -z "$(type -t wget)" ]; then
                         wget --max-redirect 16 \
                                 --header "$___user_agent" \
@@ -55,7 +59,12 @@ HTTP_Download() {
                                 --output-file"$___filepath" \
                                 --method="$___method" \
                                 "$___url"
+                        if [ $? -ne 0 ]; then
+                                rm -rf "$___filepath" &> /dev/null
+                                return 1
+                        fi
                 else
+                        rm -rf "$___filepath" &> /dev/null
                         return 1
                 fi
         else
@@ -65,13 +74,22 @@ HTTP_Download() {
                                 --output "$___filepath" \
                                 --request "$___method" \
                                 "$___url"
+                        if [ $? -ne 0 ]; then
+                                rm -rf "$___filepath" &> /dev/null
+                                return 1
+                        fi
                 elif [ ! -z "$(type -t wget)" ]; then
                         wget --max-redirect 16 \
                                 --header "$___user_agent" \
                                 --output-file"$___filepath" \
                                 --method="$___method" \
                                 "$___url"
+                        if [ $? -ne 0 ]; then
+                                rm -rf "$___filepath" &> /dev/null
+                                return 1
+                        fi
                 else
+                        rm -rf "$___filepath" &> /dev/null
                         return 1
                 fi
         fi

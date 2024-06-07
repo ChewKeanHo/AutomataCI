@@ -31,6 +31,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\_release-deb_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-docker_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-homebrew_windows-any.ps1"
+. "${env:LIBS_AUTOMATACI}\_release-npm_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-pypi_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-rpm_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-staticrepo_windows-any.ps1"
@@ -100,26 +101,6 @@ if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
 
 		$null = I18N-Processing "${TARGET}"
 
-		$___process = RELEASE-Run-DEB "$TARGET" "$STATIC_REPO"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-RPM "$TARGET" "$STATIC_REPO" `
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-DOCKER "$TARGET"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-PYPI "$TARGET"
-		if ($___process -ne 0) {
-			return 1
-		}
-
 		$___process = RELEASE-Run-CARGO "$TARGET"
 		if ($___process -ne 0) {
 			return 1
@@ -130,12 +111,37 @@ if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
 			return 1
 		}
 
+		$___process = RELEASE-Run-CHOCOLATEY "$TARGET" "$CHOCOLATEY_REPO"
+		if ($___process -ne 0) {
+			return 1
+		}
+
+		$___process = RELEASE-Run-DEB "$TARGET" "$STATIC_REPO"
+		if ($___process -ne 0) {
+			return 1
+		}
+
+		$___process = RELEASE-Run-DOCKER "$TARGET"
+		if ($___process -ne 0) {
+			return 1
+		}
+
 		$___process = RELEASE-Run-HOMEBREW "$TARGET" "$HOMEBREW_REPO"
 		if ($___process -ne 0) {
 			return 1
 		}
 
-		$___process = RELEASE-Run-CHOCOLATEY "$TARGET" "$CHOCOLATEY_REPO"
+		$___process = RELEASE-Run-NPM "$TARGET"
+		if ($___process -ne 0) {
+			return 1
+		}
+
+		$___process = RELEASE-Run-PYPI "$TARGET"
+		if ($___process -ne 0) {
+			return 1
+		}
+
+		$___process = RELEASE-Run-RPM "$TARGET" "$STATIC_REPO" `
 		if ($___process -ne 0) {
 			return 1
 		}

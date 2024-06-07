@@ -112,6 +112,7 @@ function SUBROUTINE-Package {
 	$null = . "${env:LIBS_AUTOMATACI}\_package-homebrew_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-ipk_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-msi_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-npm_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-pdf_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-pypi_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-rpm_windows-any.ps1"
@@ -170,7 +171,7 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "\..*$"
 	$TARGET_OS = $TARGET_FILENAME -replace ".*_"
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "_.*"
-	$TARGET_ARCH = $TARGET_ARCH -replace ".*-"
+	$TARGET_ARCH = $TARGET_OS -replace ".*-"
 	$TARGET_ARCH = $TARGET_ARCH -replace "\..*$"
 	$TARGET_OS = $TARGET_OS -replace "-.*"
 	$TARGET_OS = $TARGET_OS -replace "\..*$"
@@ -262,6 +263,14 @@ ${__common}|${__log}|PACKAGE-Run-IPK
 	$__log = "${__log_directory}\msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__log}|PACKAGE-Run-MSI
+"@
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$__log = "${__log_directory}\npm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+	$___process = FS-Append-File "${__serial_control}" @"
+${__common}|${__log}|PACKAGE-Run-NPM
 "@
 	if ($___process -ne 0) {
 		return 1

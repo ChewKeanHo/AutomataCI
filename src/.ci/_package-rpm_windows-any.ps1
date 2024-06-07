@@ -112,6 +112,8 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
+		return 10 # not applicable
 	} else {
 		# copy main program
 		# TIP: (1) usually is: usr/local/bin or usr/local/sbin

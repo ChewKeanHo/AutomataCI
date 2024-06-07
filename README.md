@@ -1,8 +1,8 @@
 # AutomataCI
 [![AutomataCI](src/icons/banner_1200x200.svg)](#automataci)
 
-A multi-purpose Git template repository with built-in natively operable
-semi-autonomous CI infrastructure.
+An open-source, redistributable, template-guided, and semi-autonomous CI
+infrastructure readily available your next project.
 
 ***Run the CI with full-force anywhere anytime without solely depending on any
 3rd-party provider***.
@@ -93,6 +93,7 @@ compile cross-platform images whenever possible.
   1. [Standard Go](https://go.dev/)
 * Javascript & Typescript Web Frameworks
   1. [Angular](https://angular.io/) (*`srcANGULAR`*)
+  2. [NodeJS](https://nodejs.org/) (*`srcNODE`*)
 * [Nim Programming Language](https://nim-lang.org/) (*`srcNIM`*)
 * [Python Programming Language](https://www.python.org/) (*`srcPYTHON`*)
 * [Rust Programming Language](https://www.rust-lang.org/) (*`srcRUST`*)

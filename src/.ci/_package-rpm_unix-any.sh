@@ -111,6 +111,8 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_PDF "$_target") -eq 0 ]; then
                 return 10 # not applicable
+        elif [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
+                return 10 # not applicable
         else
                 # copy main program
                 # TIP: (1) copy all files into "${__directory}/BUILD" directory.

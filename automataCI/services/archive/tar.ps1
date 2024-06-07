@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hello@hollowaykeanho.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -116,6 +116,11 @@ function TAR-Create-GZ {
 		return 1
 	}
 
+	$___process = GZ-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
 
 	# create tar archive
 	$___dest = $___destination -replace '\.gz.*$'
@@ -176,6 +181,92 @@ function TAR-Create-XZ {
 	}
 
 	$___process = XZ-Create "${___destination}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function TAR-Extract-GZ {
+	param (
+		[string]$___destination,
+		[string]$___source
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___destination}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___source}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___destination}"
+	if ($___process -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___source}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = GZ-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# unpack tar.gz
+	$___process = OS-Exec "tar" "-xzf `"${___destination}`" -C `"${___source}`""
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function TAR-Extract-XZ {
+	param (
+		[string]$___destination,
+		[string]$___source
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___destination}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___source}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___destination}"
+	if ($___process -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___source}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = XZ-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# unpack tar.xz
+	$___process = OS-Exec "tar" "-xf `"${___destination}`" -C `"${___source}`""
 	if ($___process -ne 0) {
 		return 1
 	}

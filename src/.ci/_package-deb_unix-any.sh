@@ -94,6 +94,8 @@ PACKAGE_Assemble_DEB_Content() {
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_PDF "$_target") -eq 0 ]; then
                 return 10 # not applicable
+        elif [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
+                return 10 # not applicable
         else
                 # copy main program
                 # TIP: (1) usually is: usr/local/bin or usr/local/sbin

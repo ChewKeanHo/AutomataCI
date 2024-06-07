@@ -94,7 +94,7 @@ FS_Extension_Remove() {
 
 
 FS_Extension_Replace() {
-        #___target="$1"
+        #___path="$1"
         #___extension="$2"
         #___candidate="$3"
 
@@ -107,34 +107,27 @@ FS_Extension_Replace() {
 
 
         # execute
+        ## prepare working parameters
+        ___target="${1##*/}"
+
         if [ "$2" = "*" ]; then
-                ___target="${1##*/}"
+                ## trim all extensions to the first period
                 ___target="${___target%%.*}"
 
+                ## restore directory pathing when available
                 if [ ! -z "${1%/*}" ] && [ ! "${1%/*}" = "$1" ]; then
                         ___target="${1%/*}/${___target}"
                 fi
         elif [ ! -z "$2" ]; then
+                ## trim off existing extension
                 if [ "$(printf -- "%.1s" "$2")" = "." ]; then
                         ___extension="${2#*.}"
                 else
                         ___extension="$2"
                 fi
+                ___target="${___target%.${___extension}*}"
 
-                ___target="${1##*/}"
-                while true; do
-                        if [ "${___target#*.}" = "${___extension}" ]; then
-                                ___target="${___target%.${___extension}*}"
-                                continue
-                        fi
-
-                        if [ ! "${___target##*.}" = "${___extension}" ]; then
-                                break
-                        fi
-
-                        ___target="${___target%.${___extension}*}"
-                done
-
+                ## append new extension when available
                 if [ ! "${___target}" = "${1##*/}" ]; then
                         if [ ! -z "$3" ]; then
                                 if [ "$(printf -- "%.1s" "$3")" = "." ]; then
@@ -145,17 +138,18 @@ FS_Extension_Replace() {
                         fi
                 fi
 
+                ## restore directory pathing when available
                 if [ ! -z "${1%/*}" ] && [ ! "${1%/*}" = "$1" ]; then
                         ___target="${1%/*}/${___target}"
                 fi
         else
+                ## do nothing
                 ___target="$1"
         fi
 
-        printf -- "%s" "$___target"
-
 
         # report status
+        printf -- "%s" "$___target"
         return 0
 }
 
@@ -432,6 +426,25 @@ FS_Is_Target_A_MSI() {
 
         # execute
         if [ "${1#*-msi}" != "$1" ] || [ "${1#*.msi}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
+FS_Is_Target_A_NPM() {
+        #___target="$1"
+
+
+        # execute
+        if [ "${1#*_js-js.tgz}" != "$1" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -821,7 +834,7 @@ FS_Write_File() {
 
 
         # perform file write
-        printf -- "%b" "$2" >> "$1"
+        printf -- "%b" "$2" > "$1"
         if [ $? -eq 0 ]; then
                 return 0
         fi
