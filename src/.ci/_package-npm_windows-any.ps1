@@ -41,7 +41,7 @@ function PACKAGE-Assemble-NPM-Content {
 
 
 	# execute
-	$__dest = "${_directory}\${env:PROJECT_SKU}_${env:PROJECT_VERSION}_js-js.tgz"
+	$__dest = "${_directory}\lib${env:PROJECT_SKU}-npm_${env:PROJECT_VERSION}_js-js.tgz"
 	$null = I18N-Copy "${_target}" "${__dest}"
 	$___process = FS-Copy-File "${_target}" "${__dest}"
 	if ($___process -ne 0) {

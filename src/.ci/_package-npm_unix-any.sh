@@ -40,7 +40,7 @@ PACKAGE_Assemble_NPM_Content() {
 
 
         # execute
-        __dest="${_directory}/${PROJECT_SKU}_${PROJECT_VERSION}_js-js.tgz"
+        __dest="${_directory}/lib${PROJECT_SKU}-npm_${PROJECT_VERSION}_js-js.tgz"
         I18N_Copy "$_target" "$__dest"
         FS_Copy_File "$_target" "$__dest"
         if [ $? -ne 0 ]; then
