@@ -150,6 +150,25 @@ PROJECT_CONTACT_WEBSITE = "https://github.com/ChewKeanHo/AutomataCI"
 PROJECT_SOURCE_URL = "https://github.com/ChewKeanHo/AutomataCI"
 
 
+# PROJECT_SOURCE_GIT_REMOTE
+# The git remote tag for the project release publications. This is used for
+# sourcing the upstream git configurations. Unless absolute required, this field
+# can be left intact.
+#
+# Default is: 'origin'
+PROJECT_SOURCE_GIT_REMOTE = 'origin'
+
+
+# PROJECT_SOURCE_RELEASE_TAG_LATEST
+# The tag label for latest release and also a flag to trigger release branches
+# strategies.
+#
+# Default is: 'latest'
+# To enable release branch strategy: fill in the label
+# To disable: leave it empty ('')
+PROJECT_SOURCE_RELEASE_TAG_LATEST = 'latest'
+
+
 # AUTOMATACI_LANG
 # Overrides AutomataCI to operate in 1 specific language. Otherwise, AutomataCI
 # shall query the system language settings. Only accepts language code complying
@@ -534,6 +553,16 @@ PROJECT_NODE_VERSION = 'v22.2.0'
 #
 # Default is: 'https://npm.pkg.github.com'
 PROJECT_NODE_NPM_REGISTRY = 'https://npm.pkg.github.com'
+
+
+# PROJECT_NODE_BRANCH_TAG
+# This is for technology tagging purposes such as but not limited to release
+# branches identification. The value shall always be lowercase, short, and
+# directly identify it is Node technology.
+#
+# Default is: 'npm'
+# To disable: set it empty ''
+PROJECT_NODE_BRANCH_TAG = 'npm'
 
 
 

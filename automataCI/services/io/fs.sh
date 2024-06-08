@@ -534,6 +534,44 @@ FS_Is_Target_A_Source() {
 
 
 
+FS_Is_Target_A_TARGZ() {
+        #___target="$1"
+
+
+        # execute
+        if [ "${1#*.tar.gz}" != "$1" ] || [ "${1#*.tgz}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
+FS_Is_Target_A_TARXZ() {
+        #___target="$1"
+
+
+        # execute
+        if [ "${1#*.tar.xz}" != "$1" ] || [ "${1#*.txz}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
 FS_Is_Target_A_WASM() {
         #___target="$1"
 
@@ -572,6 +610,25 @@ FS_Is_Target_A_WASM_JS() {
         # report status
         printf -- "0"
         return 0
+}
+
+
+
+
+FS_Is_Target_A_ZIP() {
+        #___target="$1"
+
+
+        # execute
+        if [ "${1#*.zip}" != "$1" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
 }
 
 

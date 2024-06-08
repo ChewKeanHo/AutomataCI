@@ -578,6 +578,46 @@ function FS-Is-Target-A-Source {
 
 
 
+function FS-Is-Target-A-TARGZ {
+	param (
+		[string]$___target
+	)
+
+
+	# execute
+	if (($("${___target}" -replace '^.*.tar.gz') -ne "${___target}") -or
+		($("${___target}" -replace '^.*.tgz') -ne "${___target}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
+function FS-Is-Target-A-TARXZ {
+	param (
+		[string]$___target
+	)
+
+
+	# execute
+	if (($("${___target}" -replace '^.*.tar.xz') -ne "${___target}") -or
+		($("${___target}" -replace '^.*.txz') -ne "${___target}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-WASM {
 	param (
 		[string]$___target
@@ -635,6 +675,25 @@ function FS-Is-Target-Exist {
 	# perform checking
 	$___process = Test-Path -Path "${___target}" -PathType Any -ErrorAction SilentlyContinue
 	if ($___process) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
+function FS-Is-Target-A-ZIP {
+	param (
+		[string]$___target
+	)
+
+
+	# execute
+	if ($("${___target}" -replace '^.*.zip') -ne "${___target}") {
 		return 0
 	}
 

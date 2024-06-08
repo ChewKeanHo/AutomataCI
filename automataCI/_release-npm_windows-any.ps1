@@ -50,7 +50,7 @@ function RELEASE-Run-NPM {
 	$null = I18N-Check-Login "NPM"
 	$___process = NODE-NPM-Check-Login
 	if ($___process -eq 0) {
-		$null = I18N-Publish "${_target}"
+		$null = I18N-Publish "NPM"
 		if ($(OS-Is-Run-Simulated) -ne 0) {
 			$null = I18N-Simulate-Publish "${_target}"
 		} else {

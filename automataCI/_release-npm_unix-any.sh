@@ -49,7 +49,7 @@ RELEASE_Run_NPM() {
         I18N_Check_Login "NPM"
         NODE_NPM_Check_Login
         if [ $? -eq 0 ]; then
-                I18N_Publish "$1"
+                I18N_Publish "NPM"
                 if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
                         I18N_Simulate_Publish "$1"
                 else

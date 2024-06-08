@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -336,6 +336,29 @@ GIT_Get_Latest_Commit_ID() {
 
 
 
+GIT_Get_Remote_URL() {
+        #___remote="$1"
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        printf -- "%s" "$(git remote get-url "$1")"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
 GIT_Get_Root_Directory() {
         # validate input
         GIT_Is_Available
@@ -475,6 +498,44 @@ GIT_Push() {
 
 
 
+GIT_Push_Specific() {
+        #___workspace="$1"
+        #___remote="$2"
+        #___source="$3"
+        #___target="$4"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$2") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$3") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$4") -eq 0 ]; then
+                return 1
+        fi
+
+        GIT_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        ___current_path="$PWD" && cd "$1"
+        git push -f "$2" "$3":"$4"
+        ___process=$?
+        cd "$___current_path" && unset ___current_path
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
 GIT_Remove_Worktree() {
         #___destination="$1"
 
@@ -531,6 +592,61 @@ GIT_Setup_Worktree() {
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+GIT_Setup_Workspace_Bare() {
+        #___remote="$1"
+        #___branch="$2"
+        #___destination="$3"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$2") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$3") -eq 0 ]; then
+                return 1
+        fi
+
+        GIT_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        ___url="$(GIT_Get_Remote_URL "$1")"
+        if [ $(STRINGS_Is_Empty "$___url") -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Remake_Directory "$3"
+        ___current_path="$PWD" && cd "$3"
+        git init &> /dev/null
+        if [ $? -ne 0 ]; then
+                cd "$___current_path" && unset ___current_path
+                return 1
+        fi
+
+        git remote add "$1" "$___url"
+        if [ $? -ne 0 ]; then
+                cd "$___current_path" && unset ___current_path
+                return 1
+        fi
+
+        git checkout --orphan "$2"
+        if [ $? -ne 0 ]; then
+                cd "$___current_path" && unset ___current_path
+                return 1
+        fi
+
+        cd "$___current_path" && unset ___current_path
 
 
         # report status

@@ -199,8 +199,7 @@ NODE_NPM_Is_Valid() {
 
 
         # execute
-        FS_Is_Target_A_NPM "$1"
-        if [ $? -ne 0 ]; then
+        if [ $(FS_Is_Target_A_NPM "$1") -ne 0 ]; then
                 return 1
         fi
 

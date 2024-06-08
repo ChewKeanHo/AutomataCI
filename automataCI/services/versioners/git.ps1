@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -475,6 +475,47 @@ function GIT-Push {
 
 
 
+function GIT-Push-Specific {
+	param(
+		[string]$___workspace,
+		[string]$___remote,
+		[string]$___source,
+		[string]$___target
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___workspace}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___remote}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___source}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___target}") -eq 0)) {
+		return 1
+	}
+
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$___current_path = Get-Location
+	$null = Set-Location -Path "${___workspace}"
+	$___process = OS-Exec "git" "push -f `"${___remote}`" `"${___source}`":`"${___target}`""
+	$null = Set-Location -Path "${___current_path}"
+	$null = Remove-Variable -Name ___current_path
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
 function GIT-Remove-Worktree {
 	param (
 		[string]$___destination
@@ -536,6 +577,69 @@ function GIT-Setup-Worktree {
 	if ($___process -ne 0) {
 		return 1
 	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function GIT-Setup-Workspace-Bare {
+	param(
+		[string]$___remote,
+		[string]$___branch,
+		[string]$___destination
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___remote}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___branch}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___destination}") -eq 0)) {
+		return 1
+	}
+
+	$___process = GIT-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$___url = "$(GIT-Get-Remote-URL "${___remote}")"
+	if ($(STRINGS-Is-Empty "${___url}") -eq 0) {
+		return 1
+	}
+
+	$null = FS-Remake-Directory "${___destination}"
+	$___current_path = Get-Location
+	$null = Set-Location -Path "${___workspace}"
+
+	$___process = OS-Exec "git" "init"
+	if ($___process -ne 0) {
+		$null = Set-Location -Path "${___current_path}"
+		$null = Remove-Variable -Name ___current_path
+		return 1
+	}
+
+	$___process = OS-Exec "git" "remote add `"${___remote}`" `"${___url}`""
+	if ($___process -ne 0) {
+		$null = Set-Location -Path "${___current_path}"
+		$null = Remove-Variable -Name ___current_path
+		return 1
+	}
+
+	$___process = OS-Exec "git" "checkout --orphan `"${___branch}`""
+	if ($___process -ne 0) {
+		$null = Set-Location -Path "${___current_path}"
+		$null = Remove-Variable -Name ___current_path
+		return 1
+	}
+
+	$null = Set-Location -Path "${___current_path}"
+	$null = Remove-Variable -Name ___current_path
 
 
 	# report status
