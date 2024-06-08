@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -155,9 +155,7 @@ function DOCKER-Create {
 		return 1
 	}
 
-	$___process = FS-Append-File "${___destination}" @"
-${___os} ${___arch} ${___tag}`n
-"@
+	$___process = FS-Append-File "${___destination}" "${___os} ${___arch} ${___tag}`n"
 	if ($___process -ne 0) {
 		return 1
 	}

@@ -238,13 +238,12 @@ NODE_NPM_Publish() {
 
         ## setup workspace
         FS_Remake_Directory "$___workspace"
-        ___current_path="$PWD" && cd "$___workspace"
-
-        FS_Copy_File "$1" "$___package"
+        FS_Copy_File "$1" "${___workspace}/${___package}"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+        ___current_path="$PWD" && cd "$___workspace"
         FS_Write_File "$___npmrc" "\
 registry=${PROJECT_NODE_NPM_REGISTRY}
 scope=@${PROJECT_SCOPE}

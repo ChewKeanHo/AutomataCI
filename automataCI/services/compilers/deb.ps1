@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -182,12 +182,13 @@ function DEB-Create-Checksum {
 	$null = FS-Make-Housing-Directory "${___location}"
 
 
-	# checksum each file
+	# checksum every items
 	foreach ($___line in (Get-ChildItem -Path "${___directory}\data" -File -Recurse)) {
 		$___checksum = MD5-Checksum-From-File "${___line}"
 		$___path = "${___line}" -replace [regex]::Escape("${___directory}\data\"), ""
 		$___path = $___path -replace "\\", "/"
-		$___process = FS-Append-File "${___location}" "${___checksum} ${___path}"
+		$___checksum = $___checksum -replace "\ .*$", ""
+		$___process = FS-Append-File "${___location}" "${___checksum} ${___path}`n"
 		if ($___process -ne 0) {
 			return 1
 		}
@@ -253,7 +254,7 @@ function DEB-Create-Control {
 	}}
 
 
-	# check if is the document already injected
+	# prepare workspace
 	$___arch = DEB-Get-Architecture "${___os}" "${___arch}"
 	$___location = "${___directory}\control\control"
 	$null = FS-Make-Housing-Directory "${___location}"
@@ -276,6 +277,7 @@ Section: ${___section}
 Priority: ${___priority}
 Homepage: ${___website}
 Description: ${___pitch}
+
 "@
 
 
@@ -298,7 +300,7 @@ Description: ${___pitch}
 			$___line = " ${___line}"
 		}
 
-		$null = FS-Append-File $___location $___line
+		$null = FS-Append-File $___location "${___line}`n"
 	}
 
 
@@ -359,6 +361,7 @@ function DEB-Create-Source-List {
 	$___process = FS-Write-File "${___filename}" @"
 # WARNING: AUTO-GENERATED - DO NOT EDIT!
 deb [signed-by=/${___key}] ${___url} ${___codename} ${___distribution}
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -366,7 +369,7 @@ deb [signed-by=/${___key}] ${___url} ${___codename} ${___distribution}
 
 	$null = FS-Make-Housing-Directory "${___directory}\data\${___key}"
 	if ($(OS-Is-Run-Simulated) -eq 0) {
-		$___process = FS-Write-File "${___directory}\data\${___key}" ""
+		$___process = FS-Write-File "${___directory}\data\${___key}" "`n"
 	} else {
 		$___process = GPG-Export-Public-Keyring `
 			"${___directory}\data\${___key}" `

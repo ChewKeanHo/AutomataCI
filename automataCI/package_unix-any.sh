@@ -35,8 +35,8 @@ fi
 . "${LIBS_AUTOMATACI}/_package-flatpak_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-homebrew_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-ipk_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_package-lib_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-msi_unix-any.sh"
-. "${LIBS_AUTOMATACI}/_package-npm_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-pdf_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-pypi_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-rpm_unix-any.sh"
@@ -245,17 +245,17 @@ ${__common}|${__log}|PACKAGE_Run_IPK
                 return 1
         fi
 
-        __log="${__log_directory}/msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__serial_control" "\
-${__common}|${__log}|PACKAGE_Run_MSI
+        __log="${__log_directory}/lib_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+        FS_Append_File "$__parallel_control" "\
+${__common}|${__log}|PACKAGE_Run_LIB
 "
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        __log="${__log_directory}/npm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+        __log="${__log_directory}/msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
         FS_Append_File "$__serial_control" "\
-${__common}|${__log}|PACKAGE_Run_NPM
+${__common}|${__log}|PACKAGE_Run_MSI
 "
         if [ $? -ne 0 ]; then
                 return 1

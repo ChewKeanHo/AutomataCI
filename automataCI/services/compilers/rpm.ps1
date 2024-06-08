@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -140,45 +140,45 @@ function RPM-Create-Source-Repo {
 	$___key = "usr\local\share\keyrings\${___sku}-keyring.gpg"
 	$___filename = "etc\yum.repos.d\${___sku}.repo"
 
-	$___process = FS-Is-File `
-		"${___directory}\BUILD\$(Split-Path -Leaf -Path "${___filename}")"
+	$___process = FS-Is-File "${___directory}\BUILD\$(FS-Get-File "${___filename}")"
 	if ($___process -eq 0) {
 		return 10
 	}
 
-	$___process = FS-Is-File `
-		"${___directory}\BUILD\$(Split-Path -Leaf -Path "${___key}")"
+	$___process = FS-Is-File "${___directory}\BUILD\$(FS-Get-File "${___key}")"
 	if ($___process -eq 0) {
 		return 1
 	}
 
 	$null = FS-Make-Directory "${___directory}\BUILD"
 	$___process = FS-Write-File `
-		"${___directory}\BUILD\$(Split-Path -Leaf -Path "${___filename}")" @"
+		"${___directory}\BUILD\$(FS-Get-File "${___filename}")" @"
 # WARNING: AUTO-GENERATED - DO NOT EDIT!
 [${___sku}]
 name=${___name}
 baseurl=${___url}
 gpgcheck=1
 gpgkey=file:///${___key}
+
 "@
 	if ($___process -ne 0) {
 		return 1
 	}
 
 	$___process = GPG-Export-Public-Keyring `
-		"${___directory}\BUILD\$(Split-Path -Leaf -Path "${___key}")" `
+		"${___directory}\BUILD\$(FS-Get-File "${___key}")" `
 		"${___gpg_id}"
 	if ($___process -ne 0) {
 		return 1
 	}
 
 	$___process = FS-Append-File "${___directory}\SPEC_INSTALL" @"
-install --directory %{buildroot}/$(Split-Path -Parent -Path "${___filename}")
-install -m 0644 $(Split-Path -Leaf -Path "${___filename}") %{buildroot}/$(Split-Path -Parent -Path "${___filename}")
+install --directory %{buildroot}/$(FS-Get-Directory "${___filename}")
+install -m 0644 $(FS-Get-File "${___filename}") %{buildroot}/$(FS-Get-Directory "${___filename}")
 
-install --directory %{buildroot}/$(Split-Path -Parent -Path "${___key}")
-install -m 0644 $(Split-Path -Leaf -Path "${___key}") %{buildroot}/$(Split-Path -Parent -Path "${___key}")
+install --directory %{buildroot}/$(FS-Get-Directory "${___key}")
+install -m 0644 $(FS-Get-File "${___key}") %{buildroot}/$(FS-Get-Directory "${___key}")
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -187,6 +187,7 @@ install -m 0644 $(Split-Path -Leaf -Path "${___key}") %{buildroot}/$(Split-Path 
 	$___process = FS-Append-File "${___directory}\SPEC_FILES" @"
 /${___filename}
 /${___key}
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -259,9 +260,10 @@ Name: ${___sku}
 Version: ${___version}
 Summary: ${___pitch}
 Release: ${___cadence}
-
 License: ${___license}
 URL: ${___website}
+
+
 "@
 
 
@@ -278,7 +280,7 @@ URL: ${___website}
 			}
 
 			$___line = $___line -replace '#.*'
-			$null = FS-Append-File $___location "${___line}`n"
+			$null = FS-Append-File $___location "$($___line -replace "#.*$")`n"
 		}
 
 		$null = FS-Remove-Silently "${___directory}\SPEC_DESCRIPTION"
@@ -294,7 +296,7 @@ URL: ${___website}
 			}
 
 			$___line = $___line -replace '#.*'
-			$null = FS-Append-File "${___location}" "${___line}`n"
+			$null = FS-Append-File "${___location}" "$($___line -replace "#.*$")`n"
 		}
 	}
 
@@ -398,7 +400,7 @@ URL: ${___website}
 			$null = FS-Append-File "${___location}" "${___line}`n"
 		}
 
-		$null = FS-Remove-Silently "${__directory}\SPEC_CLEAN"
+		$null = FS-Remove-Silently "${__directory}\SPEC_FILES"
 	} else {
 		$null = FS-Append-File "${___location}" "`n"
 	}
@@ -512,4 +514,66 @@ function RPM-Is-Valid {
 
 	# report status
 	return 1
+}
+
+
+
+
+function RPM-Register {
+	param(
+		[string]$___workspace,
+		[string]$___source,
+		[string]$___target,
+		[string]$___is_directory
+	)
+
+
+	# validate input
+	if ($(STRINGS-Is-Empty "${___workspace}") -eq 0) {
+		return 1
+	}
+
+	if ($(STRINGS-Is-Empty "${___source}") -eq 0) {
+		return 1
+	}
+
+	if ($(STRINGS-Is-Empty "${___target}") -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___workspace}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	## write into SPEC_INSTALL
+	$___spec = "${___workspace}/SPEC_INSTALL"
+	$___dir = "$(FS-Get-Directory "${___target}")"
+	$___content = "`n"
+	if ($___dir -ne $___target) {
+		$___content = "${___content}`nmkdir -p %{buildroot}/${___dir}`n"
+	}
+	$___content = "${___content}`ncp -r ${___source} %{buildroot}/${___target}`n"
+	$___process = FS-Append-File "${___spec}" "${___content}`n"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	## write into SPEC_FILES
+	$___spec = "${___workspace}/SPEC_FILES"
+	$___content = "/${___content}"
+	if ($(STRINGS-Is-Empty "${___is_directory}") -ne 0) {
+		$___content = "${___content}/*"
+	}
+	$___content = "${___content}`n"
+	$___process = FS-Append-File "${___spec}" "${___content}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
 }

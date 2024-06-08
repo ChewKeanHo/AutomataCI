@@ -140,7 +140,7 @@ function PACKAGE-Run-HOMEBREW {
 			"{{ TARGET_SHASUM }}" `
 			"${__shasum}"
 
-		$___process = FS-Append-File "${_target_path}.rb" "${__line}"
+		$___process = FS-Append-File "${_target_path}.rb" "${__line}`n"
 		if ($___process -ne 0) {
 			$null = I18N-Update-Failed
 			return 1

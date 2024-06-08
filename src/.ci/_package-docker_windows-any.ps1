@@ -54,8 +54,6 @@ function PACKAGE-Assemble-DOCKER-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-MSI "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
-		return 10 # not applicable
 	}
 
 	switch ($_target_os) {
@@ -81,14 +79,17 @@ function PACKAGE-Assemble-DOCKER-Content {
 	# generate the Dockerfile
 	$___process = FS-Write-File "${_directory}\Dockerfile" @"
 # Defining baseline image
+
 "@
 	if (${_target_os} == "windows") {
 		$___process = FS-Append-File "${_directory}\Dockerfile" @"
 FROM --platform=${_target_os}/${_target_arch} mcr.microsoft.com/windows/nanoserver:ltsc2022
+
 "@
 	} else {
 		$___process = FS-Append-File "${_directory}\Dockerfile" @"
 FROM --platform=${_target_os}/${_target_arch} busybox:latest
+
 "@
 	}
 
@@ -99,17 +100,20 @@ LABEL org.opencontainers.image.authors=`"${env:PROJECT_CONTACT_NAME} <${env:PROJ
 LABEL org.opencontainers.image.version=`"${env:PROJECT_VERSION}`"
 LABEL org.opencontainers.image.revision=`"${env:PROJECT_CADENCE}`"
 LABEL org.opencontainers.image.licenses=`"${env:PROJECT_LICENSE}`"
+
 "@
 
 	if ($(STRINGS-Is-Empty "${env:PROJECT_CONTACT_WEBSITE}") -ne 0) {
 		$___process = FS-Append-File "${_directory}\Dockerfile" @"
 LABEL org.opencontainers.image.url=`"${env:PROJECT_CONTACT_WEBSITE}`"
+
 "@
 	}
 
 	if ($(STRINGS-Is-Empty "${env:PROJECT_SOURCE_URL}") -ne 0) {
 		$___process = FS-Append-File "${_directory}\Dockerfile" @"
 LABEL org.opencontainers.image.source=`"${env:PROJECT_SOURCE_URL}`"
+
 "@
 	}
 
@@ -128,6 +132,7 @@ EXPOSE 80
 
 # Set entry point
 ENTRYPOINT ["/app/bin/${PROJECT_SKU}"]
+
 "@
 	if ($___process -ne 0) {
 		return 1

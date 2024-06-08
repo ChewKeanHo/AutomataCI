@@ -290,6 +290,7 @@ authors = [ '${___contact_name} <${___contact_email}>' ]
 
 
 
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -308,7 +309,7 @@ authors = [ '${___contact_name} <${___contact_email}>' ]
 			continue
 		}
 
-		$___process = FS-Append-File "${___filepath}" "${___line}"
+		$___process = FS-Append-File "${___filepath}" "${___line}`n"
 		if ($___process -ne 0) {
 			return 1
 		}

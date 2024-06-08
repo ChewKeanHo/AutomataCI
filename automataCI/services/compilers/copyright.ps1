@@ -70,7 +70,7 @@ Source: ${___website}
 
 	# append manually facilitated copyright contents
 	foreach ($___line in (Get-Content -Path $___manual_file)) {
-		$null = FS-Append-File "${___location}" "${___line}"
+		$null = FS-Append-File "${___location}" "${___line}`n"
 	}
 
 

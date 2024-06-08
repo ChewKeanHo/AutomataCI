@@ -169,6 +169,33 @@ PROJECT_SOURCE_GIT_REMOTE = 'origin'
 PROJECT_SOURCE_RELEASE_TAG_LATEST = 'latest'
 
 
+# PROJECT_README
+# The relative location of the project readme file from $PROJECT_PATH_ROOT
+# (repository root directory).
+#
+# Default is 'README.md'
+PROJECT_README = 'README.md'
+
+
+# PROJECT_LICENSE_FILE
+# The relative location of the project license file from $PROJECT_PATH_ROOT
+# (repository root directory).
+#
+# Default is 'LICENSE.txt'
+PROJECT_LICENSE_FILE = 'LICENSE.txt'
+
+
+# PROJECT_LICENSE_ACCEPTANCE_REQUIRED
+# The flag to indicate the license of the project **MUST** be explictly
+# accepted. This is used in ecosystem like .NET nupkg where a special UI
+# is available to interact with the end-users.
+#
+# Value is lowercase 'true' or 'false'.
+#
+# Default is 'true'
+PROJECT_LICENSE_ACCEPTANCE_REQUIRED = 'true'
+
+
 # AUTOMATACI_LANG
 # Overrides AutomataCI to operate in 1 specific language. Otherwise, AutomataCI
 # shall query the system language settings. Only accepts language code complying

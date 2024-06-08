@@ -287,6 +287,7 @@ function NIM-Run-Test {
 			-Filter "*_test.nim").FullName) {
 		$___process = FS-Append-File "${___build_list}" @"
 build|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${___arguments}
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -294,6 +295,7 @@ build|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${
 
 		$___process = FS-Append-File "${___test_list}" @"
 test|${___directory}|${___workspace}|${___log}|${__line}|${___os}|${___arch}|${___arguments}
+
 "@
 		if ($___process -ne 0) {
 			return 1

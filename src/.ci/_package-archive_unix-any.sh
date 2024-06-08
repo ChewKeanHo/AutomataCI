@@ -51,12 +51,7 @@ PACKAGE_Assemble_ARCHIVE_Content() {
                         return 1
                 fi
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
-                I18N_Assemble "$_target" "$_directory"
-                FS_Copy_File "$_target" "$_directory"
-                if [ $? -ne 0 ]; then
-                        I18N_Assemble_Failed
-                        return 1
-                fi
+                return 10 # handled by lib packager
         elif [ $(FS_Is_Target_A_WASM_JS "$_target") -eq 0 ]; then
                 return 10 # handled by wasm instead
         elif [ $(FS_Is_Target_A_WASM "$_target") -eq 0 ]; then
@@ -86,8 +81,6 @@ PACKAGE_Assemble_ARCHIVE_Content() {
         elif [ $(FS_Is_Target_A_MSI "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_PDF "$_target") -eq 0 ]; then
-                return 10 # not applicable
-        elif [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
                 return 10 # not applicable
         else
                 I18N_Assemble "$_target" "$_directory"

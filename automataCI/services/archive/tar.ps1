@@ -121,15 +121,29 @@ function TAR-Create-GZ {
 		return 1
 	}
 
+	if ($($___destination -replace '\.tgz.*$') -ne $___destination) {
+		$___dest = "$($___destination -replace '\.tgz.*$')"
+	} else {
+		$___dest = "$($___destination -replace '\.tar.gz.*$')"
+	}
+
 
 	# create tar archive
-	$___dest = $___destination -replace '\.gz.*$'
 	$___process = TAR-Create "${___dest}" "${___source}" "${___owner}" "${___group}"
 	if ($___process -ne 0) {
 		return 1
 	}
 
+
+	# compress archive
 	$___process = GZ-Create "${___dest}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# rename to target
+	$___process = FS-Move "${___dest}.gz" "${___destination}"
 	if ($___process -ne 0) {
 		return 1
 	}
@@ -172,15 +186,29 @@ function TAR-Create-XZ {
 		return 1
 	}
 
+	if ($($___destination -replace '\.txz.*$') -ne $___destination) {
+		$___dest = "$($___destination -replace '\.txz.*$')"
+	} else {
+		$___dest = "$($___destination -replace '\.tar.xz.*$')"
+	}
+
 
 	# create tar archive
-	$___destination = $___destination -replace '\.xz.*$'
-	$___process = TAR-Create "${___destination}" "${___source}" "${___owner}" "${___group}"
+	$___process = TAR-Create "${___dest}" "${___source}" "${___owner}" "${___group}"
 	if ($___process -ne 0) {
 		return 1
 	}
 
-	$___process = XZ-Create "${___destination}"
+
+	# compress archive
+	$___process = XZ-Create "${___dest}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# rename to target
+	$___process = FS-Move "${___dest}.xz" "${___destination}"
 	if ($___process -ne 0) {
 		return 1
 	}

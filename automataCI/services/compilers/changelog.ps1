@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -41,7 +41,7 @@ function CHANGELOG-Assemble-DEB {
 
 	$___initiated = ""
 	foreach ($___line in (Get-Content "${___directory}\latest")) {
-		$___process = FS-Append-File "${___target}" "${___line}"
+		$___process = FS-Append-File "${___target}" "${___line}`n"
 		if ($___process -ne 0) {
 			return 1
 		}
@@ -56,14 +56,14 @@ function CHANGELOG-Assemble-DEB {
 		}
 
 		if ($(STRINGS-Is-Empty "${___initiated}") -eq 0) {
-			$___process = FS-Append-File "${___target}" "`n"
+			$___process = FS-Append-File "${___target}" "`n`n"
 			if ($___process -ne 0) {
 				return 1
 			}
 		}
 
 		foreach ($___line in (Get-Content "${___directory}\$($___tag -replace ".*v")")) {
-			$___process = FS-Append-File "${___target}" "${___line}"
+			$___process = FS-Append-File "${___target}" "${___line}`n"
 			if ($___process -ne 0) {
 				return 1
 			}
@@ -108,10 +108,10 @@ function CHANGELOG-Assemble-MD {
 	# assemble file
 	$null = FS-Remove-Silently "${___target}"
 	$null = FS-Make-Housing-Directory "${___target}"
-	$null = FS-Write-File "${___target}" "# ${___title}`n"
-	$null = FS-Append-File "${___target}" "`n## ${___version}`n"
+	$null = FS-Write-File "${___target}" "# ${___title}`n`n"
+	$null = FS-Append-File "${___target}" "`n## ${___version}`n`n"
 	foreach ($___line in (Get-Content "${___directory}\latest")) {
-		$___process = FS-Append-File "${___target}" "* ${___line}"
+		$___process = FS-Append-File "${___target}" "* ${___line}`n"
 		if ($___process -ne 0) {
 			return 1
 		}
@@ -123,9 +123,9 @@ function CHANGELOG-Assemble-MD {
 			continue
 		}
 
-		$null = FS-Append-File "${___target}" "`n`n## ${___tag}`n"
+		$null = FS-Append-File "${___target}" "`n`n## ${___tag}`n`n"
 		foreach ($___line in (Get-Content "${___directory}\$($___tag -replace ".*v")")) {
-			$___process = FS-Append-File "${___target}" "* ${___line}"
+			$___process = FS-Append-File "${___target}" "* ${___line}`n"
 			if ($___process -ne 0) {
 				return 1
 			}
@@ -185,7 +185,7 @@ function CHANGELOG-Assemble-RPM {
 	$___process = FS-Is-File "${__resources}\changelog\data\latest"
 	if ($___process -eq 0) {
 		$___process = FS-Append-File "${___target}" `
-			"* ${___date} ${___name} <${___email}> - ${___version}-${___cadence}`n"
+			"* ${___date} ${___name} <${___email}> - ${___version}-${___cadence}`n`n"
 		if ($___process -ne 0) {
 			return 1
 		}
@@ -196,7 +196,7 @@ function CHANGELOG-Assemble-RPM {
 				continue
 			}
 
-			$___process = FS-Append-File "${___target}" "  * ${___line}"
+			$___process = FS-Append-File "${___target}" "- ${___line}`n"
 			if ($___process -ne 0) {
 				return 1
 			}
@@ -300,13 +300,7 @@ function CHANGELOG-Build-DEB-Entry {
 
 
 	switch ($___dist) {
-	stable {
-		break
-	} unstable {
-		break
-	} testing {
-		break
-	} experimental {
+	{ $_ -in "stable", "unstable", "testing", "experimental" } {
 		break
 	} default {
 		return 1
@@ -327,14 +321,14 @@ ${___sku} (${___version}) ${___dist}; urgency=${___urgency}
 	# generate body line-by-line
 	foreach ($___line in (Get-Content -Path "${___directory}\data\latest")) {
 		$___line = $___line.Substring(0, [Math]::Min($___line.Length, 80))
-		$null = FS-Append-File "${___directory}\deb\.latest" "  * ${___line}"
+		$null = FS-Append-File "${___directory}\deb\.latest" "  * ${___line}`n"
 	}
 	$null = FS-Append-File "${___directory}\deb\.latest" ""
 
 
 	# create the entry sign-off
 	$null = FS-Append-File "${___directory}\deb\.latest" `
-		"-- ${___name} <${___email}>  ${___date}"
+		"-- ${___name} <${___email}>  ${___date}`n"
 
 
 	# good file, update the previous

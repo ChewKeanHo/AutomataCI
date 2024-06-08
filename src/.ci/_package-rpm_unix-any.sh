@@ -22,6 +22,9 @@ fi
 
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/archive/tar.sh"
+. "${LIBS_AUTOMATACI}/services/archive/zip.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/rpm.sh"
 
 
 
@@ -43,56 +46,102 @@ PACKAGE_Assemble_RPM_Content() {
                 ;;
         esac
 
+
+        # execute
+        ## determine base path
+        ## TIP: (1) by design, usually is: usr/local/
+        ##      (2) please avoid: usr/, usr/{TYPE}/, usr/bin/, & usr/lib{TYPE}/
+        ##          whenever possible for avoiding conflicts with your OS native
+        ##          system packages.
+        _chroot="usr"
+        if [ ! "$(STRINGS_To_Lowercase "$PROJECT_DEBIAN_IS_NATIVE")" = "true" ]; then
+                _chroot="${_chroot}/local"
+        fi
+
         _gpg_keyring="$PROJECT_SKU"
         if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
-                # copy main library
-                # TIP: (1) usually is: usr/local/lib
-                #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
-                _filepath="${_directory}/BUILD/lib${PROJECT_SKU}.a"
-                I18N_Copy "$_target" "$_filepath"
-                FS_Make_Housing_Directory "$_filepath"
-                if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
-                        return 1
-                fi
+                if [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
+                        return 10 # not applicable
+                elif [ $(FS_Is_Target_A_TARGZ "$_target") -eq 0 ]; then
+                        # unpack library
+                        ___source="${PROJECT_SCOPE}/${PROJECT_SKU}"
+                        ___dest="${_directory}/BUILD/${___source}"
+                        ___target="${_chroot}/lib/${___source}"
 
-                FS_Copy_File "$_target" "$_filepath"
-                if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
-                        return 1
-                fi
+                        I18N_Assemble "$_target" "$___dest"
+                        FS_Make_Directory "$___dest"
+                        TAR_Extract_GZ "$___dest" "$_target"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
 
+                        RPM_Register "$_directory" "$___source" "$___target" "true"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
+                elif [ $(FS_Is_Target_A_TARXZ "$_target") -eq 0 ]; then
+                        # unpack library
+                        ___source="${PROJECT_SCOPE}/${PROJECT_SKU}"
+                        ___dest="${_directory}/BUILD/${___source}"
+                        ___target="${_chroot}/lib/${___source}"
 
-                # generate AutomataCI's required RPM spec instructions (INSTALL)
-                __file="${_directory}/SPEC_INSTALL"
-                I18N_Create "$__file"
-                FS_Write_File "$__file" "\
-install --directory %{buildroot}/usr/local/lib/${PROJECT_SKU}
-install -m 0644 lib${PROJECT_SKU}.a %{buildroot}/usr/local/lib/${PROJECT_SKU}
+                        I18N_Assemble "$_target" "$___dest"
+                        FS_Make_Directory "$___dest"
+                        TAR_Extract_XZ "$___dest" "$_target"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
 
-install --directory %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
-install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
-"
-                if [ $? -ne 0 ]; then
-                        I18N_Create_Failed
-                        return 1
-                fi
+                        RPM_Register "$_directory" "$___source" "$___target" "true"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
+                elif [ $(FS_Is_Target_A_ZIP "$_target") -eq 0 ]; then
+                        # unpack library
+                        ___source="${PROJECT_SCOPE}/${PROJECT_SKU}"
+                        ___dest="${_directory}/BUILD/${___source}"
+                        ___target="${_chroot}/lib/${___source}"
 
+                        I18N_Assemble "$_target" "$___dest"
+                        FS_Make_Directory "$___dest"
+                        ZIP_Extract "$___dest" "$_target"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
 
-                # generate AutomataCI's required RPM spec instructions (FILES)
-                __file="${_directory}/SPEC_FILES"
-                I18N_Create "$__file"
-                FS_Write_File "$__file" "\
-/usr/local/lib/${PROJECT_SKU}/lib${PROJECT_SKU}.a
-/usr/local/share/doc/lib${PROJECT_SKU}/copyright
-"
-                if [ $? -ne 0 ]; then
-                        I18N_Create_Failed
-                        return 1
+                        RPM_Register "$_directory" "$___source" "$___target" "true"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
+                else
+                        # copy library file
+                        ___source="$(FS_Get_File "$_target")"
+                        ___dest="${_directory}/BUILD/${___source}"
+                        ___target="${_chroot}/lib/${___source}"
+
+                        I18N_Assemble "$_target" "$___dest"
+                        FS_Make_Housing_Directory "$___dest"
+                        FS_Copy_File "$_target" "$___dest"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
+
+                        RPM_Register "$_directory" "$___source" "$___target"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
                 fi
 
                 _gpg_keyring="lib$PROJECT_SKU"
@@ -111,53 +160,21 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${PROJECT_SKU}/
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_PDF "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
-                return 10 # not applicable
         else
                 # copy main program
-                # TIP: (1) copy all files into "${__directory}/BUILD" directory.
-                _filepath="${_directory}/BUILD/${PROJECT_SKU}"
-                I18N_Copy "$_target" "$_filepath"
-                FS_Make_Housing_Directory "$_filepath"
+                ___source="$(FS_Get_File "$_target")"
+                ___dest="${_directory}/BUILD/${___source}"
+                ___target="${_chroot}/bin/${___source}"
+
+                I18N_Assemble "$_target" "$___dest"
+                FS_Make_Housing_Directory "$___dest"
+                FS_Copy_File "$_target" "$___dest"
                 if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
+                        I18N_Assemble_Failed
                         return 1
                 fi
 
-                FS_Copy_File "$_target" "$_filepath"
-                if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
-                        return 1
-                fi
-
-
-                # generate AutomataCI's required RPM spec instructions (INSTALL)
-                __file="${_directory}/SPEC_INSTALL"
-                I18N_Create "$__file"
-                FS_Write_File "$__file" "\
-install --directory %{buildroot}/usr/local/bin
-install -m 0755 ${PROJECT_SKU} %{buildroot}/usr/local/bin
-
-install --directory %{buildroot}/usr/local/share/doc/${PROJECT_SKU}/
-install -m 0644 copyright %{buildroot}/usr/local/share/doc/${PROJECT_SKU}/
-
-install --directory %{buildroot}/usr/local/share/man/man1/
-install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
-"
-                if [ $? -ne 0 ]; then
-                        I18N_Create_Failed
-                        return 1
-                fi
-
-
-                # generate AutomataCI's required RPM spec instructions (FILES)
-                __file="${_directory}/SPEC_FILES"
-                I18N_Create "$__file"
-                FS_Write_File "$__file" "\
-/usr/local/bin/${PROJECT_SKU}
-/usr/local/share/doc/${PROJECT_SKU}/copyright
-/usr/local/share/man/man1/${PROJECT_SKU}.1.gz
-"
+                RPM_Register "$_directory" "$___source" "$___target"
                 if [ $? -ne 0 ]; then
                         I18N_Create_Failed
                         return 1
@@ -168,9 +185,12 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 
         # NOTE: REQUIRED file
-        I18N_Create "copyright.gz"
+        ___source="copyright"
+        ___dest="${_directory}/BUILD/${___source}"
+        ___target="${_chroot}/share/doc/${PROJECT_SCOPE}/${PROJECT_SKU}/${___source}"
+        I18N_Create "$___source"
         COPYRIGHT_Create \
-                "${_directory}/BUILD/copyright" \
+                "$___dest" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/deb-copyright" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
@@ -181,15 +201,30 @@ install -m 0644 ${PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
                 return 1
         fi
 
+        RPM_Register "$_directory" "$___source" "$___target"
+        if [ $? -ne 0 ]; then
+                I18N_Create_Failed
+                return 1
+        fi
+
 
         # NOTE: REQUIRED file
-        I18N_Create "MAN PAGES"
+        ___source="${PROJECT_SCOPE}-${PROJECT_SKU}.1"
+        ___dest="${_directory}/BUILD/${___source}"
+        ___target="${_chroot}/share/man/man1/${___source}"
+        I18N_Create "$___source"
         MANUAL_Create \
-                "${_directory}/BUILD/${PROJECT_SKU}.1" \
+                "$___dest" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE"
+        if [ $? -ne 0 ]; then
+                I18N_Create_Failed
+                return 1
+        fi
+
+        RPM_Register "$_directory" "$___source" "$___target"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
                 return 1

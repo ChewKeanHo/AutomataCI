@@ -55,8 +55,6 @@ PACKAGE_Assemble_DOCKER_Content() {
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_PDF "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
-                return 10 # not applicable
         fi
 
         case "$_target_os" in

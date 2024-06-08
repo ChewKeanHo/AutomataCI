@@ -241,15 +241,14 @@ function NODE-NPM-Publish {
 	$___npmrc = ".npmrc"
 
 	## setup workspace
-	$___process = FS-Remake-Directory "${___workspace}"
-	$___current_path = Get-Location
-	$null = Set-Location "${___workspace}"
-
-	$___process = FS-Copy-File "${___target}" "${___package}"
+	$null = FS-Remake-Directory "${___workspace}"
+	$___process = FS-Copy-File "${___target}" "${___workspace}\${___package}"
 	if ($___process -ne 0) {
 		return 1
 	}
 
+	$___current_path = Get-Location
+	$null = Set-Location "${___workspace}"
 	$___process = FS-Write-File "${___npmrc}" @"
 registry=${env:PROJECT_NODE_NPM_REGISTRY}
 scope=@${env:PROJECT_SCOPE}

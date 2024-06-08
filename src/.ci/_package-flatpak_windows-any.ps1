@@ -63,8 +63,6 @@ function PACKAGE-Assemble-FLATPAK-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
-		return 10 # not applicable
 	} elseif (($_target_os -ne "linux") -and ($_target_os -ne "any")) {
 		return 10 # not applicable
 	}
@@ -168,6 +166,7 @@ modules:
     sources:
       - type: file
         path: icon-128x128.png
+
 "@
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
@@ -212,6 +211,7 @@ modules:
 		<binary>${env:PROJECT_SKU}</binary>
 	</provides>
 </component>
+
 "@
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed

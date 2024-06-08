@@ -132,13 +132,14 @@ function C-Build {
 			# it's a .c file. Register for building and linking...
 			$___process = FS-Append-File "${___build_list}" @"
 build|${___file_obj}|${___file_src}|${___file_log}|${___os}|${___arch}|${___compiler}|${___arguments}
+
 "@
 			if ($___process -ne 0) {
 				return 1
 			}
 
 
-			$___process = FS-Append-File "${___object_list}" "${___file_obj}"
+			$___process = FS-Append-File "${___object_list}" "${___file_obj}`n"
 			if ($___process -ne 0) {
 				return 1
 			}
@@ -151,7 +152,7 @@ build|${___file_obj}|${___file_src}|${___file_log}|${___os}|${___arch}|${___comp
 				return 1
 			}
 
-			$___process = FS-Append-File "${___object_list}" "${___file_obj}"
+			$___process = FS-Append-File "${___object_list}" "${___file_obj}`n"
 			if ($___process -ne 0) {
 				return 1
 			}
@@ -869,6 +870,7 @@ function C-Test {
 
 		$___process = FS-Append-File "${___build_list}" @"
 build-executable|${___file_obj}|${___file_src}|${___file_log}_build.log|${___os}|${___arch}|${___compiler}|${___arguments}
+
 "@
 		if ($___process -ne 0) {
 			return 1
@@ -876,6 +878,7 @@ build-executable|${___file_obj}|${___file_src}|${___file_log}_build.log|${___os}
 
 		$___process = FS-Append-File "${___test_list}" @"
 test|${___file_obj}|${___file_src}|${___file_log}_test.log|${___os}|${___arch}|${___compiler}|${___arguments}
+
 "@
 		if ($___process -ne 0) {
 			return 1

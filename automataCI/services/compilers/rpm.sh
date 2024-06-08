@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -145,18 +145,18 @@ RPM_Create_Source_Repo() {
         ___key="usr/local/share/keyrings/${___sku}-keyring.gpg"
         ___filename="etc/yum.repos.d/${___sku}.repo"
 
-        FS_Is_File "${___directory}/BUILD/${___filename##*/}"
+        FS_Is_File "${___directory}/BUILD/$(FS_Get_File "$___filename")"
         if [ $? -eq 0 ]; then
                 return 10
         fi
 
-        FS_Is_File "${___directory}/BUILD/${___key##*/}"
+        FS_Is_File "${___directory}/BUILD/$(FS_Get_File "$___key")"
         if [ $? -eq 0 ]; then
                 return 1
         fi
 
         FS_Make_Directory "${___directory}/BUILD"
-        FS_Write_File "${___directory}/BUILD/${___filename##*/}" "\
+        FS_Write_File "${___directory}/BUILD/$(FS_Get_File "$___filename")" "\
 # WARNING: AUTO-GENERATED - DO NOT EDIT!
 [${___sku}]
 name=${___name}
@@ -168,17 +168,17 @@ gpgkey=file:///${___key}
                 return 1
         fi
 
-        GPG_Export_Public_Keyring "${___directory}/BUILD/${___key##*/}" "$___gpg_id"
+        GPG_Export_Public_Keyring "${___directory}/BUILD/$(FS_Get_File "$___key")" "$___gpg_id"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
         FS_Append_File "${___directory}/SPEC_INSTALL" "
-install --directory %{buildroot}/${___filename%/*}
-install -m 0644 ${___filename##*/} %{buildroot}/${___filename%/*}
+install --directory %{buildroot}/$(FS_Get_Directory "$___filename")
+install -m 0644 $(FS_Get_File "$___filename") %{buildroot}/$(FS_Get_Directory "$___filename")
 
-install --directory %{buildroot}/${___key%/*}
-install -m 0644 ${___key##*/} %{buildroot}/${___key%/*}
+install --directory %{buildroot}/$(FS_Get_Directory "$___key")
+install -m 0644 $(FS_Get_File "$___key") %{buildroot}/$(FS_Get_Directory "$___key")
 "
         if [ $? -ne 0 ]; then
                 return 1
@@ -523,4 +523,64 @@ RPM_Is_Valid() {
 
         # return status
         return 1
+}
+
+
+
+
+RPM_Register() {
+        #___workspace="$1"
+        #___source="$2"
+        #___target="$3"
+        #___is_directory="$4"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        if [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
+                return 1
+        fi
+
+        if [ $(STRINGS_Is_Empty "$3") -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_Directory "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        ## write into SPEC_INSTALL
+        ___spec="${1}/SPEC_INSTALL"
+        ___dir="$(FS_Get_Directory "$3")"
+        ___content="\n"
+        if [ "$___dir" != "$3" ]; then
+                ___content="${___content}\nmkdir -p %{buildroot}/${___dir}\n"
+        fi
+        ___content="${___content}\ncp -r ${2} %{buildroot}/${3}\n"
+        FS_Append_File "$___spec" "$___content"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        ## write into SPEC_FILES
+        ___spec="${___workspace}/SPEC_FILES"
+        ___content="/${3}"
+        if [ $(STRINGS_Is_Empty "$4") -ne 0 ]; then
+                ___content="${___content}/*"
+        fi
+        ___content="${___content}\n"
+        FS_Append_File "$___spec" "$___content"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
 }

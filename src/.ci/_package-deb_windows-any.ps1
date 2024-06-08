@@ -21,6 +21,8 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\zip.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\copyright.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\deb.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\manual.ps1"
@@ -56,6 +58,18 @@ function PACKAGE-Assemble-DEB-Content {
 		# accepted
 	}}
 
+
+	# execute
+	## determine base path
+	## TIP: (1) by design, usually is: usr/local/
+	##      (2) please avoid: usr/, usr/{TYPE}/, usr/bin/, & usr/lib{TYPE}/
+	##          whenever possible for avoiding conflicts with your OS native
+	##          system packages.
+	$_chroot = "${_directory}/data/usr/"
+	if ($(STRINGS-To-Lowercase "${env:PROJECT_DEBIAN_IS_NATIVE}") -ne "true") {
+		$_chroot = "${_chroot}/local/"
+	}
+
 	$_gpg_keyring = "${env:PROJECT_SKU}"
 	$_package = "${env:PROJECT_SKU}"
 	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
@@ -63,22 +77,46 @@ function PACKAGE-Assemble-DEB-Content {
 	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		# copy main libary
-		# TIP: (1) usually is: usr/local/lib
-		#      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
-		$___dest = "${_directory}\data\usr\local\lib\${env:PROJECT_SKU}"
+		$___dest = "${_chroot}\lib\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
 
-		$null = I18N-Assemble "${_target}" "${___dest}"
-		$___process = FS-Make-Directory "${___dest}"
-		if ($___process -ne 0) {
-			$null = I18N-Assemble-Failed
-			return 1
-		}
-
-		$___process = FS-Copy-File "${_target}" "${___dest}"
-		if ($___process -ne 0) {
-			$null = I18N-Assemble-Failed
-			return 1
+		if ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
+			return 10 # not applicable
+		} elseif ($(FS-Is-Target-A-TARGZ "${_target}") -eq 0) {
+			# unpack library
+			$null = I18N-Assemble "${_target}" "${___dest}"
+			$null = FS-Make-Directory "${___dest}"
+			$___process = TAR-Extract-GZ "${___dest}" "${_target}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
+		} elseif ($(FS-Is-Target-A-TARXZ "${_target}") -eq 0) {
+			# unpack library
+			$null = I18N-Assemble "${_target}" "${___dest}"
+			$null = FS-Make-Directory "${___dest}"
+			$___process = TAR-Extract-XZ "${___dest}" "${_target}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
+		} elseif ($(FS-Is-Target-A-ZIP "${_target}") -eq 0) {
+			# unpack library
+			$null = I18N-Assemble "${_target}" "${___dest}"
+			$null = FS-Make-Directory "${___dest}"
+			$___process = ZIP-Extract "${___dest}" "${_target}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
+		} else {
+			# copy library file
+			$null = I18N-Assemble "${_target}" "${___dest}"
+			$null = FS-Make-Directory "${___dest}"
+			$___process = FS-Copy-File "${_target}" "${___dest}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
 		}
 
 		$_gpg_keyring = "lib${env:PROJECT_SKU}"
@@ -97,13 +135,9 @@ function PACKAGE-Assemble-DEB-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
-		return 10 # not applicable
 	} else {
 		# copy main program
-		# TIP: (1) usually is: usr/local/bin or usr/local/sbin
-		#      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
-		$___dest = "${_directory}\data\usr\local\bin"
+		$___dest = "${_chroot}\bin\"
 
 		$null = I18N-Assemble "${_target}" "${___dest}"
 		$null = FS-Make-Directory "${___dest}"
@@ -116,16 +150,9 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$_changelog_path = "${_directory}\data\usr\local\share\doc\${env:PROJECT_SKU}\changelog.gz"
-	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
-		$_changelog_path = "${_directory}\data\usr\share\doc\${env:PROJECT_SKU}\changelog.gz"
-	}
-
-	$null = I18N-Create "${_changelog_path}"
-	$___process = DEB-Create-Changelog `
-		"${_changelog_path}" `
-		"${_changelog}" `
-		"${env:PROJECT_SKU}"
+	$___dest = "${_chroot}\share\doc\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}\changelog.gz"
+	$null = I18N-Create "${___dest}"
+	$___process = DEB-Create-Changelog "${___dest}" "${_changelog}" "${env:PROJECT_SKU}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
@@ -133,14 +160,10 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$_copyright = "${_directory}\data\usr\local\share\doc\${env:PROJECT_SKU}\copyright"
-	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
-		$_copyright = "${_directory}\data\usr\share\doc\${env:PROJECT_SKU}\copyright"
-	}
-
-	$null = I18N-Create "${_copyright}"
+	$___dest = "${_chroot}\share\doc\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}\copyright"
+	$null = I18N-Create "${___dest}"
 	$___process = COPYRIGHT-Create `
-		"${_copyright}" `
+		"${___dest}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\deb-copyright" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
@@ -153,14 +176,10 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$_manual = "${_directory}\data\usr\local\share\man\man1\${env:PROJECT_SKU}.1"
-	if ("${env:PROJECT_DEBIAN_IS_NATIVE}" -eq "true") {
-		$_manual = "${_directory}\data\usr\share\man\man1\${env:PROJECT_SKU}.1"
-	}
-
-	$null = I18N-Create "${_manual}"
+	$___dest = "${_chroot}\share\man\man1\${env:PROJECT_SCOPE}-${env:PROJECT_SKU}.1"
+	$null = I18N-Create "${___dest}"
 	$___process = MANUAL-Create `
-		"${_manual}" `
+		"${___dest}" `
 		"${env:PROJECT_DEBIAN_IS_NATIVE}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `

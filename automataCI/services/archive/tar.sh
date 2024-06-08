@@ -110,16 +110,29 @@ TAR_Create_GZ() {
                 return 1
         fi
 
+        if [ "${1%.tgz*}" != "$1" ]; then
+                ___dest="${1%.tgz*}"
+        else
+                ___dest="${1%.tar.gz*}"
+        fi
+
 
         # create tar archive
-        TAR_Create "${1%.gz*}" "$2" "$3" "$4"
+        TAR_Create "$___dest" "$2" "$3" "$4"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # compress archive
-        GZ_Create "${1%.gz*}"
+        GZ_Create "$___dest"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # rename to destination target
+        FS_Move "${___dest}.gz" "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -159,16 +172,29 @@ TAR_Create_XZ() {
                 return 1
         fi
 
+        if [ "${1%.txz*}" != "$1" ]; then
+                ___dest="${1%.txz*}"
+        else
+                ___dest="${1%.tar.xz*}"
+        fi
+
 
         # create tar archive
-        TAR_Create "${1%.xz*}" "$2" "$3" "$4"
+        TAR_Create "$___dest" "$2" "$3" "$4"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # compress archive
-        XZ_Create "${1%%.xz*}"
+        XZ_Create "$___dest"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # rename to target
+        FS_Move "${___dest}.xz" "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi

@@ -111,8 +111,8 @@ function SUBROUTINE-Package {
 	$null = . "${env:LIBS_AUTOMATACI}\_package-flatpak_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-homebrew_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-ipk_windows-any.ps1"
+	$null = . "${env:LIBS_AUTOMATACI}\_package-lib_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-msi_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-npm_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-pdf_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-pypi_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-rpm_windows-any.ps1"
@@ -198,6 +198,7 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 	$__log = "${__log_directory}\archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-ARCHIVE
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -206,6 +207,7 @@ ${__common}|${__log}|PACKAGE-Run-ARCHIVE
 	$__log = "${__log_directory}\cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-CARGO
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -214,6 +216,7 @@ ${__common}|${__log}|PACKAGE-Run-CARGO
 	$__log = "${__log_directory}\chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-CHOCOLATEY
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -222,6 +225,7 @@ ${__common}|${__log}|PACKAGE-Run-CHOCOLATEY
 	$__log = "${__log_directory}\deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE-Run-DEB
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -230,6 +234,7 @@ ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE-Run-DEB
 	$__log = "${__log_directory}\docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__log}|PACKAGE-Run-DOCKER
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -239,6 +244,7 @@ ${__common}|${__log}|PACKAGE-Run-DOCKER
 	$__log = "${__log_directory}\flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__flatpak_path}|${__log}|PACKAGE-Run-FLATPAK
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -247,6 +253,7 @@ ${__common}|${__flatpak_path}|${__log}|PACKAGE-Run-FLATPAK
 	$__log = "${__log_directory}\homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-HOMEBREW
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -255,6 +262,16 @@ ${__common}|${__log}|PACKAGE-Run-HOMEBREW
 	$__log = "${__log_directory}\ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-IPK
+
+"@
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$__log = "${__log_directory}\lib_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+	$___process = FS-Append-File "${__parallel_control}" @"
+${__common}|${__log}|PACKAGE-Run-LIB
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -263,14 +280,7 @@ ${__common}|${__log}|PACKAGE-Run-IPK
 	$__log = "${__log_directory}\msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__log}|PACKAGE-Run-MSI
-"@
-	if ($___process -ne 0) {
-		return 1
-	}
 
-	$__log = "${__log_directory}\npm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__serial_control}" @"
-${__common}|${__log}|PACKAGE-Run-NPM
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -279,6 +289,7 @@ ${__common}|${__log}|PACKAGE-Run-NPM
 	$__log = "${__log_directory}\PDF_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-PDF
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -287,6 +298,7 @@ ${__common}|${__log}|PACKAGE-Run-PDF
 	$__log = "${__log_directory}\pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-PYPI
+
 "@
 	if ($___process -ne 0) {
 		return 1
@@ -295,6 +307,7 @@ ${__common}|${__log}|PACKAGE-Run-PYPI
 	$__log = "${__log_directory}\rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 	$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-RPM
+
 "@
 	if ($___process -ne 0) {
 		return 1

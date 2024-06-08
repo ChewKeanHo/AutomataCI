@@ -52,12 +52,7 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 			return 1
 		}
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		$null = I18N-Assemble "${_target}" "${_directory}"
-		$___process = FS-Copy-File "${_target}" "${_directory}"
-		if ($___process -ne 0) {
-			$null = I18N-Assemble-Failed
-			return 1
-		}
+		return 10 # handled by lib packager
 	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
 		return 10 # handled by wasm instead
 	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
@@ -87,8 +82,6 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 	} elseif ($(FS-Is-Target-A-MSI "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
-		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
 		return 10 # not applicable
 	} else {
 		$null = I18N-Assemble "${_target}" "${_directory}"

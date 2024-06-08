@@ -149,11 +149,10 @@ foreach ($___line in (Get-Content "${env:PROJECT_PATH_ROOT}\${env:PROJECT_NODE}\
 	}
 }
 
-
-## assemble assets and npm metadata files
+## assemble other assets and npm metadata files
 $null = I18N-Assemble-Package
 $___process = FS-Copy-File `
-	"${env:PROJECT_PATH_ROOT}\README.md" `
+	"${env:PROJECT_PATH_ROOT}\${env:PROJECT_README}" `
 	"${__workspace_path}\README.md"
 if ($___process -ne 0) {
 	$null = I18N-Assemble-Failed
@@ -161,16 +160,17 @@ if ($___process -ne 0) {
 }
 
 $___process = FS-Copy-File `
-	"${env:PROJECT_PATH_ROOT}\LICENSE.txt" `
+	"${env:PROJECT_PATH_ROOT}\${env:PROJECT_LICENSE_FILE}" `
 	"${__workspace_path}\LICENSE.txt"
 if ($___process -ne 0) {
 	$null = I18N-Assemble-Failed
 	return 1
 }
 
-
 ## export npm tarball
-$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${env:PROJECT_SKU}_js-js.tar.gz"
+### IMPORTANT: npm only recognizes .tgz file extension so rename it accordingly.
+###            Also, keep the lib- prefix -NPM for CI identification purposes.
+$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\lib${env:PROJECT_SKU}-NPM_js-js.tgz"
 $null = I18N-Export "${___dest}"
 $null = FS-Make-Housing-Directory "${___dest}"
 $null = FS-Remove-Silently "${___dest}"
@@ -180,16 +180,6 @@ $null = Set-Location "${__workspace_path}"
 $___process = TAR-Create-GZ "${___dest}" "."
 $null = Set-Location "${__current_path}"
 $null = Remove-Variable __current_path
-if ($___process -ne 0) {
-	$null = I18N-Export-Failed
-	return 1
-}
-
-### IMPORTANT: npm only recognizes .tgz file extension so rename it accordingly.
-$___source = "${___dest}"
-$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${env:PROJECT_SKU}_js-js.tgz"
-$null = FS-Remove-Silently "${___dest}"
-$___process = FS-Move "${___source}" "${___dest}"
 if ($___process -ne 0) {
 	$null = I18N-Export-Failed
 	return 1

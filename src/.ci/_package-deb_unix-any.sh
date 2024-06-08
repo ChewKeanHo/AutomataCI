@@ -16,12 +16,14 @@
 
 # initialize
 if [ "$PROJECT_PATH_ROOT" = "" ]; then
-        >&2 printf "[ ERROR ] - Please run from autoamtaCI/ci.sh.ps1 instead!\n"
+        >&2 printf "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!\n"
         return 1
 fi
 
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/archive/tar.sh"
+. "${LIBS_AUTOMATACI}/services/archive/zip.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/copyright.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/deb.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/manual.sh"
@@ -58,6 +60,18 @@ PACKAGE_Assemble_DEB_Content() {
                 ;;
         esac
 
+
+        # execute
+        ## determine base path
+        ## TIP: (1) by design, usually is: usr/local/
+        ##      (2) please avoid: usr/, usr/{TYPE}/, usr/bin/, & usr/lib{TYPE}/
+        ##          whenever possible for avoiding conflicts with your OS native
+        ##          system packages.
+        _chroot="${_directory}/data/usr/"
+        if [ ! "$(STRINGS_To_Lowercase "$PROJECT_DEBIAN_IS_NATIVE")" = "true" ]; then
+                _chroot="${_chroot}/local"
+        fi
+
         _gpg_keyring="$PROJECT_SKU"
         _package="$PROJECT_SKU"
         if [ $(FS_Is_Target_A_Source "$_target") -eq 0 ]; then
@@ -65,17 +79,46 @@ PACKAGE_Assemble_DEB_Content() {
         elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
-                # copy main libary
-                # TIP: (1) usually is: usr/local/lib
-                #      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
-                ___dest="${_directory}/data/usr/local/lib/${PROJECT_SKU}"
+                ___dest="${_chroot}/lib/${PROJECT_SCOPE}/${PROJECT_SKU}"
 
-                I18N_Copy "$_target" "$___dest"
-                FS_Make_Directory "$___dest"
-                FS_Copy_File "$_target" "$___dest"
-                if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
-                        return 1
+                if [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
+                        return 10 # not applicable
+                elif [ $(FS_Is_Target_A_TARGZ "$_target") -eq 0 ]; then
+                        # unpack library
+                        I18N_Assemble "$_target" "$___dest"
+                        FS_Make_Directory "$___dest"
+                        TAR_Extract_GZ "$___dest" "$_target"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
+                elif [ $(FS_Is_Target_A_TARXZ "$_target") -eq 0 ]; then
+                        # unpack library
+                        I18N_Assemble "$_target" "$___dest"
+                        FS_Make_Directory "$___dest"
+                        TAR_Extract_XZ "$___dest" "$_target"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
+                elif [ $(FS_Is_Target_A_ZIP "$_target") -eq 0 ]; then
+                        # unpack library
+                        I18N_Assemble "$_target" "$___dest"
+                        FS_Make_Directory "$___dest"
+                        ZIP_Extract "$___dest" "$_target"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
+                else
+                        # copy library file
+                        I18N_Assemble "$_target" "$___dest"
+                        FS_Make_Directory "$___dest"
+                        FS_Copy_File "$_target" "$___dest"
+                        if [ $? -ne 0 ]; then
+                                I18N_Assemble_Failed
+                                return 1
+                        fi
                 fi
 
                 _gpg_keyring="lib$PROJECT_SKU"
@@ -94,32 +137,24 @@ PACKAGE_Assemble_DEB_Content() {
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_PDF "$_target") -eq 0 ]; then
                 return 10 # not applicable
-        elif [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
-                return 10 # not applicable
         else
                 # copy main program
-                # TIP: (1) usually is: usr/local/bin or usr/local/sbin
-                #      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
-                ___dest="${_directory}/data/usr/local/bin"
+                ___dest="${_chroot}/bin/"
 
-                I18N_Copy "$_target" "$___dest"
+                I18N_Assemble "$_target" "$___dest"
                 FS_Make_Directory "$___dest"
                 FS_Copy_File "$_target" "$___dest"
                 if [ $? -ne 0 ]; then
-                        I18N_Copy_Failed
+                        I18N_Assemble_Failed
                         return 1
                 fi
         fi
 
 
         # NOTE: REQUIRED file
-        _changelog_path="${_directory}/data/usr/local/share/doc/${PROJECT_SKU}/changelog.gz"
-        if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
-                _changelog_path="${_directory}/data/usr/share/doc/${PROJECT_SKU}/changelog.gz"
-        fi
-
-        I18N_Create "$_changelog_path"
-        DEB_Create_Changelog "$_changelog_path" "$_changelog" "$PROJECT_SKU"
+        ___dest="${_chroot}/share/doc/${PROJECT_SCOPE}/${PROJECT_SKU}/changelog.gz"
+        I18N_Create "$___dest"
+        DEB_Create_Changelog "$___dest" "$_changelog" "$PROJECT_SKU"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
                 return 1
@@ -127,14 +162,10 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        _copyright="${_directory}/data/usr/local/share/doc/${PROJECT_SKU}/copyright"
-        if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
-                _copyright="${_directory}/data/usr/share/doc/${PROJECT_SKU}/copyright"
-        fi
-
-        I18N_Create "$_copyright"
+        ___dest="${_chroot}/share/doc/${PROJECT_SCOPE}/${PROJECT_SKU}/copyright"
+        I18N_Create "$___dest"
         COPYRIGHT_Create \
-                "$_copyright" \
+                "$___dest" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/deb-copyright" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
@@ -147,14 +178,10 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        _manual="${_directory}/data/usr/local/share/man/man1/${PROJECT_SKU}.1"
-        if [ "$PROJECT_DEBIAN_IS_NATIVE" = "true" ]; then
-                _manual="${_directory}/data/usr/share/man/man1/${PROJECT_SKU}.1"
-        fi
-
-        I18N_Create "$_manual"
+        ___dest="${_chroot}/share/man/man1/${PROJECT_SCOPE}-${PROJECT_SKU}.1"
+        I18N_Create "$___dest"
         MANUAL_Create \
-                "$_manual" \
+                "$___dest" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \

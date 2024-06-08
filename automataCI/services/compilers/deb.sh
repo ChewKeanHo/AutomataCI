@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -176,8 +176,9 @@ DEB_Create_Checksum() {
         # checksum every items
         for ___line in $(find "${1}/data" -type f); do
                 ___checksum="$(MD5_Checksum_From_File "$___line")"
-                FS_Append_File "$___location" \
-                        "${___checksum%% *} ${___line##*${1}/data/}\n"
+                ___line="${___line##*${1}/data/}"
+                ___checksum="${___checksum%% *}"
+                FS_Append_File "$___location" "${___checksum} ${___line}\n"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi

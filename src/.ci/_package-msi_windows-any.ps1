@@ -488,7 +488,6 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 				On='uninstall' />
 		</Component>
 
-
 "@
 		if ($___process -ne 0) {
 			$null = I18N-Create-Failed
@@ -510,7 +509,6 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 				</Directory>
 			</Directory>
 		</StandardDirectory>
-
 
 "@
 		if ($___process -ne 0) {
@@ -537,7 +535,6 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 			</Component>
 		</ComponentGroup>
 
-
 		<ComponentGroup Id='ProductConfigs' Directory='${__tag_DIR_INSTALL}Config'>
 			<!-- Compulsory Config Files Here -->
 			<Component Id='${__tag_COMPONENT_CONFIG}'
@@ -552,7 +549,6 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 			</Component>
 		</ComponentGroup>
 
-
 		<ComponentGroup Id='ProductLibs' Directory='${__tag_DIR_INSTALL}Lib'>
 			<!-- Compulsory Libraries Files Here -->
 			<Component Id='${__tag_COMPONENT_LIB}'
@@ -566,7 +562,6 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 			>
 			</Component>
 		</ComponentGroup>
-
 
 		<ComponentGroup Id='ProductDocs' Directory='${__tag_DIR_INSTALL}Docs'>
 			<!-- Compulsory Docs Files Here -->
@@ -589,7 +584,6 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 				/>
 			</Component>
 		</ComponentGroup>
-
 
 "@
 		if ($___process -ne 0) {
@@ -617,7 +611,6 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 			<!-- For those, use %APPDATA% and etc instead. -->
 			<!-- Otherwise, refer the above compulsory entry to add more. -->
 		</RegistryKey></Component>
-
 
 "@
 		if ($___process -ne 0) {
@@ -676,6 +669,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 				<ComponentRef Id='${__tag_COMPONENT_DOCS_OPTIONAL}' />
 			</Feature>
 		</Feature>
+
 "@
 		if ($___process -ne 0) {
 			$null = I18N-Create-Failed
@@ -690,6 +684,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 		<WixVariable Id='WixUIBannerBmp' Value='${__var_INSTALLER_BANNER_SOURCE}' />
 		<WixVariable Id='WixUIDialogBmp' Value='${__var_INSTALLER_DIALOG_SOURCE}' />
 		<WixVariable Id="WixUILicenseRtf" Value='${__var_UI_LICENSE_SOURCE}' />
+
 "@
 		if ($___process -ne 0) {
 			$null = I18N-Create-Failed
@@ -701,6 +696,7 @@ Your ${env:PROJECT_NAME} is the same/later version. No further action is require
 		$___process = FS-Append-File "${_wxs}" @"
 	</Package>
 </Wix>
+
 "@
 		if ($___process -ne 0) {
 			$null = I18N-Create-Failed

@@ -49,6 +49,7 @@ function RELEASE-Conclude-STATIC-REPO {
 This is a re-purposed repository for housing various distribution ecosystem
 such as but not limited to ``.deb``, ``.rpm``, ``.flatpak``, and etc for folks
 to ``apt-get install``, ``yum install``, or ``flatpak install``.
+
 "@
 
 	$null = I18N-Commit "STATIC REPO"

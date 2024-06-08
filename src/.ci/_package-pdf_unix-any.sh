@@ -40,8 +40,9 @@ PACKAGE_Assemble_PDF_Content() {
 
 
         # execute
-        I18N_Copy "$_target" "${_directory}/$(FS_Get_File "$_target")"
-        FS_Copy_File "$_target" "${_directory}/$(FS_Get_File "$_target")"
+        ___dest="${_directory}/$(FS_Get_File "$_target")"
+        I18N_Copy "$_target" "$___dest"
+        FS_Copy_File "$_target" "$___dest"
         if [ $? -ne 0 ]; then
                 I18N_Copy_Failed
                 return 1

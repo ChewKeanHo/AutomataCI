@@ -46,7 +46,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-## build the artifacts and shift it to the workspace
+## build the artifacts and move it to the workspace
 I18N_Build "$PROJECT_NODE"
 FS_Remove_Silently "$__workspace_path"
 FS_Make_Housing_Directory "$__workspace_path"
@@ -159,24 +159,24 @@ while IFS="" read -r ___line || [ -n "$___line" ]; do
 done < "${PROJECT_PATH_ROOT}/${PROJECT_NODE}/package.json"
 IFS="$___old_IFS" && unset ___old_IFS
 
-
-## assemble assets and npm metadata files
+## assemble other assets and npm metadata files
 I18N_Assemble_Package
-FS_Copy_File "${PROJECT_PATH_ROOT}/README.md" "${__workspace_path}/README.md"
+FS_Copy_File "${PROJECT_PATH_ROOT}/${PROJECT_README}" "${__workspace_path}/README.md"
 if [ $? -ne 0 ]; then
         I18N_Assemble_Failed
         return 1
 fi
 
-FS_Copy_File "${PROJECT_PATH_ROOT}/LICENSE.txt" "${__workspace_path}/LICENSE.txt"
+FS_Copy_File "${PROJECT_PATH_ROOT}/${PROJECT_LICENSE_FILE}" "${__workspace_path}/LICENSE.txt"
 if [ $? -ne 0 ]; then
         I18N_Assemble_Failed
         return 1
 fi
-
 
 ## export npm tarball
-___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${PROJECT_SKU}_js-js.tar.gz"
+### IMPORTANT: npm only recognizes .tgz file extension so rename it accordingly.
+###            Also, keep the lib- prefix -NPM for CI identification purposes.
+___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/lib${PROJECT_SKU}-NPM_js-js.tgz"
 I18N_Export "$___dest"
 FS_Make_Housing_Directory "$___dest"
 FS_Remove_Silently "$___dest"
@@ -185,16 +185,6 @@ __current_path="$PWD" && cd "$__workspace_path"
 TAR_Create_GZ "$___dest" "."
 ___process=$?
 cd "$__current_path" && unset __current_path
-if [ $___process -ne 0 ]; then
-        I18N_Export_Failed
-        return 1
-fi
-
-### IMPORTANT: npm only recognizes .tgz file extension so rename it accordingly.
-___source="$___dest"
-___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${PROJECT_SKU}_js-js.tgz"
-FS_Remove_Silently "$___dest"
-FS_Move "$___source" "$___dest"
 if [ $___process -ne 0 ]; then
         I18N_Export_Failed
         return 1

@@ -104,9 +104,7 @@ function RELEASE-Run-CHECKSUM {
 				return 1
 			}
 
-			$___process = FS-Append-File "${__sha256_file}" @"
-${__value}  $TARGET
-"@
+			$___process = FS-Append-File "${__sha256_file}" "${__value}  $TARGET`n"
 			if ($___process -ne 0) {
 				$null = I18N-Checksum-Failed
 				return 1
@@ -121,9 +119,7 @@ ${__value}  $TARGET
 				return 1
 			}
 
-			$___process = FS-Append-File "${__sha512_file}" @"
-${__value}  $TARGET
-"@
+			$___process = FS-Append-File "${__sha512_file}" "${__value}  $TARGET`n"
 			if ($___process -ne 0) {
 				$null = I18N-Checksum-Failed
 				return 1

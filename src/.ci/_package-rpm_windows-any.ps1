@@ -21,6 +21,9 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\zip.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\rpm.ps1"
 
 
 
@@ -44,56 +47,113 @@ function PACKAGE-Assemble-RPM-Content {
 	}}
 
 
+	# execute
+	## determine base path
+	## TIP: (1) by design, usually is: usr/local/
+	##      (2) please avoid: usr/, usr/{TYPE}/, usr/bin/, & usr/lib{TYPE}/
+	##          whenever possible for avoiding conflicts with your OS native
+	##          system packages.
+	$_chroot = "usr"
+	if ("$(STRINGS-To-Lowercase "$PROJECT_DEBIAN_IS_NATIVE")" -eq "true") {
+		$_chroot = "${_chroot}/local"
+	}
+
 	$_gpg_keyring = "${env:PROJECT_SKU}"
 	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		# copy main libary
-		# TIP: (1) usually is: usr/local/lib
-		#      (2) please avoid: lib/, lib{TYPE}/ usr/lib/, and usr/lib{TYPE}/
-		$_filepath = "${_directory}\BUILD\lib${env:PROJECT_SKU}.a"
-		$null = I18N-Copy "${_target}" "${_filepath}"
-		$___process = FS-Make-Housing-Directory "${_filepath}"
-		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
-			return 1
-		}
+		if ($(FS-Is-Target-A-NPM "${_target}" -eq 0)) {
+			return 10 # not applicable
+		} elseif ($(FS-Is-Target-A-TARGZ "${_target}" -eq 0)) {
+			# unpack library
+			$___source = "${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
+			$___dest = "${_directory}\BUILD\${___source}"
+			$___target = "${_chroot}\lib\${___source}"
 
-		$___process = FS-Copy-File "${_target}" "${_filepath}"
-		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
-			return 1
-		}
+			$null = I18N-Assemble "${_target}" "${___dest}"
+			$null = FS-Make-Directory "${___dest}"
+			$___process = TAR-Extract-GZ "${___dest}" "${_target}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
 
+			$___process = RPM-Register `
+				"${_directory}" `
+				"${___source}" `
+				"${___target}" `
+				"true"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
+		} elseif ($(FS-Is-Target-A-TARXZ "${_target}" -eq 0)) {
+			# unpack library
+			$___source = "${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
+			$___dest = "${_directory}\BUILD\${___source}"
+			$___target = "${_chroot}\lib\${___source}"
 
-		# generate AutomataCI's required RPM spec instructions (INSTALL)
-		$__file = "${_directory}\SPEC_INSTALL"
-		$null = I18N-Create "${__file}"
-		$___process = FS-Write-File "${__file}" @"
-install --directory %{buildroot}/usr/local/lib/${env:PROJECT_SKU}
-install -m 0644 lib${env:PROJECT_SKU}.a %{buildroot}/usr/local/lib/${env:PROJECT_SKU}
+			$null = I18N-Assemble "${_target}" "${___dest}"
+			$null = FS-Make-Directory "${___dest}"
+			$___process = TAR-Extract-XZ "${___dest}" "${_target}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
 
-install --directory %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}/
-install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}/
-"@
-		if ($___process -ne 0) {
-			$null = I18N-Create-Failed
-			return 1
-		}
+			$___process = RPM-Register `
+				"${_directory}" `
+				"${___source}" `
+				"${___target}" `
+				"true"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
+		} elseif ($(FS-Is-Target-A-ZIP "${_target}" -eq 0)) {
+			# unpack library
+			$___source = "${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
+			$___dest = "${_directory}\BUILD\${___source}"
+			$___target = "${_chroot}\lib\${___source}"
 
+			$null = I18N-Assemble "${_target}" "${___dest}"
+			$null = FS-Make-Directory "${___dest}"
+			$___process = ZIP-Extract "${___dest}" "${_target}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
 
-		# generate AutomataCI's required RPM spec instructions (FILES)
-		$__file = "${_directory}\SPEC_FILES"
-		$null = I18N-Create "${__file}"
-		$___process = FS-Write-File "${__file}" @"
-/usr/local/lib/${env:PROJECT_SKU}/lib${env:PROJECT_SKU}.a
-/usr/local/share/doc/lib${env:PROJECT_SKU}/copyright
-"@
-		if ($___process -ne 0) {
-			$null = I18N-Create-Failed
-			return 1
+			$___process = RPM-Register `
+				"${_directory}" `
+				"${___source}" `
+				"${___target}" `
+				"true"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
+		} else {
+			# copy library file
+			$___source = "$(FS-Get-File "${_target}")"
+			$___dest = "${_directory}\BUILD\${___source}"
+			$___target = "${_chroot}\lib\${___source}"
+
+			$null = I18N-Assemble "${_target}" "${___dest}"
+			$null = FS-Make-Directory "${___dest}"
+			$___process = FS-Copy-File "${_target}" "${___dest}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
+
+			$___process = RPM-Register "${_directory}" "${___source}" "${___target}"
+			if ($___process -ne 0) {
+				$null = I18N-Assemble-Failed
+				return 1
+			}
 		}
 
 		$_gpg_keyring = "lib${env:PROJECT_SKU}"
@@ -112,56 +172,23 @@ install -m 0644 copyright %{buildroot}/usr/local/share/doc/lib${env:PROJECT_SKU}
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
 		return 10 # not applicable
-	} elseif ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
-		return 10 # not applicable
 	} else {
 		# copy main program
-		# TIP: (1) usually is: usr/local/bin or usr/local/sbin
-		#      (2) please avoid: bin/, usr/bin/, sbin/, and usr/sbin/
-		$_filepath = "${_directory}\BUILD\${env:PROJECT_SKU}"
-		$null = I18N-Copy "${_target}" "${_filepath}"
-		$___process = FS-Make-Housing-Directory "${_filepath}"
+		$___source = "$(FS-Get-File "${_target}")"
+		$___dest = "${_directory}\BUILD\${___source}"
+		$___target = "${_chroot}\lib\${___source}"
+
+		$null = I18N-Assemble "${_target}" "${___dest}"
+		$null = FS-Make-Directory "${___dest}"
+		$___process = FS-Copy-File "${_target}" "${___dest}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
+			$null = I18N-Assemble-Failed
 			return 1
 		}
 
-		$___process = FS-Copy-File "${_target}" "${_filepath}"
+		$___process = RPM-Register "${_directory}" "${___source}" "${___target}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
-			return 1
-		}
-
-
-		# generate AutomataCI's required RPM spec instructions (INSTALL)
-		$__file = "${_directory}\SPEC_INSTALL"
-		$null = I18N-Create "${__file}"
-		$___process = FS-Write-File "${__file}" @"
-install --directory %{buildroot}/usr/local/bin
-install -m 0755 ${env:PROJECT_SKU} %{buildroot}/usr/local/bin
-
-install --directory %{buildroot}/usr/local/share/doc/${env:PROJECT_SKU}/
-install -m 644 copyright %{buildroot}/usr/local/share/doc/${env:PROJECT_SKU}/
-
-install --directory %{buildroot}/usr/local/share/man/man1/
-install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
-"@
-		if ($___process -ne 0) {
-			$null = I18N-Create-Failed
-			return 1
-		}
-
-
-		# generate AutomataCI's required RPM spec instructions (FILES)
-		$__file = "${_directory}\SPEC_FILES"
-		$null = I18N-Create "${__file}"
-		$___process = FS-Write-File "${__file}" @"
-/usr/local/bin/${env:PROJECT_SKU}
-/usr/local/share/doc/${env:PROJECT_SKU}/copyright
-/usr/local/share/man/man1/${env:PROJECT_SKU}.1.gz
-"@
-		if ($___process -ne 0) {
-			$null = I18N-Create-Failed
+			$null = I18N-Assemble-Failed
 			return 1
 		}
 
@@ -170,14 +197,23 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 
 	# NOTE: REQUIRED file
-	$null = I18N-Create "copyright.gz"
+	$___source = "copyright"
+	$___dest = "${_directory}/BUILD/${___source}"
+	$___target = "${_chroot}/share/doc/${env:PROJECT_SCOPE}/${env:PROJECT_SKU}/${___source}"
+	$null = I18N-Create "${___source}"
 	$___process = COPYRIGHT-Create `
-		"${_directory}\BUILD\copyright" `
+		"${___dest}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\deb-copyright" `
-		${env:PROJECT_SKU} `
-		${env:PROJECT_CONTACT_NAME} `
-		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE}
+		"${env:PROJECT_SKU}" `
+		"${env:PROJECT_CONTACT_NAME}" `
+		"${env:PROJECT_CONTACT_EMAIL}" `
+		"${env:PROJECT_CONTACT_WEBSITE}"
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
+		return 1
+	}
+
+	$___process = RPM-Register "${_directory}" "${___source}" "${___target}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
@@ -185,13 +221,22 @@ install -m 644 ${env:PROJECT_SKU}.1.gz %{buildroot}/usr/local/share/man/man1/
 
 
 	# NOTE: REQUIRED file
-	$null = I18N-Create "MAN PAGES"
+	$___source = "${env:PROJECT_SCOPE}-${env:PROJECT_SKU}.1"
+	$___dest = "${_directory}/BUILD/${___source}"
+	$___target = "${_chroot}/share/man/man1/${___source}"
+	$null = I18N-Create "${___source}"
 	$___process = MANUAL-Create `
-		"${_directory}\BUILD\${env:PROJECT_SKU}.1" `
-		${env:PROJECT_SKU} `
-		${env:PROJECT_CONTACT_NAME} `
-		${env:PROJECT_CONTACT_EMAIL} `
-		${env:PROJECT_CONTACT_WEBSITE}
+		"${___dest}" `
+		"${env:PROJECT_SKU}" `
+		"${env:PROJECT_CONTACT_NAME}" `
+		"${env:PROJECT_CONTACT_EMAIL}" `
+		"${env:PROJECT_CONTACT_WEBSITE}"
+	if ($___process -ne 0) {
+		$null = I18N-Create-Failed
+		return 1
+	}
+
+	$___process = RPM-Register "${_directory}" "${___source}" "${___target}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
