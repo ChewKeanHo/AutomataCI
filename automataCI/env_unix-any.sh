@@ -182,6 +182,7 @@ fi
 
 
 if [ $(STRINGS_Is_Empty "$PROJECT_LIBREOFFICE") -ne 0 ] ||
+        [ $(STRINGS_Is_Empty "$PROJECT_BOOK") -ne 0 ] ||
         [ $(STRINGS_Is_Empty "$PROJECT_RESEARCH") -ne 0 ]; then
         I18N_Install "LIBREOFFICE"
         LIBREOFFICE_Setup
