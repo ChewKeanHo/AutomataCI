@@ -156,6 +156,7 @@ if ($(STRINGS-Is-Empty "${env:PROJECT_ANGULAR}") -ne 0) {
 
 
 if (($(STRINGS-Is-Empty "${env:PROJECT_LIBREOFFICE}") -ne 0) -or
+	($(STRINGS-Is-Empty "${env:PROJECT_BOOK}") -ne 0) -or
 	($(STRINGS-Is-Empty "${env:PROJECT_RESEARCH}") -ne 0)) {
 	$null = I18N-Install "LIBREOFFICE"
 	if ($(LIBREOFFICE-Setup) -ne 0) {

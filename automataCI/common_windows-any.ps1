@@ -83,6 +83,11 @@ if ($___process -ne 0) {
 	return 1
 }
 
+$___process = RUN-Subroutine-Exec "${env:PROJECT_BOOK}" "BOOK"
+if ($___process -ne 0) {
+	return 1
+}
+
 $___process = RUN-Subroutine-Exec "${env:PROJECT_C}" "C"
 if ($___process -ne 0) {
 	return 1

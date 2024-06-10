@@ -229,6 +229,22 @@ PROJECT_ANGULAR = ''
 
 
 ######################
+# BOOK TECHNOLOGY    #
+######################
+# PROJECT_BOOK
+# This is the control variable used for enabling e-book generation and also
+# defining its source directory relative to PROJECT_PATH_ROOT. Depending on
+# the offered service (e.g. GitHub Actions), setting this variable with value
+# shall notify the CI provider to setup the necessary software automatically.
+#
+# To enable it: simply supply the path (e.g. default is 'srcBOOK').
+# To disable it: simply supply an empty path (e.g. default is '').
+PROJECT_BOOK = 'srcBOOK'
+
+
+
+
+######################
 # C TECHNOLOGY       #
 ######################
 # PROJECT_C

@@ -86,6 +86,12 @@ if [ $? -ne 0 ]; then
 fi
 
 
+Run_Subroutine_Exec "$PROJECT_BOOK" "BOOK"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
 Run_Subroutine_Exec "$PROJECT_C" "C"
 if [ $? -ne 0 ]; then
         return 1
