@@ -1,4 +1,4 @@
-# Copyright 2024 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2024 (Holloway) Chew, Kean Ho <hello@hollowaykeanho.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -35,27 +35,31 @@ if ($___process -ne 0) {
 }
 
 
-$null = FS-Make-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
 
 
-$___target = "research-paper"
-$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RESEARCH}\${___target}.odt"
-$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\research-${env:PROJECT_SKU}_any-any"
+# setup important variables
+$___name = "${env:PROJECT_SKU}-${env:PROJECT_RESEARCH_IDENTIFIER}_${env:PROJECT_VERSION}_any-any"
+$___source = "research-paper.odt"
+
+
+
+
+# build PDF
+$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_RESEARCH}\${___source}"
+$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\build-${___name}"
 $null = I18N-Prepare "${___source}"
 $___process = FS-Is-File "${___source}"
 if ($___process -ne 0) {
 	$null = I18N-Prepare-Failed
 	return 1
 }
-
 $null = FS-Remake-Directory "${___dest}"
 
-
-## build pdf - refer the following page for modifying parameters:
+## IMPORTANT: refer the following page for modifying parameters:
 ##   https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html
 $null = I18N-Build "${___source}"
 $___process = OS-Exec "$(LIBREOFFICE-Get)" @"
---writer --headless --convert-to "pdf:writer_pdf_Export:{
+--headless --convert-to "pdf:writer_pdf_Export:{
 	"UseLosslessCompression": true,
 	"Quality": 100,
 	"SelectPdfVersion": 0,
@@ -73,9 +77,12 @@ if ($___process -ne 0) {
 }
 
 
-## export outputs
-$___source = "${___dest}\${___target}.pdf"
-$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${env:PROJECT_SKU}-research_${env:PROJECT_VERSION}_any-any.pdf"
+
+
+# export output
+$___source = "${___dest}\$(FS-Get-File "${___source}")"
+$___source = FS-Extension-Replace "${___source}" ".odt" ".pdf"
+$___dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${___name}.pdf"
 
 $___process = FS-Is-File "${___source}"
 if ($___process -ne 0) {

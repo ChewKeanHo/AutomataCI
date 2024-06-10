@@ -59,8 +59,37 @@ LIBREOFFICE_Get() {
 
 
 
+LIBREOFFICE_Get_Path_Local() {
+        # execute
+        ___path="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_LIBREOFFICE_ENGINE}/bin/soffice"
+
+        case "$PROJECT_OS" in
+        windows)
+                ___path="${___path}.exe"
+                ;;
+        *)
+                ;;
+        esac
+
+
+        # report status
+        printf -- "%b" "$___path"
+        return 0
+}
+
+
+
+
 LIBREOFFICE_Get_Path() {
-        case "$(OS_Get)" in
+        # execute
+        ___path="$(LIBREOFFICE_Get_Path_Local)"
+        FS_Is_File "$___path"
+        if [ $? -eq 0 ]; then
+                printf -- "%b" "$___path"
+                return 0
+        fi
+
+        case "$PROJECT_OS" in
         darwin)
                 ___path="/Applications/LibreOffice.app/Contents/MacOS/soffice"
                 ;;
@@ -68,7 +97,7 @@ LIBREOFFICE_Get_Path() {
                 ___path="C:\\Program Files\\LibreOffice\\program\\soffice.exe"
                 ;;
         *)
-                ___path="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/libreoffice/bin/libreoffice"
+                ___path="/bin/soffice"
                 ;;
         esac
 
@@ -131,117 +160,133 @@ LIBREOFFICE_Setup() {
 
 
         # execute
-        if [ "$(OS_Get)" = "darwin" ]; then
-                ## apple OS
-                ___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/libreoffice/install.dmg"
-                FS_Make_Housing_Directory "$___dest"
-                FS_Remove_Silently "$___dest"
+        ___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/${PROJECT_PATH_LIBREOFFICE_ENGINE}"
+        ___url="${PROJECT_LIBREOFFICE_MIRROR}/stable/${PROJECT_LIBREOFFICE_VERSION}"
+        case "$PROJECT_OS" in
+        darwin)
+                ___dest="${___dest}/install.dmg"
 
-
-                ## Download directly from provider
-                ___url="${PROJECT_LIBREOFFICE_MIRROR}/stable/${PROJECT_LIBREOFFICE_VERSION}"
                 ___url="${___url}/mac"
-                if [ "$(OS_Get_Arch)" = "amd64" ]; then
+                case "$PROJECT_ARCH" in
+                amd64)
                         ___url="${___url}/x86_64"
                         ___url="${___url}/LibreOffice_${PROJECT_LIBREOFFICE_VERSION}_MacOS_x86-64.dmg"
-                elif [ "$(OS_Get_Arch)" = "arm64" ]; then
+                        ;;
+                arm64)
                         ___url="${___url}/aarch64"
                         ___url="${___url}/LibreOffice_${PROJECT_LIBREOFFICE_VERSION}_MacOS_aarch64.dmg"
-                else
-                        return 1
-                fi
+                        ;;
+                *)
+                        ___url=""
+                        ;;
+                esac
 
-
-                # download from provider
-                HTTP_Download "GET" "$___url" "$___dest"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-
-
-                ## silently install
-                APPLE_Install_DMG "$___dest"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-
-
-                ## clean up
-                FS_Remove_Silently "$___dest"
-        elif [ "$(OS_Get)" = "windows" ]; then
-                ## Attempt to use directly from the provider
-                ___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/libreoffice/install.msi"
-                FS_Make_Housing_Directory "$___dest"
-                FS_Remove_Silently "$___dest"
-
-
-                ## Download directly from provider
-                ___url="${PROJECT_LIBREOFFICE_MIRROR}/stable/${PROJECT_LIBREOFFICE_VERSION}"
-                ___url="${___url}/win"
-                if [ "$(OS_Get_Arch)" = "amd64" ]; then
-                        ___url="${___url}/x86_64"
-                        ___url="${___url}/LibreOffice_${PROJECT_LIBREOFFICE_VERSION}_Win_x86-64.msi"
-                elif [ "$(OS_Get_Arch)" = "arm64" ]; then
-                        ___url="${___url}/aarch64"
-                        ___url="${___url}/LibreOffice_${PROJECT_LIBREOFFICE_VERSION}_Win_aarch64.msi"
-                else
-                        return 1
-                fi
-
-                HTTP_Download "GET" "$___url" "$___dest"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-
-                FS_Is_File "$___dest"
-                if [ $? -ne 0 ]; then
-                        return 1
-                fi
-
-                MSI_Install_Silent "$___dest"
-                ___process=$?
-                FS_Remove_Silently "$___dest"
-                if [ $___process -ne 0 ]; then
-                        return 1
-                fi
-        else
-                # other UNIX OS (including Linux)
-                OS_Is_Command_Available "flatpak"
-                if [ $? -eq 0 ]; then
-                        flatpak --user install org.libreoffice.LibreOffice
+                ## attempt to download from vendor directly
+                if [ $(STRINGS_Is_Empty "$___url") -ne 0 ]; then
+                        FS_Make_Housing_Directory "$___dest"
+                        FS_Remove_Silently "$___dest"
+                        HTTP_Download "GET" "$___url" "$___dest"
                         if [ $? -ne 0 ]; then
                                 return 1
                         fi
 
-                        return 0
+                        APPLE_Install_DMG "$___dest"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+
+                        FS_Remove_Silently "$___dest"
                 fi
+                ;;
+        windows)
+                ___dest="${___dest}/install.msi"
 
-
-                # check compatible platform version
-                ___url="https://appimages.libreitalia.org"
-                case "$(OS_Get_Arch)" in
+                ___url="${___url}/win"
+                case "$PROJECT_ARCH" in
                 amd64)
-                        ___url="${___url}/LibreOffice-fresh.full-x86_64.AppImage"
+                        ___url="${___url}/aarch64"
+                        ___url="${___url}/LibreOffice_${PROJECT_LIBREOFFICE_VERSION}_Win_X86-64.msi"
+                        ;;
+                arm64)
+                        ___url="${___url}/aarch64"
+                        ___url="${___url}/LibreOffice_${PROJECT_LIBREOFFICE_VERSION}_Win_aarch64.msi"
                         ;;
                 *)
-                        return 1
+                        ___url=""
                         ;;
                 esac
 
-
-                # download appimage portable version
-                ___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/libreoffice/bin/libreoffice"
-                FS_Make_Housing_Directory "$___dest"
-                FS_Remove_Silently "$___dest"
-                HTTP_Download "GET" "$___url" "$___dest"
-                if [ $? -ne 0 ]; then
-                        return 1
+                if [ $(STRINGS_Is_Empty "$___url") -ne 0 ]; then
+                        FS_Make_Housing_Directory "$___dest"
+                        FS_Remove_Silently "$___dest"
+                        HTTP_Download "GET" "$___url" "$___dest"
+                        ___process=$?
+                        if [ $___process -eq 0 ]; then
+                                MSI_Install_Silent "$___dest"
+                                ___process=$?
+                                FS_Remove_Silently "$___dest"
+                        fi
                 fi
 
-                chmod +x "$___dest"
-                if [ $? -ne 0 ]; then
-                        return 1
+                ## fallback to choco as the last resort
+                if [ $(STRINGS_Is_Empty "$___url") -eq 0 ] || [ $___process -ne 0 ]; then
+                        OS_Is_Command_Available "choco"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+
+                        choco install libreoffice-fresh -y
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
                 fi
+                ;;
+        linux)
+                OS_Is_Command_Available "flatpak"
+                ___process=$?
+                if [ $___process -eq 0 ]; then
+                        flatpak --user install org.libreoffice.LibreOffice
+                        ___process=$?
+                fi
+
+                ## download appimage as last resort
+                if [ $___process -ne 0 ]; then
+                        ___dest="$(LIBREOFFICE_Get_Path_Local)"
+                        ___url="https://appimages.libreitalia.org"
+                        case "$PROJECT_ARCH" in
+                        amd64)
+                                ___url="${___url}/LibreOffice-fresh.full-x86_64.AppImage"
+                                ;;
+                        *)
+                                return 1
+                                ;;
+                        esac
+
+                        if [ $(STRINGS_Is_Empty "$___url") -ne 0 ]; then
+                                FS_Make_Housing_Directory "$___dest"
+                                FS_Remove_Silently "$___dest"
+                                HTTP_Download "GET" "$___url" "$___dest"
+                                if [ $? -ne 0 ]; then
+                                        return 1
+                                fi
+
+                                chmod +x "$___dest"
+                                if [ $? -ne 0 ]; then
+                                        return 1
+                                fi
+                        fi
+                fi
+                ;;
+        *)
+                return 1 # unsupported
+                ;;
+        esac
+
+
+        # test the output
+        LIBREOFFICE_Is_Available
+        if [ $? -eq 0 ]; then
+                return 0
         fi
 
 

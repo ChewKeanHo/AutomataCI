@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2024 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2024 (Holloway) Chew, Kean Ho <hello@hollowaykeanho.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -36,12 +36,18 @@ if [ $? -ne 0 ]; then
 fi
 
 
-FS_Make_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"
 
 
-___target="research-paper"
-___source="${PROJECT_PATH_ROOT}/${PROJECT_RESEARCH}/${___target}.odt"
-___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/research-${PROJECT_SKU}_any-any"
+# setup inportant variables
+___name="${PROJECT_SKU}-${PROJECT_RESEARCH_IDENTIFIER}_${PROJECT_VERSION}_any-any"
+___source="research-paper.odt"
+
+
+
+
+# build PDF
+___source="${PROJECT_PATH_ROOT}/${PROJECT_RESEARCH}/${___source}"
+___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/build-${___name}"
 I18N_Prepare "$___source"
 FS_Is_File "$___source"
 if [ $? -ne 0 ]; then
@@ -51,11 +57,8 @@ fi
 
 FS_Remake_Directory "$___dest"
 
-
-
-
-## build pdf - refer the following page for modifying parameters:
-#    https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html
+## IMPORTANT: refer the following page for modifying parameters:
+##   https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html
 I18N_Build "$___source"
 $(LIBREOFFICE_Get) --headless --convert-to "pdf:writer_pdf_Export:{
         \"UseLosslessCompression\": true,
@@ -77,9 +80,10 @@ fi
 
 
 
-## export outputs
-___source="${___dest}/${___target}.pdf"
-___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${PROJECT_SKU}-research_${PROJECT_VERSION}_any-any.pdf"
+## export output
+___source="${___dest}/$(FS_Get_File "$___source")"
+___source="$(FS_Extension_Replace "$___source" ".odt" ".pdf")"
+___dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}/${___name}.pdf"
 
 FS_Is_File "$___source"
 if [ $? -ne 0 ]; then

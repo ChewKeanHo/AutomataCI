@@ -449,6 +449,10 @@ GOOGLEAI_BLOCK_HARASSMENT = 'BLOCK_NONE'
 # notify the CI provider to setup a localized virtual environment for
 # development automatically.
 #
+# Do note that should the following technologies are enabled, LibreOffice shall
+# be installed regardless of this control variable:
+#     (1) PROJECT_RESEARCH - using Libreoffice by default.
+#
 # To enable it: simply supply the path (e.g. default is 'srcLIBREOFFICE').
 # To disable it: simply supply an empty path (e.g. default is '').
 PROJECT_LIBREOFFICE = ''
@@ -462,8 +466,7 @@ PROJECT_LIBREOFFICE = ''
 #
 # Refer to the following mirror list for value selection:
 #     (1) https://download.documentfoundation.org/mirmon/allmirrors.html
-PROJECT_LIBREOFFICE_MIRROR = "https://ftp.osuosl.org/pub/tdf/libreoffice"
-
+PROJECT_LIBREOFFICE_MIRROR = "https://download.documentfoundation.org/libreoffice"
 
 # PROJECT_LIBREOFFICE_VERSION
 # This is for defining the LibreOffice version to install into the local OS.
@@ -471,8 +474,14 @@ PROJECT_LIBREOFFICE_MIRROR = "https://ftp.osuosl.org/pub/tdf/libreoffice"
 # Refer the the following list for value selection:
 #     (1) https://www.libreoffice.org/download/download-libreoffice/
 #
-# Example: '24.2.1' for 'LibreOffice 24.2.1'
-PROJECT_LIBREOFFICE_VERSION = "24.2.1"
+# Example: '24.4.3' for 'LibreOffice 24.4.3'
+PROJECT_LIBREOFFICE_VERSION = "24.2.3"
+
+
+# PROJECT_PATH_LIBREOFFICE_ENGINE
+# This is a relative pathing to PROJECT_PATH_ROOT + PROJECT_PATH_TOOLS for
+# setting up localized environment.
+PROJECT_PATH_LIBREOFFICE_ENGINE = "libreoffice-engine"
 
 
 
@@ -647,6 +656,18 @@ PROJECT_PYPI_README_MIME = "text/markdown"
 # To enable it: simply supply the path (e.g. default is 'srcRESEARCH').
 # To disable it: simply supply an empty path (e.g. default is '').
 PROJECT_RESEARCH = ''
+
+
+# PROJECT_RESEARCH_IDENTIFIER
+# The file identifier for the compiled output paper file from its peers with the
+# same formats (e.g. a bunch of PDFs). This is suffix-ed within the filename
+# itself like:
+#
+#    pattern: '${PROJECT_SKU}-${PROJECT_RESEARCH_IDENTIFIER}_v${PROJECT_VERSION}_any-any.pdf'
+#    example: 'automataci-RESEARCH_v100.00.100_any-any.pdf'
+#
+# default is: 'RESEARCH'
+PROJECT_RESEARCH_IDENTIFIER = 'RESEARCH'
 
 
 
