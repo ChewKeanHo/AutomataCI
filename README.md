@@ -98,7 +98,8 @@ compile cross-platform images whenever possible.
 * [Python Programming Language](https://www.python.org/) (*`srcPYTHON`*)
 * [Rust Programming Language](https://www.rust-lang.org/) (*`srcRUST`*)
 * [LibreOffice](https://www.libreoffice.org/)
-  1. **Writer** - 2-Columns Research Paper PDF Creation (*`srcRESEARCH`*)
+  1. **Writer** - 2-Columns Research PDF Paper (*`srcRESEARCH`*)
+  2. **Writer** - PDF eBOOK (*`srcBOOK`*)
 * Some Manual MISC stuffs
 
 
