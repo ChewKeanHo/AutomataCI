@@ -79,7 +79,7 @@ PACKAGE_Run_DOCKER() {
         I18N_Create_Package "DOCKER"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/docker.txt"
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/docker_${_src}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-docker-${_src}"
         I18N_Remake "$_src"
         FS_Remake_Directory "$_src"
         if [ $? -ne 0 ]; then

@@ -15,7 +15,7 @@
 
 
 
-function SHASUM-Checksum-From-File {
+function SHASUM-Create-From-File {
 	param (
 		[string]$___target,
 		[string]$___algo

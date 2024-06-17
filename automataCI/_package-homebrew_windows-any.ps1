@@ -11,10 +11,8 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
-. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
-. "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
-. "${env:LIBS_AUTOMATACI}\services\checksum\shasum.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\homebrew.ps1"
 
 
 
@@ -22,7 +20,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return
 }
 
@@ -42,37 +40,14 @@ function PACKAGE-Run-HOMEBREW {
 	$_target_filename = $__list[2]
 	$_target_os = $__list[3]
 	$_target_arch = $__list[4]
+	$_src = $__list[5]
 
 
 	# validate input
-	$null = I18N-Check-Availability "TAR"
-	$___process = TAR-Is-Available
-	if ($___process -ne 0) {
-		$null = I18N-Check-Failed
-		return 1
-	}
 
 
 	# prepare workspace and required values
 	$null = I18N-Create-Package "HOMEBREW"
-	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
-	$_target_path = "${_dest}\${_src}"
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\homebrew_${_src}"
-	$null = I18N-Remake "${_src}"
-	$___process = FS-Remake-Directory "${_src}"
-	if ($___process -ne 0) {
-		$null = I18N-Remake-Failed
-		return 1
-	}
-
-
-	# check formula.rb is available
-	$null = I18N-Check "formula.rb"
-	$___process = FS-Is-File "${_src}/formula.rb"
-	if ($___process -eq 0) {
-		$null = I18N-Check-Failed
-		return 1
-	}
 
 
 	# copy all complimentary files to the workspace
@@ -94,7 +69,6 @@ function PACKAGE-Run-HOMEBREW {
 	switch ($___process) {
 	10 {
 		$null = I18N-Assemble-Skipped
-		$null = FS-Remove-Silently "${_src}"
 		return 0
 	} 0 {
 		# accepted
@@ -102,50 +76,6 @@ function PACKAGE-Run-HOMEBREW {
 		$null = I18N-Assemble-Failed
 		return 1
 	}}
-
-
-	# archive the assembled payload
-	$__current_path = Get-Location
-	$null = Set-Location -Path "${_src}"
-	$null = I18N-Archive "${_target_path}.tar.xz"
-	$___process = TAR-Create-XZ "${_target_path}.tar.xz" "*"
-	$null = Set-Location -Path "${__current_path}"
-	$null = Remove-Variable -Name __current_path
-	if ($___process -ne 0) {
-		$null = I18N-Archive-Failed
-		return 1
-	}
-
-
-	# sha256 the package
-	$null = I18N-Shasum "SHA256"
-	$__shasum = SHASUM-Checksum-From-File "${_target_path}.tar.xz" "256"
-	if ($(STRINGS-Is-Empty "${__shasum}") -eq 0) {
-		$null = I18N-Shasum-Failed
-		return 1
-	}
-
-
-	# update the formula.rb script
-	$null = I18N-Update "formula.rb"
-	$null = FS-Remove-Silently "${_target_path}.rb"
-	foreach ($__line in (Get-Content "${_src}\formula.rb")) {
-		$__line = STRINGS-Replace-All `
-			"${__line}" `
-			"{{ TARGET_PACKAGE }}" `
-			"$(Split-Path -Leaf -Path "${_target_path}.tar.xz")"
-
-		$__line = STRINGS-Replace-All `
-			"${__line}" `
-			"{{ TARGET_SHASUM }}" `
-			"${__shasum}"
-
-		$___process = FS-Append-File "${_target_path}.rb" "${__line}`n"
-		if ($___process -ne 0) {
-			$null = I18N-Update-Failed
-			return 1
-		}
-	}
 
 
 	# report status

@@ -64,7 +64,7 @@ PACKAGE_Run_CHOCOLATEY() {
         I18N_Create_Package "CHOCOLATEY"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}"
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/choco_${_src}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-choco-${_src}"
         I18N_Remake "$_src"
         FS_Remake_Directory "$_src"
         if [ $? -ne 0 ]; then
@@ -100,7 +100,7 @@ PACKAGE_Run_CHOCOLATEY() {
 
 
         # check nuspec file is available
-        I18N_Check ".nuspec metadata"
+        I18N_Check ".nuspec"
         __name=""
         for __file in "${_src}/"*.nuspec; do
                 FS_Is_File "${__file}"

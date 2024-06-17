@@ -41,9 +41,9 @@ function PACKAGE-Assemble-PDF-Content {
 
 
 	# execute
-	$___dest = "${_directory}\$(FS-Get-File "${_target}")"
-	$null = I18N-Copy "${_target}" "${___dest}"
-	$___process = FS-Copy-File "${_target}" "${___dest}"
+	$__dest = "${_directory}\$(FS-Get-File "${_target}")"
+	$null = I18N-Copy "${_target}" "${__dest}"
+	$___process = FS-Copy-File "${_target}" "${__dest}"
 	if ($___process -ne 0) {
 		$null = I18N-Copy-Failed
 		return 1

@@ -37,7 +37,6 @@ fi
 . "${LIBS_AUTOMATACI}/services/publishers/dotnet.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/github.sh"
 . "${LIBS_AUTOMATACI}/services/publishers/homebrew.sh"
-. "${LIBS_AUTOMATACI}/services/publishers/reprepro.sh"
 
 
 
@@ -85,14 +84,6 @@ fi
 
 I18N_Install "DOCKER"
 DOCKER_Setup
-if [ $? -ne 0 ]; then
-        I18N_Install_Failed
-        return 1
-fi
-
-
-I18N_Install "REPREPRO"
-REPREPRO_Setup
 if [ $? -ne 0 ]; then
         I18N_Install_Failed
         return 1

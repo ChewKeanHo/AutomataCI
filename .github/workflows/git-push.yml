@@ -28,7 +28,7 @@ jobs:
         CONTAINER_PASSWORD: ${{ secrets.CONTAINER_PASSWORD }}
         TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-        PROJECT_SIMULATE_RELEASE_REPO: true
+        PROJECT_SIMULATE_RUN: true
         PROJECT_ROBOT_RUN: true
         PROJECT_ROBOT_GITHUB_TOKEN: "${{ github.token }}"
     steps:

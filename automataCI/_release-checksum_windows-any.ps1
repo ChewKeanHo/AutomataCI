@@ -11,6 +11,7 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\crypto\gpg.ps1"
 . "${env:LIBS_AUTOMATACI}\services\checksum\shasum.ps1"
@@ -27,25 +28,25 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-function RELEASE-Run-CHECKSUM {
+function RELEASE-Conclude-CHECKSUM {
 	param (
-		[string]$__static_repo
+		[string]$__repo_directory
 	)
 
 
 	# execute
-	$__sha256_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha256.txt"
+	$__sha256_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\releaser-sha256.txt"
 	$null = FS-Remove-Silently "${__sha256_file}"
 
-	$__sha256_target = "${env:PROJECT_SKU}-sha256_${env:PROJECT_VERSION}.txt"
-	$__sha256_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${__sha256_target}"
-	$null = FS-Remove-Silently "${__sha256_target}"
-
-	$__sha512_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\sha512.txt"
+	$__sha512_file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\releaser-sha512.txt"
 	$null = FS-Remove-Silently "${__sha512_file}"
 
+	$__sha256_target = "${env:PROJECT_SKU}-sha256_${env:PROJECT_VERSION}.txt"
+	$__sha256_target = "${__repo_directory}\${__sha256_target}"
+	$null = FS-Remove-Silently "${__sha256_target}"
+
 	$__sha512_target = "${env:PROJECT_SKU}-sha512_${env:PROJECT_VERSION}.txt"
-	$__sha512_target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${__sha512_target}"
+	$__sha512_target = "${__repo_directory}\${__sha512_target}"
 	$null = FS-Remove-Silently "${__sha512_target}"
 
 
@@ -53,33 +54,44 @@ function RELEASE-Run-CHECKSUM {
 	$___process = GPG-Is-Available "${env:PROJECT_GPG_ID}"
 	if ($___process -eq 0) {
 		$__keyfile = "${env:PROJECT_SKU}-gpg_${env:PROJECT_VERSION}.keyfile"
-		$null = I18N-Export "${__keyfile}"
-		$__keyfile = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${__keyfile}"
+		$__keyfile = "${__repo_directory}\${__keyfile}"
+
+		$null = I18N-Publish "${__keyfile}"
 		$null = FS-Remove-Silently "${__keyfile}"
-
-		$___process = GPG-Export-Public-Key "${__keyfile}" "${env:PROJECT_GPG_ID}"
-		if ($___process -ne 0) {
-			$null = I18N-Export-Failed
-			return 1
+		if ($(OS-Is-Run-Simulated) -ne 0) {
+			$___process = GPG-Export-Public-Key `
+				"${__keyfile}" `
+				"${env:PROJECT_GPG_ID}"
+			if ($___process -ne 0) {
+				$null = I18N-Publish-Failed
+				return 1
+			}
+		} else {
+			$null = I18N-Simulate-Publish "${__keyfile}"
 		}
 
-		$___process = FS-Copy-File `
-			"${__keyfile}" `
-			"${__static_repo}\$(Split-Path -Leaf -Path "${__keyfile}")"
-		if ($___process -ne 0) {
-			$null = I18N-Export-Failed
-			return 1
-		}
+		foreach ($TARGET in (Get-ChildItem -Path "${__repo_directory}")) {
+			$TARGET = $TARGET.FullName
 
-		foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
-			$TARGET = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${TARGET}"
 			if ($("${TARGET}" -replace '^.*.asc') -ne "${TARGET}") {
 				continue # it's a gpg cert
 			}
 
+			if ($("${TARGET}" -replace '^.*.gpg') -ne "${TARGET}") {
+				continue # it's a gpg keyfile or cert
+			}
+
 			$null = I18N-Sign "${TARGET}" "GPG"
+			if ($(OS-Is-Run-Simulated) -eq 0) {
+				$null = I18N-Simulate-Notarize "${TARGET}"
+				continue
+			}
+
 			FS-Remove-Silently "${TARGET}.asc"
-			$___process = GPG-Detach-Sign-File "${TARGET}" "${env:PROJECT_GPG_ID}"
+			$___process = GPG-Detach-Sign-File `
+				"${TARGET}.asc" `
+				"${TARGET}" `
+				"${env:PROJECT_GPG_ID}"
 			if ($___process -ne 0) {
 				$null = I18N-Sign-Failed
 				return 1
@@ -89,7 +101,9 @@ function RELEASE-Run-CHECKSUM {
 
 
 	# shasum all files
-	foreach ($TARGET in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}")) {
+	foreach ($TARGET in (Get-ChildItem -Path "${__repo_directory}")) {
+		$TARGET = $TARGET.FullName
+
 		$___process = FS-Is-Directory "${TARGET}"
 		if ($___process -eq 0) {
 			$null = I18N-Is-Directory-Skipped "${TARGET}"
@@ -97,14 +111,16 @@ function RELEASE-Run-CHECKSUM {
 		}
 
 		if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_SHA256}") -ne 0) {
-			$null = I18N-Checksum "$TARGET" "SHA256"
-			$__value = SHASUM-Checksum-From-File $TARGET.FullName "256"
+			$null = I18N-Checksum $TARGET "SHA256"
+			$__value = SHASUM-Create-From-File $TARGET "256"
 			if ($(STRINGS-Is-Empty "${__value}") -eq 0) {
 				$null = I18N-Checksum-Failed
 				return 1
 			}
 
-			$___process = FS-Append-File "${__sha256_file}" "${__value}  $TARGET`n"
+			$___process = FS-Append-File `
+				"${__sha256_file}" `
+				"${__value}  $(FS-Get-File "$TARGET")`n"
 			if ($___process -ne 0) {
 				$null = I18N-Checksum-Failed
 				return 1
@@ -112,14 +128,16 @@ function RELEASE-Run-CHECKSUM {
 		}
 
 		if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_SHA512}") -ne 0) {
-			$null = I18N-Checksum "$TARGET" "SHA512"
-			$__value = SHASUM-Checksum-From-File $TARGET.FullName "512"
+			$null = I18N-Checksum $TARGET "SHA512"
+			$__value = SHASUM-Create-From-File $TARGET "512"
 			if ($(STRINGS-Is-Empty "${__value}") -eq 0) {
 				$null = I18N-Checksum-Failed
 				return 1
 			}
 
-			$___process = FS-Append-File "${__sha512_file}" "${__value}  $TARGET`n"
+			$___process = FS-Append-File `
+				"${__sha512_file}" `
+				"${__value}  $(FS-Get-File "$TARGET")`n"
 			if ($___process -ne 0) {
 				$null = I18N-Checksum-Failed
 				return 1
@@ -130,10 +148,10 @@ function RELEASE-Run-CHECKSUM {
 
 	$___process = FS-Is-File "${__sha256_file}"
 	if ($___process -eq 0) {
-		$null = I18N-Export "${__sha256_target}"
+		$null = I18N-Conclude "${__sha256_target}"
 		$___process = FS-Move "${__sha256_file}" "${__sha256_target}"
 		if ($___process -ne 0) {
-			$null = I18N-Export-Failed
+			$null = I18N-Conclude-Failed
 			return 1
 		}
 	}
@@ -141,10 +159,10 @@ function RELEASE-Run-CHECKSUM {
 
 	$___process = FS-Is-File "${__sha512_file}"
 	if ($___process -eq 0) {
-		$null = I18N-Export "${__sha512_target}"
+		$null = I18N-Conclude "${__sha512_target}"
 		$___process = FS-Move "${__sha512_file}" "${__sha512_target}"
 		if ($___process -ne 0) {
-			$null = I18N-Export-Failed
+			$null = I18N-Conclude-Failed
 			return 1
 		}
 	}
@@ -170,7 +188,7 @@ function RELEASE-Initiate-CHECKSUM {
 	if ($(OS-Is-Run-Simulated) -eq 0) {
 		$null = I18N-Simulate-Available "GPG"
 	} else {
-		$___process = GPG-Is-Available
+		$___process = GPG-Is-Available "${env:PROJECT_GPG_ID}"
 		if ($___process -ne 0) {
 			$null = I18N-Check-Failed
 			return 1

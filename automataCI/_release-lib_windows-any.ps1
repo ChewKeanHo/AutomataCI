@@ -9,8 +9,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
 . "${env:LIBS_AUTOMATACI}\services\archive\zip.ps1"
@@ -31,17 +31,17 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function RELEASE-Run-LIBS {
 	param(
-		[string]$_target
+		[string]$__target
 	)
 
 
 	# validate input
-	if ($(STRINGS-Is-Empty "${env:PROJECT_SOURCE_RELEASE_TAG_LATEST}") -eq 0) {
+	$___process = FS-Is-Target-A-Library "${__target}"
+	if ($___process -ne 0) {
 		return 0
 	}
 
-	$___process = FS-Is-Target-A-Library "${_target}"
-	if ($___process -ne 0) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_SOURCE_RELEASE_TAG_LATEST}") -eq 0) {
 		return 0
 	}
 
@@ -56,26 +56,34 @@ function RELEASE-Run-LIBS {
 
 
 	# execute
-	## identify tag
 	$__branch = "v${env:PROJECT_VERSION}"
-	if ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
+	if ($(FS-Is-Target-A-NPM "${__target}") -eq 0) {
 		if ($(STRINGS-Is-Empty "${env:PROJECT_NODE_BRANCH_TAG}") -eq 0) {
 			return 0
 		}
 
 		$__branch = "${__branch}_${env:PROJECT_NODE_BRANCH_TAG}"
+	} elseif ($(FS-Is-Target-A-C "${__target}") -eq 0) {
+		if ($(STRINGS-Is-Empty "${env:PROJECT_C_BRANCH_TAG}") -eq 0) {
+			return 0
+		}
+
+		$__branch = "${__branch}_${env:PROJECT_C_BRANCH_TAG}"
 	} else {
 		return 0
 	}
 
+
+	# begin publication
 	$null = I18N-Publish "git@${__branch}"
 	if ($(OS-Is-Run-Simulated) -eq 0) {
 		$null = I18N-Simulate-Publish "${__branch}"
 		return 0
 	}
 
-	## create workspace directory
-	$__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\release-branch_${_branch}"
+
+	# create workspace directory
+	$__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\release-branch_${__branch}"
 	$___process = GIT-Setup-Workspace-Bare `
 		"${env:PROJECT_SOURCE_GIT_REMOTE}" `
 		"${__branch}" `
@@ -85,15 +93,16 @@ function RELEASE-Run-LIBS {
 		return 1
 	}
 
-	## unpack package into directory
-	if ($(FS-Is-Target-A-TARGZ "$1") -eq 0) {
-		$___process = TAR-Extract-GZ "${__workspace}" "${_target}"
-	} elseif ($(FS-Is-Target-A-TARXZ "$1") -eq 0) {
-		$___process = TAR-Extract-XZ "${__workspace}" "${_target}"
-	} elseif ($(FS-Is-Target-A-ZIP "$1") -eq 0) {
-		$___process = ZIP-Extract "${__workspace}" "${_target}"
+
+	# unpack package into directory
+	if ($(FS-Is-Target-A-TARGZ "${__target}") -eq 0) {
+		$___process = TAR-Extract-GZ "${__workspace}" "${__target}"
+	} elseif ($(FS-Is-Target-A-TARXZ "${__target}") -eq 0) {
+		$___process = TAR-Extract-XZ "${__workspace}" "${__target}"
+	} elseif ($(FS-Is-Target-A-ZIP "${__target}") -eq 0) {
+		$___process = ZIP-Extract "${__workspace}" "${__target}"
 	} else {
-		$___process = FS-Copy-File "${_target}" "${__workspace}"
+		$___process = FS-Copy-File "${__target}" "${__workspace}"
 	}
 
 	if ($___process -ne 0) {
@@ -101,7 +110,8 @@ function RELEASE-Run-LIBS {
 		return 1
 	}
 
-	## commit release
+
+	# commit release
 	$__current_path = Get-Location
 	$null = Set-Location -Path "${__workspace}"
 	$___process = GIT-Autonomous-Commit "${__branch}"
@@ -112,7 +122,8 @@ function RELEASE-Run-LIBS {
 		return 1
 	}
 
-	## push to upstream
+
+	# push to upstream
 	$___process = GIT-Push-Specific "${__workspace}" `
 		"${env:PROJECT_SOURCE_GIT_REMOTE}" `
 		"${__branch}"

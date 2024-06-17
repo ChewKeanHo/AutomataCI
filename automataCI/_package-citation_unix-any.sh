@@ -39,7 +39,7 @@ PACKAGE_Run_CITATION() {
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/CITATIONS.yml" \
                 "$PROJECT_CITATION" \
                 "$PROJECT_CITATION_TYPE" \
-                "$(TIME_Format_ISO8601_Date "$(TIME_Now)")" \
+                "$(TIME_Format_Date_ISO8601 "$(TIME_Now)")" \
                 "$PROJECT_NAME" \
                 "$PROJECT_VERSION" \
                 "$PROJECT_LICENSE" \

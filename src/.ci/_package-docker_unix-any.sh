@@ -58,12 +58,46 @@ PACKAGE_Assemble_DOCKER_Content() {
         fi
 
         case "$_target_os" in
-        linux|windows)
+        any)
+                _target_image="scratch"
+                __arch_list=""
+                ;;
+        linux)
+                _target_image="$PROJECT_CONTAINER_BASE_LINUX"
+                __arch_list="$PROJECT_CONTAINER_BASE_LINUX_ARCH"
+                ;;
+        windows)
+                _target_image="$PROJECT_CONTAINER_BASE_WINDOWS"
+                __arch_list="$PROJECT_CONTAINER_BASE_WINDOWS_ARCH"
                 ;;
         *)
-                return 10
+                return 10 # not supported
                 ;;
         esac
+
+        __supported_arch=1
+        if [ $(STRINGS_Is_Empty "$__arch_list") -ne 0 ] &&
+                [ ! "$_target_image" = "scratch" ]; then
+                while [ ! "$__arch_list" = '' ]; do
+                        __arch="${__arch_list%%|*}"
+                        __arch_list="${__arch_list#*|}"
+
+                        if [ "$__arch_list" = "$__arch" ]; then
+                                __arch_list=""
+                        fi
+
+                        if [ "$_target_arch" = "$__arch" ]; then
+                                __supported_arch=0
+                                break
+                        fi
+                done
+        else
+                __supported_arch=0
+        fi
+
+        if [ $__supported_arch -ne 0 ]; then
+                return 10 # not supported
+        fi
 
 
         # assemble the package
@@ -80,19 +114,8 @@ PACKAGE_Assemble_DOCKER_Content() {
 
         # generate the Dockerfile
         FS_Write_File "${_directory}/Dockerfile" "\
-# Defining baseline image
-"
-        if [ "$_target_os" = "windows" ]; then
-                FS_Append_File "${_directory}/Dockerfile" "\
-FROM --platform=${_target_os}/${_target_arch} mcr.microsoft.com/windows/nanoserver:ltsc2022
-"
-        else
-                FS_Append_File "${_directory}/Dockerfile" "\
-FROM --platform=${_target_os}/${_target_arch} busybox:latest
-"
-        fi
+FROM --platform=${_target_os}/${_target_arch} ${_target_image}
 
-        FS_Append_File "${_directory}/Dockerfile" "\
 LABEL org.opencontainers.image.title=\"${PROJECT_NAME}\"
 LABEL org.opencontainers.image.description=\"${PROJECT_PITCH}\"
 LABEL org.opencontainers.image.authors=\"${PROJECT_CONTACT_NAME} <${PROJECT_CONTACT_EMAIL}>\"
@@ -113,21 +136,22 @@ LABEL org.opencontainers.image.source=\"${PROJECT_SOURCE_URL}\"
 "
         fi
 
-        FS_Append_File "${_directory}/Dockerfile" "\
+        FS_Append_File "${_directory}/Dockerfile" "
 # Defining environment variables
 ENV ARCH ${_target_arch}
 ENV OS ${_target_os}
 ENV PORT 80
 
 # Assemble the file structure
-COPY .blank /tmp/.tmpfile
-ADD ${PROJECT_SKU} /app/bin/${PROJECT_SKU}
+COPY .blank /tmp/.placeholder
+ADD --chmod=765 ${PROJECT_SKU} /usr/local/bin/${PROJECT_SKU}
 
 # Set network port exposures
 EXPOSE 80
 
 # Set entry point
-ENTRYPOINT [\"/app/bin/${PROJECT_SKU}\"]
+ENTRYPOINT ['/usr/local/bin/${PROJECT_SKU}']
+CMD ['help']
 "
         if [ $? -ne 0 ]; then
                 return 1

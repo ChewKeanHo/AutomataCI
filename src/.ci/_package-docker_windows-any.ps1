@@ -54,14 +54,39 @@ function PACKAGE-Assemble-DOCKER-Content {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-MSI "${_target}") -eq 0) {
 		return 10 # not applicable
+	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
+		return 10 # not applicable
 	}
 
 	switch ($_target_os) {
-	{ $_ -in 'linux', 'windows' } {
-		# accepted
+	'any' {
+		$_target_image = "scratch"
+		$__arch_list = ""
+	} 'linux' {
+		$_target_image = "${env:PROJECT_CONTAINER_BASE_LINUX}"
+		$__arch_list = "${env:PROJECT_CONTAINER_BASE_LINUX_ARCH}"
+	} 'windows' {
+		$_target_image = "${env:PROJECT_CONTAINER_BASE_WINDOWS}"
+		$__arch_list = "${env:PROJECT_CONTAINER_BASE_WINDOWS_ARCH}"
 	} default {
-		return 10
+		return 10 # not supported
 	}}
+
+	$__supported = 1
+	if (($(STRINGS-Is-Empty "${__arch_list}") -ne 0) -and ($_target_image -ne "scratch")) {
+		$__arch_list.Split("|") | ForEach {
+			if ($_target_arch -eq $_) {
+				$__supported = 0
+				break
+			}
+		}
+	} else {
+		$__supported = 0
+	}
+
+	if ($__supported -ne 0) {
+		return 10 # not supported
+	}
 
 
 	# assemble the package
@@ -77,23 +102,9 @@ function PACKAGE-Assemble-DOCKER-Content {
 
 
 	# generate the Dockerfile
-	$___process = FS-Write-File "${_directory}\Dockerfile" @"
-# Defining baseline image
+	$null = FS-Write-File "${_directory}\Dockerfile" @"
+FROM --platform=${_target_os}/${_target_arch} ${_target_image}
 
-"@
-	if (${_target_os} == "windows") {
-		$___process = FS-Append-File "${_directory}\Dockerfile" @"
-FROM --platform=${_target_os}/${_target_arch} mcr.microsoft.com/windows/nanoserver:ltsc2022
-
-"@
-	} else {
-		$___process = FS-Append-File "${_directory}\Dockerfile" @"
-FROM --platform=${_target_os}/${_target_arch} busybox:latest
-
-"@
-	}
-
-	$___process = FS-Append-File "${_directory}\Dockerfile" @"
 LABEL org.opencontainers.image.title=`"${env:PROJECT_NAME}`"
 LABEL org.opencontainers.image.description=`"${env:PROJECT_PITCH}`"
 LABEL org.opencontainers.image.authors=`"${env:PROJECT_CONTACT_NAME} <${env:PROJECT_CONTACT_EMAIL}>`"
@@ -104,34 +115,36 @@ LABEL org.opencontainers.image.licenses=`"${env:PROJECT_LICENSE}`"
 "@
 
 	if ($(STRINGS-Is-Empty "${env:PROJECT_CONTACT_WEBSITE}") -ne 0) {
-		$___process = FS-Append-File "${_directory}\Dockerfile" @"
+		$null = FS-Append-File "${_directory}\Dockerfile" @"
 LABEL org.opencontainers.image.url=`"${env:PROJECT_CONTACT_WEBSITE}`"
 
 "@
 	}
 
 	if ($(STRINGS-Is-Empty "${env:PROJECT_SOURCE_URL}") -ne 0) {
-		$___process = FS-Append-File "${_directory}\Dockerfile" @"
+		$null = FS-Append-File "${_directory}\Dockerfile" @"
 LABEL org.opencontainers.image.source=`"${env:PROJECT_SOURCE_URL}`"
 
 "@
 	}
 
 	$___process = FS-Append-File "${_directory}\Dockerfile" @"
+
 # Defining environment variables
 ENV ARCH ${_target_arch}
 ENV OS ${_target_os}
 ENV PORT 80
 
 # Assemble the file structure
-COPY .blank /tmp/.tmpfile
-ADD ${PROJECT_SKU} /app/bin/${PROJECT_SKU}
+COPY .blank /tmp/.placeholder
+ADD --chmod 765 ${PROJECT_SKU} /usr/local/bin/${PROJECT_SKU}
 
 # Set network port exposures
 EXPOSE 80
 
 # Set entry point
-ENTRYPOINT ["/app/bin/${PROJECT_SKU}"]
+ENTRYPOINT ['/usr/local/bin/${PROJECT_SKU}']
+CMD ['help']
 
 "@
 	if ($___process -ne 0) {

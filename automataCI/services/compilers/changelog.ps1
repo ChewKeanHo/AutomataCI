@@ -298,13 +298,7 @@ function CHANGELOG-Build-DEB-Entry {
 		return 1
 	}
 
-
-	switch ($___dist) {
-	{ $_ -in "stable", "unstable", "testing", "experimental" } {
-		break
-	} default {
-		return 1
-	}}
+	$___dest = $___dest -replace "\/.*$", ""
 
 
 	# all good. Generate the log fragment
@@ -312,6 +306,7 @@ function CHANGELOG-Build-DEB-Entry {
 
 
 	# create the entry header
+	$null = FS-Remove-Silently "${___directory}\deb\.latest"
 	$null = FS-Write-File "${___directory}\deb\.latest" @"
 ${___sku} (${___version}) ${___dist}; urgency=${___urgency}
 

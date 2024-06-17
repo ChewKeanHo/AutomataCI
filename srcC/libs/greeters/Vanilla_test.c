@@ -1,33 +1,10 @@
 /*
  * [ LICENSE CLAUSE HERE ]
  */
-
-
-
-
-/* define test libraries */
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma GCC diagnostic ignored "-Wvariadic-macros"
-#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
-#include <stdio.h>
-
-struct Scenario {
-	long ID;
-	const char *Name;
-	const char *Description;
-};
-
-#define Logf(...) fprintf(stderr,##__VA_ARGS__);
-/* define test libraries */
-
-
-
-
-/* import test target's source code (.c file directly) and setup test suite */
 #include <string.h>
-#include "greeter_any-any.c"
+
+#include "../testing/Vanilla.h"
+#include "./Vanilla.c"
 
 
 

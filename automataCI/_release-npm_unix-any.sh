@@ -10,8 +10,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/node.sh"
 
@@ -28,13 +28,17 @@ fi
 
 
 RELEASE_Run_NPM() {
-        #_target="$1"
+        #__target="$1"
 
 
         # validate input
         NODE_NPM_Is_Valid "$1"
         if [ $? -ne 0 ]; then
                 return 0
+        fi
+
+        if [ $(STRINGS_Is_Empty "$PROJECT_NODE") -eq 0 ]; then
+                return 0 # disabled explicitly
         fi
 
         I18N_Activate_Environment
@@ -46,19 +50,23 @@ RELEASE_Run_NPM() {
 
 
         # execute
-        I18N_Check_Login "NPM"
-        NODE_NPM_Check_Login
-        if [ $? -eq 0 ]; then
-                I18N_Publish "NPM"
-                if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
-                        I18N_Simulate_Publish "$1"
-                else
-                        NODE_NPM_Publish "$1"
-                        if [ $? -ne 0 ]; then
-                                I18N_Publish_Failed
-                                return 1
-                        fi
+        I18N_Publish "NPM"
+        if [ $(OS_Is_Run_Simulated) -ne 0 ]; then
+                I18N_Check_Login "NPM"
+                NODE_NPM_Check_Login
+                if [ $? -ne 0 ]; then
+                        I18N_Publish_Failed
+                        return 1
                 fi
+
+                NODE_NPM_Publish "$1"
+                if [ $? -ne 0 ]; then
+                        I18N_Publish_Failed
+                        return 1
+                fi
+        else
+                # always simulate in case of error or mishaps before any point of no return
+                I18N_Simulate_Publish "NPM"
         fi
 
 

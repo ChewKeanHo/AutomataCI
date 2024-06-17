@@ -15,7 +15,7 @@
 
 
 
-function I18N-Simulate-Conclusion {
+function I18N-Simulate-Conclude {
 	param(
 		[string]$___subject
 	)

@@ -20,6 +20,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 }
 
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\time.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\changelog.ps1"
 
@@ -38,9 +39,9 @@ if ($___process -ne 0) {
 
 
 # execute
-$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog"
+$__directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\changelog"
 $null = I18N-Create "${env:PROJECT_VERSION} DATA CHANGELOG"
-$___process = CHANGELOG-Build-DATA-Entry $__file
+$___process = CHANGELOG-Build-DATA-Entry $__directory
 if ($___process -ne 0) {
 	$null = I18N-Create-Failed
 	return 1
@@ -49,14 +50,14 @@ if ($___process -ne 0) {
 
 $null = I18N-Create "${env:PROJECT_VERSION} DEB CHANGELOG"
 $___process = CHANGELOG-Build-DEB-Entry `
-	"${__file}" `
+	"${__directory}" `
 	"$env:PROJECT_VERSION" `
 	"$env:PROJECT_SKU" `
-	"$env:PROJECT_DEBIAN_DISTRIBUTION" `
-	"$env:PROJECT_DEBIAN_URGENCY" `
+	"$env:PROJECT_DEB_DISTRIBUTION" `
+	"$env:PROJECT_DEB_URGENCY" `
 	"$env:PROJECT_CONTACT_NAME" `
 	"$env:PROJECT_CONTACT_EMAIL" `
-	(Get-Date -Format 'R')
+	"$(TIME-Format-Datetime-RFC5322 "$(TIME-Now)")"
 if ($___process -ne 0) {
 	$null = I18N-Create-Failed
 	return 1

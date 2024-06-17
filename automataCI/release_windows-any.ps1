@@ -26,17 +26,17 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\_release-cargo_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-changelog_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-checksum_windows-any.ps1"
-. "${env:LIBS_AUTOMATACI}\_release-chocolatey_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-citation_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-deb_windows-any.ps1"
+. "${env:LIBS_AUTOMATACI}\_release-flatpak_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-docker_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-homebrew_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-lib_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-npm_windows-any.ps1"
-. "${env:LIBS_AUTOMATACI}\_release-pdf_windows-any.ps1"
+. "${env:LIBS_AUTOMATACI}\_release-project_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-pypi_windows-any.ps1"
+. "${env:LIBS_AUTOMATACI}\_release-research_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-rpm_windows-any.ps1"
-. "${env:LIBS_AUTOMATACI}\_release-staticrepo_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_release-docsrepo_windows-any.ps1"
 
 
@@ -63,6 +63,15 @@ if ($___process -eq 0) {
 }
 
 
+
+
+# determine pathing variables
+$PACKAGE_DIRECTORY = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
+
+
+
+
+# initialize workspace and release job functions
 $___process = OS-Is-Command-Available "RELEASE-Run-Pre-Processor"
 if ($___process -eq 0) {
 	$___process = RELEASE-Run-Pre-Processor
@@ -72,104 +81,120 @@ if ($___process -eq 0) {
 }
 
 
-$___process = RELEASE-Setup-STATIC-REPO
+$___process = RELEASE-Setup-PROJECT # !! IMPORTANT !! - always the first
 if ($___process -ne 0) {
 	return 1
 }
 
 
-$___process = RELEASE-Setup-HOMEBREW
+$___process = RELEASE-Setup-DEB "${DEB_REPO}"
 if ($___process -ne 0) {
 	return 1
 }
 
 
-$___process = RELEASE-Setup-CHOCOLATEY
+$___process = RELEASE-Setup-FLATPAK "$FLATPAK_REPO"
 if ($___process -ne 0) {
 	return 1
 }
 
 
-$STATIC_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_STATIC_REPO_DIRECTORY}"
-$HOMEBREW_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_HOMEBREW_DIRECTORY}"
-$CHOCOLATEY_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_RELEASE}\${env:PROJECT_CHOCOLATEY_DIRECTORY}"
-$PACKAGE_DIRECTORY = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
-if (Test-Path -PathType Container -Path "${PACKAGE_DIRECTORY}") {
-	foreach ($TARGET in (Get-ChildItem -Path "${PACKAGE_DIRECTORY}")) {
-		$TARGET = $TARGET.FullName
-		if ($TARGET -like "*.asc") {
-			continue
-		}
+$___process = RELEASE-Setup-HOMEBREW "${HOMEBREW_REPO}"
+if ($___process -ne 0) {
+	return 1
+}
 
-		$null = I18N-Processing "${TARGET}"
 
-		$___process = RELEASE-Run-CARGO "$TARGET"
+$___process = RELEASE-Setup-RPM "${RPM_REPO}"
+if ($___process -ne 0) {
+	return 1
+}
+
+
+
+
+# scan through each product and run the release processing respectively
+foreach ($TARGET in (Get-ChildItem -Path "${PACKAGE_DIRECTORY}")) { $TARGET = $TARGET.FullName
+	if ($TARGET -like "*.asc") {
+		continue # it's a gpg cert
+	}
+
+	if ($TARGET -like "*.gpg") {
+		continue # it's a gpg keyfile or cert
+	}
+
+	$null = I18N-Processing "${TARGET}"
+
+	$___process = RELEASE-Run-CARGO "$TARGET"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-CITATION-CFF "$TARGET"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-DEB "$TARGET" "$DEB_REPO" "$DEB_REPO_DATA"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-DOCKER "$TARGET"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-HOMEBREW "$TARGET" "$HOMEBREW_REPO"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-LIBS "$TARGET"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-NPM "$TARGET"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-PYPI "$TARGET"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-RESEARCH "$TARGET"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = RELEASE-Run-RPM "$TARGET" "$RPM_REPO"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = OS-Is-Command-Available "RELEASE-Run-Package-Processor"
+	if ($___process -eq 0) {
+		$___process = RELEASE-Run-Package-Processor "$TARGET"
 		if ($___process -ne 0) {
 			return 1
-		}
-
-		$___process = RELEASE-Run-CITATION-CFF "$TARGET"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-CHOCOLATEY "$TARGET" "$CHOCOLATEY_REPO"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-DEB "$TARGET" "$STATIC_REPO"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-DOCKER "$TARGET"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-HOMEBREW "$TARGET" "$HOMEBREW_REPO"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-LIBS "$TARGET"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-NPM "$TARGET"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-PDF "$TARGET"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-PYPI "$TARGET"
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = RELEASE-Run-RPM "$TARGET" "$STATIC_REPO" `
-		if ($___process -ne 0) {
-			return 1
-		}
-
-		$___process = OS-Is-Command-Available "RELEASE-Run-Package-Processor"
-		if ($___process -eq 0) {
-			$___process = RELEASE-Run-Package-Processor "$TARGET"
-			if ($___process -ne 0) {
-				return 1
-			}
 		}
 	}
 }
 
 
-$___process = RELEASE-Run-CHECKSUM "$STATIC_REPO"
+
+
+# run one-time directory-wide release processing functions
+$___process = RELEASE-Update-DEB "$DEB_REPO" "$DEB_REPO_DATA"
+if ($___process -ne 0) {
+	return 1
+}
+
+
+$___process = RELEASE-Update-RPM "$RPM_REPO"
 if ($___process -ne 0) {
 	return 1
 }
@@ -184,34 +209,54 @@ if ($___process -eq 0) {
 }
 
 
-if ($(OS-Is-Run-Simulated) -eq 0) {
-	$null = I18N-Simulate-Conclusion "STATIC REPO"
-	$null = I18N-Simulate-Conclusion "CHANGELOG"
-} else {
-	$___process = RELEASE-Conclude-STATIC-REPO
-	if ($___process -ne 0) {
-		return 1
-	}
 
-	$___process = RELEASE-Conclude-HOMEBREW "$HOMEBREW_REPO"
-	if ($___process -ne 0) {
-		return 1
-	}
 
-	$___process = RELEASE-Conclude-CHOCOLATEY "$CHOCOLATEY_REPO"
-	if ($___process -ne 0) {
-		return 1
-	}
+# conclude the release
+$___process = RELEASE-Conclude-CHECKSUM "$PACKAGE_DIRECTORY" ## !! IMPORTANT !! - always the first
+if ($___process -ne 0) {
+	return 1
+}
 
-	$___process = RELEASE-Conclude-CHANGELOG
-	if ($___process -ne 0) {
-		return 1
-	}
 
-	$___process = RELEASE-Conclude-DOCS
-	if ($___process -ne 0) {
-		return 1
-	}
+$___process = RELEASE-Conclude-DEB "$DEB_REPO"
+if ($___process -ne 0) {
+	return 1
+}
+
+
+$___process = RELEASE-Conclude-FLATPAK "$FLATPAK_REPO"
+if ($___process -ne 0) {
+	return 1
+}
+
+
+$___process = RELEASE-Conclude-HOMEBREW "$HOMEBREW_REPO"
+if ($___process -ne 0) {
+	return 1
+}
+
+
+$___process = RELEASE-Conclude-RPM "$RPM_REPO"
+if ($___process -ne 0) {
+	return 1
+}
+
+
+$___process = RELEASE-Conclude-DOCS
+if ($___process -ne 0) {
+	return 1
+}
+
+
+$___process = RELEASE-Conclude-CHANGELOG
+if ($___process -ne 0) {
+	return 1
+}
+
+
+$___process = RELEASE-Conclude-PROJECT # !! IMPORTANT !! - must always be the last
+if ($___process -ne 0) {
+	return 1
 }
 
 

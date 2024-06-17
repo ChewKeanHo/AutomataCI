@@ -44,8 +44,13 @@ function PACKAGE-Assemble-LIB-Content {
 
 
 	# execute
-	## copy over known archived files
+	$_workspace = "packagers-lib-lib${env:PROJECT_SKU}_${_target_os}-${_target_arch}"
+	$_workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${_workspace}"
+	$null = FS-Remove-Silently "${_workspace}"
+
+	$__dest = "${_workspace}\lib"
 	if ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
+		# copy over - do not modify anymore
 		$__dest = "lib${env:PROJECT_SKU}-NPM_${env:PROJECT_VERSION}_js-js.tgz"
 		$__dest = "${_directory}\${__dest}"
 		$null = I18N-Copy "${_target}" "${__dest}"
@@ -57,69 +62,106 @@ function PACKAGE-Assemble-LIB-Content {
 
 		return 0
 	} elseif ($(FS-Is-Target-A-TARGZ "${_target}") -eq 0) {
-		$__dest = "lib${env:PROJECT_SKU}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}.tar.gz"
-		$__dest = "${_directory}\${__dest}"
-		$null = I18N-Copy "${_target}" "${__dest}"
-		$___process = FS-Copy-File "${_target}" "${__dest}"
+		# unpack library
+		$null = I18N-Assemble "${_target}" "${__dest}"
+		$null = FS-Make-Directory "${__dest}"
+		$___process = TAR-Extract-GZ "${__dest}" "${_target}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
+			$null = I18N-Assemble-Failed
 			return 1
 		}
-
-		return 0
 	} elseif ($(FS-Is-Target-A-TARXZ "${_target}") -eq 0) {
-		$__dest = "lib${env:PROJECT_SKU}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}.tar.xz"
-		$__dest = "${_directory}\${__dest}"
-		$null = I18N-Copy "${_target}" "${__dest}"
-		$___process = FS-Copy-File "${_target}" "${__dest}"
+		# unpack library
+		$null = I18N-Assemble "${_target}" "${__dest}"
+		$null = FS-Make-Directory "${__dest}"
+		$___process = TAR-Extract-XZ "${__dest}" "${_target}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
+			$null = I18N-Assemble-Failed
 			return 1
 		}
-
-		return 0
 	} elseif ($(FS-Is-Target-A-ZIP "${_target}") -eq 0) {
-		$__dest = "lib${env:PROJECT_SKU}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}.zip"
-		$__dest = "${_directory}\${__dest}"
-		$null = I18N-Copy "${_target}" "${__dest}"
-		$___process = FS-Copy-File "${_target}" "${__dest}"
+		# unpack library
+		$null = I18N-Assemble "${_target}" "${__dest}"
+		$null = FS-Make-Directory "${__dest}"
+		$___process = ZIP-Extract "${__dest}" "${_target}"
 		if ($___process -ne 0) {
-			$null = I18N-Copy-Failed
+			$null = I18N-Assemble-Failed
 			return 1
 		}
-
-		return 0
+	} else {
+		# assumed it is a standalone library file
+		$null = I18N-Assemble "${_target}" "${__dest}"
+		$null = FS-Make-Directory "${__dest}"
+		$___process = FS-Copy-File "${_target}" "${__dest}"
+		if ($___process -ne 0) {
+			$null = I18N-Assemble-Failed
+			return 1
+		}
 	}
 
-	## assume standalone library file - manually package into .tar.xz, .zip, and .nupkg
-	$__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\package-${_target_name}"
-	$null = FS-Remake-Directory "${__workspace}"
 
-	$null = I18N-Copy "${_target}" "${__workspace}"
-	$___process = FS-Copy-File "${_target}" "${__workspace}"
-	if ($___process -ne 0) {
-		$null = I18N-Copy-Failed
+	# sanity check before proceeding
+	$___process = FS-Is-Directory-Empty "${__dest}"
+	if ($___process -eq 0) {
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
+
+	# copy README.md
 	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_README}"
-	$null = I18N-Copy "${__source}" "${__workspace}"
-	$___process = FS-Copy-File "${__source}" "${__workspace}"
+	$__dest = "${_workspace}\${env:PROJECT_README}"
+	$null = I18N-Assemble "${__source}" "${__dest}"
+	$___process = FS-Copy-File "${__source}" "${__dest}"
 	if ($___process -ne 0) {
-		$null = I18N-Copy-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
-	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_LICENSE_FILE}"
-	$null = I18N-Copy "${__source}" "${__workspace}"
-	$___process = FS-Copy-File "${__source}" "${__workspace}"
+
+	# copy user guide
+	Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs" `
+	| Where-Object { ($_.Name -like "USER-GUIDES*.pdf") } `
+	| ForEach-Object { $__source = $_.FullName
+		$__dest = "${_workspace}\$(FS-Get-File "${__source}")"
+		$null = I18N-Assemble "${__source}" "${__dest}"
+		$___process = FS-Copy-File "${__source}" "${__dest}"
+		if ($___process -ne 0) {
+			$null = I18N-Assemble-Failed
+			return 1
+		}
+	}
+
+
+	# copy license file
+	Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses" `
+	| Where-Object { ($_.Name -like "LICENSE*.pdf") } `
+	| ForEach-Object { $__source = $_.FullName
+		$__dest = "${_workspace}\$(FS-Get-File "${__source}")"
+		$null = I18N-Assemble "${__source}" "${__dest}"
+		$___process = FS-Copy-File "${__source}" "${__dest}"
+		if ($___process -ne 0) {
+			$null = I18N-Assemble-Failed
+			return 1
+		}
+	}
+
+
+	# assemble icon.png
+	$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\icons\icon-128x128.png"
+	$__dest = "${_workspace}\icon.png"
+	$null = I18N-Assemble "${__source}" "${__dest}"
+	$___process = FS-Copy-File "${__source}" "${__dest}"
 	if ($___process -ne 0) {
-		$null = I18N-Copy-Failed
+		$null = I18N-Assemble-Failed
 		return 1
 	}
 
+
+	# begin packaging
 	$__current_path = Get-Location
-	$null = Set-Location -Path "${__workspace}"
+	$null = Set-Location -Path "${_workspace}"
+
 	## package tar.xz
 	$__dest = "lib${env:PROJECT_SKU}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}.tar.xz"
 	$null = I18N-Create-Package "${__dest}"
@@ -145,28 +187,34 @@ function PACKAGE-Assemble-LIB-Content {
 	}
 
 	## package nupkg
-	$__dest = ".\Package.nuspec"
 	$__acceptance = "false"
 	if ($(STRINGS-To-Lowercase "${env:PROJECT_LICENSE_ACCEPTANCE_REQUIRED}") -eq "true") {
 		$__acceptance = "true"
 	}
 
+	$__dest = "lib${env:PROJECT_SKU}.nuspec"
 	$null = I18N-Create "${__dest}"
+	$__dest = ".\${__dest}"
 	$___process = FS-Write-File "${__dest}" @"
 <?xml version='1.0' encoding='utf-8'?>
 <package xmlns='http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'>
 	<metadata>
-		<id>${PROJECT_SKU}</id>
-		<version>${PROJECT_VERSION}</version>
-		<authors>${PROJECT_CONTACT_NAME}</authors>
-		<owners>${PROJECT_CONTACT_NAME}</owners>
-		<projectUrl>${PROJECT_SOURCE_URL}</projectUrl>
-		<title>${PROJECT_NAME}</title>
-		<description>${PROJECT_PITCH}</description>
-		<license>${PROJECT_LICENSE}</license>
+		<id>${env:PROJECT_SKU}</id>
+		<version>${env:PROJECT_VERSION}</version>
+		<authors>${env:PROJECT_CONTACT_NAME}</authors>
+		<owners>${env:PROJECT_CONTACT_NAME}</owners>
+		<projectUrl>${env:PROJECT_SOURCE_URL}</projectUrl>
+		<title>${env:PROJECT_NAME}</title>
+		<description>${env:PROJECT_PITCH}</description>
+		<license>${env:PROJECT_LICENSE}</license>
 		<requireLicenseAcceptance>${__acceptance}</requireLicenseAcceptance>
-		<readme>${PROJECT_README}</readme>
+		<readme>${env:PROJECT_README}</readme>
 	</metadata>
+	<files>
+		<file src="${env:PROJECT_README}" target="${env:PROJECT_README}" />
+		<file src="icon.png" target="icon.png" />
+		<file src="lib\**" target="lib" />
+	</files>
 </package>
 
 "@
@@ -176,7 +224,6 @@ function PACKAGE-Assemble-LIB-Content {
 		$null = Remove-Variable -Name __current_path
 		return 1
 	}
-
 
 	$__dest = "lib${env:PROJECT_SKU}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}.nupkg"
 	$null = I18N-Create-Package "${__dest}"

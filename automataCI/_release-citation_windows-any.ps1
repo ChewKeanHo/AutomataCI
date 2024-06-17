@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
 
@@ -26,23 +27,32 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function RELEASE-Run-CITATION-CFF {
 	param(
-		[string]$_target
+		[string]$__target
 	)
 
 
 	# validate input
-	$___process = FS-Is-Target-A-Citation-CFF "${_target}"
+	$___process = FS-Is-Target-A-Citation-CFF "${__target}"
 	if ($___process -ne 0) {
 		return 0
 	}
 
+	if ($(STRINGS-Is-Empty "${env:PROJECT_CITATION}") -eq 0) {
+		return 0 # disabled explicitly
+	}
+
 
 	# execute
-	$null = I18N-Export "CITATION.cff"
-	$___process = FS-Copy-File "${_target}" "${env:PROJECT_PATH_ROOT}\CITATION.cff"
-	if ($___process -ne 0) {
-		$null = I18N-Export-Failed
-		return 1
+	$null = I18N-Publish "CITATION.cff"
+	if ($(OS-Is-Run-Simulated) -ne 0) {
+		$___process = FS-Copy-File "${__target}" "${env:PROJECT_PATH_ROOT}\CITATION.cff"
+		if ($___process -ne 0) {
+			$null = I18N-Publish-Failed
+			return 1
+		}
+	} else {
+		# always simulate in case of error or mishaps before any point of no return
+		$null = I18N-Simulate-Publish "CITATION.cff"
 	}
 
 

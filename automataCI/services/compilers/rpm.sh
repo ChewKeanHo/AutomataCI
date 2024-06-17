@@ -12,8 +12,12 @@
 # the License.
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/disk.sh"
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
+. "${LIBS_AUTOMATACI}/services/io/time.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/changelog.sh"
+. "${LIBS_AUTOMATACI}/services/checksum/md5.sh"
+. "${LIBS_AUTOMATACI}/services/checksum/shasum.sh"
 
 
 
@@ -106,8 +110,10 @@ RPM_Create_Source_Repo() {
         ___directory="$2"
         ___gpg_id="$3"
         ___url="$4"
-        ___name="$5"
-        ___sku="$6"
+        ___metalink="$5"
+        ___name="$6"
+        ___scope="$7"
+        ___sku="$8"
 
 
         # validate input
@@ -119,6 +125,7 @@ RPM_Create_Source_Repo() {
                 [ $(STRINGS_Is_Empty "$___gpg_id") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___url") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___name") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___scope") -eq 0 ] ||
                 [ $(STRINGS_Is_Empty "$___sku") -eq 0 ]; then
                 return 1
         fi
@@ -140,10 +147,19 @@ RPM_Create_Source_Repo() {
 
 
         # execute
-        ___url="${___url}/rpm"
-        ___url="${___url%//rpm*}/rpm"
         ___key="usr/local/share/keyrings/${___sku}-keyring.gpg"
         ___filename="etc/yum.repos.d/${___sku}.repo"
+
+        if [ $(STRINGS_Is_Empty "$___metalink") -ne 0 ]; then
+                ___url="\
+#baseurl=${___url} # note: flat repository - only for reference
+metalink=${___metalink}
+"
+        else
+                ___url="\
+baseurl=${___url}
+"
+        fi
 
         FS_Is_File "${___directory}/BUILD/$(FS_Get_File "$___filename")"
         if [ $? -eq 0 ]; then
@@ -158,9 +174,9 @@ RPM_Create_Source_Repo() {
         FS_Make_Directory "${___directory}/BUILD"
         FS_Write_File "${___directory}/BUILD/$(FS_Get_File "$___filename")" "\
 # WARNING: AUTO-GENERATED - DO NOT EDIT!
-[${___sku}]
+[${___scope}-${___sku}]
 name=${___name}
-baseurl=${___url}
+${___url}
 gpgcheck=1
 gpgkey=file:///${___key}
 "
@@ -456,6 +472,150 @@ URL: ${___website}
 
 
 
+RPM_Flatten_Repo() {
+        ___repo_directory="$1"
+        ___filename_repomdxml="$2"
+        ___filename_metalink="$3"
+        ___base_url="$4"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$___repo_directory") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___filename_repomdxml") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___filename_metalink") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$___base_url") -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_Directory "$___repo_directory"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS_Is_Directory "${___repo_directory}/repodata"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS_Is_File "${___repo_directory}/repodata/repomd.xml"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        ___repomd="${___repo_directory}/repomd.xml"
+        if [ $(STRINGS_Is_Empty "$___filename_repomdxml") -ne 0 ]; then
+                ___repomd="${___repo_directory}/${___filename_repomdxml}"
+        fi
+
+        ___metalink="${___repo_directory}/METALINK_RPM"
+        if [ $(STRINGS_Is_Empty "$___filename_metalink") -ne 0 ]; then
+                ___metalink="${___repo_directory}/${___filename_metalink}"
+        fi
+
+
+        # patch repomd.xml location fields and write to main directory
+        FS_Remove_Silently "$___repomd"
+
+        ___old_IFS="$IFS"
+        while IFS= read -r ___line || [ -n "$___line" ]; do
+                ## patch location fields
+                if [ ! "${___line##*<location href=\"repodata/}" = "$___line" ]; then
+                        FS_Append_File "$___repomd" "\
+${___line%%<location*}<location href=\"${___line##*<location href=\"repodata/}
+"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+
+                        continue
+                elif [ ! "${___line##*<location href=\'repodata/}" = "$___line" ]; then
+                        FS_Append_File "$___repomd" "\
+${___line%%<location*}<location href='${___line##*<location href=\'repodata/}
+"
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+
+                        continue
+                fi
+
+                ## nothing else so write it in.
+                FS_Append_File "$___repomd" "${___line}\n"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        done < "${___repo_directory}/repodata/repomd.xml"
+        IFS="$___old_IFS" && unset ___old_IFS
+
+        FS_Remove "${___repo_directory}/repodata/repomd.xml"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # export all metadata files to main directory
+        for ___file in "${___repo_directory}/repodata/"*; do
+                FS_Is_File "$___file"
+                if [ $? -ne 0 ]; then
+                        continue
+                fi
+
+                ___dest="${___repo_directory}/$(FS_Get_File "$___file")"
+                FS_Remove_Silently "$___dest"
+                FS_Move "$___file" "$___dest"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
+        done
+
+        FS_Remove "${___repo_directory}/repodata"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # create RPM_Metalink
+        ___time="$(TIME_Now)"
+        ___url="${___base_url}/$(FS_Get_File "$___repomd")"
+
+        FS_Remove_Silently "$___metalink"
+        FS_Write_File "$___metalink" "\
+<?xml version='1.0' encoding='utf-8'?>
+<metalink version='3.0' \
+xmlns='http://www.metalinker.org/' \
+type='dynamic' \
+pubdate='$(TIME_Format_Datetime_RFC5322_UTC "$___time")' \
+generator='mirrormanager' \
+xmlns:mm0='http://fedorahosted.org/mirrormanager'>
+ <files>
+  <file name='$(FS_Get_File "$___repomd")'>
+   <mm0:timestamp>${___time}</mm0:timestamp>
+   <size>$(DISK_Calculate_Size_File_Byte "$___repomd")</size>
+   <verification>
+    <hash type='md5'>$(MD5_Create_From_File "$___repomd")</hash>
+    <hash type='sha1'>$(SHASUM_Create_From_File "$___repomd" "1")</hash>
+    <hash type='sha256'>$(SHASUM_Create_From_File "$___repomd" "256")</hash>
+    <hash type='sha512'>$(SHASUM_Create_From_File "$___repomd" "512")</hash>
+   </verification>
+   <resources maxconnections='1'>
+     <url protocol='https' type='https' preference='100'>${___url}</url>
+   </resources>
+  </file>
+ </files>
+</metalink>
+"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
 RPM_Is_Available() {
         ___os="$1"
         ___arch="$2"
@@ -473,7 +633,7 @@ RPM_Is_Available() {
         fi
 
 
-        # check compatible target cpu architecture
+        # check compatible target os
         case "$___os" in
         linux|any)
                 ;;
@@ -555,24 +715,30 @@ RPM_Register() {
 
 
         # execute
-        ## write into SPEC_INSTALL
+        # write into SPEC_INSTALL
         ___spec="${1}/SPEC_INSTALL"
-        ___dir="$(FS_Get_Directory "$3")"
-        ___content="\n"
-        if [ "$___dir" != "$3" ]; then
-                ___content="${___content}\nmkdir -p %{buildroot}/${___dir}\n"
+        if [ $(STRINGS_Is_Empty "$4") -ne 0 ]; then
+                ___content="\
+mkdir -p %{buildroot}/${3}
+cp -r $(FS_Get_Directory "$2") %{buildroot}/${3}/.
+"
+        else
+                ___content="\
+mkdir -p %{buildroot}/$(FS_Get_Directory "$3")
+cp -r ${2} %{buildroot}/${3}
+"
         fi
-        ___content="${___content}\ncp -r ${2} %{buildroot}/${3}\n"
+
         FS_Append_File "$___spec" "$___content"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        ## write into SPEC_FILES
-        ___spec="${___workspace}/SPEC_FILES"
+        # write into SPEC_FILES
+        ___spec="${1}/SPEC_FILES"
         ___content="/${3}"
         if [ $(STRINGS_Is_Empty "$4") -ne 0 ]; then
-                ___content="${___content}/*"
+                ___content="${___content}/$(FS_Get_Directory "$2")"
         fi
         ___content="${___content}\n"
         FS_Append_File "$___spec" "$___content"

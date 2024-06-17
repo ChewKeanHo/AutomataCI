@@ -10,8 +10,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-. "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/io/os.sh"
+. "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/docker.sh"
 
@@ -28,14 +29,17 @@ fi
 
 
 RELEASE_Run_DOCKER() {
-        _target="$1"
-        _directory="$2"
+        __target="$1"
 
 
         # validate input
-        DOCKER_Is_Valid "$_target"
+        DOCKER_Is_Valid "$__target"
         if [ $? -ne 0 ]; then
                 return 0
+        fi
+
+        if [ $(STRINGS_Is_Empty "$PROJECT_CONTAINER_REGISTRY") -eq 0 ]; then
+                return 0 # disabled explicitly
         fi
 
         I18N_Check_Availability "DOCKER"
@@ -48,17 +52,18 @@ RELEASE_Run_DOCKER() {
 
         # execute
         I18N_Publish "DOCKER"
-        if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
-                I18N_Simulate_Publish "DOCKER"
-        else
-                DOCKER_Release "$_target" "$PROJECT_VERSION"
+        if [ $(OS_Is_Run_Simulated) -ne 0 ]; then
+                DOCKER_Release "$__target" "$PROJECT_VERSION"
                 if [ $? -ne 0 ]; then
                         I18N_Publish_Failed
                         return 1
                 fi
 
-                I18N_Clean "$_target"
-                FS_Remove_Silently "$_target"
+                I18N_Clean "$__target"
+                FS_Remove_Silently "$__target"
+        else
+                # always simulate in case of error or mishaps before any point of no return
+                I18N_Simulate_Publish "DOCKER"
         fi
 
 

@@ -19,7 +19,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return
 }
 
@@ -59,7 +59,7 @@ function PACKAGE-Run-CARGO {
 	$null = I18N-Create-Package "RUST"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\cargo_${_src}"
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\cargo_${_src}"
+	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-cargo-${_src}"
 	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {

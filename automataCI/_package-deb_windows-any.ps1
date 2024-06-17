@@ -19,7 +19,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return
 }
 
@@ -61,7 +61,7 @@ function PACKAGE-Run-DEB {
 	$null = I18N-Create-Package "DEB"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}.deb"
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb_${_src}"
+	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-deb-${_src}"
 	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {

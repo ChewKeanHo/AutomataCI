@@ -11,8 +11,12 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\disk.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\time.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\changelog.ps1"
+. "${env:LIBS_AUTOMATACI}\services\checksum\md5.ps1"
+. "${env:LIBS_AUTOMATACI}\services\checksum\shasum.ps1"
 
 
 
@@ -100,7 +104,9 @@ function RPM-Create-Source-Repo {
 		[string]$___directory,
 		[string]$___gpg_id,
 		[string]$___url,
+		[string]$___metalink,
 		[string]$___name,
+		[string]$___scope,
 		[string]$___sku
 	)
 
@@ -114,6 +120,7 @@ function RPM-Create-Source-Repo {
 		($(STRINGS-Is-Empty "${___gpg_id}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___url}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___name}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___scope}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___sku}") -eq 0)) {
 		return 1
 	}
@@ -135,10 +142,22 @@ function RPM-Create-Source-Repo {
 
 
 	# execute
-	$___url = "${___url}/rpm"
-	$___url = $___url -replace "//rpm", "/rpm"
 	$___key = "usr\local\share\keyrings\${___sku}-keyring.gpg"
 	$___filename = "etc\yum.repos.d\${___sku}.repo"
+
+	if ($(STRINGS-Is-Empty "${___metalink}") -ne 0) {
+		$___url = @"
+#baseurl=${___url} # note: flat repository - base url is only for reference
+metalink=${___metalink}
+
+"@
+	} else {
+		$___url = @"
+baseurl=${___url}
+
+"@
+
+}
 
 	$___process = FS-Is-File "${___directory}\BUILD\$(FS-Get-File "${___filename}")"
 	if ($___process -eq 0) {
@@ -151,12 +170,11 @@ function RPM-Create-Source-Repo {
 	}
 
 	$null = FS-Make-Directory "${___directory}\BUILD"
-	$___process = FS-Write-File `
-		"${___directory}\BUILD\$(FS-Get-File "${___filename}")" @"
+	$___process = FS-Write-File "${___directory}\BUILD\$(FS-Get-File "${___filename}")" @"
 # WARNING: AUTO-GENERATED - DO NOT EDIT!
-[${___sku}]
+[${___scope}-${___sku}]
 name=${___name}
-baseurl=${___url}
+${___url}
 gpgcheck=1
 gpgkey=file:///${___key}
 
@@ -445,6 +463,149 @@ URL: ${___website}
 
 
 
+function RPM-Flatten-Repo {
+	param(
+		[string]$___repo_directory,
+		[string]$___filename_repomdxml,
+		[string]$___filename_metalink,
+		[string]$___base_url
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___repo_directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___filename_repomdxml}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___filename_metalink}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___base_url}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___repo_directory}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___repo_directory}\repodata"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___repo_directory}\repodata\repomd.xml"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___repomd = "${___repo_directory}\repomd.xml"
+	if ($(STRINGS-Is-Empty "${___filename_repomdxml}") -ne 0) {
+		$___repomd = "${___repo_directory}\${___filename_repomdxml}"
+	}
+
+	$___metalink = "${___repo_directory}\METALINK_RPM"
+	if ($(STRINGS-Is-Empty "${___filename_metalink}") -ne 0) {
+		$___repomd = "${___repo_directory}\${___filename_metalink}"
+	}
+
+
+	# patch repomd.xml location fields and write to main directory
+	$null = FS-Remove-Silently "${___repomd}"
+
+	foreach ($___line in (Get-Content -Path "${___repo_directory}/repodata/repomd.xml")) {
+		## patch location fields
+		if ($($___line -replace "^\s*<location href=\`"repodata\/", "") -ne "${___line}") {
+			$___process = FS-Append-File "${___repomd}" @"
+$($___line -replace "<location.*$", "")<location href=`"$($___line -replace "^\s*<location href=\`"repodata\/", "")
+
+"@
+			if ($___process -ne 0) {
+				return 1
+			}
+
+			continue
+		} elseif ($($___line -replace "^\s*<location href=\'repodata\/", "") -ne "${___line}") {
+			$___process = FS-Append-File "${___repomd}" @"
+$($___line -replace "<location.*$", "")<location href=`'$($___line -replace "^\s*<location href=\'repodata\/", "")
+
+"@
+			if ($___process -ne 0) {
+				return 1
+			}
+
+			continue
+		}
+
+		## nothing else so write it in.
+		$___process = FS-Append-File "${___repomd}" "${___line}`n"
+		if ($___process -ne 0) {
+			return 1
+		}
+	}
+
+	$___process = FS-Remove "${___repo_directory}\repodata\repomd.xml"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# export all metadata files to main directory
+	Get-ChildItem -Path "${___directory_package}" -File `
+	| ForEach-Object { $___file = $_.FullName
+		$___process = FS-Is-File "${___file}"
+		if ($___process -ne 0) {
+			continue
+		}
+
+		$___dest = "${___repo_directory}\$(FS-Get-File "${___file}")"
+		$null = FS-Remove-Silently "${___dest}"
+		$___process = FS-Move "${___file}" "${___dest}"
+		if ($___process -ne 0) {
+			return 1
+		}
+	}
+
+	$___process = FS-Remove "${___repo_directory}\repodata"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# create RPM_Metalink
+	$___time = TIME-Now
+	$___url = "${___base_url}/$(FS-Get-File "${___repomd}")"
+
+	$null = FS-Remove-Silently "${___metalink}"
+	$___process = FS-Write-File "${___metalink}" @"
+<?xml version='1.0' encoding='utf-8'?>
+<metalink version='3.0' xmlns='http://www.metalinker.org/' type='dynamic' pubdate='$(TIME-Format-Datetime-RFC5322-UTC "${___time}")' generator='mirrormanager' xmlns:mm0='http://fedorahosted.org/mirrormanager'>
+ <files>
+  <file name='$(FS-Get-File "${___repomd}")'>
+   <mm0:timestamp>${___time}</mm0:timestamp>
+   <size>$(DISK-Calculate-Size-File-Byte "${___repomd}")</size>
+   <verification>
+    <hash type='md5'>$(MD5-Create-From-File "${___repomd}")</hash>
+    <hash type='sha1'>$(SHASUM-Create-From-File "${___repomd}" "1")</hash>
+    <hash type='sha256'>$(SHASUM-Create-From-File "${___repomd}" "256")</hash>
+    <hash type='sha512'>$(SHASUM-Create-From-File "${___repomd}" "512")</hash>
+   </verification>
+   <resources maxconnections='1'>
+     <url protocol='https' type='https' preference='100'>${___url}</url>
+   </resources>
+  </file>
+ </files>
+</metalink>
+
+"@
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
 function RPM-Is-Available {
 	param(
 		[string]$___os,
@@ -550,22 +711,30 @@ function RPM-Register {
 	# execute
 	## write into SPEC_INSTALL
 	$___spec = "${___workspace}/SPEC_INSTALL"
-	$___dir = "$(FS-Get-Directory "${___target}")"
-	$___content = "`n"
-	if ($___dir -ne $___target) {
-		$___content = "${___content}`nmkdir -p %{buildroot}/${___dir}`n"
+	if ($(STRINGS-Is-Empty "${___is_directory}") -ne 0) {
+		$___content = @"
+mkdir -p %{buildroot}/${___target}
+cp -r $(FS_Get_Directory "${___source}") %{buildroot}/${___target}/.
+
+"@
+	} else {
+		$___content = @"
+mkdir -p %{buildroot}/$(FS-Get-Directory "${___target}")
+cp -r ${___source} %{buildroot}/${___target}/.
+
+"@
 	}
-	$___content = "${___content}`ncp -r ${___source} %{buildroot}/${___target}`n"
-	$___process = FS-Append-File "${___spec}" "${___content}`n"
+
+	$___process = FS-Append-File "${___spec}" "${___content}"
 	if ($___process -ne 0) {
 		return 1
 	}
 
-	## write into SPEC_FILES
+	# write into SPEC_FILES
 	$___spec = "${___workspace}/SPEC_FILES"
 	$___content = "/${___content}"
 	if ($(STRINGS-Is-Empty "${___is_directory}") -ne 0) {
-		$___content = "${___content}/*"
+		$___content = "${___content}/$(FS-Get-Directory "${___target}")"
 	}
 	$___content = "${___content}`n"
 	$___process = FS-Append-File "${___spec}" "${___content}"

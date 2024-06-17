@@ -48,6 +48,16 @@ function FS-Copy-All {
 		return 1
 	}
 
+	$___process = FS-Is-Directory "${___source}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Directory "${___destination}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
 
 	# execute
 	$null = Copy-Item -Path "${___source}\*" -Destination "${___destination}" -Recurse
@@ -72,6 +82,16 @@ function FS-Copy-File {
 
 	# validate input
 	if ([string]::IsNullOrEmpty($___source) -or [string]::IsNullOrEmpty($___destination)) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___source}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = FS-Is-Target-Exist "${___destination}"
+	if ($___process -eq 0) {
 		return 1
 	}
 
@@ -309,6 +329,34 @@ function FS-Is-Directory {
 
 
 
+function FS-Is-Directory-Empty {
+	param (
+		[string]$___target
+	)
+
+
+	# validate input
+	$___process = FS-Is-Directory "${___target}"
+	if ($___process -ne 0) {
+		return 0
+	}
+
+
+	# execute
+	if((Get-ChildItem "${___target}" -force `
+		| Select-Object -First 1 `
+		| Measure-Object).Count -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
 function FS-Is-File {
 	param (
 		[string]$___target
@@ -339,6 +387,40 @@ function FS-Is-File {
 
 
 
+function FS-Is-Target-A-C {
+	param (
+		[string]$___target
+	)
+
+
+	# execute
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	if ($(FS-Is-Target-A-Cargo "${___target}") -eq 0) {
+		return 1
+	}
+
+	if ($(FS-Is-Target-A-Chocolatey "${___target}") -eq 0) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if (($("${___file_subject}" -replace '.*-C.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-c.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*\.c$', '') -ne "${___file_subject}")) {
+		return 0
+	}
+
+
+	# report status
+	return 1
+}
+
+
+
+
 function FS-Is-Target-A-Cargo {
 	param (
 		[string]$___target
@@ -346,7 +428,12 @@ function FS-Is-Target-A-Cargo {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*-cargo') -ne "${___target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if ($("${___file_subject}" -replace '.*-cargo.*', '') -ne "${___file_subject}") {
 		return 0
 	}
 
@@ -365,8 +452,13 @@ function FS-Is-Target-A-Chocolatey {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*-chocolatey') -ne "${___target}") -or
-		($("${___target}" -replace '^.*-choco') -ne "${___target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if (($("${___file_subject}" -replace '.*-chocolatey.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-choco.*', '') -ne "${___file_subject}")) {
 		return 0
 	}
 
@@ -385,7 +477,12 @@ function FS-Is-Target-A-Citation-CFF {
 
 
 	# execute
-	if ($("${___target}" -replace '^.*.cff') -ne "${___target}") {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if ($("${___file_subject}" -replace '.*\.cff$', '') -ne "${___file_subject}") {
 		return 0
 	}
 
@@ -404,8 +501,13 @@ function FS-Is-Target-A-Docs {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*-doc') -ne "${___target}") -or
-		($("${___target}" -replace '^.*-docs') -ne "${___target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if (($("${___file_subject}" -replace '.*-doc.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-docs.*', '') -ne "${___file_subject}")) {
 		return 0
 	}
 
@@ -424,8 +526,13 @@ function FS-Is-Target-A-Homebrew {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*-homebrew') -ne "${___target}") -or
-		($("${___target}" -replace '^.*-brew') -ne "${___target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if (($("${___file_subject}" -replace '.*-homebrew.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-brew.*', '') -ne "${___file_subject}")) {
 		return 0
 	}
 
@@ -439,18 +546,23 @@ function FS-Is-Target-A-Homebrew {
 
 function FS-Is-Target-A-Library {
 	param (
-		[string]$___subject
+		[string]$___target
 	)
 
 
 	# execute
-	if (($("${___subject}" -replace '^lib.*') -ne "${___subject}") -or
-		($("${___subject}" -replace '.*\.a$') -ne "${___subject}") -or
-		($("${___subject}" -replace '.*\.dll$') -ne "${___subject}") -or
-		($("${___subject}" -replace '^.*-lib') -ne "${___subject}") -or
-		($("${___subject}" -replace '^.*-libs') -ne "${___subject}") -or
-		($("${___subject}" -replace '^.*-library') -ne "${___subject}") -or
-		($("${___subject}" -replace '^.*-libraries') -ne "${___subject}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if (($("${___file_subject}" -replace '^lib.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*\.a$', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*\.dll$', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-lib.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-libs.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-library.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-libraries.*', '') -ne "${___file_subject}")) {
 		return 0
 	}
 
@@ -469,8 +581,13 @@ function FS-Is-Target-A-MSI {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*-msi') -ne "${___target}") -or
-		($("${___target}" -replace '^.*.msi') -ne "${___target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if (($("${___file_subject}" -replace '.*\.msi$', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-msi.*', '') -ne "${___file_subject}")) {
 		return 0
 	}
 
@@ -489,7 +606,12 @@ function FS-Is-Target-A-NPM {
 
 
 	# execute
-	if ($("${___target}" -replace '^.*_js-js.tgz') -ne "${___target}") {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if ($("${___file_subject}" -replace '.*_js-js\.tgz$', '') -ne "${___file_subject}") {
 		return 0
 	}
 
@@ -508,7 +630,12 @@ function FS-Is-Target-A-Nupkg {
 
 
 	# execute
-	if ($("${___target}" -replace '^.*.nupkg') -ne "${___target}") {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if ($("${___file_subject}" -replace '.*\.nupkg$', '') -ne "${___file_subject}") {
 		return 0
 	}
 
@@ -527,7 +654,12 @@ function FS-Is-Target-A-PDF {
 
 
 	# execute
-	if ($("${___target}" -replace '^.*.pdf') -ne "${___target}") {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if ($("${___file_subject}" -replace '.*\.pdf$', '') -ne "${___file_subject}") {
 		return 0
 	}
 
@@ -546,7 +678,12 @@ function FS-Is-Target-A-PYPI {
 
 
 	# execute
-	if ($("${___target}" -replace '^.*-pypi') -ne "${___target}") {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if ($("${___file_subject}" -replace '.*-pypi.*', '') -ne "${___file_subject}") {
 		return 0
 	}
 
@@ -565,8 +702,13 @@ function FS-Is-Target-A-Source {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*-src') -ne "${___target}") -or
-		($("${___target}" -replace '^.*-source') -ne "${___target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if (($("${___file_subject}" -replace '.*-src.*', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*-source.*', '') -ne "${___file_subject}")) {
 		return 0
 	}
 
@@ -585,8 +727,13 @@ function FS-Is-Target-A-TARGZ {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*.tar.gz') -ne "${___target}") -or
-		($("${___target}" -replace '^.*.tgz') -ne "${___target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if (($("${___file_subject}" -replace '.*\.tar\.gz$', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*\.tgz$', '') -ne "${___file_subject}")) {
 		return 0
 	}
 
@@ -605,8 +752,13 @@ function FS-Is-Target-A-TARXZ {
 
 
 	# execute
-	if (($("${___target}" -replace '^.*.tar.xz') -ne "${___target}") -or
-		($("${___target}" -replace '^.*.txz') -ne "${___target}")) {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if (($("${___file_subject}" -replace '.*\.tar\.xz$', '') -ne "${___file_subject}") -or
+		($("${___file_subject}" -replace '.*\.txz$', '') -ne "${___file_subject}")) {
 		return 0
 	}
 
@@ -625,7 +777,12 @@ function FS-Is-Target-A-WASM {
 
 
 	# execute
-	if ($("${___target}" -replace '^.*-wasm') -ne "${___target}") {
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if ($("${___file_subject}" -replace '.*-wasm.*', '') -ne "${___file_subject}") {
 		return 0
 	}
 
@@ -644,17 +801,46 @@ function FS-Is-Target-A-WASM-JS {
 
 
 	# execute
-	if ($("${___target}" -replace '^.*-wasm') -eq "${___target}") {
+	if ([string]::IsNullOrEmpty("${___target}")) {
 		return 1
 	}
 
-	if ($("${___target}" -replace '^.*.js') -eq "${___target}") {
+	if ($(FS-Is-Target-A-WASM "${___target}") -ne 0) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if ($("${___file_subject}" -replace '.*\.js$', '') -eq "${___file_subject}") {
 		return 1
 	}
 
 
 	# report status
 	return 0
+}
+
+
+
+
+function FS-Is-Target-A-ZIP {
+	param (
+		[string]$___target
+	)
+
+
+	# execute
+	if ([string]::IsNullOrEmpty("${___target}")) {
+		return 1
+	}
+
+	$___file_subject = FS-Get-File "${___target}"
+	if ($("${___file_subject}" -replace '^.*\.zip$', '') -ne "${___file_subject}") {
+		return 0
+	}
+
+
+	# report status
+	return 1
 }
 
 
@@ -675,25 +861,6 @@ function FS-Is-Target-Exist {
 	# perform checking
 	$___process = Test-Path -Path "${___target}" -PathType Any -ErrorAction SilentlyContinue
 	if ($___process) {
-		return 0
-	}
-
-
-	# report status
-	return 1
-}
-
-
-
-
-function FS-Is-Target-A-ZIP {
-	param (
-		[string]$___target
-	)
-
-
-	# execute
-	if ($("${___target}" -replace '^.*.zip') -ne "${___target}") {
 		return 0
 	}
 
@@ -809,6 +976,11 @@ function FS-Move {
 
 	# validate input
 	if ([string]::IsNullOrEmpty($___source) -or [string]::IsNullOrEmpty($___destination)) {
+		return 1
+	}
+
+	$___process = FS-Is-Target-Exist $___source
+	if ($___process -ne 0) {
 		return 1
 	}
 

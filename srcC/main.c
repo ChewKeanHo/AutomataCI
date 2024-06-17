@@ -2,9 +2,10 @@
  * [ LICENSE CLAUSE HERE ]
  */
 #include <stdio.h>
-#include "libs/sample/entity_any-any.h"
-#include "libs/sample/location_any-any.h"
-#include "libs/sample/greeter_any-any.h"
+
+#include "libs/entities/Vanilla.h"
+#include "libs/locations/Vanilla.h"
+#include "libs/greeters/Vanilla.h"
 
 
 

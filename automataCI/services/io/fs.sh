@@ -45,6 +45,16 @@ FS_Copy_All() {
                 return 1
         fi
 
+        FS_Is_Directory "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS_Is_Directory "$2"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
 
         # execute
         cp -r "${1}"* "${2}/."
@@ -67,6 +77,16 @@ FS_Copy_File() {
 
         # validate input
         if [ -z "$1" ] || [ -z "$2" ]; then
+                return 1
+        fi
+
+        FS_Is_File "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS_Is_Target_Exist "$2"
+        if [ $? -eq 0 ]; then
                 return 1
         fi
 
@@ -272,6 +292,32 @@ FS_Is_Directory() {
 
 
 
+FS_Is_Directory_Empty() {
+        #___target="$1"
+
+
+        # validate input
+        FS_Is_Directory "$1"
+        if [ $? -ne 0 ]; then
+                return 0
+        fi
+
+
+        # execute
+        for ___item in "$1"/*; do
+                if [ -e "$___item" ]; then
+                        return 1
+                fi
+        done
+
+
+        # report status
+        return 0
+}
+
+
+
+
 FS_Is_File() {
         #___target="$1"
 
@@ -300,12 +346,53 @@ FS_Is_File() {
 
 
 
+FS_Is_Target_A_C() {
+        #___target="$1"
+
+
+        # execute
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        if [ $(FS_Is_Target_A_Cargo "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        if [ $(FS_Is_Target_A_Chocolatey "$1") -eq 0 ]; then
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*-C}" != "$___file_subject" ] ||
+                [ "${___file_subject#*-c}" != "$___file_subject" ] ||
+                [ "${___file_subject#*.c}" != "$___file_subject" ]; then
+                printf -- "0"
+                return 0
+        fi
+
+
+        # report status
+        printf -- "1"
+        return 1
+}
+
+
+
+
 FS_Is_Target_A_Cargo() {
         #___target="$1"
 
 
         # execute
-        if [ "${1#*-cargo}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*-cargo}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -324,7 +411,14 @@ FS_Is_Target_A_Chocolatey() {
 
 
         # execute
-        if [ "${1#*-chocolatey}" != "$1" ] || [ "${1#*-choco}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*-chocolatey}" != "$___file_subject" ] ||
+                [ "${___file_subject#*-choco}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -343,7 +437,13 @@ FS_Is_Target_A_Citation_CFF() {
 
 
         # execute
-        if [ "${1#*.cff}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*.cff}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -362,7 +462,14 @@ FS_Is_Target_A_Docs() {
 
 
         # execute
-        if [ "${1#*-doc}" != "$1" ] || [ "${1#*-docs}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*-doc}" != "$___file_subject" ] ||
+                [ "${___file_subject#*-docs}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -381,7 +488,14 @@ FS_Is_Target_A_Homebrew() {
 
 
         # execute
-        if [ "${1#*-homebrew}" != "$1" ] || [ "${1#*-brew}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*-homebrew}" != "$___file_subject" ] ||
+                [ "${___file_subject#*-brew}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -400,13 +514,19 @@ FS_Is_Target_A_Library() {
 
 
         # execute
-        if [ "${1%%lib*}" != "$1" ] ||
-                [ "${1##*.a}" != "$1" ] ||
-                [ "${1##*.dll}" != "$1" ] ||
-                [ "${1#*-lib}" != "$1" ] ||
-                [ "${1#*-libs}" != "$1" ] ||
-                [ "${1#*-library}" != "$1" ] ||
-                [ "${1#*-libraries}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#lib*}" != "$___file_subject" ] ||
+                [ "${___file_subject#*.a}" != "$___file_subject" ] ||
+                [ "${___file_subject#*.dll}" != "$___file_subject" ] ||
+                [ "${___file_subject#*-lib}" != "$___file_subject" ] ||
+                [ "${___file_subject#*-libs}" != "$___file_subject" ] ||
+                [ "${___file_subject#*-library}" != "$___file_subject" ] ||
+                [ "${___file_subject#*-libraries}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -425,7 +545,14 @@ FS_Is_Target_A_MSI() {
 
 
         # execute
-        if [ "${1#*-msi}" != "$1" ] || [ "${1#*.msi}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*-msi}" != "$___file_subject" ] ||
+                [ "${___file_subject#*.msi}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -444,7 +571,13 @@ FS_Is_Target_A_NPM() {
 
 
         # execute
-        if [ "${1#*_js-js.tgz}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*_js-js.tgz}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -463,7 +596,13 @@ FS_Is_Target_A_Nupkg() {
 
 
         # execute
-        if [ "${1#*.nupkg}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*.nupkg}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -482,7 +621,13 @@ FS_Is_Target_A_PDF() {
 
 
         # execute
-        if [ "${1#*.pdf}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*.pdf}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -501,7 +646,13 @@ FS_Is_Target_A_PYPI() {
 
 
         # execute
-        if [ "${1#*-pypi}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*-pypi}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -520,7 +671,14 @@ FS_Is_Target_A_Source() {
 
 
         # execute
-        if [ "${1#*-src}" != "$1" ] || [ "${1#*-source}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*-src}" != "$___file_subject" ] ||
+                [ "${___file_subject#*-source}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -539,7 +697,14 @@ FS_Is_Target_A_TARGZ() {
 
 
         # execute
-        if [ "${1#*.tar.gz}" != "$1" ] || [ "${1#*.tgz}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*.tar.gz}" != "$___file_subject" ] ||
+                [ "${___file_subject#*.tgz}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -558,7 +723,14 @@ FS_Is_Target_A_TARXZ() {
 
 
         # execute
-        if [ "${1#*.tar.xz}" != "$1" ] || [ "${1#*.txz}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*.tar.xz}" != "$___file_subject" ] ||
+                [ "${___file_subject#*.txz}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -577,7 +749,13 @@ FS_Is_Target_A_WASM() {
 
 
         # execute
-        if [ "${1#*-wasm}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*-wasm}" != "$___file_subject" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -596,12 +774,18 @@ FS_Is_Target_A_WASM_JS() {
 
 
         # execute
-        if [ "${1#*-wasm}" == "$1" ]; then
+        if [ "$1" = "" ]; then
                 printf -- "1"
                 return 1
         fi
 
-        if [ "${1#*.js}" == "$1" ]; then
+        if [ $(FS_Is_Target_A_WASM "$1") -ne 0 ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*.js}" == "$___file_subject" ]; then
                 printf -- "1"
                 return 1
         fi
@@ -620,7 +804,13 @@ FS_Is_Target_A_ZIP() {
 
 
         # execute
-        if [ "${1#*.zip}" != "$1" ]; then
+        if [ "$1" = "" ]; then
+                printf -- "1"
+                return 1
+        fi
+
+        ___file_subject="$(FS_Get_File "$1")"
+        if [ "${___file_subject#*.zip}" != "${___file_subject}" ]; then
                 printf -- "0"
                 return 0
         fi
@@ -753,6 +943,11 @@ FS_Move() {
                 return 1
         fi
 
+        FS_Is_Target_Exist "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
 
         # execute
         mv "$1" "$2"
@@ -835,6 +1030,22 @@ FS_Remove_Silently() {
 FS_Rename() {
         #___source="$1"
         #___target="$2"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -z "$2" ]; then
+                return 1
+        fi
+
+        FS_Is_Target_Exist "$1"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        FS_Is_Target_Exist "$2"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
 
 
         # execute

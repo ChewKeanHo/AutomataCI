@@ -65,9 +65,9 @@ function PACKAGE-Assemble-DEB-Content {
 	##      (2) please avoid: usr/, usr/{TYPE}/, usr/bin/, & usr/lib{TYPE}/
 	##          whenever possible for avoiding conflicts with your OS native
 	##          system packages.
-	$_chroot = "${_directory}/data/usr/"
-	if ($(STRINGS-To-Lowercase "${env:PROJECT_DEBIAN_IS_NATIVE}") -ne "true") {
-		$_chroot = "${_chroot}/local/"
+	$_chroot = "${_directory}/data/usr"
+	if ($(STRINGS-To-Lowercase "${env:PROJECT_DEB_IS_NATIVE}") -ne "true") {
+		$_chroot = "${_chroot}/local"
 	}
 
 	$_gpg_keyring = "${env:PROJECT_SKU}"
@@ -77,42 +77,42 @@ function PACKAGE-Assemble-DEB-Content {
 	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		$___dest = "${_chroot}\lib\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
+		$__dest = "${_chroot}\lib\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
 
 		if ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
 			return 10 # not applicable
 		} elseif ($(FS-Is-Target-A-TARGZ "${_target}") -eq 0) {
 			# unpack library
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = TAR-Extract-GZ "${___dest}" "${_target}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = TAR-Extract-GZ "${__dest}" "${_target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
 			}
 		} elseif ($(FS-Is-Target-A-TARXZ "${_target}") -eq 0) {
 			# unpack library
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = TAR-Extract-XZ "${___dest}" "${_target}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = TAR-Extract-XZ "${__dest}" "${_target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
 			}
 		} elseif ($(FS-Is-Target-A-ZIP "${_target}") -eq 0) {
 			# unpack library
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = ZIP-Extract "${___dest}" "${_target}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = ZIP-Extract "${__dest}" "${_target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
 			}
 		} else {
 			# copy library file
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = FS-Copy-File "${_target}" "${___dest}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = FS-Copy-File "${_target}" "${__dest}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
@@ -137,11 +137,11 @@ function PACKAGE-Assemble-DEB-Content {
 		return 10 # not applicable
 	} else {
 		# copy main program
-		$___dest = "${_chroot}\bin\"
+		$__dest = "${_chroot}\bin\${env:PROJECT_SKU}"
 
-		$null = I18N-Assemble "${_target}" "${___dest}"
-		$null = FS-Make-Directory "${___dest}"
-		$___process = FS-Copy-File "${_target}" "${___dest}"
+		$null = I18N-Assemble "${_target}" "${__dest}"
+		$null = FS-Make-Housing-Directory "${__dest}"
+		$___process = FS-Copy-File "${_target}" "${__dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
@@ -150,9 +150,9 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$___dest = "${_chroot}\share\doc\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}\changelog.gz"
-	$null = I18N-Create "${___dest}"
-	$___process = DEB-Create-Changelog "${___dest}" "${_changelog}" "${env:PROJECT_SKU}"
+	$__dest = "${_chroot}\share\doc\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}\changelog.gz"
+	$null = I18N-Create "${__dest}"
+	$___process = DEB-Create-Changelog "${__dest}" "${_changelog}" "${env:PROJECT_SKU}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
@@ -160,10 +160,10 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$___dest = "${_chroot}\share\doc\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}\copyright"
-	$null = I18N-Create "${___dest}"
+	$__dest = "${_chroot}\share\doc\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}\copyright"
+	$null = I18N-Create "${__dest}"
 	$___process = COPYRIGHT-Create `
-		"${___dest}" `
+		"${__dest}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\deb-copyright" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
@@ -176,11 +176,11 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# NOTE: REQUIRED file
-	$___dest = "${_chroot}\share\man\man1\${env:PROJECT_SCOPE}-${env:PROJECT_SKU}.1"
-	$null = I18N-Create "${___dest}"
+	$__dest = "${_chroot}\share\man\man1\${env:PROJECT_SCOPE}-${env:PROJECT_SKU}.1"
+	$null = I18N-Create "${__dest}"
 	$___process = MANUAL-Create `
-		"${___dest}" `
-		"${env:PROJECT_DEBIAN_IS_NATIVE}" `
+		"${__dest}" `
+		"${env:PROJECT_DEB_IS_NATIVE}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}" `
@@ -202,12 +202,17 @@ function PACKAGE-Assemble-DEB-Content {
 
 	# NOTE: OPTIONAL (Comment to turn it off)
 	$null = I18N-Create "source.list"
+	$__url = "${env:PROJECT_STATIC_URL}"
+	if ($(STRINGS-Is-Empty "${env:PROJECT_DEB_URL}") -ne 0) {
+		$__url = "${env:PROJECT_DEB_URL}"
+	}
+
 	$___process = DEB-Create-Source-List `
 		"${_directory}" `
 		"${env:PROJECT_GPG_ID}" `
-		"${env:PROJECT_STATIC_URL}" `
-		"${env:PROJECT_REPREPRO_CODENAME}" `
-		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
+		"${__url}" `
+		"${env:PROJECT_DEB_COMPONENT}" `
+		"${env:PROJECT_DEB_DISTRIBUTION}" `
 		"${_gpg_keyring}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
@@ -216,20 +221,31 @@ function PACKAGE-Assemble-DEB-Content {
 
 
 	# WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
+	$__arch = "${_target_arch}"
+	if ($__arch -eq "any") {
+		$__arch = "all"
+	}
+
+	$__os = "${_target_os}"
+	if ($__os -eq "any") {
+		$__os = "all"
+	}
+
+
 	$null = I18N-Create "${_directory}\control\control"
 	$___process = DEB-Create-Control `
 		"${_directory}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}" `
 		"${_package}" `
 		"${env:PROJECT_VERSION}" `
-		"${_target_arch}" `
-		"${_target_os}" `
+		"${__arch}" `
+		"${__os}" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}" `
 		"${env:PROJECT_CONTACT_WEBSITE}" `
 		"${env:PROJECT_PITCH}" `
-		"${env:PROJECT_DEBIAN_PRIORITY}" `
-		"${env:PROJECT_DEBIAN_SECTION}" `
+		"${env:PROJECT_DEB_PRIORITY}" `
+		"${env:PROJECT_DEB_SECTION}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\ABSTRACTS.txt"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed

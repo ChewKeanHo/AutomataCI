@@ -88,11 +88,6 @@ if ($___process -ne 0) {
 	return 1
 }
 
-$___process = RUN-Subroutine-Exec "${env:PROJECT_C}" "C"
-if ($___process -ne 0) {
-	return 1
-}
-
 $___process = RUN-Subroutine-Exec "${env:PROJECT_GO}" "GO"
 if ($___process -ne 0) {
 	return 1
@@ -129,6 +124,15 @@ if ($___process -ne 0) {
 }
 
 $___process = RUN-Subroutine-Exec "${env:PROJECT_PATH_SOURCE}" "BASELINE"
+if ($___process -ne 0) {
+	return 1
+}
+
+# IMPORTANT: C on unix has some issue with setting the terminal into ultra
+#            strict mode after build causing other technological integrations
+#            to fail after run (e.g. flatpak). Therefore, it will be placed as
+#            the last one to execute.
+$___process = RUN-Subroutine-Exec "${env:PROJECT_C}" "C"
 if ($___process -ne 0) {
 	return 1
 }

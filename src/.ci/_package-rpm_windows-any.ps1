@@ -54,7 +54,7 @@ function PACKAGE-Assemble-RPM-Content {
 	##          whenever possible for avoiding conflicts with your OS native
 	##          system packages.
 	$_chroot = "usr"
-	if ("$(STRINGS-To-Lowercase "$PROJECT_DEBIAN_IS_NATIVE")" -eq "true") {
+	if ("$(STRINGS-To-Lowercase "$PROJECT_RPM_IS_NATIVE")" -eq "true") {
 		$_chroot = "${_chroot}/local"
 	}
 
@@ -68,13 +68,13 @@ function PACKAGE-Assemble-RPM-Content {
 			return 10 # not applicable
 		} elseif ($(FS-Is-Target-A-TARGZ "${_target}" -eq 0)) {
 			# unpack library
-			$___source = "${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
-			$___dest = "${_directory}\BUILD\${___source}"
-			$___target = "${_chroot}\lib\${___source}"
+			$__source = "${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
+			$__dest = "${_directory}\BUILD\${__source}"
+			$__target = "${_chroot}\lib"
 
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = TAR-Extract-GZ "${___dest}" "${_target}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = TAR-Extract-GZ "${__dest}" "${_target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
@@ -82,8 +82,8 @@ function PACKAGE-Assemble-RPM-Content {
 
 			$___process = RPM-Register `
 				"${_directory}" `
-				"${___source}" `
-				"${___target}" `
+				"${__source}" `
+				"${__target}" `
 				"true"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
@@ -91,13 +91,13 @@ function PACKAGE-Assemble-RPM-Content {
 			}
 		} elseif ($(FS-Is-Target-A-TARXZ "${_target}" -eq 0)) {
 			# unpack library
-			$___source = "${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
-			$___dest = "${_directory}\BUILD\${___source}"
-			$___target = "${_chroot}\lib\${___source}"
+			$__source = "${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
+			$__dest = "${_directory}\BUILD\${__source}"
+			$__target = "${_chroot}\lib"
 
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = TAR-Extract-XZ "${___dest}" "${_target}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = TAR-Extract-XZ "${__dest}" "${_target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
@@ -105,8 +105,8 @@ function PACKAGE-Assemble-RPM-Content {
 
 			$___process = RPM-Register `
 				"${_directory}" `
-				"${___source}" `
-				"${___target}" `
+				"${__source}" `
+				"${__target}" `
 				"true"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
@@ -114,13 +114,13 @@ function PACKAGE-Assemble-RPM-Content {
 			}
 		} elseif ($(FS-Is-Target-A-ZIP "${_target}" -eq 0)) {
 			# unpack library
-			$___source = "${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
-			$___dest = "${_directory}\BUILD\${___source}"
-			$___target = "${_chroot}\lib\${___source}"
+			$__source = "${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
+			$__dest = "${_directory}\BUILD\${__source}"
+			$__target = "${_chroot}\lib"
 
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = ZIP-Extract "${___dest}" "${_target}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = ZIP-Extract "${__dest}" "${_target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
@@ -128,8 +128,8 @@ function PACKAGE-Assemble-RPM-Content {
 
 			$___process = RPM-Register `
 				"${_directory}" `
-				"${___source}" `
-				"${___target}" `
+				"${__source}" `
+				"${__target}" `
 				"true"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
@@ -137,19 +137,19 @@ function PACKAGE-Assemble-RPM-Content {
 			}
 		} else {
 			# copy library file
-			$___source = "$(FS-Get-File "${_target}")"
-			$___dest = "${_directory}\BUILD\${___source}"
-			$___target = "${_chroot}\lib\${___source}"
+			$__source = "$(FS-Get-File "${_target}")"
+			$___dest = "${_directory}\BUILD\${__source}"
+			$__target = "${_chroot}\lib"
 
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = FS-Copy-File "${_target}" "${___dest}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = FS-Copy-File "${_target}" "${__dest}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
 			}
 
-			$___process = RPM-Register "${_directory}" "${___source}" "${___target}"
+			$___process = RPM-Register "${_directory}" "${__source}" "${__target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
@@ -174,19 +174,19 @@ function PACKAGE-Assemble-RPM-Content {
 		return 10 # not applicable
 	} else {
 		# copy main program
-		$___source = "$(FS-Get-File "${_target}")"
-		$___dest = "${_directory}\BUILD\${___source}"
-		$___target = "${_chroot}\lib\${___source}"
+		$__source = "$(FS-Get-File "${_target}")"
+		$__dest = "${_directory}\BUILD\${__source}"
+		$__target = "${_chroot}\bin\${env:PROJECT_SKU}"
 
-		$null = I18N-Assemble "${_target}" "${___dest}"
-		$null = FS-Make-Directory "${___dest}"
-		$___process = FS-Copy-File "${_target}" "${___dest}"
+		$null = I18N-Assemble "${_target}" "${__dest}"
+		$null = FS-Make-Directory "${__dest}"
+		$___process = FS-Copy-File "${_target}" "${__dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
 		}
 
-		$___process = RPM-Register "${_directory}" "${___source}" "${___target}"
+		$___process = RPM-Register "${_directory}" "${__source}" "${__target}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
@@ -197,12 +197,12 @@ function PACKAGE-Assemble-RPM-Content {
 
 
 	# NOTE: REQUIRED file
-	$___source = "copyright"
-	$___dest = "${_directory}/BUILD/${___source}"
-	$___target = "${_chroot}/share/doc/${env:PROJECT_SCOPE}/${env:PROJECT_SKU}/${___source}"
+	$__source = "copyright"
+	$__dest = "${_directory}/BUILD/${__source}"
+	$__target = "${_chroot}/share/doc/${env:PROJECT_SCOPE}/${env:PROJECT_SKU}/${__source}"
 	$null = I18N-Create "${___source}"
 	$___process = COPYRIGHT-Create `
-		"${___dest}" `
+		"${__dest}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\deb-copyright" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
@@ -213,7 +213,7 @@ function PACKAGE-Assemble-RPM-Content {
 		return 1
 	}
 
-	$___process = RPM-Register "${_directory}" "${___source}" "${___target}"
+	$___process = RPM-Register "${_directory}" "${__source}" "${__target}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
@@ -221,12 +221,13 @@ function PACKAGE-Assemble-RPM-Content {
 
 
 	# NOTE: REQUIRED file
-	$___source = "${env:PROJECT_SCOPE}-${env:PROJECT_SKU}.1"
-	$___dest = "${_directory}/BUILD/${___source}"
-	$___target = "${_chroot}/share/man/man1/${___source}"
-	$null = I18N-Create "${___source}"
+	$__source = "${env:PROJECT_SCOPE}-${env:PROJECT_SKU}.1"
+	$__dest = "${_directory}/BUILD/${__source}"
+	$__source = "${__source}.gz"
+	$__target = "${_chroot}/share/man/man1/${__source}"
+	$null = I18N-Create "${__source}"
 	$___process = MANUAL-Create `
-		"${___dest}" `
+		"${__dest}" `
 		"${env:PROJECT_SKU}" `
 		"${env:PROJECT_CONTACT_NAME}" `
 		"${env:PROJECT_CONTACT_EMAIL}" `
@@ -236,7 +237,7 @@ function PACKAGE-Assemble-RPM-Content {
 		return 1
 	}
 
-	$___process = RPM-Register "${_directory}" "${___source}" "${___target}"
+	$___process = RPM-Register "${_directory}" "${__source}" "${__target}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed
 		return 1
@@ -245,13 +246,25 @@ function PACKAGE-Assemble-RPM-Content {
 
 	# NOTE: OPTIONAL (Comment to turn it off)
 	$null = I18N-Create "source.repo"
+	$___metalink = ""
+	if ($(STRINGS-IS-Empty "${env:PROJECT_RPM_FLAT_MODE}") -ne 0) {
+		# flat mode enabled
+		if ($(STRINGS-IS-Empty "${env:PROJECT_RPM_METALINK}") -ne 0) {
+			$null = I18N-Create-Failed
+			return 1
+		}
+
+		$___metalink = "${env:PROJECT_RPM_URL}\${env:PROJECT_RPM_METALINK}"
+	}
+
 	$___process = RPM-Create-Source-Repo `
-		"${env:PROJECT_SIMULATE_RELEASE_REPO}" `
+		"${env:PROJECT_SIMULATE_RUN}" `
 		"${_directory}" `
 		"${env:PROJECT_GPG_ID}" `
-		"${env:PROJECT_STATIC_URL}" `
-		"${env:PROJECT_REPREPRO_CODENAME}" `
-		"${env:PROJECT_DEBIAN_DISTRIBUTION}" `
+		"${env:PROJECT_RPM_URL}" `
+		"${___metalink}" `
+		"${env:PROJECT_NAME}" `
+		"${env:PROJECT_SCOPE}" `
 		"${_gpg_keyring}"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed

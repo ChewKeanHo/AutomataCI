@@ -54,8 +54,8 @@ FS_Remake_Directory "${PROJECT_PATH_ROOT}/${PROJECT_PATH_LIB}"
 # build main exectuable
 I18N_Configure_Build_Settings
 __target="${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
-__workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/build-${__target}"
-__log="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/build-${__target}"
+__workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/materialize-${__target}"
+__log="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/materialize-${PROJECT_C}/${__target}"
 case "$PROJECT_OS" in
 windows)
         __target="${__workspace}/${__target}.exe"
@@ -100,8 +100,8 @@ fi
 # build main library
 I18N_Configure_Build_Settings
 __target="lib${PROJECT_SKU}_${PROJECT_OS}-${PROJECT_ARCH}"
-__workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/build-${__target}"
-__log="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/build-${__target}"
+__workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/materialize-${__target}"
+__log="${PROJECT_PATH_ROOT}/${PROJECT_PATH_LOG}/materialize-${PROJECT_C}/${__target}"
 case "$PROJECT_OS" in
 windows)
         __target="${__workspace}/${__target}.dll"

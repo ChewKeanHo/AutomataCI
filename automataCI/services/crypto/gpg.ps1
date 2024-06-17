@@ -16,21 +16,28 @@
 
 
 
-function GPG-Detach-Sign-File {
+function GPG-Clear-Sign-File {
 	param (
+		[string]$___output,
 		[string]$___target,
 		[string]$___id
 	)
 
 
 	# validate input
-	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+	if (($(STRINGS-Is-Empty "${___output}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___target}") -eq 0) -or
 		($(STRINGS-Is-Empty "${___id}") -eq 0)) {
 		return 1
 	}
 
-	$___process = FS-Is-File "${___target}"
+	$___process = FS-Is-Target-Exist "${___output}"
 	if ($___process -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___target}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -41,8 +48,56 @@ function GPG-Detach-Sign-File {
 
 
 	# execute
-	$___process = OS-Exec `
-		"gpg" "--armor --detach-sign --local-user `"${__id}`" `"${__target}`""
+	$___process = OS-Exec "gpg" @"
+--armor --clear-sign --local-user `"${___id}`" --output `"${___output}`" `"${___target}`"
+"@
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function GPG-Detach-Sign-File {
+	param (
+		[string]$___output,
+		[string]$___target,
+		[string]$___id
+	)
+
+
+	# validate input
+	if (($(STRINGS-Is-Empty "${___output}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___target}") -eq 0) -or
+		($(STRINGS-Is-Empty "${___id}") -eq 0)) {
+		return 1
+	}
+
+	$___process = FS-Is-Target-Exists "${___output}"
+	if ($___process -eq 0) {
+		return 1
+	}
+
+	$___process = FS-Is-File "${___target}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	$___process = GPG-Is-Available "${___id}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$___process = OS-Exec "gpg" @"
+--armor --detach-sign --local-user `"${___id}`" --output `"${___output}`" `"${___target}`"
+"@
 	if ($___process -ne 0) {
 		return 1
 	}
@@ -133,6 +188,10 @@ function GPG-Is-Available {
 	$___process = OS-Is-Command-Available "gpg"
 	if ($___process -ne 0) {
 		return 1
+	}
+
+	if ($(STRINGS-Is-Empty "${___id}") -eq 0) {
+		return 0
 	}
 
 	$___process = OS-Exec "gpg" "--list-key `"${___id}`""

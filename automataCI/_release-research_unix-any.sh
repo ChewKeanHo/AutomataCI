@@ -10,6 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 
@@ -25,8 +26,8 @@ fi
 
 
 
-RELEASE_Run_PDF() {
-        #_target="$1"
+RELEASE_Run_RESEARCH() {
+        #__target="$1"
 
 
         # validate input
@@ -34,18 +35,25 @@ RELEASE_Run_PDF() {
                 return 0
         fi
 
+        if [ "${1##*${PROJECT_RESEARCH_IDENTIFIER}}" = "$1" ]; then
+                return 0 # not a research paper
+        fi
+
 
         # execute
-        ___dest="PAPER.pdf"
-        I18N_Publish "$___dest"
-        ___dest="${PROJECT_PATH_ROOT}/${___dest}"
-        if [ "${1##*${PROJECT_RESEARCH_IDENTIFIER}}" != "$1" ]; then
-                ## it's a research paper
-                FS_Copy_File "$1" "$___dest"
+        I18N_Publish "RESEARCH"
+        if [ $(OS_Is_Run_Simulated) -ne 0 ]; then
+                __dest="PAPER.pdf"
+                __dest="${PROJECT_PATH_ROOT}/${__dest}"
+                I18N_Publish "$__dest"
+                FS_Copy_File "$1" "$__dest"
                 if [ $? -ne 0 ]; then
                         I18N_Publish_Failed
                         return 1
                 fi
+        else
+                # always simulate in case of error or mishaps before any point of no return
+                I18N_Simulate_Publish "RESEARCH"
         fi
 
 

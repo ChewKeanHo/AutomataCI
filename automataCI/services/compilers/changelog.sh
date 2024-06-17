@@ -299,13 +299,7 @@ CHANGELOG_Build_DEB_Entry() {
                 return 1
         fi
 
-        case "$___dist" in
-        stable|unstable|testing|experimental)
-                ;;
-        *)
-                return 1
-                ;;
-        esac
+        ___dist="${___dist%%/*}"
 
 
         # all good. Generate the log fragment
@@ -313,6 +307,7 @@ CHANGELOG_Build_DEB_Entry() {
 
 
         # create the entry header
+        FS_Remove_Silently "${___directory}/deb/.latest"
         FS_Append_File "${___directory}/deb/.latest" "\
 ${___sku} (${___version}) ${___dist}; urgency=${___urgency}
 

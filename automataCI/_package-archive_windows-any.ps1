@@ -20,7 +20,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from automataIC/ci.sh.ps1 instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataIC\ci.sh.ps1 instead!`n"
 	return
 }
 
@@ -62,7 +62,7 @@ function PACKAGE-Run-ARCHIVE {
 	$null = I18N-Create-Package "ARCHIVE"
 	$_src = "${_target_filename}_${env:PROJECT_VERSION}_${_target_os}-${_target_arch}"
 	$_target_path = "${_dest}\${_src}"
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\archive_${_src}"
+	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-archive-${_src}"
 	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {
@@ -110,11 +110,11 @@ function PACKAGE-Run-ARCHIVE {
 	windows {
 		$_target_path = "${_target_path}.zip"
 		$null = I18N-Package "${_target_path}"
-		$___process = ZIP-Create "${_target_path}" "*"
+		$___process = ZIP-Create "${_target_path}" "."
 	} Default {
 		$_target_path = "${_target_path}.tar.xz"
 		$null = I18N-Package "${_target_path}"
-		$___process = TAR-Create-XZ "${_target_path}" "*"
+		$___process = TAR-Create-XZ "${_target_path}" "."
 	}}
 
 

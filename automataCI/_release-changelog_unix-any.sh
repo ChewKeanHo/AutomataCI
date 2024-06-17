@@ -10,6 +10,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+. "${LIBS_AUTOMATACI}/services/io/os.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/changelog.sh"
 
@@ -27,13 +28,18 @@ fi
 
 RELEASE_Conclude_CHANGELOG() {
         # execute
-        I18N_Export "${PROJECT_VERSION} CHANGELOG"
-        CHANGELOG_Seal \
-                "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog" \
-                "$PROJECT_VERSION"
-        if [ $? -ne 0 ]; then
-                I18N_Export_Failed
-                return 1
+        I18N_Conclude "${PROJECT_VERSION} CHANGELOG"
+        if [ $(OS_Is_Run_Simulated) -ne 0 ]; then
+                CHANGELOG_Seal \
+                        "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog" \
+                        "$PROJECT_VERSION"
+                if [ $? -ne 0 ]; then
+                        I18N_Conclude_Failed
+                        return 1
+                fi
+        else
+                # always simulate in case of error or mishaps before any point of no return
+                I18N_Simulate_Conclude "${PROJECT_VERSION} CHANGELOG"
         fi
 
 

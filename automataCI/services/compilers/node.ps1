@@ -370,9 +370,11 @@ function NODE-Setup {
 	}
 
 	$___location = "$(NODE-Get-Activator-Path)"
-	$null = FS-Remove-Silently "$(FS-Get-Directory "${___location}")"
+	$___directory = "$(FS-Get-Directory "${___location}")"
+	$null = FS-Remove-Silently "${___directory}"
 
 	$___target = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TOOLS}\"
+	$null = FS-Make-Directory "${___target}"
 	switch ("${env:PROJECT_OS}") {
 	"windows" {
 		$___process = ZIP-Extract "${___target}" "${___filepath}"
@@ -387,15 +389,14 @@ function NODE-Setup {
 		return 1
 	}
 
-	$___process = FS-Move "${___target}" "$(FS-Get-Directory "${___location}")"
+	$___process = FS-Move "${___target}" "${___directory}"
 	if ($___process -ne 0) {
 		return 1
 	}
 
-
 	## create activator script
 	$___label = "(${env:PROJECT_PATH_NODE_ENGINE})"
-	$___target = "$(FS-Get-Directory "${___location}")"
+	$___target = "${___directory}"
 	$null = FS-Write-File "${___location}" @"
 `$___target = `"${___target}`"
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -10,8 +10,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-DISK_Calculate_Size() {
-        #___location="$1"
+DISK_Calculate_Size_Directory_KB() {
+        #___directory="$1"
 
 
         # validate input
@@ -32,6 +32,36 @@ DISK_Calculate_Size() {
         fi
 
         printf "${___size%%[!0-9]*}"
+
+
+        # report status
+        return 0
+}
+
+
+
+
+DISK_Calculate_Size_File_Byte() {
+        #___file="$1"
+
+
+        # validate input
+        if [ -z "$1" ] || [ -d "$1" ]; then
+                return 1
+        fi
+
+        DISK_Is_Available
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        ___size="$(du -b "$1")"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+        printf -- "%b" "${___size%%[!0-9]*}"
 
 
         # report status

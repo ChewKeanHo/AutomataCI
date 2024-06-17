@@ -80,7 +80,7 @@ PACKAGE_Run_PYPI() {
         I18N_Create "PYPI"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/pypi_${_src}"
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/pypi_${_src}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-pypi-${_src}"
         I18N_Remake "$_src"
         FS_Remake_Directory "$_src"
         if [ $? -ne 0 ]; then

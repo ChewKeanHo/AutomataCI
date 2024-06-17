@@ -56,8 +56,8 @@ $null = FS-Remake-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LIB}"
 # build main executable
 $null = I18N-Configure-Build-Settings
 $__target = "${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
-$__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\build-${__target}"
-$__log = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\build-${__target}"
+$__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\materialize-${__target}"
+$__log = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\materialize-${env:PROJECT_C}\${__target}"
 switch ("${env:PROJECT_OS}") {
 "windows" {
 	$__target = "${__workspace}\${__target}.exe"
@@ -102,8 +102,8 @@ if ($___process -ne 0) {
 # build main library
 $null = I18N-Configure-Build-Settings
 $__target = "lib${env:PROJECT_SKU}_${env:PROJECT_OS}-${env:PROJECT_ARCH}"
-$__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\build-${__target}"
-$__log = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\build-${__target}"
+$__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\materialize-${__target}"
+$__log = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\materialize-${env:PROJECT_C}\${__target}"
 switch ("${env:PROJECT_OS}") {
 "windows" {
 	$__target = "${__workspace}\${__target}.dll"

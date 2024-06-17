@@ -24,27 +24,40 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\tar.ps1"
+. "${env:LIBS_AUTOMATACI}\services\archive\zip.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\c.ps1"
 
 
 
 
 # execute
+## define workspace configurations (avoid changes unless absolute necessary)
+$__source_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}"
 $__output_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}"
 $null = FS-Remake-Directory "${__output_directory}"
 
-$__log_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}"
+$__log_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\build-${env:PROJECT_C}"
 $null = FS-Make-Directory "${__log_directory}"
 
 $__tmp_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}"
 $null = FS-Make-Directory "${__tmp_directory}"
 
-$__parallel_directory = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\c-parallel"
+$__parallel_directory = "${__tmp_directory}\build-parallel-C"
 $null = FS-Remake-Directory "${__parallel_directory}"
 
+$__output_lib_directory = "${__tmp_directory}\build-lib${env:PROJECT_SKU}-C"
+$null = FS-Remake-Directory "${__output_lib_directory}"
+
+
+## define build targets
+##
+## Pattern: '[OS]|[ARCH]|[COMPILER]|[TYPE]|[CONTROL_FILE]'
+##         (1) '[TYPE]'         - can either be 'executable' or 'library' only.
+##         (2) '[CONTROL_FILE]' - the full filepath for a AutomataCI list of
+##                                targets text file.
 $__executable = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}\executable.txt"
 $__library = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_C}\library.txt"
-
 $__build_targets = @(
 	"darwin|amd64|clang|executable|${__executable}"
 	"darwin|amd64|clang|library|${__library}"
@@ -84,14 +97,117 @@ $__build_targets = @(
 	"windows|arm64|x86_64-w64-mingw32-gcc|library|${__library}"
 )
 
+
+## NOTE: (1) Additional files like .h files, c source code files, assets files,
+##           and etc to pack into library bulk.
+##
+##       (2) Basic package files like README.md and LICENSE.txt are not
+##           required. The Package CI job will package it automatically in later
+##           CI stage. Just focus on only the end-user consumption.
+##
+##       (3) Pattern: '[FULL_PATH]|[NEW_FILENAME]'
+$__libs_files = @(
+	"${__source_directory}\libs\greeters\Vanilla.h|lib${env:PROJECT_SKU}.h"
+)
+
+
 $__placeholders = @(
-	"${env:PROJECT_SKU}-src_any-any"
-	"${env:PROJECT_SKU}-homebrew_any-any"
-	"${env:PROJECT_SKU}-chocolatey_any-any"
 	"${env:PROJECT_SKU}-msi_any-any"
 )
 
 
+## NOTE: (1) C Compilers Optimization flags for known target OS and ARCH types.
+function Get-Optimization-Flags {
+	param(
+		[string]$__target_os,
+		[string]$__target_arch
+	)
+
+
+	switch ("${__target_os}") {
+	darwin {
+		$__arguments = "$(C-Get-Strict-Settings) -fPIC"
+	} windows {
+		$__arguments = " -Wall" `
+			+ " -Wextra" `
+			+ " -std=gnu89" `
+			+ " -pedantic" `
+			+ " -Wstrict-prototypes" `
+			+ " -Wold-style-definition" `
+			+ " -Wundef" `
+			+ " -Wno-trigraphs" `
+			+ " -fno-strict-aliasing" `
+			+ " -fno-common" `
+			+ " -fshort-wchar" `
+			+ " -fno-stack-protector" `
+			+ " -Werror-implicit-function-declaration" `
+			+ " -Wno-format-security" `
+			+ " -Os" `
+			+ " -static"
+	} default {
+		$__arguments = "$(C-Get-Strict-Settings) -static -pie -fPIE"
+	}}
+
+	switch ("${__target_arch}") {
+	{ $_ -in "armle", "armel", "armhf" } {
+		$__arguments = " -Wall" `
+			+ " -Wextra" `
+			+ " -std=gnu89" `
+			+ " -pedantic" `
+			+ " -Wstrict-prototypes" `
+			+ " -Wold-style-definition" `
+			+ " -Wundef" `
+			+ " -Wno-trigraphs" `
+			+ " -fno-strict-aliasing" `
+			+ " -fno-common" `
+			+ " -fstack-protector-all" `
+			+ " -Werror-implicit-function-declaration" `
+			+ " -Wno-format-security" `
+			+ " -Os" `
+			+ " -static"
+	} wasm {
+		$__arguments = " -Wall" `
+			+ " -Wextra" `
+			+ " -std=gnu89" `
+			+ " -pedantic" `
+			+ " -Wstrict-prototypes" `
+			+ " -Wold-style-definition" `
+			+ " -Wundef" `
+			+ " -Wno-trigraphs" `
+			+ " -fno-strict-aliasing" `
+			+ " -fno-common" `
+			+ " -fshort-wchar" `
+			+ " -fno-stack-protector" `
+			+ " -Werror-implicit-function-declaration" `
+			+ " -Wno-format-security" `
+			+ " -Os" `
+			+ " -static"
+	} default {
+		# no changes
+	}}
+
+
+	# report status
+	return $__arguments
+}
+
+
+## NOTE: (1) perform any hard-coded overriding restrictions or gatekeeping
+##           customization adjustments here (e.g. interim buggy compiler,
+##           geo-politic distruption). By default, it is returning 0. Any
+##           rejection shall return a non-zero value (e.g. 1).
+function Check-Host-Can-Build-Target {
+	switch ("${__target_os}-${__target_arch}") {
+	default {
+		# no issue by default
+		return 0
+	}}
+}
+
+
+
+
+# build algorithms - modify only when absolute necessary
 function SUBROUTINE-Build {
 	param(
 		[string]$__line
@@ -119,6 +235,10 @@ function SUBROUTINE-Build {
 	$__target_arch = $__list[4]
 	$__target_compiler = $__list[5]
 	$__arguments = $__list[6]
+	$__output_directory = $__list[7]
+	$__output_lib_directory = $__list[8]
+	$__tmp_directory = $__list[9]
+	$__log_directory = $__list[10]
 
 
 	# validate input
@@ -128,15 +248,19 @@ function SUBROUTINE-Build {
 		($(STRINGS-Is-Empty "${__target_os}") -eq 0) -or
 		($(STRINGS-Is-Empty "${__target_arch}") -eq 0) -or
 		($(STRINGS-Is-Empty "${__target_compiler}") -eq 0) -or
-		($(STRINGS-Is-Empty "${__arguments}") -eq 0)) {
+		($(STRINGS-Is-Empty "${__arguments}") -eq 0) -or
+		($(STRINGS-Is-Empty "${__output_directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${__output_lib_directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${__tmp_directory}") -eq 0) -or
+		($(STRINGS-Is-Empty "${__log_directory}") -eq 0)) {
 		return 1
 	}
 
 
 	# prepare critical parameters
 	$__target = "$(FS-Extension-Remove "$(FS-Get-File "${__file_output}")" "*")"
-	$__workspace = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\build-${__target}"
-	$__log = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_LOG}\build-${__target}"
+	$__workspace = "${__tmp_directory}\build-${__target}"
+	$__log = "${__log_directory}\${__target}"
 	$__file_output = "${__workspace}\$(FS-Get-File "${__file_output}")"
 
 	$null = I18N-Build-Parallel "${__file_output}"
@@ -158,7 +282,11 @@ function SUBROUTINE-Build {
 
 
 	# export target
-	$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\$(FS-Get-File "${__file_output}")"
+	$__dest = "${__output_directory}"
+	if ("${__file_type}" -eq "library") {
+		$__dest = "${__output_lib_directory}"
+	}
+	$__dest = "${__dest}\$(FS-Get-File "${__file_output}")"
 	$null = FS-Remove-Silently "${__dest}"
 	$___process = FS-Copy-File "${__file_output}" "${__dest}"
 	if ($___process -ne 0) {
@@ -185,9 +313,7 @@ function SUBROUTINE-Build {
 }
 
 
-
-
-# register targets and execute parallel build
+## register targets and execute parallel build
 foreach ($__line in $__build_targets) {
 	if ($(STRINGS-Is-Empty "${__line}") -eq 0) {
 		continue
@@ -259,97 +385,75 @@ foreach ($__line in $__build_targets) {
 		}
 	}
 
+	$___process = Check-Host-Can-Build-Target
+	if ($___process -ne 0) {
+		continue
+	}
 
-	## NOTE: perform any hard-coded host system restrictions or gatekeeping
-	##       customization adjustments here.
-	switch ("${__target_os}-${__target_arch}") {
-	default {
-		# accepted
-	}}
-
-
-	# formulate compiler optimization flags
-	switch ("${__target_os}") {
-	darwin {
-		$__arguments = "$(C-Get-Strict-Settings) -fPIC"
-	} windows {
-		$__arguments = " -Wall" `
-			+ " -Wextra" `
-			+ " -std=gnu89" `
-			+ " -pedantic" `
-			+ " -Wstrict-prototypes" `
-			+ " -Wold-style-definition" `
-			+ " -Wundef" `
-			+ " -Wno-trigraphs" `
-			+ " -fno-strict-aliasing" `
-			+ " -fno-common" `
-			+ " -fshort-wchar" `
-			+ " -fno-stack-protector" `
-			+ " -Werror-implicit-function-declaration" `
-			+ " -Wno-format-security" `
-			+ " -Os" `
-			+ " -static"
-	} default {
-		$__arguments = "$(C-Get-Strict-Settings) -static -pie -fPIE"
-	}}
-
-	switch ("${__target_arch}") {
-	{ $_ -in "armle", "armel", "armhf" } {
-		$__arguments = " -Wall" `
-			+ " -Wextra" `
-			+ " -std=gnu89" `
-			+ " -pedantic" `
-			+ " -Wstrict-prototypes" `
-			+ " -Wold-style-definition" `
-			+ " -Wundef" `
-			+ " -Wno-trigraphs" `
-			+ " -fno-strict-aliasing" `
-			+ " -fno-common" `
-			+ " -fstack-protector-all" `
-			+ " -Werror-implicit-function-declaration" `
-			+ " -Wno-format-security" `
-			+ " -Os" `
-			+ " -static"
-	} wasm {
-		$__arguments = " -Wall" `
-			+ " -Wextra" `
-			+ " -std=gnu89" `
-			+ " -pedantic" `
-			+ " -Wstrict-prototypes" `
-			+ " -Wold-style-definition" `
-			+ " -Wundef" `
-			+ " -Wno-trigraphs" `
-			+ " -fno-strict-aliasing" `
-			+ " -fno-common" `
-			+ " -fshort-wchar" `
-			+ " -fno-stack-protector" `
-			+ " -Werror-implicit-function-declaration" `
-			+ " -Wno-format-security" `
-			+ " -Os" `
-			+ " -static"
-	} default {
-		# no changes
-	}}
+	$__arguments = "$(Get-Optimization-Flags "${__target_os}" "${__target_arch}")"
 
 
 	# target is healthy - register into build list
 	$null = FS-Append-File "${__parallel_directory}\parallel.txt" @"
-${__file_output}|${__source}|${__target_type}|${__target_os}|${__target_arch}|${__target_compiler}|${__arguments}
+${__file_output}|${__source}|${__target_type}|${__target_os}|${__target_arch}|${__target_compiler}|${__arguments}|${__output_directory}|${__output_lib_directory}|${__tmp_directory}|${__log_directory}
+
 "@
 }
 
 
-# NOTE: For some reason, the sync flag in parallel run is not free up at this
-#       layer. The underlying layer (object files building) is in parallel run
-#       and shall be given that priority.
-#
-#       Hence, we can only use serial run for the time being.
+## Execute the build
+## NOTE: For some reason, the sync flag in parallel run is not free up at this
+##       layer. The underlying layer (object files building) is in parallel run
+##       and shall be given that priority.
+##
+##       Hence, we can only use serial run for the time being.
 $___process = SYNC-Exec-Serial `
 	${function:SUBROUTINE-Build}.ToString() `
 	"${__parallel_directory}\parallel.txt" `
 	"${__parallel_directory}"
 if ($___process -ne 0) {
 	return 1
+}
+
+
+## assemble additional library files
+foreach ($__line in $__libs_files) {
+	if ($(STRINGS-Is-Empty "${__line}") -eq 0) {
+		continue
+	}
+
+	$__list = $__line -split "\|"
+
+
+	# build the file
+	$__source = $__list[0]
+	$__dest = $__list[1]
+	$__file = "${__output_lib_directory}\${__dest}"
+	$null = I18N-Copy "${__source}" "${__dest}"
+	$null = FS-Remove-Silently "${__dest}"
+	$___process = FS-Copy-File "${__source}" "${__dest}"
+	if ($___process -ne 0) {
+		$null = I18N-Copy-Failed
+		return 1
+	}
+}
+
+
+## export library package
+$___process = FS-Is-Directory-Empty "${__output_lib_directory}"
+if ($___process -ne 0) {
+	$__dest = "${__output_directory}/lib${env:PROJECT_SKU}-C_any-any.tar.xz"
+
+	$null = I18N-Export "${__dest}"
+	$__current_path = Get-Location
+	$null = Set-Location -Path "${__output_lib_directory}"
+	$___process = TAR-Create-XZ "${__dest}" "."
+	$null = Set-Location -Path "${__current_path}"
+	$null = Remove-Variable -Name __current_path
+	if ($___process -ne 0) {
+		$null = I18N-Export-Failed
+		return 1
+	}
 }
 
 
@@ -363,7 +467,7 @@ foreach ($__line in $__placeholders) {
 
 
 	# build the file
-	$__file = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}\${__line}"
+	$__file = "${__output_directory}\${__line}"
 	$null = I18N-Build "${__line}"
 	$null = FS-Remove-Silently "${__file}"
 	$___process = FS-Touch-File "${__file}"
@@ -372,11 +476,6 @@ foreach ($__line in $__placeholders) {
 		return 1
 	}
 }
-
-
-
-
-# compose documentations
 
 
 

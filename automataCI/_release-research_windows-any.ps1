@@ -9,6 +9,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+. "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 
@@ -24,30 +25,37 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 
 
-function RELEASE-Run-PDF {
+function RELEASE-Run-RESEARCH {
 	param(
-		[string]$_target
+		[string]$__target
 	)
 
 
 	# validate input
-	$___process = FS-Is-Target-A-PDF "${_target}"
+	$___process = FS-Is-Target-A-PDF "${__target}"
 	if ($___process -ne 0) {
 		return 0
 	}
 
+	if ($($__target -replace "^.*${env:PROJECT_RESEARCH_IDENTIFIER}") -eq "${__target}") {
+		return 0 # not a research paper
+	}
+
 
 	# execute
-	$___dest = "PAPER.pdf"
-	$null = I18N-Publish "${___dest}"
-	$___dest = "${env:PROJECT_PATH_ROOT}\${___dest}"
-	if ($($_target -replace "^.*${env:PROJECT_RESEARCH_IDENTIFIER}") -ne "${_target}") {
-		## it's a research paper
-		$___process = FS-Copy-File "${_target}" "${___dest}"
+	$null = I18N-Publish "RESEARCH"
+	if ($(OS-Is-Run-Simulated) -ne 0) {
+		$__dest = "PAPER.pdf"
+		$null = I18N-Publish "${__dest}"
+		$__dest = "${env:PROJECT_PATH_ROOT}\${__dest}"
+		$___process = FS-Copy-File "${__target}" "${__dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Publish-Failed
 			return 1
 		}
+	} else {
+		# always simulate in case of error or mishaps before any point of no return
+		$null = I18N-Simulate-Publish "RESEARCH"
 	}
 
 

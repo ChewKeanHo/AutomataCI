@@ -200,7 +200,7 @@ function OS-Exec {
 
 function OS-Is-Run-Simulated {
 	# execute
-	if (-not ([string]::IsNullOrEmpty("${env:PROJECT_SIMULATE_RELEASE_REPO}"))) {
+	if (-not ([string]::IsNullOrEmpty("${env:PROJECT_SIMULATE_RUN}"))) {
 		return 0
 	}
 

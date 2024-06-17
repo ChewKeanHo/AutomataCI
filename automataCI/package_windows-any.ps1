@@ -23,6 +23,9 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\sync.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
+. "${env:LIBS_AUTOMATACI}\services\compilers\flatpak.ps1"
+. "${env:LIBS_AUTOMATACI}\services\publishers\homebrew.ps1"
+. "${env:LIBS_AUTOMATACI}\services\versioners\git.ps1"
 
 . "${env:LIBS_AUTOMATACI}\_package-changelog_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_package-citation_windows-any.ps1"
@@ -40,9 +43,58 @@ if ($___process -ne 0) {
 }
 
 
+if ($(STRINGS-Is-Empty "${env:PROJECT_HOMEBREW_URL}") -ne 0) {
+	$HOMEBREW_WORKSPACE = "packagers-homebrew-${env:PROJECT_SKU}"
+	$null = I18N-Setup "${HOMEBREW_WORKSPACE}"
+	$HOMEBREW_WORKSPACE = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${HOMEBREW_WORKSPACE}"
+	$___process = FS-Remake-Directory "${HOMEBREW_WORKSPACE}"
+	if ($___process -ne 0) {
+		$null = I18N-Setup-Failed
+		return 1
+	}
+}
+
+
+if ($(STRINGS-Is-Empty "${env:PROJECT_FLATPAK_URL}") -ne 0) {
+	$FLATPAK_REPO = "flatpak-repo"
+	$null = I18N-Setup "${FLATPAK_REPO}"
+	$FLATPAK_REPO = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${FLATPAK_REPO}"
+	$null = FS-Remove-Silently "$FLATPAK_REPO"
+
+	if (($(STRINGS-Is-Empty "${env:PROJECT_FLATPAK_REPO}") -ne 0) -and
+		($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_REPO}") -ne 0)) {
+		# version controlled repository supplied; AND
+		# single unified repository is not enabled
+		$null = FS-Make-Housing-Directory "$FLATPAK_REPO"
+		$___process = GIT-Clone-Repo `
+			"${env:PROJECT_PATH_ROOT}" `
+			"${env:PROJECT_PATH_TEMP}" `
+			"$(Get-Location)" `
+			"${env:PROJECT_FLATPAK_REPO}" `
+			"${env:PROJECT_SIMULATE_RUN}" `
+			"$(FS-Get-File "${env:FLATPAK_REPO}")" `
+			"${env:PROJECT_FLATPAK_REPO_BRANCH}"
+		if ($___process -ne 0) {
+			$null = I18N-Setup-Failed
+			return 1
+		}
+
+		if ($(STRINGS-Is-Empty "${env:PROJECT_FLATPAK_PATH}") -ne 0) {
+			$FLATPAK_REPO = "${FLATPAK_REPO}/${env:PROJECT_FLATPAK_PATH}"
+		}
+	}
+
+	$___process = FS-Make-Directory "$FLATPAK_REPO"
+	if ($___process -ne 0) {
+		$null = I18N-Setup-Failed
+		return 1
+	}
+}
+
+
 $FILE_CHANGELOG_MD = "${env:PROJECT_SKU}-CHANGELOG_${env:PROJECT_VERSION}.md"
 $FILE_CHANGELOG_MD = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${FILE_CHANGELOG_MD}"
-$FILE_CHANGELOG_DEB = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\deb\changelog.gz"
+$FILE_CHANGELOG_DEB = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-changelog\deb.gz"
 $___process = Package-Run-CHANGELOG "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
 if ($___process -ne 0) {
 	return 1
@@ -157,17 +209,18 @@ function SUBROUTINE-Package {
 
 # begin registering packagers
 if ($(FS-Is-Directory "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}") -eq 0) {
-foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}" `
-	| Select-Object -ExpandProperty FullName)) {
-	$___process = FS-Is-File "$file"
+foreach ($i in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_BUILD}")) {
+	$i = $i.FullName
+
+	$___process = FS-Is-File "$i"
 	if ($___process -ne 0) {
 		continue
 	}
 
 
 	# parse build candidate
-	$null = I18N-Detected "${file}"
-	$TARGET_FILENAME = Split-Path -Leaf $file
+	$null = I18N-Detected "${i}"
+	$TARGET_FILENAME = Split-Path -Leaf $i
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "\..*$"
 	$TARGET_OS = $TARGET_FILENAME -replace ".*_"
 	$TARGET_FILENAME = $TARGET_FILENAME -replace "_.*"
@@ -192,125 +245,204 @@ foreach ($file in (Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_P
 		}
 	}
 
-	$null = I18N-Sync-Register "$file"
-	$__common = "${DEST}|${file}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
+	$__common = "${DEST}|${i}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
 
-	$__log = "${__log_directory}\archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
+
+	# begin registrations
+	$null = I18N-Sync-Register "$i"
+
+	if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_ARCHIVE}") -ne 0) {
+		$__log = "archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+		$__log = "${__log_directory}\${__log}"
+		$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-ARCHIVE
 
 "@
-	if ($___process -ne 0) {
-		return 1
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
-	$__log = "${__log_directory}\cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
+	if ($(STRINGS-Is-Empty "${env:PROJECT_RUST}") -ne 0) {
+		$__log = "cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+		$__log = "${__log_directory}\${__log}"
+		$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-CARGO
 
 "@
-	if ($___process -ne 0) {
-		return 1
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
-	$__log = "${__log_directory}\chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
+	# NOTE: chocolatey only serve windows
+	if ($(STRINGS-Is-Empty "${env:PROJECT_CHOCOLATEY_URL}") -ne 0) {
+		switch ("${TARGET_OS}") {
+		{ $_ -in "any", "windows" } {
+			$__log = "chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+			$__log = "${__log_directory}\${__log}"
+			$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-CHOCOLATEY
 
 "@
-	if ($___process -ne 0) {
-		return 1
+			if ($___process -ne 0) {
+				return 1
+			}
+		} default {
+		}}
 	}
 
-	$__log = "${__log_directory}\deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
+	# NOTE: deb does not work in windows or mac
+	if ($(STRINGS-Is-Empty "${env:PROJECT_DEB_URL}") -ne 0) {
+		switch ("${TARGET_OS}") {
+		{ $_ -in "windows", "darwin" } {
+			$__log = "deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+			$__log = "${__log_directory}\${__log}"
+			$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE-Run-DEB
 
 "@
-	if ($___process -ne 0) {
-		return 1
+			if ($___process -ne 0) {
+				return 1
+			}
+		} default {
+		}}
 	}
 
-	$__log = "${__log_directory}\docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__serial_control}" @"
+	# NOTE: container only server windows and linux
+	if ($(STRINGS-Is-Empty "${env:PROJECT_CONTAINER_REGISTRY}") -ne 0) {
+		switch ("${TARGET_OS}") {
+		{ $_ -in "any", "linux", "windows" } {
+			$__log = "docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+			$__log = "${__log_directory}\${__log}"
+			$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__log}|PACKAGE-Run-DOCKER
 
 "@
-	if ($___process -ne 0) {
-		return 1
+			if ($___process -ne 0) {
+				return 1
+			}
+		} default {
+		}}
 	}
 
-	$__flatpak_path = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${env:PROJECT_PATH_RELEASE}\flatpak"
-	$__log = "${__log_directory}\flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__serial_control}" @"
-${__common}|${__flatpak_path}|${__log}|PACKAGE-Run-FLATPAK
+	# NOTE: flatpak only serve linux
+	$___process = FLATPAK-Is-Available
+	if (($___process -eq 0) -and
+		($(STRINGS-Is-Empty "${env:PROJECT_FLATPAK_URL}") -ne 0)) {
+		switch ("${TARGET_OS}") {
+		{ $_ -in "any", "linux" } {
+			$__log = "flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+			$__log = "${__log_directory}\${__log}"
+			$___process = FS-Append-File "${__serial_control}" @"
+${__common}|${FLATPAK_REPO}|${__log}|PACKAGE-Run-FLATPAK
 
 "@
-	if ($___process -ne 0) {
-		return 1
+			if ($___process -ne 0) {
+				return 1
+			}
+		} default {
+		}}
 	}
 
-	$__log = "${__log_directory}\homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
-${__common}|${__log}|PACKAGE-Run-HOMEBREW
+	# NOTE: homebrew only serve linux and mac
+	if ($(STRINGS-Is-Empty "${env:PROJECT_HOMEBREW_URL}") -ne 0) {
+		switch ("${TARGET_OS}") {
+		{ $_ -in "any", "darwin", "linux" } {
+			$__log = "homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+			$__log = "${__log_directory}\${__log}"
+			$___process = FS-Append-File "${__parallel_control}" @"
+${__common}|${HOMEBREW_WORKSPACE}|${__log}|PACKAGE-Run-HOMEBREW
 
 "@
-	if ($___process -ne 0) {
-		return 1
+			if ($___process -ne 0) {
+				return 1
+			}
+		} default {
+		}}
 	}
 
-	$__log = "${__log_directory}\ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
+	if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_IPK}") -ne 0) {
+		$__log = "ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+		$__log = "${__log_directory}\${__log}"
+		$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-IPK
 
 "@
-	if ($___process -ne 0) {
-		return 1
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
-	$__log = "${__log_directory}\lib_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
+	if (($(FS-Is-Target-A-Library "${i}") -eq 0) -and
+		($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_ARCHIVE}") -ne 0)) {
+		$__log = "lib_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+		$__log = "${__log_directory}\${__log}"
+		$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-LIB
 
 "@
-	if ($___process -ne 0) {
-		return 1
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
-	$__log = "${__log_directory}\msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__serial_control}" @"
+	# NOTE: MSI only works in windows
+	if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_MSI}") -ne 0) {
+		switch ("${TARGET_OS}") {
+		{ $_ -in "any", "windows" } {
+			$__log = "msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+			$__log = "${__log_directory}\${__log}"
+			$___process = FS-Append-File "${__serial_control}" @"
 ${__common}|${__log}|PACKAGE-Run-MSI
 
 "@
-	if ($___process -ne 0) {
-		return 1
+			if ($___process -ne 0) {
+				return 1
+			}
+		} default {
+		}}
 	}
 
-	$__log = "${__log_directory}\PDF_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
+	if ($(FS-Is-Target-A-PDF "${i}") -eq 0) {
+		$__log = "PDF_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+		$__log = "${__log_directory}\${__log}"
+		$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-PDF
 
 "@
-	if ($___process -ne 0) {
-		return 1
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
-	$__log = "${__log_directory}\pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
+	if ($(STRINGS-Is-Empty "${env:PROJECT_PYTHON}") -ne 0) {
+		$__log = "pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+		$__log = "${__log_directory}\${__log}"
+		$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-PYPI
 
 "@
-	if ($___process -ne 0) {
-		return 1
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
-	$__log = "${__log_directory}\rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-	$___process = FS-Append-File "${__parallel_control}" @"
+	# NOTE: RPM only serve linux
+	if ($(STRINGS-Is-Empty "${env:PROJECT_RPM_URL}") -ne 0) {
+		switch ("${TARGET_OS}") {
+		{ $_ -in "any", "linux" } {
+			$__log = "rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+			$__log = "${__log_directory}\${__log}"
+			$___process = FS-Append-File "${__parallel_control}" @"
 ${__common}|${__log}|PACKAGE-Run-RPM
 
 "@
-	if ($___process -ne 0) {
-		return 1
+			if ($___process -ne 0) {
+				return 1
+			}
+		} default {
+		}}
 	}
 }
 }
@@ -325,6 +457,28 @@ if ($___process -eq 0) {
 		"${__control_directory}"
 	if ($___process -ne 0) {
 		$null = I18N-Sync-Failed
+		return 1
+	}
+}
+
+
+if ($(STRINGS-Is-Empty "${env:PROJECT_HOMEBREW_URL}") -ne 0) {
+	$null = I18N-Newline
+	$null = I18N-Newline
+
+	$__dest = "${env:PROJECT_SKU}.rb"
+	$null = I18N-Export "${__dest}"
+	$__dest = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}\${__dest}"
+	$___process = HOMEBREW-Seal "${__dest}" `
+		"${env:PROJECT_SKU}-homebrew_${env:PROJECT_VERSION}_any-any.tar.xz" `
+		"${HOMEBREW_WORKSPACE}" `
+		"${env:PROJECT_SKU}" `
+		"${env:PROJECT_PITCH}" `
+		"${env:PROJECT_CONTACT_WEBSITE}" `
+		"${env:PROJECT_LICENSE}" `
+		"${env:PROJECT_HOMEBREW_URL}"
+	if ($___process -ne 0) {
+		$null = I18N-Export-Failed
 		return 1
 	}
 }

@@ -54,7 +54,7 @@ PACKAGE_Assemble_RPM_Content() {
         ##          whenever possible for avoiding conflicts with your OS native
         ##          system packages.
         _chroot="usr"
-        if [ ! "$(STRINGS_To_Lowercase "$PROJECT_DEBIAN_IS_NATIVE")" = "true" ]; then
+        if [ ! "$(STRINGS_To_Lowercase "$PROJECT_RPM_IS_NATIVE")" = "true" ]; then
                 _chroot="${_chroot}/local"
         fi
 
@@ -68,76 +68,76 @@ PACKAGE_Assemble_RPM_Content() {
                         return 10 # not applicable
                 elif [ $(FS_Is_Target_A_TARGZ "$_target") -eq 0 ]; then
                         # unpack library
-                        ___source="${PROJECT_SCOPE}/${PROJECT_SKU}"
-                        ___dest="${_directory}/BUILD/${___source}"
-                        ___target="${_chroot}/lib/${___source}"
+                        __source="${PROJECT_SCOPE}/${PROJECT_SKU}"
+                        __dest="${_directory}/BUILD/${__source}"
+                        __target="${_chroot}/lib"
 
-                        I18N_Assemble "$_target" "$___dest"
-                        FS_Make_Directory "$___dest"
-                        TAR_Extract_GZ "$___dest" "$_target"
+                        I18N_Assemble "$_target" "$__dest"
+                        FS_Make_Directory "$__dest"
+                        TAR_Extract_GZ "$__dest" "$_target"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
 
-                        RPM_Register "$_directory" "$___source" "$___target" "true"
+                        RPM_Register "$_directory" "$__source" "$__target" "true"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
                 elif [ $(FS_Is_Target_A_TARXZ "$_target") -eq 0 ]; then
                         # unpack library
-                        ___source="${PROJECT_SCOPE}/${PROJECT_SKU}"
-                        ___dest="${_directory}/BUILD/${___source}"
-                        ___target="${_chroot}/lib/${___source}"
+                        __source="${PROJECT_SCOPE}/${PROJECT_SKU}"
+                        __dest="${_directory}/BUILD/${__source}"
+                        __target="${_chroot}/lib"
 
-                        I18N_Assemble "$_target" "$___dest"
-                        FS_Make_Directory "$___dest"
-                        TAR_Extract_XZ "$___dest" "$_target"
+                        I18N_Assemble "$_target" "$__dest"
+                        FS_Make_Directory "$__dest"
+                        TAR_Extract_XZ "$__dest" "$_target"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
 
-                        RPM_Register "$_directory" "$___source" "$___target" "true"
+                        RPM_Register "$_directory" "$__source" "$__target" "true"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
                 elif [ $(FS_Is_Target_A_ZIP "$_target") -eq 0 ]; then
                         # unpack library
-                        ___source="${PROJECT_SCOPE}/${PROJECT_SKU}"
-                        ___dest="${_directory}/BUILD/${___source}"
-                        ___target="${_chroot}/lib/${___source}"
+                        __source="${PROJECT_SCOPE}/${PROJECT_SKU}"
+                        __dest="${_directory}/BUILD/${__source}"
+                        __target="${_chroot}/lib"
 
-                        I18N_Assemble "$_target" "$___dest"
-                        FS_Make_Directory "$___dest"
-                        ZIP_Extract "$___dest" "$_target"
+                        I18N_Assemble "$_target" "$__dest"
+                        FS_Make_Directory "$__dest"
+                        ZIP_Extract "$__dest" "$_target"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
 
-                        RPM_Register "$_directory" "$___source" "$___target" "true"
+                        RPM_Register "$_directory" "$__source" "$__target" "true"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
                 else
                         # copy library file
-                        ___source="$(FS_Get_File "$_target")"
-                        ___dest="${_directory}/BUILD/${___source}"
-                        ___target="${_chroot}/lib/${___source}"
+                        __source="$(FS_Get_File "$_target")"
+                        __dest="${_directory}/BUILD/${__source}"
+                        __target="${_chroot}/lib/${__source}"
 
-                        I18N_Assemble "$_target" "$___dest"
-                        FS_Make_Housing_Directory "$___dest"
-                        FS_Copy_File "$_target" "$___dest"
+                        I18N_Assemble "$_target" "$__dest"
+                        FS_Make_Housing_Directory "$__dest"
+                        FS_Copy_File "$_target" "$__dest"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
 
-                        RPM_Register "$_directory" "$___source" "$___target"
+                        RPM_Register "$_directory" "$__source" "$__target"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
@@ -162,19 +162,19 @@ PACKAGE_Assemble_RPM_Content() {
                 return 10 # not applicable
         else
                 # copy main program
-                ___source="$(FS_Get_File "$_target")"
-                ___dest="${_directory}/BUILD/${___source}"
-                ___target="${_chroot}/bin/${___source}"
+                __source="$(FS_Get_File "$_target")"
+                __dest="${_directory}/BUILD/${__source}"
+                __target="${_chroot}/bin/${PROJECT_SKU}"
 
-                I18N_Assemble "$_target" "$___dest"
-                FS_Make_Housing_Directory "$___dest"
-                FS_Copy_File "$_target" "$___dest"
+                I18N_Assemble "$_target" "$__dest"
+                FS_Make_Housing_Directory "$__dest"
+                FS_Copy_File "$_target" "$__dest"
                 if [ $? -ne 0 ]; then
                         I18N_Assemble_Failed
                         return 1
                 fi
 
-                RPM_Register "$_directory" "$___source" "$___target"
+                RPM_Register "$_directory" "$__source" "$__target"
                 if [ $? -ne 0 ]; then
                         I18N_Create_Failed
                         return 1
@@ -185,12 +185,12 @@ PACKAGE_Assemble_RPM_Content() {
 
 
         # NOTE: REQUIRED file
-        ___source="copyright"
-        ___dest="${_directory}/BUILD/${___source}"
-        ___target="${_chroot}/share/doc/${PROJECT_SCOPE}/${PROJECT_SKU}/${___source}"
-        I18N_Create "$___source"
+        __source="copyright"
+        __dest="${_directory}/BUILD/${__source}"
+        __target="${_chroot}/share/doc/${PROJECT_SCOPE}/${PROJECT_SKU}/${__source}"
+        I18N_Create "$__source"
         COPYRIGHT_Create \
-                "$___dest" \
+                "$__dest" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/deb-copyright" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
@@ -201,7 +201,7 @@ PACKAGE_Assemble_RPM_Content() {
                 return 1
         fi
 
-        RPM_Register "$_directory" "$___source" "$___target"
+        RPM_Register "$_directory" "$__source" "$__target"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
                 return 1
@@ -209,12 +209,13 @@ PACKAGE_Assemble_RPM_Content() {
 
 
         # NOTE: REQUIRED file
-        ___source="${PROJECT_SCOPE}-${PROJECT_SKU}.1"
-        ___dest="${_directory}/BUILD/${___source}"
-        ___target="${_chroot}/share/man/man1/${___source}"
-        I18N_Create "$___source"
+        __source="${PROJECT_SCOPE}-${PROJECT_SKU}.1"
+        __dest="${_directory}/BUILD/${__source}"
+        __source="${__source}.gz"
+        __target="${_chroot}/share/man/man1/${__source}"
+        I18N_Create "$__source"
         MANUAL_Create \
-                "$___dest" \
+                "$__dest" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
@@ -224,7 +225,7 @@ PACKAGE_Assemble_RPM_Content() {
                 return 1
         fi
 
-        RPM_Register "$_directory" "$___source" "$___target"
+        RPM_Register "$_directory" "$__source" "$__target"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
                 return 1
@@ -233,12 +234,25 @@ PACKAGE_Assemble_RPM_Content() {
 
         # NOTE: OPTIONAL (Comment to turn it off)
         I18N_Create "source.repo"
+        ___metalink=""
+        if [ $(STRINGS_Is_Empty "$PROJECT_RPM_FLAT_MODE") -ne 0 ]; then
+                # flat mode enabled
+                if [ $(STRINGS_Is_Empty "$PROJECT_RPM_METALINK") -eq 0 ]; then
+                        I18N_Create_Failed
+                        return 1
+                fi
+
+                ___metalink="${PROJECT_RPM_URL}/${PROJECT_RPM_METALINK}"
+        fi
+
         RPM_Create_Source_Repo \
-                "$PROJECT_SIMULATE_RELEASE_REPO" \
+                "$PROJECT_SIMULATE_RUN" \
                 "$_directory" \
                 "$PROJECT_GPG_ID" \
-                "$PROJECT_STATIC_URL" \
+                "$PROJECT_RPM_URL" \
+                "$___metalink" \
                 "$PROJECT_NAME" \
+                "$PROJECT_SCOPE" \
                 "$_gpg_keyring"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed

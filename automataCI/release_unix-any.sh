@@ -27,17 +27,17 @@ fi
 . "${LIBS_AUTOMATACI}/_release-cargo_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-changelog_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-checksum_unix-any.sh"
-. "${LIBS_AUTOMATACI}/_release-chocolatey_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-citation_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-deb_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-docker_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-flatpak_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-homebrew_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-lib_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-npm_unix-any.sh"
-. "${LIBS_AUTOMATACI}/_release-pdf_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-project_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-pypi_unix-any.sh"
+. "${LIBS_AUTOMATACI}/_release-research_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-rpm_unix-any.sh"
-. "${LIBS_AUTOMATACI}/_release-staticrepo_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_release-docsrepo_unix-any.sh"
 
 
@@ -54,8 +54,8 @@ __recipe="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/${PROJECT_PATH_CI}"
 __recipe="${__recipe}/release_unix-any.sh"
 FS_Is_File "$__recipe"
 if [ $? -eq 0 ]; then
-        I18N_Detected "${__recipe}"
-        I18N_Parse "${__recipe}"
+        I18N_Detected "$__recipe"
+        I18N_Parse "$__recipe"
         . "$__recipe"
         if [ $? -ne 0 ]; then
                 I18N_Parse_Failed
@@ -64,6 +64,15 @@ if [ $? -eq 0 ]; then
 fi
 
 
+
+
+# determine pathing variables
+PACKAGE_DIRECTORY="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+
+
+
+
+# initialize workspace and release job functions
 OS_Is_Command_Available "RELEASE_Run_Pre_Processor"
 if [ $? -eq 0 ]; then
         RELEASE_Run_Pre_Processor
@@ -73,87 +82,110 @@ if [ $? -eq 0 ]; then
 fi
 
 
-RELEASE_Setup_STATIC_REPO
+RELEASE_Setup_PROJECT # !! IMPORTANT !! - always the first
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-RELEASE_Setup_HOMEBREW
+RELEASE_Setup_DEB "$DEB_REPO"
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-RELEASE_Setup_CHOCOLATEY
+RELEASE_Setup_FLATPAK "$FLATPAK_REPO"
 if [ $? -ne 0 ]; then
         return 1
 fi
 
 
-STATIC_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_STATIC_REPO_DIRECTORY}"
-HOMEBREW_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_HOMEBREW_DIRECTORY}"
-CHOCOLATEY_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_RELEASE}/${PROJECT_CHOCOLATEY_DIRECTORY}"
-for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
+RELEASE_Setup_HOMEBREW "$HOMEBREW_REPO"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+RELEASE_Setup_RPM "$RPM_REPO"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+
+
+# scan through each product and run the release processing respectively
+for TARGET in "$PACKAGE_DIRECTORY"/*; do
         if [ "${TARGET%.asc*}" != "$TARGET" ]; then
-                continue
+                continue # it's a gpg cert
         fi
+
+        if [ "${TARGET%.gpg*}" != "$TARGET" ]; then
+                continue # it's a gpg keyfile or cert
+        fi
+
         I18N_Processing "$TARGET"
+
 
         RELEASE_Run_CARGO "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        RELEASE_Run_CHOCOLATEY "$TARGET" "$CHOCOLATEY_REPO"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
 
         RELEASE_Run_CITATION_CFF "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        RELEASE_Run_DEB "$TARGET" "$STATIC_REPO"
+
+        RELEASE_Run_DEB "$TARGET" "$DEB_REPO" "$DEB_REPO_DATA"
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
 
         RELEASE_Run_DOCKER "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        RELEASE_Run_LIBS "$TARGET"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
 
         RELEASE_Run_HOMEBREW "$TARGET" "$HOMEBREW_REPO"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
+
+        RELEASE_Run_LIBS "$TARGET"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
         RELEASE_Run_NPM "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        RELEASE_Run_PDF "$TARGET"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
 
         RELEASE_Run_PYPI "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        RELEASE_Run_RPM "$TARGET" "$STATIC_REPO"
+
+        RELEASE_Run_RESEARCH "$TARGET"
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
+
+        RELEASE_Run_RPM "$TARGET" "$RPM_REPO"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
 
         OS_Is_Command_Available "RELEASE_Run_Package_Processor"
         if [ $? -eq 0 ]; then
@@ -165,7 +197,16 @@ for TARGET in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"/*; do
 done
 
 
-RELEASE_Run_CHECKSUM "$STATIC_REPO"
+
+
+# run one-time directory-wide release processing functions
+RELEASE_Update_DEB "$DEB_REPO" "$DEB_REPO_DATA"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+RELEASE_Update_RPM "$RPM_REPO"
 if [ $? -ne 0 ]; then
         return 1
 fi
@@ -180,34 +221,54 @@ if [ $? -eq 0 ]; then
 fi
 
 
-if [ $(OS_Is_Run_Simulated) -eq 0 ]; then
-        I18N_Simulate_Conclude "STATIC REPO"
-        I18N_Simulate_Conclude "CHANGELOG"
-else
-        RELEASE_Conclude_STATIC_REPO
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
 
-        RELEASE_Conclude_HOMEBREW "$HOMEBREW_REPO"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
 
-        RELEASE_Conclude_CHOCOLATEY "$CHOCOLATEY_REPO"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
+# conclude the release
+RELEASE_Conclude_CHECKSUM "$PACKAGE_DIRECTORY" ## !! IMPORTANT !! - always the first
+if [ $? -ne 0 ]; then
+        return 1
+fi
 
-        RELEASE_Conclude_CHANGELOG
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
 
-        RELEASE_Conclude_DOCS
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
+RELEASE_Conclude_DEB "$DEB_REPO"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+RELEASE_Conclude_FLATPAK "$FLATPAK_REPO"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+RELEASE_Conclude_HOMEBREW "$HOMEBREW_REPO"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+RELEASE_Conclude_RPM "$RPM_REPO"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+RELEASE_Conclude_DOCS
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+RELEASE_Conclude_CHANGELOG
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+RELEASE_Conclude_PROJECT # !! IMPORTANT !! - always the last
+if [ $? -ne 0 ]; then
+        return 1
 fi
 
 

@@ -43,8 +43,13 @@ PACKAGE_Assemble_LIB_Content() {
 
 
         # execute
-        ## copy over known archived files
+        _workspace="packagers-lib-$(FS_Get_File "$_target")"
+        _workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${_workspace}"
+        FS_Remove_Silently "$_workspace"
+
+        __dest="${_workspace}/lib"
         if [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
+                # copy over - do not further modify its content anymore
                 __dest="lib${PROJECT_SKU}-NPM_${PROJECT_VERSION}_js-js.tgz"
                 __dest="${_directory}/${__dest}"
                 I18N_Copy "$_target" "$__dest"
@@ -56,67 +61,111 @@ PACKAGE_Assemble_LIB_Content() {
 
                 return 0
         elif [ $(FS_Is_Target_A_TARGZ "$_target") -eq 0 ]; then
-                __dest="lib${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${target_arch}.tar.gz"
-                __dest="${_directory}/${__dest}"
-                I18N_Copy "$_target" "$__dest"
-                FS_Copy_File "$_target" "$__dest"
+                # unpack library
+                I18N_Assemble "$_target" "$__dest"
+                FS_Make_Directory "$__dest"
+                TAR_Extract_GZ "$__dest" "$_target"
                 if [ $? -ne 0 ]; then
                         I18N_Copy_Failed
                         return 1
                 fi
-
-                return 0
         elif [ $(FS_Is_Target_A_TARXZ "$_target") -eq 0 ]; then
-                __dest="lib${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${target_arch}.tar.xz"
-                __dest="${_directory}/${__dest}"
-                I18N_Copy "$_target" "$__dest"
-                FS_Copy_File "$_target" "$__dest"
+                # unpack library
+                I18N_Assemble "$_target" "$__dest"
+                FS_Make_Directory "$__dest"
+                TAR_Extract_XZ "$__dest" "$_target"
                 if [ $? -ne 0 ]; then
                         I18N_Copy_Failed
                         return 1
                 fi
-
-                return 0
         elif [ $(FS_Is_Target_A_ZIP "$_target") -eq 0 ]; then
-                __dest="lib${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${target_arch}.zip"
-                __dest="${_directory}/${__dest}"
-                I18N_Copy "$_target" "$__dest"
+                # unpack library
+                I18N_Assemble "$_target" "$__dest"
+                FS_Make_Directory "$__dest"
+                ZIP_Extract "$__dest" "$_target"
+                if [ $? -ne 0 ]; then
+                        I18N_Assemble_Failed
+                        return 1
+                fi
+        else
+                # assumed it is a standalone library file
+                I18N_Assemble "$_target" "$__dest"
+                FS_Make_Directory "$__dest"
                 FS_Copy_File "$_target" "$__dest"
+                if [ $? -ne 0 ]; then
+                        I18N_Assemble_Failed
+                        return 1
+                fi
+        fi
+
+
+        # sanity check before proceeding
+        FS_Is_Directory_Empty "$__dest"
+        if [ $? -eq 0 ]; then
+                I18N_Assemble_Failed
+                return 1
+        fi
+
+
+        # copy README.md
+        __source="${PROJECT_PATH_ROOT}/${PROJECT_README}"
+        __dest="${_workspace}/${PROJECT_README}"
+        I18N_Assemble "$__source" "$__dest"
+        FS_Copy_File "$__source" "$__dest"
+        if [ $? -ne 0 ]; then
+                I18N_Assemble_Failed
+                return 1
+        fi
+
+
+        # copy user guide files
+        for __source in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/USER-GUIDES"*.pdf; do
+                FS_Is_Target_Exist "$__source"
+                if [ $? -ne 0 ]; then
+                        continue
+                fi
+
+                __dest="${_workspace}/$(FS_Get_File "$__source")"
+                I18N_Copy "$__source" "$__dest"
+                FS_Copy_File "$__source" "$__dest"
                 if [ $? -ne 0 ]; then
                         I18N_Copy_Failed
                         return 1
                 fi
+        done
 
-                return 0
-        fi
 
-        ## assume standalone library file - manually package into .tar.xz, .zip, and .nupkg
-        __workspace="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/package-${_target_name}"
-        FS_Remake_Directory "$__workspace"
-        I18N_Copy "$_target" "$__workspace"
-        FS_Copy_File "$_target" "$__workspace"
+        # copy license files
+        for __source in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/LICENSE"*.pdf; do
+                FS_Is_Target_Exist "$__source"
+                if [ $? -ne 0 ]; then
+                        continue
+                fi
+
+                __dest="${_workspace}/$(FS_Get_File "$__source")"
+                I18N_Copy "$__source" "$__dest"
+                FS_Copy_File "$__source" "$__dest"
+                if [ $? -ne 0 ]; then
+                        I18N_Copy_Failed
+                        return 1
+                fi
+        done
+
+
+        # assemble icon.png
+        __source="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/icons/icon-128x128.png"
+        __dest="${_workspace}/icon.png"
+        I18N_Assemble "$__source" "$__dest"
+        FS_Copy_File "$__source" "$__dest"
         if [ $? -ne 0 ]; then
-                I18N_Copy_Failed
+                I18N_Assemble_Failed
                 return 1
         fi
 
-        __source="${PROJECT_PATH_ROOT}/${PROJECT_README}"
-        I18N_Copy "$__source" "$__workspace"
-        FS_Copy_File "$__source" "$__workspace"
-        if [ $? -ne 0 ]; then
-                I18N_Copy_Failed
-                return 1
-        fi
 
-        __source="${PROJECT_PATH_ROOT}/${PROJECT_LICENSE_FILE}"
-        I18N_Copy "$__source" "$__workspace"
-        FS_Copy_File "$__source" "$__workspace"
-        if [ $? -ne 0 ]; then
-                I18N_Copy_Failed
-                return 1
-        fi
+        # begin packaging
+        __current_path="$PWD" && cd "$_workspace"
 
-        __current_path="$PWD" && cd "$__workspace"
         ## package tar.xz
         __dest="lib${PROJECT_SKU}_${PROJECT_VERSION}_${_target_os}-${_target_arch}.tar.xz"
         I18N_Create_Package "$__dest"
@@ -140,14 +189,14 @@ PACKAGE_Assemble_LIB_Content() {
         fi
 
         ## package nupkg
-        __dest="./Package.nuspec"
         __acceptance="false"
         if [ $(STRINGS_To_Lowercase "$PROJECT_LICENSE_ACCEPTANCE_REQUIRED") = "true" ]; then
                 __acceptance="true"
         fi
 
+        __dest="lib${PROJECT_SKU}.nuspec"
         I18N_Create "$__dest"
-        FS_Write_File "$__dest" "\
+        FS_Write_File "./${__dest}" "\
 <?xml version='1.0' encoding='utf-8'?>
 <package xmlns='http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'>
         <metadata>
@@ -161,7 +210,13 @@ PACKAGE_Assemble_LIB_Content() {
                 <license>${PROJECT_LICENSE}</license>
                 <requireLicenseAcceptance>${__acceptance}</requireLicenseAcceptance>
                 <readme>${PROJECT_README}</readme>
+                <icon>icon.png</icon>
         </metadata>
+        <files>
+                <file src=\"${PROJECT_README}\" target=\"${PROJECT_README}\" />
+                <file src=\"icon.png\" target=\"icon.png\" />
+                <file src=\"lib\\\\**\" target=\"lib\" />
+        </files>
 </package>
 "
         if [ $? -ne 0 ]; then

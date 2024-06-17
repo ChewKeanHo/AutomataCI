@@ -17,7 +17,7 @@
 
 
 
-MD5_Checksum_From_File() {
+MD5_Create_From_File() {
         #___target="$1"
 
 
@@ -35,27 +35,28 @@ MD5_Checksum_From_File() {
         # execute
         OS_Is_Command_Available "md5sum"
         if [ $? -eq 0 ]; then
-                md5sum "$1"
+                ___value="$(md5sum "$1")"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
-
-                return 0
         fi
 
         OS_Is_Command_Available "md5"
         if [ $? -eq 0 ]; then
-                md5 "$1"
+                ___value="$(md5 "$1")"
                 if [ $? -ne 0 ]; then
                         return 1
                 fi
+        fi
 
-                return 0
+        if [ $(STRINGS_Is_Empty "$___value") -eq 0 ]; then
+                return 1
         fi
 
 
         # report status
-        return 1
+        printf -- "%s" "${___value%% *}"
+        return 0
 }
 
 

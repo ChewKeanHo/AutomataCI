@@ -72,7 +72,7 @@ PACKAGE_Run_IPK() {
         I18N_Create_Package "IPK"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}.ipk"
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/ipk_${_src}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-ipk-${_src}"
         I18N_Remake "$_src"
         FS_Remake_Directory "${_src}"
         if [ $? -ne 0 ]; then

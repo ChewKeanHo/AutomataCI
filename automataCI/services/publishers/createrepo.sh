@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -38,50 +38,40 @@ CREATEREPO_Is_Available() {
 
 
 CREATEREPO_Publish() {
-        ___target="$1"
-        ___directory="$2"
+        #___repo_directory="$1"
 
 
         # validate input
-        if [ $(STRINGS_Is_Empty "$___target") -eq 0 ] ||
-                [ $(STRINGS_Is_Empty "$__directory") -eq 0 ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
                 return 1
         fi
 
-        FS_Is_Directory "$___target"
-        if [ $? -eq 0 ]; then
-                return 1
-        fi
-
-        FS_Is_Directory "$___directory"
+        FS_Is_Directory "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        FS_Copy_File "$__target" "$__directory"
-        if [ $? -ne 0 ]; then
-                return 1
-        fi
-
         OS_Is_Command_Available "createrepo"
         if [ $? -eq 0 ]; then
-                createrepo --update "$__directory"
-                if [ $? -eq 0 ]; then
-                        return 0
+                createrepo --update "$1"
+                if [ $? -ne 0 ]; then
+                        return 1
                 fi
+
+                return 0
         fi
 
         OS_Is_Command_Available "createrepo_c"
         if [ $? -eq 0 ]; then
-                createrepo_c --update "$__directory"
-                if [ $? -eq 0 ]; then
-                        return 0
+                createrepo_c --update "$1"
+                if [ $? -ne 0 ]; then
+                        return 1
                 fi
         fi
 
 
         # report status
-        return 1
+        return 0
 }

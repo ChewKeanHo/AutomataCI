@@ -24,6 +24,9 @@ fi
 . "${LIBS_AUTOMATACI}/services/io/strings.sh"
 . "${LIBS_AUTOMATACI}/services/io/sync.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
+. "${LIBS_AUTOMATACI}/services/compilers/flatpak.sh"
+. "${LIBS_AUTOMATACI}/services/publishers/homebrew.sh"
+. "${LIBS_AUTOMATACI}/services/versioners/git.sh"
 
 . "${LIBS_AUTOMATACI}/_package-archive_unix-any.sh"
 . "${LIBS_AUTOMATACI}/_package-cargo_unix-any.sh"
@@ -60,13 +63,63 @@ if [ $? -ne 0 ]; then
 fi
 
 
+if [ "$(STRINGS_Is_Empty "$PROJECT_HOMEBREW_URL")" -ne 0 ]; then
+        HOMEBREW_WORKSPACE="packagers-homebrew-${PROJECT_SKU}"
+        I18N_Setup "$HOMEBREW_WORKSPACE"
+        HOMEBREW_WORKSPACE="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${HOMEBREW_WORKSPACE}"
+        FS_Remake_Directory "${HOMEBREW_WORKSPACE}"
+        if [ $? -ne 0 ]; then
+                I18N_Setup_Failed
+                return 1
+        fi
+fi
+
+
+if [ "$(STRINGS_Is_Empty "$PROJECT_FLATPAK_URL")" -ne 0 ]; then
+        FLATPAK_REPO="flatpak-repo"
+        I18N_Setup "$FLATPAK_REPO"
+        FLATPAK_REPO="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${FLATPAK_REPO}"
+        FS_Remove_Silently "$FLATPAK_REPO"
+
+        if [ $(STRINGS_Is_Empty "$PROJECT_FLATPAK_REPO") -ne 0 ] &&
+                [ $(STRINGS_Is_Empty "$PROJECT_RELEASE_REPO") -eq 0 ]; then
+                # version controlled repository supplied; AND
+                # single unified repository is not enabled
+                FS_Make_Housing_Directory "$FLATPAK_REPO"
+                GIT_Clone_Repo \
+                        "$PROJECT_PATH_ROOT" \
+                        "$PROJECT_PATH_TEMP" \
+                        "$PWD" \
+                        "$PROJECT_FLATPAK_REPO" \
+                        "$PROJECT_SIMULATE_RUN" \
+                        "$(FS_Get_File "$FLATPAK_REPO")" \
+                        "$PROJECT_FLATPAK_REPO_BRANCH"
+                if [ $? -ne 0 ]; then
+                        I18N_Setup_Failed
+                        return 1
+                fi
+
+                if [ $(STRINGS_Is_Empty "$PROJECT_FLATPAK_PATH") -ne 0 ]; then
+                        FLATPAK_REPO="${FLATPAK_REPO}/${PROJECT_FLATPAK_PATH}"
+                fi
+        fi
+
+        FS_Make_Directory "$FLATPAK_REPO"
+        if [ $? -ne 0 ]; then
+                I18N_Setup_Failed
+                return 1
+        fi
+fi
+
+
 FILE_CHANGELOG_MD="${PROJECT_SKU}-CHANGELOG_${PROJECT_VERSION}.md"
 FILE_CHANGELOG_MD="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${FILE_CHANGELOG_MD}"
-FILE_CHANGELOG_DEB="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb/changelog.gz"
+FILE_CHANGELOG_DEB="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-changelog/deb.gz"
 PACKAGE_Run_CHANGELOG "$FILE_CHANGELOG_MD" "$FILE_CHANGELOG_DEB"
 if [ $? -ne 0 ]; then
         return 1
 fi
+
 
 FILE_CITATION_CFF="${PROJECT_SKU}-CITATION_${PROJECT_VERSION}.cff"
 FILE_CITATION_CFF="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${FILE_CITATION_CFF}"
@@ -177,112 +230,205 @@ for i in "${PROJECT_PATH_ROOT}/${PROJECT_PATH_BUILD}"/*; do
                 fi
         fi
 
-        I18N_Sync_Register "$i"
         __common="${DEST}|${i}|${TARGET_FILENAME}|${TARGET_OS}|${TARGET_ARCH}"
 
-        __log="${__log_directory}/archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
+
+        # begin registrations
+        I18N_Sync_Register "$i"
+
+        if [ $(STRINGS_Is_Empty "$PROJECT_RELEASE_ARCHIVE") -ne 0 ]; then
+                __log="archive_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                __log="${__log_directory}/${__log}"
+                FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_ARCHIVE
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
-        __log="${__log_directory}/cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
+        if [ $(STRINGS_Is_Empty "$PROJECT_RUST") -ne 0 ]; then
+                __log="cargo_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                __log="${__log_directory}/${__log}"
+                FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_CARGO
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
-        __log="${__log_directory}/chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
+        # NOTE: chocolatey only serve windows
+        if [ $(STRINGS_Is_Empty "$PROJECT_CHOCOLATEY_URL") -ne 0 ]; then
+                case "$TARGET_OS" in
+                any|windows)
+                        __log="chocolatey_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                        __log="${__log_directory}/${__log}"
+                        FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_CHOCOLATEY
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                        ;;
+                *)
+                        ;;
+                esac
         fi
 
-        __log="${__log_directory}/deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
+        # NOTE: deb does not work in windows or mac
+        if [ $(STRINGS_Is_Empty "$PROJECT_DEB_URL") -ne 0 ]; then
+                case "$TARGET_OS" in
+                windows|darwin)
+                        ;;
+                *)
+                        __log="deb_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                        __log="${__log_directory}/${__log}"
+                        FS_Append_File "$__parallel_control" "\
 ${__common}|${FILE_CHANGELOG_DEB}|${__log}|PACKAGE_Run_DEB
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                        ;;
+                esac
         fi
 
-        __log="${__log_directory}/docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__serial_control" "\
+        # NOTE: container only serve windows and linux
+        if [ $(STRINGS_Is_Empty "$PROJECT_CONTAINER_REGISTRY") -ne 0 ]; then
+                case "$TARGET_OS" in
+                any|linux|windows)
+                        __log="docker_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                        __log="${__log_directory}/${__log}"
+                        FS_Append_File "$__serial_control" "\
 ${__common}|${__log}|PACKAGE_Run_DOCKER
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                        ;;
+                *)
+                        ;;
+                esac
         fi
 
-        __flatpak_path="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${PROJECT_PATH_RELEASE}/flatpak"
-        __log="${__log_directory}/flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__serial_control" "\
-${__common}|${__flatpak_path}|${__log}|PACKAGE_Run_FLATPAK
+        # NOTE: flatpak only serve linux
+        FLATPAK_Is_Available
+        if [ $? -eq 0 ] && [ $(STRINGS_Is_Empty "$PROJECT_FLATPAK_URL") -ne 0 ]; then
+                case "$TARGET_OS" in
+                any|linux)
+                        __log="flatpak_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                        __log="${__log_directory}/${__log}"
+                        FS_Append_File "$__serial_control" "\
+${__common}|${FLATPAK_REPO}|${__log}|PACKAGE_Run_FLATPAK
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                        ;;
+                *)
+                        ;;
+                esac
         fi
 
-        __log="${__log_directory}/homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
-${__common}|${__log}|PACKAGE_Run_HOMEBREW
+        # NOTE: homebrew only serve linux and mac
+        if [ $(STRINGS_Is_Empty "$PROJECT_HOMEBREW_URL") -ne 0 ]; then
+                case "$TARGET_OS" in
+                any|darwin|linux)
+                        __log="homebrew_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                        __log="${__log_directory}/${__log}"
+                        FS_Append_File "$__parallel_control" "\
+${__common}|${HOMEBREW_WORKSPACE}|${__log}|PACKAGE_Run_HOMEBREW
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                        ;;
+                *)
+                        ;;
+                esac
         fi
 
-        __log="${__log_directory}/ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
+        if [ $(STRINGS_Is_Empty "$PROJECT_RELEASE_IPK") -ne 0 ]; then
+                __log="ipk_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                __log="${__log_directory}/${__log}"
+                FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_IPK
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
-        __log="${__log_directory}/lib_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
+        if [ $(FS_Is_Target_A_Library "$i") -eq 0 ] &&
+                [ $(STRINGS_Is_Empty "$PROJECT_RELEASE_ARCHIVE") -ne 0 ]; then
+                __log="lib_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                __log="${__log_directory}/${__log}"
+                FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_LIB
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
-        __log="${__log_directory}/msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__serial_control" "\
+        # NOTE: MSI only works in windows
+        if [ $(STRINGS_Is_Empty "$PROJECT_RELEASE_MSI") -ne 0 ]; then
+                case "$TARGET_OS" in
+                any|windows)
+                        __log="msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                        __log="${__log_directory}/${__log}"
+                        FS_Append_File "$__serial_control" "\
 ${__common}|${__log}|PACKAGE_Run_MSI
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                        ;;
+                *)
+                        ;;
+                esac
+
         fi
 
-        __log="${__log_directory}/pdf_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
+        if [ $(FS_Is_Target_A_PDF "$i") -eq 0 ]; then
+                __log="pdf_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                __log="${__log_directory}/${__log}"
+                FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_PDF
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
-        __log="${__log_directory}/pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
+        if [ $(STRINGS_Is_Empty "$PROJECT_PYTHON") -ne 0 ]; then
+                __log="pypi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                __log="${__log_directory}/${__log}"
+                FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_PYPI
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
-        __log="${__log_directory}/rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
-        FS_Append_File "$__parallel_control" "\
+        # NOTE: RPM only serve linux
+        if [ $(STRINGS_Is_Empty "$PROJECT_RPM_URL") -ne 0 ]; then
+                case "$TARGET_OS" in
+                any|linux)
+                        __log="rpm_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
+                        __log="${__log_directory}/${__log}"
+                        FS_Append_File "$__parallel_control" "\
 ${__common}|${__log}|PACKAGE_Run_RPM
 "
-        if [ $? -ne 0 ]; then
-                return 1
+                        if [ $? -ne 0 ]; then
+                                return 1
+                        fi
+                        ;;
+                *)
+                        ;;
+                esac
         fi
 done
 fi
@@ -294,6 +440,28 @@ if [ $? -eq 0 ]; then
         SYNC_Exec_Parallel "SUBROUTINE_Package" "$__parallel_control"
         if [ $? -ne 0 ]; then
                 I18N_Sync_Failed
+                return 1
+        fi
+fi
+
+
+if [ $(STRINGS_Is_Empty "$PROJECT_HOMEBREW_URL") -ne 0 ]; then
+        I18N_Newline
+        I18N_Newline
+
+        __dest="${PROJECT_SKU}.rb"
+        I18N_Export "$__dest"
+        __dest="${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}/${__dest}"
+        HOMEBREW_Seal "$__dest" \
+                "${PROJECT_SKU}-homebrew_${PROJECT_VERSION}_any-any.tar.xz" \
+                "$HOMEBREW_WORKSPACE" \
+                "$PROJECT_SKU" \
+                "$PROJECT_PITCH" \
+                "$PROJECT_CONTACT_WEBSITE" \
+                "$PROJECT_LICENSE" \
+                "$PROJECT_HOMEBREW_URL"
+        if [ $? -ne 0 ];then
+                I18N_Export_Failed
                 return 1
         fi
 fi

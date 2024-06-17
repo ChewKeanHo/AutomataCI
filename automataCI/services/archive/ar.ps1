@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -11,6 +11,7 @@
 # under the License.
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 
 
 
@@ -51,6 +52,37 @@ function AR-Create {
 
 	# execute
 	$___process = OS-Exec "ar" "cr ${___name} ${___list}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# report status
+	return 0
+}
+
+
+
+
+function AR-Extract {
+	param (
+		[string]$___file
+	)
+
+
+	# validate input
+	if ($(STRINGS-Is-Empty "${___file}") -eq 0) {
+		return 1
+	}
+
+	$___process = AR-Is-Available
+	if ($___process -ne 0) {
+		return 1
+	}
+
+
+	# execute
+	$___process = OS-Exec "ar" "-x `"${___file}`""
 	if ($___process -ne 0) {
 		return 1
 	}

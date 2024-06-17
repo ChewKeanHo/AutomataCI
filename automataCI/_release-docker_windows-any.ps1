@@ -9,8 +9,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
 . "${env:LIBS_AUTOMATACI}\services\io\os.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\fs.ps1"
+. "${env:LIBS_AUTOMATACI}\services\io\strings.ps1"
 . "${env:LIBS_AUTOMATACI}\services\i18n\translations.ps1"
 . "${env:LIBS_AUTOMATACI}\services\compilers\docker.ps1"
 
@@ -28,15 +29,18 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 function RELEASE-Run-DOCKER {
 	param(
-		[string]$_target,
-		[string]$_directory
+		[string]$__target
 	)
 
 
 	# validate input
-	$___process = DOCKER-Is-Valid "${_target}"
+	$___process = DOCKER-Is-Valid "${__target}"
 	if ($___process -ne 0) {
 		return 0
+	}
+
+	if ($(STRINGS-Is-Empty "${env:PROJECT_CONTAINER_REGISTRY}") -eq 0) {
+		return 0 # disabled explicitly
 	}
 
 	$null = I18N-Check-Availability "DOCKER"
@@ -49,17 +53,18 @@ function RELEASE-Run-DOCKER {
 
 	# execute
 	$null = I18N-Publish "DOCKER"
-	if ($(OS-Is-Run-Simulated) -eq 0) {
-		$null = I18N-Simulate-Publish "DOCKER"
-	} else {
-		$___process = DOCKER-Release "${_target}" "${env:PROJECT_VERSION}"
+	if ($(OS-Is-Run-Simulated) -ne 0) {
+		$___process = DOCKER-Release "${__target}" "${env:PROJECT_VERSION}"
 		if ($___process -ne 0) {
 			$null = I18N-Publish-Failed
 			return 1
 		}
 
-		$null = I18N-Clean "${_target}"
-		$null = FS-Remove-Silently "${_target}"
+		$null = I18N-Clean "${__target}"
+		$null = FS-Remove-Silently "${__target}"
+	} else {
+		# always simulate in case of error or mishaps before any point of no return
+		$null = I18N-Simulate-Publish "DOCKER"
 	}
 
 

@@ -19,7 +19,7 @@
 
 # initialize
 if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
-	Write-Error "[ ERROR ] - Please run from automataCI/ci.sh.ps1 instead!`n"
+	Write-Error "[ ERROR ] - Please run from automataCI\ci.sh.ps1 instead!`n"
 	return
 }
 
@@ -39,7 +39,7 @@ function PACKAGE-Run-CITATION {
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\CITATIONS.yml" `
 		"${env:PROJECT_CITATION}" `
 		"${env:PROJECT_CITATION_TYPE}" `
-		"$(TIME-Format-ISO8601-Date "$(TIME-Now)")" `
+		"$(TIME-Format-Date-ISO8601 "$(TIME-Now)")" `
 		"${env:PROJECT_NAME}" `
 		"${env:PROJECT_VERSION}" `
 		"${env:PROJECT_LICENSE}" `

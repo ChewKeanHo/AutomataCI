@@ -35,7 +35,6 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 . "${env:LIBS_AUTOMATACI}\services\publishers\chocolatey.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\dotnet.ps1"
 . "${env:LIBS_AUTOMATACI}\services\publishers\github.ps1"
-. "${env:LIBS_AUTOMATACI}\services\publishers\reprepro.ps1"
 
 
 
@@ -85,13 +84,6 @@ if ($(APPIMAGE-Setup) -ne 0) {
 
 $null = I18N-Install "MSI (WIX)"
 if ($(MSI-Setup) -ne 0) {
-	$null = I18N-Install-Failed
-	return 1
-}
-
-
-$null = I18N-Install "REPREPRO"
-if ($(REPREPRO-Setup) -ne 0) {
 	$null = I18N-Install-Failed
 	return 1
 }

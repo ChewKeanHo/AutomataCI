@@ -3,12 +3,17 @@
 # Step to do:
 # (1) List all the source codes for compilation in the following patterns:
 #           [OS]-[ARCH] relative/path/to/code.[TYPE]
-#     Example:
+#     Example (1):
 #           any-any main.c
 #           linux-amd64 fx1_linux-amd64.c
 #           linux-amd64 fx2_linux-amd64.o
-#           linux-arm64 fx1_linux-amd64.c
-#           linux-arm64 fx2_linux-amd64.o
+#           linux-amd64 lib1_linux-amd64.a
+#
+#     Example (2):
+#           any-any main.c
+#           linux-arm64 fx1_linux-arm64.c
+#           linux-arm64 fx2_linux-arm64.o
+#           linux-arm64 lib1_linux-arm64.a
 #
 # (2) The leading platform tag is to tell AutomataCI when a source is compatible
 #     with a target build during cross-compilation. Use the value 'any' to
@@ -18,4 +23,4 @@
 # (3) The list also accepts pre-built library object files (.o extension).
 #     AutomataCI will register it for linking only and copy it into the
 #     workspace.
-any-any libs/sample/greeter_any-any.c
+any-any libs/greeters/Vanilla.c

@@ -39,14 +39,17 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 	if ($(FS-Is-Target-A-Source "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
-		$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}\"
-		$___process = FS-Is-Directory "${___source}"
+		$__source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_DOCS}"
+		$__dest = "${_directory}\docs"
+
+		$___process = FS-Is-Directory "${__source}"
 		if ($___process -ne 0) {
 			return 10 # not applicable
 		}
 
-		$null = I18N-Assemble "${___source}" "${_directory}"
-		$___process = FS-Copy-All "${___source}" "${_directory}"
+		$null = I18N-Assemble "${__source}" "${__dest}"
+		$null = FS-Make-Directory "${__dest}"
+		$___process = FS-Copy-All "${__source}" "${__dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
@@ -56,18 +59,22 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 	} elseif ($(FS-Is-Target-A-WASM-JS "${_target}") -eq 0) {
 		return 10 # handled by wasm instead
 	} elseif ($(FS-Is-Target-A-WASM "${_target}") -eq 0) {
-		$null = I18N-Assemble "${_target}" "${_directory}"
-		$___process = FS-Copy-File "${_target}" "${_directory}"
+		$__dest = "${_directory}\assets\$(FS-Get-File "${_target}")"
+
+		$null = I18N-Assemble "${_target}" "${__dest}"
+		$null = FS-Make-Directory "${__dest}"
+		$___process = FS-Copy-File "${_target}" "${__dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
 		}
 
-		$___source = "$(FS-Extension-Remove "${_target}" ".wasm").js"
-		$___process = FS-Is-File "${___source}"
+		$__source = "$(FS-Extension-Remove "${_target}" ".wasm").js"
+		$___process = FS-Is-File "${__source}"
 		if ($___process -eq 0) {
-			$null = I18N-Assemble "${___source}" "${_directory}"
-			$___process = FS-Copy-File "${___source}" "${_directory}"
+			$__dest = "${__dest}\$(FS-Get-File "${__source}")"
+			$null = I18N-Assemble "${__source}" "${__dest}"
+			$___process = FS-Copy-File "${__source}" "${__dest}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
@@ -84,8 +91,14 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 	} elseif ($(FS-Is-Target-A-PDF "${_target}") -eq 0) {
 		return 10 # not applicable
 	} else {
-		$null = I18N-Assemble "${_target}" "${_directory}"
-		$___process = FS-Copy-File "${_target}" "${_directory}"
+		$__dest = "${_directory}\bin\${env:PROJECT_SKU}"
+		if ($_target_os -eq "windows") {
+			$__dest = "${__dest}.exe"
+		}
+
+		$null = I18N-Assemble "${_target}" "${__dest}"
+		$null = FS-Make-Housing-Directory "${__dest}"
+		$___process = FS-Copy-File "${_target}" "${__dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
@@ -94,22 +107,30 @@ function PACKAGE-Assemble-ARCHIVE-Content {
 
 
 	# copy user guide
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\USER-GUIDES_en.pdf"
-	$null = I18N-Assemble "${___source}" "${_directory}"
-	$___process = FS-Copy-File "${___source}" "${_directory}"
-	if ($___process -ne 0) {
-		$null = I18N-Assemble-Failed
-		return 1
+	Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs" `
+	| Where-Object { ($_.Name -like "USER-GUIDES*.pdf") } `
+	| ForEach-Object { $__source = $_.FullName
+		$__dest = "${_directory}\$(FS-Get-File "${__source}")"
+		$null = I18N-Assemble "${__source}" "${__dest}"
+		$___process = FS-Copy-File "${__source}" "${__dest}"
+		if ($___process -ne 0) {
+			$null = I18N-Assemble-Failed
+			return 1
+		}
 	}
 
 
 	# copy license file
-	$___source = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses\LICENSE_en.pdf"
-	$null = I18N-Assemble "${___source}" "${_directory}"
-	$___process = FS-Copy-File "${___source}" "${_directory}"
-	if ($___process -ne 0) {
-		$null = I18N-Assemble-Failed
-		return 1
+	Get-ChildItem -Path "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\licenses" `
+	| Where-Object { ($_.Name -like "LICENSE*.pdf") } `
+	| ForEach-Object { $__source = $_.FullName
+		$__dest = "${_directory}\$(FS-Get-File "${__source}")"
+		$null = I18N-Assemble "${__source}" "${__dest}"
+		$___process = FS-Copy-File "${__source}" "${__dest}"
+		if ($___process -ne 0) {
+			$null = I18N-Assemble-Failed
+			return 1
+		}
 	}
 
 

@@ -57,10 +57,10 @@ function PACKAGE-Run-RPM {
 		return 0
 	}}
 
-	$null = I18N-Check-Availability "MANUAL DOCS"
+	$null = I18N-Check-Availability "MANUAL"
 	$___process = MANUAL-Is-Available
 	if ($___process -ne 0) {
-		$null = I18N-Check-Failed "MANUAL DOCS"
+		$null = I18N-Check-Failed "MANUAL"
 		return 1
 	}
 
@@ -68,7 +68,7 @@ function PACKAGE-Run-RPM {
 	# prepare workspace and required values
 	$null = I18N-Create-Package "RPM"
 	$_src = "${_target_filename}_${_target_os}-${_target_arch}"
-	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\rpm_${_src}"
+	$_src = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\packagers-rpm-${_src}"
 	$null = I18N-Remake "${_src}"
 	$___process = FS-Remake-Directory "${_src}"
 	if ($___process -ne 0) {

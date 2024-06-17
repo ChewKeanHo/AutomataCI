@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -38,14 +38,12 @@ function CREATEREPO-Is-Available {
 
 function CREATEREPO-Publish {
 	param (
-		[string]$___target,
 		[string]$___directory
 	)
 
 
 	# validate input
-	if (($(STRINGS-Is-Empty "${___target}") -eq 0) -or
-		($(STRINGS-Is-Empty "${___directory}") -eq 0)) {
+	if ($(STRINGS-Is-Empty "${___target}") -eq 0) {
 		return 1
 	}
 
@@ -54,18 +52,8 @@ function CREATEREPO-Publish {
 		return 1
 	}
 
-	$___process = FS-Is-Directory "${___directory}"
-	if ($___process -ne 0) {
-		return 1
-	}
-
 
 	# execute
-	$___process = FS-Copy-File "${___target}" "${___directory}"
-	if ($___process -ne 0) {
-		return 1
-	}
-
 	$___process = OS-Is-Command-Available "createrepo"
 	if ($___process -eq 0) {
 		$___process = OS-Exec "createrepo" "--update ${___directory}"

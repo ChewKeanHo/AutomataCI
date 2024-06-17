@@ -67,8 +67,8 @@ PACKAGE_Assemble_DEB_Content() {
         ##      (2) please avoid: usr/, usr/{TYPE}/, usr/bin/, & usr/lib{TYPE}/
         ##          whenever possible for avoiding conflicts with your OS native
         ##          system packages.
-        _chroot="${_directory}/data/usr/"
-        if [ ! "$(STRINGS_To_Lowercase "$PROJECT_DEBIAN_IS_NATIVE")" = "true" ]; then
+        _chroot="${_directory}/data/usr"
+        if [ ! "$(STRINGS_To_Lowercase "$PROJECT_DEB_IS_NATIVE")" = "true" ]; then
                 _chroot="${_chroot}/local"
         fi
 
@@ -79,42 +79,42 @@ PACKAGE_Assemble_DEB_Content() {
         elif [ $(FS_Is_Target_A_Docs "$_target") -eq 0 ]; then
                 return 10 # not applicable
         elif [ $(FS_Is_Target_A_Library "$_target") -eq 0 ]; then
-                ___dest="${_chroot}/lib/${PROJECT_SCOPE}/${PROJECT_SKU}"
+                __dest="${_chroot}/lib/${PROJECT_SCOPE}/${PROJECT_SKU}"
 
                 if [ $(FS_Is_Target_A_NPM "$_target") -eq 0 ]; then
                         return 10 # not applicable
                 elif [ $(FS_Is_Target_A_TARGZ "$_target") -eq 0 ]; then
                         # unpack library
-                        I18N_Assemble "$_target" "$___dest"
-                        FS_Make_Directory "$___dest"
-                        TAR_Extract_GZ "$___dest" "$_target"
+                        I18N_Assemble "$_target" "$__dest"
+                        FS_Make_Directory "$__dest"
+                        TAR_Extract_GZ "$__dest" "$_target"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
                 elif [ $(FS_Is_Target_A_TARXZ "$_target") -eq 0 ]; then
                         # unpack library
-                        I18N_Assemble "$_target" "$___dest"
-                        FS_Make_Directory "$___dest"
-                        TAR_Extract_XZ "$___dest" "$_target"
+                        I18N_Assemble "$_target" "$__dest"
+                        FS_Make_Directory "$__dest"
+                        TAR_Extract_XZ "$__dest" "$_target"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
                 elif [ $(FS_Is_Target_A_ZIP "$_target") -eq 0 ]; then
                         # unpack library
-                        I18N_Assemble "$_target" "$___dest"
-                        FS_Make_Directory "$___dest"
-                        ZIP_Extract "$___dest" "$_target"
+                        I18N_Assemble "$_target" "$__dest"
+                        FS_Make_Directory "$__dest"
+                        ZIP_Extract "$__dest" "$_target"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
                         fi
                 else
                         # copy library file
-                        I18N_Assemble "$_target" "$___dest"
-                        FS_Make_Directory "$___dest"
-                        FS_Copy_File "$_target" "$___dest"
+                        I18N_Assemble "$_target" "$__dest"
+                        FS_Make_Directory "$__dest"
+                        FS_Copy_File "$_target" "$__dest"
                         if [ $? -ne 0 ]; then
                                 I18N_Assemble_Failed
                                 return 1
@@ -139,11 +139,11 @@ PACKAGE_Assemble_DEB_Content() {
                 return 10 # not applicable
         else
                 # copy main program
-                ___dest="${_chroot}/bin/"
+                __dest="${_chroot}/bin/${PROJECT_SKU}"
 
-                I18N_Assemble "$_target" "$___dest"
-                FS_Make_Directory "$___dest"
-                FS_Copy_File "$_target" "$___dest"
+                I18N_Assemble "$_target" "$__dest"
+                FS_Make_Housing_Directory "$__dest"
+                FS_Copy_File "$_target" "$__dest"
                 if [ $? -ne 0 ]; then
                         I18N_Assemble_Failed
                         return 1
@@ -152,9 +152,9 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        ___dest="${_chroot}/share/doc/${PROJECT_SCOPE}/${PROJECT_SKU}/changelog.gz"
-        I18N_Create "$___dest"
-        DEB_Create_Changelog "$___dest" "$_changelog" "$PROJECT_SKU"
+        __dest="${_chroot}/share/doc/${PROJECT_SCOPE}/${PROJECT_SKU}/changelog.gz"
+        I18N_Create "$__dest"
+        DEB_Create_Changelog "$__dest" "$_changelog" "$PROJECT_SKU"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
                 return 1
@@ -162,10 +162,10 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        ___dest="${_chroot}/share/doc/${PROJECT_SCOPE}/${PROJECT_SKU}/copyright"
-        I18N_Create "$___dest"
+        __dest="${_chroot}/share/doc/${PROJECT_SCOPE}/${PROJECT_SKU}/copyright"
+        I18N_Create "$__dest"
         COPYRIGHT_Create \
-                "$___dest" \
+                "$__dest" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/licenses/deb-copyright" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
@@ -178,10 +178,10 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # NOTE: REQUIRED file
-        ___dest="${_chroot}/share/man/man1/${PROJECT_SCOPE}-${PROJECT_SKU}.1"
-        I18N_Create "$___dest"
+        __dest="${_chroot}/share/man/man1/${PROJECT_SCOPE}-${PROJECT_SKU}.1"
+        I18N_Create "$__dest"
         MANUAL_Create \
-                "$___dest" \
+                "$__dest" \
                 "$PROJECT_SKU" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
@@ -203,12 +203,17 @@ PACKAGE_Assemble_DEB_Content() {
 
         # NOTE: OPTIONAL (Comment to turn it off)
         I18N_Create "${_directory}/source.list"
+        __url="$PROJECT_STATIC_URL"
+        if [ $(STRINGS_Is_Empty "$PROJECT_DEB_URL") -ne 0 ]; then
+                __url="$PROJECT_DEB_URL"
+        fi
+
         DEB_Create_Source_List \
                 "$_directory" \
                 "$PROJECT_GPG_ID" \
-                "$PROJECT_STATIC_URL" \
-                "$PROJECT_REPREPRO_CODENAME" \
-                "$PROJECT_DEBIAN_DISTRIBUTION" \
+                "$__url" \
+                "$PROJECT_DEB_COMPONENT" \
+                "$PROJECT_DEB_DISTRIBUTION" \
                 "$_gpg_keyring"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed
@@ -217,20 +222,30 @@ PACKAGE_Assemble_DEB_Content() {
 
 
         # WARNING: THIS REQUIRED FILE MUST BE THE LAST ONE
+        __arch="$_target_arch"
+        if [ "$__arch" = "any" ]; then
+                __arch="all"
+        fi
+
+        __os="$_target_os"
+        if [ "$__os" = "any" ]; then
+                __os="all"
+        fi
+
         I18N_Create "${_directory}/control/control"
         DEB_Create_Control \
                 "$_directory" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}" \
                 "$_package" \
                 "$PROJECT_VERSION" \
-                "$_target_arch" \
-                "$_target_os" \
+                "$__arch" \
+                "$__os" \
                 "$PROJECT_CONTACT_NAME" \
                 "$PROJECT_CONTACT_EMAIL" \
                 "$PROJECT_CONTACT_WEBSITE" \
                 "$PROJECT_PITCH" \
-                "$PROJECT_DEBIAN_PRIORITY" \
-                "$PROJECT_DEBIAN_SECTION" \
+                "$PROJECT_DEB_PRIORITY" \
+                "$PROJECT_DEB_SECTION" \
                 "${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/docs/ABSTRACTS.txt"
         if [ $? -ne 0 ]; then
                 I18N_Create_Failed

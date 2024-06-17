@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -9,7 +9,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-function TIME-Format-ISO8601-Date {
+function TIME-Format-Date-ISO8601 {
 	param(
 		[string]$___epoch
 	)
@@ -24,6 +24,46 @@ function TIME-Format-ISO8601-Date {
 	# execute
 	$___t = (Get-Date "1970-01-01 00:00:00.000Z") + ([TimeSpan]::FromSeconds($___epoch))
 	return $___t.ToString("yyyy-MM-dd")
+}
+
+
+
+
+function TIME-Format-Datetime-RFC5322 {
+	param(
+		[string]$___epoch
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($___epoch)) {
+		return 1
+	}
+
+
+	# execute
+	$___t = (Get-Date "1970-01-01 00:00:00.000Z") + ([TimeSpan]::FromSeconds($___epoch))
+	return $___t.ToString("ddd, dd MMM YYYY HH:mm:ss zzz")
+}
+
+
+
+
+function TIME-Format-Datetime-RFC5322-UTC {
+	param(
+		[string]$___epoch
+	)
+
+
+	# validate input
+	if ([string]::IsNullOrEmpty($___epoch)) {
+		return 1
+	}
+
+
+	# execute
+	$___t = (Get-Date "1970-01-01 00:00:00.000Z") + ([TimeSpan]::FromSeconds($___epoch))
+	return $___t.ToUniversalTime().ToString("ddd, dd MMM YYYY HH:mm:ss zzz")
 }
 
 

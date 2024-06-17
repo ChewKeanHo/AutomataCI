@@ -53,9 +53,9 @@ function PACKAGE-Assemble-IPK-Content {
 	##      (2) please avoid: usr/, usr/{TYPE}/, usr/bin/, & usr/lib{TYPE}/
 	##          whenever possible for avoiding conflicts with your OS native
 	##          system packages.
-	$_chroot = "${_directory}/data/usr/"
-	if ($(STRINGS-To-Lowercase "${env:PROJECT_DEBIAN_IS_NATIVE}") -ne "true") {
-		$_chroot = "${_chroot}/local/"
+	$_chroot = "${_directory}/data/usr"
+	if ($(STRINGS-To-Lowercase "${env:PROJECT_DEB_IS_NATIVE}") -ne "true") {
+		$_chroot = "${_chroot}/local"
 	}
 
 	$_gpg_keyring = "${env:PROJECT_SKU}"
@@ -65,42 +65,42 @@ function PACKAGE-Assemble-IPK-Content {
 	} elseif ($(FS-Is-Target-A-Docs "${_target}") -eq 0) {
 		return 10 # not applicable
 	} elseif ($(FS-Is-Target-A-Library "${_target}") -eq 0) {
-		$___dest = "${_chroot}\lib\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
+		$__dest = "${_chroot}\lib\${env:PROJECT_SCOPE}\${env:PROJECT_SKU}"
 
 		if ($(FS-Is-Target-A-NPM "${_target}") -eq 0) {
 			return 10 # not applicable
 		} elseif ($(FS-Is-Target-A-TARGZ "${_target}") -eq 0) {
 			# unpack library
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = TAR-Extract-GZ "${___dest}" "${_target}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = TAR-Extract-GZ "${__dest}" "${_target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
 			}
 		} elseif ($(FS-Is-Target-A-TARXZ "${_target}") -eq 0) {
 			# unpack library
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = TAR-Extract-XZ "${___dest}" "${_target}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = TAR-Extract-XZ "${__dest}" "${_target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
 			}
 		} elseif ($(FS-Is-Target-A-ZIP "${_target}") -eq 0) {
 			# unpack library
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = ZIP-Extract "${___dest}" "${_target}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = ZIP-Extract "${__dest}" "${_target}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
 			}
 		} else {
 			# copy library file
-			$null = I18N-Assemble "${_target}" "${___dest}"
-			$null = FS-Make-Directory "${___dest}"
-			$___process = FS-Copy-File "${_target}" "${___dest}"
+			$null = I18N-Assemble "${_target}" "${__dest}"
+			$null = FS-Make-Directory "${__dest}"
+			$___process = FS-Copy-File "${_target}" "${__dest}"
 			if ($___process -ne 0) {
 				$null = I18N-Assemble-Failed
 				return 1
@@ -127,11 +127,14 @@ function PACKAGE-Assemble-IPK-Content {
 		return 10 # not applicable
 	} else {
 		# copy main program
-		$___dest = "${_chroot}\bin\"
+		$__dest = "${_chroot}\bin\${env:PROJECT_SKU}"
+		if ($_target_os -eq "windows") {
+			$__dest = "${__dest}.exe"
+		}
 
-		$null = I18N-Assemble "${_target}" "${___dest}"
-		$null = FS-Make-Directory "${___dest}"
-		$___process = FS-Copy-File "${_target}" "${___dest}"
+		$null = I18N-Assemble "${_target}" "${__dest}"
+		$null = FS-Make-Housing-Directory "${__dest}"
+		$___process = FS-Copy-File "${_target}" "${__dest}"
 		if ($___process -ne 0) {
 			$null = I18N-Assemble-Failed
 			return 1
@@ -152,8 +155,8 @@ function PACKAGE-Assemble-IPK-Content {
 		"${env:PROJECT_CONTACT_EMAIL}" `
 		"${env:PROJECT_CONTACT_WEBSITE}" `
 		"${env:PROJECT_PITCH}" `
-		"${env:PROJECT_DEBIAN_PRIORITY}" `
-		"${env:PROJECT_DEBIAN_SECTION}" `
+		"${env:PROJECT_DEB_PRIORITY}" `
+		"${env:PROJECT_DEB_SECTION}" `
 		"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_SOURCE}\docs\ABSTRACTS.txt"
 	if ($___process -ne 0) {
 		$null = I18N-Create-Failed

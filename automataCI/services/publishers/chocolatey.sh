@@ -83,7 +83,7 @@ CHOCOLATEY_Archive() {
 
         # execute
         ___current_path="$PWD" && cd "$2"
-        ZIP_Create "$1" "*"
+        ZIP_Create "$1" "."
         ___process=$?
         cd "$___current_path" && unset ___current_path
         if [ $___process -ne 0 ]; then

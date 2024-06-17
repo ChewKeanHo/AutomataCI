@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -58,7 +58,7 @@ function IPK-Create-Archive {
 
 	# package control
 	$null = Set-Location "${___directory}\control"
-	$___process = TAR-Create-GZ "..\control.tar.gz" "*"
+	$___process = TAR-Create-GZ "${___directory}\control.tar.gz" "."
 	if ($___process -ne 0) {
 		$null = Set-Location $___current_path
 		$null = Remove-Variable -Name ___current_path
@@ -68,7 +68,7 @@ function IPK-Create-Archive {
 
 	# package data
 	$null = Set-Location "${___directory}\data"
-	$___process = TAR-Create-GZ "..\data.tar.gz" "*"
+	$___process = TAR-Create-GZ "${___directory}\data.tar.gz" "."
 	if ($___process -ne 0) {
 		$null = Set-Location $___current_path
 		$null = Remove-Variable -Name ___current_path
@@ -98,7 +98,7 @@ function IPK-Create-Archive {
 
 	# move to destination
 	$null = FS-Remove-Silently "${___destination}"
-	$___process = FS-Move "${___file}.gz" "${___destination}"
+	$___process = FS-Move "${___file}" "${___destination}"
 
 
 	# return to current directory

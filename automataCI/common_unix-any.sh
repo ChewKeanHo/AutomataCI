@@ -92,12 +92,6 @@ if [ $? -ne 0 ]; then
 fi
 
 
-Run_Subroutine_Exec "$PROJECT_C" "C"
-if [ $? -ne 0 ]; then
-        return 1
-fi
-
-
 Run_Subroutine_Exec "$PROJECT_GO" "GO"
 if [ $? -ne 0 ]; then
         return 1
@@ -141,6 +135,15 @@ fi
 
 
 Run_Subroutine_Exec "$PROJECT_PATH_SOURCE" "BASELINE"
+if [ $? -ne 0 ]; then
+        return 1
+fi
+
+
+# IMPORTANT: C can set the terminal into a very strict mode after build causing
+#            other technological integrations to fail after run (e.g. flatpak).
+#            Therefore, it shall be placed as the last one to execute.
+Run_Subroutine_Exec "$PROJECT_C" "C"
 if [ $? -ne 0 ]; then
         return 1
 fi

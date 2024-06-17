@@ -15,7 +15,7 @@
 
 
 
-function MD5-Checksum-From-File {
+function MD5-Create-From-File {
 	param (
 		[string]$___target
 	)

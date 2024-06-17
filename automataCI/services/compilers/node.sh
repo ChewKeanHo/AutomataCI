@@ -377,6 +377,7 @@ NODE_Setup() {
         FS_Remove_Silently "$(FS_Get_Directory "$___location")"
 
         ___target="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TOOLS}/"
+        FS_Make_Directory "$___target"
         case "$PROJECT_OS" in
         windows)
                 ZIP_Extract "$___target" "$___filepath"
@@ -395,7 +396,8 @@ NODE_Setup() {
                 return 1
         fi
 
-        FS_Move "$___target" "$(FS_Get_Directory "$___location")"
+        ___directory="$(FS_Get_Directory "$___location")"
+        FS_Move "$___target" "$___directory"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -403,7 +405,7 @@ NODE_Setup() {
 
         ## create activator script
         ___label="($PROJECT_PATH_NODE_ENGINE)"
-        ___target="$(FS_Get_Directory "$___location")/bin"
+        ___target="${___directory}/bin"
         FS_Write_File "$___location" "\
 #!/bin/sh
 ___target=\"${___target}\"

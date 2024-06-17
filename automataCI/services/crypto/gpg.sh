@@ -17,29 +17,80 @@
 
 
 
-GPG_Detach_Sign_File() {
-        #___target="$1"
-        #___id="$2"
+GPG_Clear_Sign_File() {
+        #___output="$1"
+        #___target="$2"
+        #___id="$3"
 
 
         # validate input
-        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] || [ $(STRINGS_Is_Empty "$2") -eq 0 ]; then
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$2") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$3") -eq 0 ]; then
                 return 1
         fi
 
-        FS_Is_File "$1"
+        FS_Is_Target_Exist "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_File "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
-        GPG_Is_Available "$2"
+        GPG_Is_Available "$3"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # execute
-        gpg --armor --detach-sign --local-user "$2" "$1"
+        gpg --armor --clear-sign --local-user "$3" --output "$1" "$2"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+GPG_Detach_Sign_File() {
+        #___output="$1"
+        #___target="$2"
+        #___id="$3"
+
+
+        # validate input
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$2") -eq 0 ] ||
+                [ $(STRINGS_Is_Empty "$3") -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_Target_Exist "$1"
+        if [ $? -eq 0 ]; then
+                return 1
+        fi
+
+        FS_Is_File "$2"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+        GPG_Is_Available "$3"
+        if [ $? -ne 0 ]; then
+                return 1
+        fi
+
+
+        # execute
+        gpg --armor --detach-sign --local-user "$3" --output "$1" "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -122,6 +173,10 @@ GPG_Is_Available() {
         OS_Is_Command_Available "gpg"
         if [ $? -ne 0 ]; then
                 return 1
+        fi
+
+        if [ $(STRINGS_Is_Empty "$1") -eq 0 ]; then
+                return 0
         fi
 
         gpg --list-key "$1" &> /dev/null

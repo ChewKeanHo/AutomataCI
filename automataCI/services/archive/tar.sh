@@ -118,23 +118,25 @@ TAR_Create_GZ() {
 
 
         # create tar archive
-        TAR_Create "$___dest" "$2" "$3" "$4"
+        TAR_Create "${___dest}.tar" "$2" "$3" "$4"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # compress archive
-        GZ_Create "$___dest"
+        GZ_Create "${___dest}.tar"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # rename to destination target
-        FS_Move "${___dest}.gz" "$1"
-        if [ $? -ne 0 ]; then
-                return 1
+        if [ ! "$1" = "${___dest}.tar.gz" ]; then
+                FS_Move "${___dest}.tar.gz" "$1"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
 
@@ -180,23 +182,25 @@ TAR_Create_XZ() {
 
 
         # create tar archive
-        TAR_Create "$___dest" "$2" "$3" "$4"
+        TAR_Create "${___dest}.tar" "$2" "$3" "$4"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # compress archive
-        XZ_Create "$___dest"
+        XZ_Create "${___dest}.tar"
         if [ $? -ne 0 ]; then
                 return 1
         fi
 
 
         # rename to target
-        FS_Move "${___dest}.xz" "$1"
-        if [ $? -ne 0 ]; then
-                return 1
+        if [ ! "$1" = "${___dest}.tar.xz" ]; then
+                FS_Move "${___dest}.tar.xz" "$1"
+                if [ $? -ne 0 ]; then
+                        return 1
+                fi
         fi
 
 
@@ -234,7 +238,7 @@ TAR_Extract_GZ() {
 
 
         # unpack tar.gz
-        tar -xzf "$2" -C "$1"
+        tar -C "$1" -xzf "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi
@@ -257,8 +261,8 @@ TAR_Extract_XZ() {
                 return 1
         fi
 
-        FS_Is_File "$1"
-        if [ $? -eq 0 ]; then
+        FS_Is_Directory "$1"
+        if [ $? -ne 0 ]; then
                 return 1
         fi
 
@@ -274,7 +278,7 @@ TAR_Extract_XZ() {
 
 
         # unpack tar.xz
-        tar -xf "$2" -C "$1"
+        tar -C "$1" -xf "$2"
         if [ $? -ne 0 ]; then
                 return 1
         fi

@@ -129,23 +129,25 @@ function TAR-Create-GZ {
 
 
 	# create tar archive
-	$___process = TAR-Create "${___dest}" "${___source}" "${___owner}" "${___group}"
+	$___process = TAR-Create "${___dest}.tar" "${___source}" "${___owner}" "${___group}"
 	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# compress archive
-	$___process = GZ-Create "${___dest}"
+	$___process = GZ-Create "${___dest}.tar"
 	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# rename to target
-	$___process = FS-Move "${___dest}.gz" "${___destination}"
-	if ($___process -ne 0) {
-		return 1
+	if ("${___destination}" -ne "${___dest}.tar.gz") {
+		$___process = FS-Move "${___dest}.tar.gz" "${___destination}"
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
 
@@ -194,23 +196,25 @@ function TAR-Create-XZ {
 
 
 	# create tar archive
-	$___process = TAR-Create "${___dest}" "${___source}" "${___owner}" "${___group}"
+	$___process = TAR-Create "${___dest}.tar" "${___source}" "${___owner}" "${___group}"
 	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# compress archive
-	$___process = XZ-Create "${___dest}"
+	$___process = XZ-Create "${___dest}.tar"
 	if ($___process -ne 0) {
 		return 1
 	}
 
 
 	# rename to target
-	$___process = FS-Move "${___dest}.xz" "${___destination}"
-	if ($___process -ne 0) {
-		return 1
+	if ("${___destination}" -ne "${___dest}.tar.xz") {
+		$___process = FS-Move "${___dest}.xz" "${___destination}"
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 
 
@@ -251,7 +255,7 @@ function TAR-Extract-GZ {
 
 
 	# unpack tar.gz
-	$___process = OS-Exec "tar" "-xzf `"${___destination}`" -C `"${___source}`""
+	$___process = OS-Exec "tar" "-C `"${___destination}`" -xzf `"${___source}`""
 	if ($___process -ne 0) {
 		return 1
 	}
@@ -277,8 +281,8 @@ function TAR-Extract-XZ {
 		return 1
 	}
 
-	$___process = FS-Is-File "${___destination}"
-	if ($___process -eq 0) {
+	$___process = FS-Is-Directory "${___destination}"
+	if ($___process -ne 0) {
 		return 1
 	}
 
@@ -294,7 +298,7 @@ function TAR-Extract-XZ {
 
 
 	# unpack tar.xz
-	$___process = OS-Exec "tar" "-xf `"${___destination}`" -C `"${___source}`""
+	$___process = OS-Exec "tar" "-C `"${___destination}`" -xf `"${___source}`""
 	if ($___process -ne 0) {
 		return 1
 	}

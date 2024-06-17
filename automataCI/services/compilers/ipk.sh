@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -57,7 +57,7 @@ IPK_Create_Archive() {
 
         # package control
         cd "${___directory}/control"
-        TAR_Create_GZ "../control.tar.gz" "*"
+        TAR_Create_GZ "${___directory}/control.tar.gz" "."
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
                 return 1
@@ -66,7 +66,7 @@ IPK_Create_Archive() {
 
         # package data
         cd "${___directory}/data"
-        TAR_Create_GZ "../data.tar.gz" "*"
+        TAR_Create_GZ "${___directory}/data.tar.gz" "."
         if [ $? -ne 0 ]; then
                 cd "$___current_path" && unset ___current_path
                 return 1
@@ -93,7 +93,7 @@ IPK_Create_Archive() {
 
         # move to destination
         FS_Remove_Silently "$___destination"
-        FS_Move "${___file}.gz" "$___destination"
+        FS_Move "$___file" "$___destination"
         ___process=$?
 
 

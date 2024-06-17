@@ -21,6 +21,7 @@ if [ "$PROJECT_PATH_ROOT" = "" ]; then
 fi
 
 . "${LIBS_AUTOMATACI}/services/io/fs.sh"
+. "${LIBS_AUTOMATACI}/services/io/time.sh"
 . "${LIBS_AUTOMATACI}/services/i18n/translations.sh"
 . "${LIBS_AUTOMATACI}/services/compilers/changelog.sh"
 
@@ -39,9 +40,9 @@ fi
 
 
 # execute
-__file="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog"
+__directory="${PROJECT_PATH_ROOT}/${PROJECT_PATH_SOURCE}/changelog"
 I18N_Create "${PROJECT_VERSION} DATA CHANGELOG"
-CHANGELOG_Build_Data_Entry "$__file"
+CHANGELOG_Build_Data_Entry "$__directory"
 if [ $? -ne 0 ]; then
         I18N_Create_Failed
         return 1
@@ -50,14 +51,14 @@ fi
 
 I18N_Create "${PROJECT_VERSION} DEB CHANGELOG"
 CHANGELOG_Build_DEB_Entry \
-        "$__file" \
+        "$__directory" \
         "$PROJECT_VERSION" \
         "$PROJECT_SKU" \
-        "$PROJECT_DEBIAN_DISTRIBUTION" \
-        "$PROJECT_DEBIAN_URGENCY" \
+        "$PROJECT_DEB_DISTRIBUTION" \
+        "$PROJECT_DEB_URGENCY" \
         "$PROJECT_CONTACT_NAME" \
         "$PROJECT_CONTACT_EMAIL" \
-        "$(date -R)"
+        "$(TIME_Format_Datetime_RFC5322 "$(TIME_Now)")"
 if [ $? -ne 0 ]; then
         I18N_Create_Failed
         return 1

@@ -74,7 +74,7 @@ PACKAGE_Run_DEB() {
         I18N_Create_Package "DEB"
         _src="${_target_filename}_${PROJECT_VERSION}_${_target_os}-${_target_arch}"
         _target_path="${_dest}/${_src}.deb"
-        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/deb_${_src}"
+        _src="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/packagers-deb-${_src}"
         I18N_Remake "$_src"
         FS_Remake_Directory "${_src}"
         if [ $? -ne 0 ]; then
