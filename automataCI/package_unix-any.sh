@@ -67,10 +67,27 @@ if [ "$(STRINGS_Is_Empty "$PROJECT_HOMEBREW_URL")" -ne 0 ]; then
         HOMEBREW_WORKSPACE="packagers-homebrew-${PROJECT_SKU}"
         I18N_Setup "$HOMEBREW_WORKSPACE"
         HOMEBREW_WORKSPACE="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${HOMEBREW_WORKSPACE}"
-        FS_Remake_Directory "${HOMEBREW_WORKSPACE}"
+        FS_Remake_Directory "$HOMEBREW_WORKSPACE"
         if [ $? -ne 0 ]; then
                 I18N_Setup_Failed
                 return 1
+        fi
+fi
+
+
+if [ "$(STRINGS_Is_Empty "$PROJECT_MSI_INSTALL_DIRECTORY")" -ne 0 ]; then
+        MSI_WORKSPACE="packagers-msi-${PROJECT_SKU}"
+        I18N_Setup "$MSI_WORKSPACE"
+        MSI_WORKSPACE="${PROJECT_PATH_ROOT}/${PROJECT_PATH_TEMP}/${MSI_WORKSPACE}"
+        FS_Remake_Directory "$MSI_WORKSPACE"
+        if [ $? -ne 0 ]; then
+                I18N_Setup_Failed
+                return 1
+        fi
+
+        if [ $(STRINGS_Is_Empty "$PROJECT_MSI_REGISTRY_KEY") -eq 0 ]; then
+                PROJECT_MSI_REGISTRY_KEY="\
+Software\\\\${PROJECT_SCOPE}\\\\InstalledProducts\\\\${PROJECT_SKU_TITLECASE}"
         fi
 fi
 
@@ -373,13 +390,13 @@ ${__common}|${__log}|PACKAGE_Run_LIB
         fi
 
         # NOTE: MSI only works in windows
-        if [ $(STRINGS_Is_Empty "$PROJECT_RELEASE_MSI") -ne 0 ]; then
+        if [ $(STRINGS_Is_Empty "$PROJECT_MSI_INSTALL_DIRECTORY") -ne 0 ]; then
                 case "$TARGET_OS" in
                 any|windows)
                         __log="msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
                         __log="${__log_directory}/${__log}"
-                        FS_Append_File "$__serial_control" "\
-${__common}|${__log}|PACKAGE_Run_MSI
+                        FS_Append_File "$__parallel_control" "\
+${__common}|${MSI_WORKSPACE}|${__log}|PACKAGE_Run_MSI
 "
                         if [ $? -ne 0 ]; then
                                 return 1
@@ -464,6 +481,32 @@ if [ $(STRINGS_Is_Empty "$PROJECT_HOMEBREW_URL") -ne 0 ]; then
                 I18N_Export_Failed
                 return 1
         fi
+fi
+
+
+if [ "$(STRINGS_Is_Empty "$PROJECT_MSI_INSTALL_DIRECTORY")" -ne 0 ]; then
+        I18N_Newline
+        I18N_Newline
+
+        # sort any arch into others
+        PACKAGE_Sort_MSI "$MSI_WORKSPACE"
+        if [ $? -ne 0 ];then
+                return 1
+        fi
+
+        # seal all MSI packages
+        for _candidate in "${MSI_WORKSPACE}/"*; do
+                FS_Is_Directory "$_candidate"
+                if [ $? -ne 0 ]; then
+                        continue
+                fi
+
+                I18N_Newline
+                PACKAGE_Seal_MSI "$_candidate" "${PROJECT_PATH_ROOT}/${PROJECT_PATH_PKG}"
+                if [ $? -ne 0 ];then
+                        return 1
+                fi
+        done
 fi
 
 

@@ -111,11 +111,6 @@ ${__source_directory}/libs/greeters/Vanilla.h|lib${PROJECT_SKU}.h
 "
 
 
-__placeholders="\
-${PROJECT_SKU}-msi_any-any
-"
-
-
 ## NOTE: (1) C Compilers Optimization flags for known target OS and ARCH types.
 Get_Optimization_Flags() {
         __target_os="$1"
@@ -486,30 +481,6 @@ if [ $? -ne 0 ]; then
                 return 1
         fi
 fi
-
-
-
-
-# placeholding flag files
-old_IFS="$IFS"
-while IFS="" read -r __line || [ -n "$__line" ]; do
-        if [ $(STRINGS_Is_Empty "$__line") -eq 0 ]; then
-                continue
-        fi
-
-
-        # build the file
-        __file="${__output_directory}/${__line}"
-        I18N_Build "$__line"
-        FS_Remove_Silently "$__file"
-        FS_Touch_File "$__file"
-        if [ $? -ne 0 ]; then
-                I18N_Build_Failed
-                return 1
-        fi
-done <<EOF
-$__placeholders
-EOF
 
 
 

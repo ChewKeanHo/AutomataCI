@@ -76,7 +76,7 @@ PROJECT_NAME = "Chew Kean Ho's AutomataCI"
 # PROJECT_PITCH
 # A short elevator pitch about the project used as a short description. Max
 # Max: 60 characters.
-PROJECT_PITCH = 'One Peaceful Frontend+Backend Software Library Suite.'
+PROJECT_PITCH = 'An OSS, redistributable, & semi-autonomous CI infrastructure.'
 
 
 # PROJECT_VERSION
@@ -504,6 +504,7 @@ PROJECT_LIBREOFFICE = ''
 #     (1) https://download.documentfoundation.org/mirmon/allmirrors.html
 PROJECT_LIBREOFFICE_MIRROR = 'https://download.documentfoundation.org/libreoffice'
 
+
 # PROJECT_LIBREOFFICE_VERSION
 # This is for defining the LibreOffice version to install into the local OS.
 #
@@ -758,6 +759,7 @@ CARGO_REGISTRY = 'crates-io'
 # The title of the changelog file.
 PROJECT_CHANGELOG_TITLE = 'Changelog | 更新日志 | Endringslogg | Cacatan Perubahan | Ändringslogg | 変更履歴'
 
+
 # PROJECT_RELEASE_SHA256
 # Perform SHA256 checksum file generation in Release job. To disable it, simply
 # let it empty.
@@ -853,14 +855,6 @@ PROJECT_RELEASE_ARCHIVE = 'enabled'
 
 # PROJECT_RELEASE_IPK
 # The flag to package ipk pipeline.
-#
-# To enable : fill in some string (e.g. 'enabled')
-# To disable: leave it empty ('')
-PROJECT_RELEASE_IPK = 'enabled'
-
-
-# PROJECT_RELEASE_MSI
-# The flag to package msi pipeline.
 #
 # To enable : fill in some string (e.g. 'enabled')
 # To disable: leave it empty ('')
@@ -1377,6 +1371,295 @@ PROJECT_HOMEBREW_REPO_KEY = 'origin'
 #
 # Default is 'main' or 'master'.
 PROJECT_HOMEBREW_REPO_BRANCH = 'main'
+
+
+
+
+###########################
+# DISTRIBUTION - MSI      #
+###########################
+# PROJECT_MSI_INSTALL_DIRECTORY
+# Defines the primary directory installation value for installer execute
+# sequences ('InstallExecuteSequence'). The value can only be 'INSTALLDIR'
+# (controlled value).
+#
+# This field also acts as the flag for enabling or disabling the homebrew
+# pipeline.
+#
+# To enable it: set the value as 'INSTALLDIR'
+# To disable it: set it empty.
+#
+# Default is: 'INSTALLDIR' (enabled)
+PROJECT_MSI_INSTALL_DIRECTORY = 'INSTALLDIR'
+
+
+# PROJECT_MSI_ARP_INSTALL_LOCATION
+# Defines the CustomAction's ID for installer execute sequences
+# ('InstallExecuteSequence'). The value can only be 'ARPINSTALLLOCATION'
+# (controlled value).
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'ARPINSTALLLOCATION'
+PROJECT_MSI_ARP_INSTALL_LOCATION = 'ARPINSTALLLOCATION'
+
+
+# PROJECT_MSI_COMPRESSED_MODE
+# Defines the compress mode for the installer. It STRICTLY accepts lowercase
+# 'yes' or 'no' only.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'yes'
+PROJECT_MSI_COMPRESSED_MODE = 'yes'
+
+
+# PROJECT_MSI_INSTALLER_VERSION_UNIX
+# Defines the MSI installer version for unix workspace (where WiX is not used).
+#
+# This field CANNOT BE LEFT EMPTY and is only for unix packagers.
+#
+# Default is: '400' (Windows Installer 4.0 - included in Vista)
+PROJECT_MSI_INSTALLER_VERSION_UNIX = '400'
+
+
+# PROJECT_MSI_INSTALLER_VERSION_WINDOWS
+# Defines the MSI installer version for windows workspace (where WiX is used).
+#
+# This field CANNOT BE LEFT EMPTY and is only for windows packagers.
+#
+# Default is: '500' (WiX4)
+PROJECT_MSI_INSTALLER_VERSION_WINDOWS = '500'
+
+
+# PROJECT_MSI_CODEPAGE
+# Defines the charset of the installer.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: '65001' (UTF-8)
+PROJECT_MSI_CODEPAGE = '65001'
+
+
+# PROJECT_MSI_INSTALLER_SCOPE
+# Defines the installer scope.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'perMachine'
+PROJECT_MSI_INSTALLER_SCOPE = 'perMachine'
+
+
+# PROJECT_MSI_REGISTRY_NAME
+# Defines the name of the registry. Unless aboslute needed, it's best to leave
+# this as it is.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'InstallLocation'
+PROJECT_MSI_REGISTRY_NAME = 'InstallLocation'
+
+
+# PROJECT_MSI_REGISTRY_KEY
+# Defines the location of the registry.
+#
+# This field is shared for both unix and windows packagers.
+#
+# If this field is left empty, AutomataCI shall generate a default version
+# using the following pattern:
+#   'Software\${PROJECT_SCOPE}\InstalledProducts\${PROJECT_SKU_TITLECASE}'
+#
+# Default is: '' (leave it automated)
+PROJECT_MSI_REGISTRY_KEY = ''
+
+
+# PROJECT_MSI_FEATURES_ID
+# The ID for the entire installer's feature list. This the the root of the list
+# consisting of main feature list, optional features list, and etc.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'FeaturesAll'
+PROJECT_MSI_FEATURES_ID = 'FeaturesAll'
+
+
+# PROJECT_MSI_MAIN_FEATURE_ID
+# The ID for the compulsory features list. This consists of all the MUST HAVE
+# components to be installed at the client side.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'FeaturesMain'
+PROJECT_MSI_MAIN_FEATURE_ID = 'FeaturesMain'
+
+
+# PROJECT_MSI_REGISTRIES_ID
+# The ID for the compulsory main registries component. This handles the main
+# registeries internal implementations.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'RegValInstallLocation_comp'
+PROJECT_MSI_REGISTRIES_ID = 'RegValInstallLocation_comp'
+
+
+# PROJECT_MSI_REGISTRIES_GUID
+# The unique GUID for the compulsory main registries component. Its value is
+# similar to a UUID type.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# When in doubt, use the PROJECT_UUID and play with the last 6 characters.
+#
+# Default is: '*' - in some cases may fail.
+PROJECT_MSI_REGISTRIES_GUID = '7E665EAF-446B-7738-84D9-FE18BE039400'
+
+
+# PROJECT_MSI_BIN_FEATURE_ID
+# The ID for the executables features list. When available, the executables will
+# be in this component.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'FeaturesBin'
+PROJECT_MSI_BIN_FEATURE_ID = 'FeaturesBin'
+
+
+# PROJECT_MSI_BIN_COMPONENT_ID
+# The ID for the executables component.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'ComponentBin'
+PROJECT_MSI_BIN_COMPONENT_ID = 'ComponentBin'
+
+
+# PROJECT_MSI_BIN_COMPONENT_GUID
+# The unique GUID for the executables component. Its value is similar to an UUID
+# type.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# When in doubt, use the PROJECT_UUID and play with the last 6 characters.
+#
+# Default is: '*' - in some cases may fail.
+PROJECT_MSI_BIN_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039401'
+
+
+# PROJECT_MSI_CONFIG_FEATURE_ID
+# The ID for the config files features list. When available, the config files
+# will be in this component.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'FeaturesBin'
+PROJECT_MSI_CONFIG_FEATURE_ID = 'FeaturesConfig'
+
+
+# PROJECT_MSI_CONFIG_COMPONENT_ID
+# The ID for the config files component.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'ComponentConfig'
+PROJECT_MSI_CONFIG_COMPONENT_ID = 'ComponentConfig'
+
+
+# PROJECT_MSI_CONFIG_COMPONENT_GUID
+# The unique GUID for the config files component. Its value is similar to
+# an UUID type.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# When in doubt, use the PROJECT_UUID and play with the last 6 characters.
+#
+# Default is: '*' - in some cases may fail.
+PROJECT_MSI_CONFIG_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039402'
+
+
+# PROJECT_MSI_LIB_FEATURE_ID
+# The ID for the libraries features list. When available, the libraries will
+# be in this component.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'FeaturesLib'
+PROJECT_MSI_LIB_FEATURE_ID = 'FeaturesLib'
+
+
+# PROJECT_MSI_LIB_COMPONENT_ID
+# The ID for the libraries component.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'ComponentLib'
+PROJECT_MSI_LIB_COMPONENT_ID = 'ComponentLib'
+
+
+# PROJECT_MSI_LIB_COMPONENT_GUID
+# The unique GUID for the libraries component. Its value is similar to an UUID
+# type.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# When in doubt, use the PROJECT_UUID and play with the last 6 characters.
+#
+# Default is: '*' - in some cases may fail.
+PROJECT_MSI_LIB_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039403'
+
+
+# PROJECT_MSI_DOCS_FEATURE_ID
+# The ID for the documenations features list. When available, the documents will
+# be in this component.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# When in doubt, use the PROJECT_UUID and play with the last 6 characters.
+#
+# Default is: '*' - in some cases may fail.
+PROJECT_MSI_DOCS_FEATURE_ID = 'FeaturesDocs'
+
+
+# PROJECT_MSI_DOCS_COMPONENT_ID
+# The ID for the documentations component.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# Default is: 'ComponentDocs'
+PROJECT_MSI_DOCS_COMPONENT_ID = 'ComponentDocs'
+
+
+# PROJECT_MSI_DOCS_COMPONENT_GUID
+# The unique GUID for the documentations component. Its value is similar to an
+# UUID type.
+#
+# This field CANNOT BE LEFT EMPTY and is shared for both unix and windows
+# packagers.
+#
+# When in doubt, use the PROJECT_UUID and play with the last 6 characters.
+#
+# Default is: '*' - in some cases may fail.
+PROJECT_MSI_DOCS_COMPONENT_GUID = '7E665EAF-446B-7738-84D9-FE18BE039404'
 
 
 

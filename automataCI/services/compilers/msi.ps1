@@ -1,4 +1,4 @@
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -46,25 +46,21 @@ function MSI-Compile {
 		return 1
 	}
 
+	$___lang = MSI-Get-Culture "${___lang}"
 	if ($(STRINGS-Is-Empty "${___lang}") -eq 0) {
 		return 1
 	}
 
 
 	# execute
-	$___arguments = "build " `
-		+ "-arch ${___arch} " `
-		+ "-culture ${___lang} " `
-		+ "-out `"" + $(FS-Extension-Replace "${___target}" ".wxs" ".msi") + "`" "
+	$___arguments = @"
+build -arch ${___arch} -culture ${___lang} -out `"$(FS-Extension-Replace "${___target}" ".wxs" ".msi")`"
+"@
 
-	$___extensions = $(Split-Path -Parent -Path "${___target}") + "\ext"
-	$___process = FS-Is-Directory "${___extensions}"
-	if ($___process -eq 0) {
-		foreach ($___ext in (Get-ChildItem "${___extensions}" -Filter "*.dll")) {
-			$___arguments += "-ext ${___ext} "
-		}
+	foreach ($___ext in (Get-ChildItem "$(FS-Get-Directory "${___target}")\ext" -File -Filter "*.dll")) {
+		$___arguments += " -ext ${___ext}"
 	}
-	$___arguments += "`"${___target}`" "
+	$___arguments += " ${___target}"
 
 	$___process = OS-Exec "wix" "${___arguments}"
 	if ($___process -ne 0) {
@@ -74,6 +70,122 @@ function MSI-Compile {
 
 	# report status
 	return 0
+}
+
+
+
+
+function MSI-Get-Directory-Program-Files {
+	param(
+		[string]$___arch
+	)
+
+
+	# execute
+	switch ("${___arch}") {
+	{ $_ -in "amd64", "arm64" } {
+		return "ProgramFiles64Folder"
+	} { $_ -in "i386", "arm" } {
+		return "ProgramFilesFolder"
+	} default {
+		return "ProgramFiles6432Folder"
+	}}
+}
+
+
+
+
+function MSI-Get-Culture {
+	param(
+		[string]$___lang
+	)
+
+
+	# execute
+	# IMPORTANT NOTE: this is a temporary function for handling WiX's
+	#                 localization bug. More info:
+	#                 (1) https://github.com/wixtoolset/issues/issues/7896
+	#                 (2) https://wixtoolset.org/docs/tools/wixext/wixui/#translated-strings
+	switch (STRINGS-To-Lowercase "${___lang}") {
+	"ar" {
+		return "ar-SA"
+	} "bg" {
+		return "bg-BG"
+	} "ca" {
+		return "ca-ES"
+	} "cs" {
+		return "cs-CZ"
+	} "da" {
+		return "da-DK"
+	} "de" {
+		return "de-DE"
+	} "el" {
+		return "el-GR"
+	} "en" {
+		return "en-US"
+	} "es" {
+		return "es-ES"
+	} "et" {
+		return "et-EE"
+	} "fi" {
+		return "fi-FI"
+	} "fr" {
+		return "fr-FR"
+	} "he" {
+		return "he-IL"
+	} "hi" {
+		return "hi-IN"
+	} "hr" {
+		return "hr-HR"
+	} "hu" {
+		return "hu-HU"
+	} "it" {
+		return "it-IT"
+	} "ja" {
+		return "ja-JP"
+	} "kk" {
+		return "kk-KZ"
+	} "ko" {
+		return "ko-KR"
+	} "lt" {
+		return "lt-LT"
+	} "lv" {
+		return "lv-LV"
+	} "nb" {
+		return "nb-NO"
+	} "nl" {
+		return "nl-NL"
+	} "pl" {
+		return "pl-PL"
+	} "pt" {
+		return "pt-PT"
+	} "ro" {
+		return "ro-RO"
+	} "ru" {
+		return "ru-RU"
+	} "sk" {
+		return "sk-SK"
+	} "sl" {
+		return "sl-SI"
+	} "sq" {
+		return "sq-AL"
+	} "sr" {
+		return "sr-Latn-RS"
+	} "sv" {
+		return "sv-SE"
+	} "th" {
+		return "th-TH"
+	} "tr" {
+		return "tr-TR"
+	} "uk" {
+		return "uk-UA"
+	} "zh-hant" {
+		return "zh-TW"
+	} { $_ -in "zh", "zh-hans" } {
+		return "zh-CN"
+	} default {
+		return ""
+	}}
 }
 
 

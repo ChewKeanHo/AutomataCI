@@ -81,6 +81,7 @@ function PACKAGE-Assemble-CHOCOLATEY-Content {
 			}
 		} else {
 			# copy library file
+			$__dest = "${__dest}\$(FS-Get-File "${_target}")"
 			$null = I18N-Assemble "${_target}" "${__dest}"
 			$null = FS-Make-Directory "${__dest}"
 			$___process = FS-Copy-File "${_target}" "${__dest}"

@@ -111,11 +111,6 @@ $__libs_files = @(
 )
 
 
-$__placeholders = @(
-	"${env:PROJECT_SKU}-msi_any-any"
-)
-
-
 ## NOTE: (1) C Compilers Optimization flags for known target OS and ARCH types.
 function Get-Optimization-Flags {
 	param(
@@ -452,27 +447,6 @@ if ($___process -ne 0) {
 	$null = Remove-Variable -Name __current_path
 	if ($___process -ne 0) {
 		$null = I18N-Export-Failed
-		return 1
-	}
-}
-
-
-
-
-# placeholding flag files
-foreach ($__line in $__placeholders) {
-	if ($(STRINGS-Is-Empty "${__line}") -eq 0) {
-		continue
-	}
-
-
-	# build the file
-	$__file = "${__output_directory}\${__line}"
-	$null = I18N-Build "${__line}"
-	$null = FS-Remove-Silently "${__file}"
-	$___process = FS-Touch-File "${__file}"
-	if ($___process -ne 0) {
-		$null = I18N-Build-Failed
 		return 1
 	}
 }

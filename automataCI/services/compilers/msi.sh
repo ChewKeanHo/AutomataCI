@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2023  (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
+# Copyright 2023 (Holloway) Chew, Kean Ho <hollowaykeanho@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -21,6 +21,7 @@
 MSI_Compile() {
         #___target="$1"
         #___arch="$2"
+        #___lang="$3"
 
 
         # validate input
@@ -43,12 +44,50 @@ MSI_Compile() {
                 return 1
         fi
 
+        ___ext=""
+        ___extensions="$(FS_Get_Directory "$1")/ext"
+        for ___file in "$(FS_Get_Directory "$1")/ext/"*; do
+                FS_Is_File "$___file"
+                if [ $? -ne 0 ]; then
+                        continue
+                fi
+
+                if [ ! "${___file%%.dll*}" = "$___file" ]; then
+                        ___ext="${___ext} -ext \"${___file}\""
+                fi
+        done
+
 
         # execute
-        wixl --verbose --arch "${___arch}" --output "${1%.wxs*}.msi" "$1"
+        wixl --verbose --arch "${___arch}" ${___ext} --output "${1%.wxs*}.msi" "$1"
         if [ $? -ne 0 ]; then
                 return 1
         fi
+
+
+        # report status
+        return 0
+}
+
+
+
+
+MSI_Get_Directory_Program_Files() {
+        #___arch="$1"
+
+
+        # execute
+        case "$1" in
+        amd64|arm64)
+                printf -- "ProgramFiles64Folder"
+                ;;
+        i386|arm)
+                printf -- "ProgramFilesFolder"
+                ;;
+        *)
+                printf -- ""
+                ;;
+        esac
 
 
         # report status

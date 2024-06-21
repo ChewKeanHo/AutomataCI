@@ -63,6 +63,7 @@ else
 fi
 
 export LIBS_AUTOMATACI="${PROJECT_PATH_ROOT}/${PROJECT_PATH_AUTOMATA}"
+export LIBS_HESTIA="${LIBS_AUTOMATACI}/services"
 
 
 

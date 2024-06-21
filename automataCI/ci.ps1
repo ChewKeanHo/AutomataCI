@@ -70,6 +70,7 @@ if (Test-Path ".\ci.ps1") {
 }
 
 ${env:LIBS_AUTOMATACI} = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_AUTOMATA}"
+${env:LIBS_HESTIA} = "${env:LIBS_AUTOMATACI}\services"
 
 
 

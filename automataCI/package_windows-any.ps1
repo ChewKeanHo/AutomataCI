@@ -29,6 +29,7 @@ if (-not (Test-Path -Path $env:PROJECT_PATH_ROOT)) {
 
 . "${env:LIBS_AUTOMATACI}\_package-changelog_windows-any.ps1"
 . "${env:LIBS_AUTOMATACI}\_package-citation_windows-any.ps1"
+. "${env:LIBS_AUTOMATACI}\_package-msi_windows-any.ps1"
 
 
 
@@ -51,6 +52,25 @@ if ($(STRINGS-Is-Empty "${env:PROJECT_HOMEBREW_URL}") -ne 0) {
 	if ($___process -ne 0) {
 		$null = I18N-Setup-Failed
 		return 1
+	}
+}
+
+
+if ($(STRINGS-Is-Empty "${env:PROJECT_MSI_INSTALL_DIRECTORY}") -ne 0) {
+	$MSI_WORKSPACE = "packagers-msi-${env:PROJECT_SKU}"
+	$null = I18N-Setup "${MSI_WORKSPACE}"
+	$MSI_WORKSPACE = "${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_TEMP}\${MSI_WORKSPACE}"
+	$___process = FS-Remake-Directory "${MSI_WORKSPACE}"
+	if ($___process -ne 0) {
+		$null = I18N-Setup-Failed
+		return 1
+	}
+
+
+	if ($(STRINGS-Is-Empty "${env:PROJECT_MSI_REGISTRY_KEY}") -eq 0) {
+		${env:PROJECT_MSI_REGISTRY_KEY} = @"
+Software\${env:PROJECT_SCOPE}\InstalledProducts\${env:PROJECT_SKU_TITLECASE}
+"@
 	}
 }
 
@@ -165,7 +185,7 @@ function SUBROUTINE-Package {
 	$null = . "${env:LIBS_AUTOMATACI}\_package-ipk_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-lib_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-msi_windows-any.ps1"
-	$null = . "${env:LIBS_AUTOMATACI}\_package-pdf_windows-any.ps1"
+
 	$null = . "${env:LIBS_AUTOMATACI}\_package-pypi_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-rpm_windows-any.ps1"
 	$null = . "${env:LIBS_AUTOMATACI}\_package-sourcing_windows-any.ps1"
@@ -388,13 +408,13 @@ ${__common}|${__log}|PACKAGE-Run-LIB
 	}
 
 	# NOTE: MSI only works in windows
-	if ($(STRINGS-Is-Empty "${env:PROJECT_RELEASE_MSI}") -ne 0) {
+	if ($(STRINGS-Is-Empty "${env:PROJECT_MSI_INSTALL_DIRECTORY}") -ne 0) {
 		switch ("${TARGET_OS}") {
 		{ $_ -in "any", "windows" } {
 			$__log = "msi_${TARGET_FILENAME}_${TARGET_OS}-${TARGET_ARCH}.log"
 			$__log = "${__log_directory}\${__log}"
-			$___process = FS-Append-File "${__serial_control}" @"
-${__common}|${__log}|PACKAGE-Run-MSI
+			$___process = FS-Append-File "${__parallel_control}" @"
+${__common}|${MSI_WORKSPACE}|${__log}|PACKAGE-Run-MSI
 
 "@
 			if ($___process -ne 0) {
@@ -480,6 +500,33 @@ if ($(STRINGS-Is-Empty "${env:PROJECT_HOMEBREW_URL}") -ne 0) {
 	if ($___process -ne 0) {
 		$null = I18N-Export-Failed
 		return 1
+	}
+}
+
+
+if ($(STRINGS-Is-Empty "${env:PROJECT_MSI_INSTALL_DIRECTORY}") -ne 0) {
+	$null = I18N-Newline
+	$null = I18N-Newline
+
+
+	# sort 'any' arch into others
+	$___process = PACKAGE-Sort-MSI "${MSI_WORKSPACE}"
+	if ($___process -ne 0) {
+		return 1
+	}
+
+	# seal all MSI packages
+	foreach ($_candidate in (Get-ChildItem -Path "${MSI_WORKSPACE}" -Directory)) {
+		$_candidate = $_candidate.FullName
+
+		$null = I18N-Newline
+
+		$___process = PACKAGE-Seal-MSI `
+				"${_candidate}" `
+				"${env:PROJECT_PATH_ROOT}\${env:PROJECT_PATH_PKG}"
+		if ($___process -ne 0) {
+			return 1
+		}
 	}
 }
 

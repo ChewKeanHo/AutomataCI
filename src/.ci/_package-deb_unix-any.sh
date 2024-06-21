@@ -112,6 +112,7 @@ PACKAGE_Assemble_DEB_Content() {
                         fi
                 else
                         # copy library file
+                        __dest="${__dest}/$(FS_Get_File "$_target")"
                         I18N_Assemble "$_target" "$__dest"
                         FS_Make_Directory "$__dest"
                         FS_Copy_File "$_target" "$__dest"
